@@ -34,7 +34,7 @@ You can install NLCPy by executing either of following commands.
 - Install from PyPI
 
     ```
-    $ pip install nlcpy/
+    $ pip install nlcpy
     ```
 
 - Install from your local computer

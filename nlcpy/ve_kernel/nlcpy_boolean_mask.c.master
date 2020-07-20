@@ -1,0 +1,290 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (a_src->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ a_mask->dtype:bool)
+
+uint64_t nlcpy_getitem_from_mask(
+                        ve_arguments *args,
+                        int32_t *psw
+) {
+    ve_array *a_src = &(args->binary.x);
+    ve_array *a_mask = &(args->binary.y);
+    ve_array *a_dst = &(args->binary.z);
+    
+    assert(a_src->size == a_mask->size);
+    assert(a_src->ndim == a_mask->ndim);
+    assert(a_src->dtype == a_dst->dtype);
+
+#begin_switch
+    @TYPE1@ *ps = (@TYPE1@ *)a_src->ve_adr;
+    @TYPE2@ *pm = (@TYPE2@ *)a_mask->ve_adr;
+    @TYPE1@ *pd = (@TYPE1@ *)a_dst->ve_adr;
+    if (ps == NULL || pm == NULL || pd == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+/////////
+// 0-d //
+/////////
+    if (a_src->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (pm[0]) {
+            pd[0] = ps[0];
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (a_src->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        int64_t n_inner = 0;
+        int64_t cnt = 0;
+        uint64_t is0 = a_src->strides[n_inner] / a_src->itemsize;
+        uint64_t im0 = a_mask->strides[n_inner] / a_mask->itemsize;
+        uint64_t id0 = a_dst->strides[n_inner] / a_dst->itemsize;
+        for (i = 0; i < a_src->shape[n_inner]; i++) {
+            if (pm[i*im0]) {
+                pd[cnt*id0] = ps[i*is0];
+                cnt++;
+            }
+        }
+} /* omp single */
+
+/////////
+// N-d //
+/////////
+    } else if (a_src->ndim > 1 && a_src->ndim <= NLCPY_MAXNDIM){
+    /* difficult to parallelize */
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t *cnt_x = (int64_t*)alloca(sizeof(int64_t)*a_src->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = a_src->ndim - 1;
+        int64_t n_outer = 0;
+        int64_t cnt = 0;
+        nlcpy__reset_coords(cnt_x, a_src->ndim);
+        
+        uint64_t is = 0;
+        uint64_t im = 0;
+        uint64_t is0 = a_src->strides[n_inner] / a_src->itemsize;
+        uint64_t im0 = a_mask->strides[n_inner] / a_mask->itemsize;
+        uint64_t id0 = a_dst->strides[a_dst->ndim-1] / a_dst->itemsize;
+        for (;;) {
+            // most inner loop for vectorize
+            for (i = 0; i < a_src->shape[n_inner]; i++) {
+                if (pm[i*im0+im]) {
+                    pd[cnt*id0] = ps[i*is0+is];
+                    cnt++;
+                }
+            }
+            // set next index
+            for (k = n_inner-1; k >= 0; k--) {
+                if (++cnt_x[k] < a_src->shape[k]) {
+                    is += a_src->strides[k] / a_src->itemsize;
+                    im += a_mask->strides[k] / a_mask->itemsize;
+                    break;
+                }
+                cnt_x[k] = 0;
+                is -= (a_src->strides[k] / a_src->itemsize) * (a_src->shape[k] - 1);
+                im -= (a_mask->strides[k] / a_mask->itemsize) * (a_mask->shape[k] - 1);
+            }
+            if (k < 0) break;
+        }
+} /* omp single */
+
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+// TODO: check output elements are correct?
+uint64_t nlcpy_setitem_from_mask(
+                        ve_arguments *args,
+                        int32_t *psw
+) {
+    ve_array *a_src = &(args->binary.x);
+    ve_array *a_mask = &(args->binary.y);
+    ve_array *a_val = &(args->binary.z);
+    
+    assert(a_src->size == a_mask->size);
+    //assert(a_src->size == a_val->size);
+    assert(a_src->ndim == a_mask->ndim);
+    assert(a_src->dtype == a_val->dtype);
+
+#begin_switch
+    @TYPE1@ *ps = (@TYPE1@ *)a_src->ve_adr;
+    @TYPE2@ *pm = (@TYPE2@ *)a_mask->ve_adr;
+    @TYPE1@ *pv = (@TYPE1@ *)a_val->ve_adr;
+    if (ps == NULL || pm == NULL || pv == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+/////////
+// 0-d //
+/////////
+    if (a_src->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (pm[0]) {
+            ps[0] = pv[0];
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (a_src->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        int64_t n_inner = 0;
+        uint64_t is0 = a_src->strides[n_inner] / a_src->itemsize;
+        uint64_t im0 = a_mask->strides[n_inner] / a_mask->itemsize;
+        uint64_t iv0 = a_val->strides[n_inner] / a_val->itemsize;
+        uint64_t cnt_v = 0;
+        for (i = 0; i < a_src->shape[n_inner]; i++) {
+            if (pm[i*im0]) {
+                ps[i*is0] = pv[cnt_v*iv0];
+                cnt_v++;
+            }
+        }
+} /* omp single */
+
+/////////
+// N-d //
+/////////
+    } else if (a_src->ndim > 1 && a_src->ndim <= NLCPY_MAXNDIM){
+// TODO: check parallelization is possible
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t *cnt_x = (int64_t*)alloca(sizeof(int64_t)*a_src->ndim);
+        int64_t *cnt_v = (int64_t*)alloca(sizeof(int64_t)*a_val->ndim);
+        int64_t i, j, k, l;
+        int64_t n_inner = a_src->ndim - 1;
+        int64_t n_inner_val = a_val->ndim - 1;
+        int64_t n_outer = 0;
+        int64_t cnt = 0;
+        nlcpy__reset_coords(cnt_x, a_src->ndim);
+        nlcpy__reset_coords(cnt_v, a_val->ndim);
+        
+        uint64_t is = 0;
+        uint64_t im = 0;
+        uint64_t iv = 0;
+        uint64_t is0 = a_src->strides[n_inner] / a_src->itemsize;
+        uint64_t im0 = a_mask->strides[n_inner] / a_mask->itemsize;
+        uint64_t iv0 = a_val->strides[n_inner_val] / a_val->itemsize;
+        for (;;) {
+            // most inner loop for vectorize
+            for (i = 0; i < a_src->shape[n_inner]; i++) {
+                if (pm[i*im0+im]) {
+                    ps[i*is0+is] = pv[cnt_v[n_inner_val]*iv0+iv];
+                    cnt_v[n_inner_val]++;
+                }
+            }
+            // set next index
+            for (k = n_inner-1; k >= 0; k--) {
+                if (++cnt_x[k] < a_src->shape[k]) {
+                    is += a_src->strides[k] / a_src->itemsize;
+                    im += a_mask->strides[k] / a_mask->itemsize;
+                    break;
+                }
+                cnt_x[k] = 0;
+                is -= (a_src->strides[k] / a_src->itemsize) * (a_src->shape[k] - 1);
+                im -= (a_mask->strides[k] / a_mask->itemsize) * (a_mask->shape[k] - 1);
+            }
+            if (k < 0) break;
+            // set next index for val
+            if (cnt_v[n_inner_val] == a_val->shape[n_inner_val]) {
+                cnt_v[n_inner_val] = 0;
+                for (l = n_inner_val-1; l >= 0; l--) {
+                    if (++cnt_v[l] < a_val->shape[l]) {
+                        iv += a_val->strides[l] / a_val->itemsize;
+                        break;
+                    }
+                    cnt_v[l] = 0;
+                    iv -= (a_val->strides[l] / a_val->itemsize) * (a_val->shape[l] - 1);
+                }
+            }
+        }
+} /* omp single */
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+
+
+// count number of true from 1-d boolean array
+// call without RequestManager
+int64_t nlcpy_count_n_true(ve_array *a) {
+    int64_t i, n_true; 
+    Bint *tmp;
+    assert(a->ndim == 0 || a->ndim == 1);
+
+    n_true = 0;
+    tmp = (Bint *)a->ve_adr;
+    for (i = 0; i < a->size; i++) {
+        n_true += (int64_t)tmp[i];
+    }
+    return n_true;
+}
+
+
+

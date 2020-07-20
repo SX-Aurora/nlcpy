@@ -1,0 +1,382 @@
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+import time
+
+# profiling status
+NOT_PROFILING = 0
+UNDER_PROFILING = 1
+END_PROFILING = 2
+
+
+class Profiling():
+    def __init__(self):
+        self.n_alloc_mem = 0
+        self.t_alloc_mem = 0
+        self.n_free_mem = 0
+        self.t_free_mem = 0
+        self.n_write_mem = 0
+        self.t_write_mem = 0
+        self.n_read_mem = 0
+        self.t_read_mem = 0
+        self.n_wait_result = 0
+        self.t_wait_result = 0
+        self.vh_runtime = 0
+        self.total_runtime = 0
+        self.status = NOT_PROFILING
+
+    def start(self):
+        if self.status == UNDER_PROFILING:
+            raise Exception('under profiling')
+        self.clear()
+        self.status = UNDER_PROFILING
+        self.total_runtime = time.time()
+
+    def stop(self):
+        if self.status != UNDER_PROFILING:
+            raise Exception('not started profiling')
+        self.total_runtime = time.time() - self.total_runtime
+        self.vh_runtime = self.total_runtime - (
+            self.t_alloc_mem + self.t_free_mem + self.t_write_mem
+            + self.t_read_mem + self.t_wait_result)
+        self.status = END_PROFILING
+
+    def get_stats(self):
+        if _prof.status != END_PROFILING:
+            raise Exception('not finished profiling')
+        _stats = {
+            'veo_alloc_mem': {
+                'elapsed_time': 0,
+                'number_of_call': 0,
+            },
+            'veo_free_mem': {
+                'elapsed_time': 0,
+                'number_of_call': 0,
+            },
+            'veo_write_mem': {
+                'elapsed_time': 0,
+                'number_of_call': 0,
+            },
+            'veo_read_mem': {
+                'elapsed_time': 0,
+                'number_of_call': 0,
+            },
+            'veo_wait_result': {
+                'elapsed_time': 0,
+                'number_of_call': 0,
+            },
+            'vh_runtime': {
+                'elapsed_time': 0,
+            },
+            'total_runtime': {
+                'elapsed_time': 0,
+            },
+        }
+        # alloc mem
+        _stats['veo_alloc_mem']['elapsed_time'] = _prof.t_alloc_mem
+        _stats['veo_alloc_mem']['number_of_call'] = _prof.n_alloc_mem
+        # free mem
+        _stats['veo_free_mem']['elapsed_time'] = _prof.t_free_mem
+        _stats['veo_free_mem']['number_of_call'] = _prof.n_free_mem
+        # write mem
+        _stats['veo_write_mem']['elapsed_time'] = _prof.t_write_mem
+        _stats['veo_write_mem']['number_of_call'] = _prof.n_write_mem
+        # read mem
+        _stats['veo_read_mem']['elapsed_time'] = _prof.t_read_mem
+        _stats['veo_read_mem']['number_of_call'] = _prof.n_read_mem
+        # VE runtime
+        _stats['veo_wait_result']['elapsed_time'] = _prof.t_wait_result
+        _stats['veo_wait_result']['number_of_call'] = _prof.n_wait_result
+        # VH runtime
+        _stats['vh_runtime']['elapsed_time'] = _prof.vh_runtime
+        # total runtime
+        _stats['total_runtime']['elapsed_time'] = _prof.total_runtime
+        return _stats
+
+    def clear(self):
+        self.n_alloc_mem = 0
+        self.t_alloc_mem = 0
+        self.n_free_mem = 0
+        self.t_free_mem = 0
+        self.n_write_mem = 0
+        self.t_write_mem = 0
+        self.n_read_mem = 0
+        self.t_read_mem = 0
+        self.n_wait_result = 0
+        self.t_wait_result = 0
+        self.total_s = 0
+        self.total_e = 0
+        self.in_analyze = 0
+        self.status = NOT_PROFILING
+
+
+_prof = Profiling()
+
+
+## @if(lang_ja)
+# @name Profiling
+# @else
+# @name Profiling
+# @endif
+# @{
+## @fn start_profiling()
+# @rename prof.start_profiling start_profiling nlcpy.prof.start_profiling
+# @if(lang_ja)
+# @else
+# @pydoc
+# @brief Starts profiling.
+# @details 
+# %Profiling the code block between start_profiling and @ref stop_profiling "stop_profiling".@n 
+# See @ref print_run_stats "print_run_stats" or @ref get_run_stats "get_run_stats"
+# for how to display profiling results.@n
+# @endpydoc
+# @endif
+def start_profiling():
+    _prof.start()
+
+
+## @if(lang_ja)
+# @name Profiling
+# @else
+# @name Profiling
+# @endif
+# @{
+## @fn stop_profiling()
+# @rename prof.stop_profiling stop_profiling nlcpy.prof.stop_profiling
+# @if(lang_ja)
+# @else
+# @pydoc
+# @brief Stops profiling.
+# @details 
+# %Profiling the code block between @ref start_profiling "start_profiling" and stop_profiling.@n 
+# See @ref print_run_stats "print_run_stats" or @ref get_run_stats "get_run_stats"
+# for how to display profiling results.@n
+# @endpydoc
+# @endif
+def stop_profiling():
+    _prof.stop()
+
+
+def profile_alloc_mem(func):
+    def wrap_func(*args, **kwargs):
+        if _prof.status != UNDER_PROFILING:
+            return func(*args, **kwargs)
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        _prof.n_alloc_mem += 1
+        _prof.t_alloc_mem += (e - s)
+        return res
+    return wrap_func
+
+
+def profile_free_mem(func):
+    def wrap_func(*args, **kwargs):
+        if _prof.status != UNDER_PROFILING:
+            return func(*args, **kwargs)
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        _prof.n_free_mem += 1
+        _prof.t_free_mem += (e - s)
+        return res
+    return wrap_func
+
+
+def profile_write_mem(func):
+    def wrap_func(*args, **kwargs):
+        if _prof.status != UNDER_PROFILING:
+            return func(*args, **kwargs)
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        _prof.n_write_mem += 1
+        _prof.t_write_mem += (e - s)
+        return res
+    return wrap_func
+
+
+def profile_read_mem(func):
+    def wrap_func(*args, **kwargs):
+        if _prof.status != UNDER_PROFILING:
+            return func(*args, **kwargs)
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        _prof.n_read_mem += 1
+        _prof.t_read_mem += (e - s)
+        return res
+    return wrap_func
+
+
+def profile_wait_result(func):
+    def wrap_func(*args, **kwargs):
+        if _prof.status != UNDER_PROFILING:
+            return func(*args, **kwargs)
+        s = time.time()
+        res = func(*args, **kwargs)
+        e = time.time()
+        _prof.n_wait_result += 1
+        _prof.t_wait_result += (e - s)
+        return res
+    return wrap_func
+
+
+def _print_impl(msg, val, is_exp):
+    if is_exp:
+        print("{} {:.3e} [sec]".format(msg, val))
+    else:
+        print("{} {} times".format(msg, val))
+
+
+## @if(lang_ja)
+# @name Profiling
+# @else
+# @name Profiling
+# @endif
+# @{
+## @fn print_run_stats()
+# @rename prof.print_run_stats print_run_stats nlcpy.prof.print_run_stats
+# @if(lang_ja)
+# @else
+# @pydoc
+# @brief Prints NLCPy run stats.
+# @par Sample Program
+# @code
+# # sample.py
+# import nlcpy as vp
+# vp.prof.start_profiling()
+# for i in range(10):
+#     vp.random.rand(10000)
+# vp.prof.stop_profiling()
+# vp.prof.print_run_stats()
+# @endcode
+# @par Execution
+# @verbatim
+# $ python sample.py
+# ----------- NLCPy Run Stats ------------
+# alloc memory on VE:
+#   total: 1.6927719116210938e-05 [sec]
+#   alloc_mem was called 10 times
+# free memory on VE:
+#   total: 0.0004165172576904297 [sec]
+#   free_mem was called 10 times
+# write memory on VE:
+#   total: 0 [sec]
+#   veo_write_mem was called 0 times
+# read memory from VE:
+#   total: 0 [sec]
+#   veo_read_mem was called 0 times
+# VE runtime(include offload overhead):
+#   total: 0.0025153160095214844 [sec]
+#   veo_wait_result was called 10 times
+# other VH runtime:
+#   total: 0.00048661231994628906 [sec]
+# total runtime:
+#   total: 0.003435373306274414 [sec]
+# ----------------------------------------
+# @endverbatim
+# @endpydoc
+# @endif
+def print_run_stats():
+    if _prof.status != END_PROFILING:
+        raise Exception('profiling not finished')
+    print("\n----------- NLCPy Run Stats ------------")
+    # alloc mem
+    print("alloc memory on VE:")
+    _print_impl("  total:", _prof.t_alloc_mem, True)
+    _print_impl("  veo_alloc_mem was called", _prof.n_alloc_mem, False)
+    # free mem
+    print("free memory on VE:")
+    _print_impl("  total:", _prof.t_free_mem, True)
+    _print_impl("  veo_free_mem was called", _prof.n_free_mem, False)
+    # write mem
+    print("write memory on VE:")
+    _print_impl("  total:", _prof.t_write_mem, True)
+    _print_impl("  veo_write_mem was called", _prof.n_write_mem, False)
+    # read mem
+    print("read memory from VE:")
+    _print_impl("  total:", _prof.t_read_mem, True)
+    _print_impl("  veo_read_mem was called", _prof.n_read_mem, False)
+    # VE runtime
+    print("VE runtime(include offload overhead):")
+    _print_impl("  total:", _prof.t_wait_result, True)
+    _print_impl("  veo_wait_result was called", _prof.n_wait_result, False)
+    # VH runtime
+    print("other VH runtime:")
+    _print_impl("  total:", _prof.vh_runtime, True)
+    # total runtime
+    print("total runtime:")
+    _print_impl("  total:", _prof.total_runtime, True)
+    print("----------------------------------------\n")
+
+
+## @if(lang_ja)
+# @name Profiling
+# @else
+# @name Profiling
+# @endif
+# @{
+## @fn get_run_stats()
+# @rename prof.get_run_stats get_run_stats nlcpy.prof.get_run_stats
+# @if(lang_ja)
+# @else
+# @pydoc
+# @brief Gets dict of NLCPy run stats.
+# @retval out : <em>dict</em> @n
+# @par Sample Program
+# @code
+# # sample.py
+# import nlcpy as vp
+# from pprint import pprint
+# vp.prof.start_profiling()
+# for i in range(10):
+#     vp.random.rand(10000)
+# vp.prof.stop_profiling()
+# stats = vp.prof.get_run_stats()
+# pprint(stats)
+# @endcode
+# @par Execution
+# @verbatim
+# $ python sample.py
+# {'total_runtime': {'elapsed_time': 0.004348278045654297},
+#  'veo_alloc_mem': {'elapsed_time': 2.574920654296875e-05, 'number_of_call': 10},
+#  'veo_free_mem': {'elapsed_time': 4.100799560546875e-05, 'number_of_call': 10},
+#  'veo_read_mem': {'elapsed_time': 0, 'number_of_call': 0},
+#  'veo_wait_result': {'elapsed_time': 0.0034487247467041016,
+#                      'number_of_call': 10},
+#  'veo_write_mem': {'elapsed_time': 0, 'number_of_call': 0},
+#  'vh_runtime': {'elapsed_time': 0.0008327960968017578}}
+# @endverbatim
+# @endpydoc
+# @endif
+def get_run_stats():
+    return _prof.get_stats()

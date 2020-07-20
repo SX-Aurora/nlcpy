@@ -1,0 +1,13 @@
+## @fn 
+# @ingroup 
+# @if(lang_ja)
+# @else
+# @pydoc
+# @brief 
+# @details 
+# @par Example
+# @code
+# >>> import nlcpy
+# @endcode
+# @endpydoc
+# @endif

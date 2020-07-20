@@ -1,0 +1,141 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (a_src->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ a_idx->dtype:i64)
+
+uint64_t nlcpy_take(ve_arguments *args, int32_t *psw) {
+    ve_array *a_src = &(args->take.src);
+    ve_array *a_idx = &(args->take.idx);
+    ve_array *a_out = &(args->take.out);
+    int64_t ldim = args->take.ldim;
+    int64_t cdim = args->take.cdim;
+    int64_t rdim = args->take.rdim;
+    int64_t index_range = args->take.index_range;
+    assert(a_idx->size == a_out->size);
+    assert(a_src->dtype == a_out->dtype);
+
+#begin_switch
+    @TYPE1@ *d_src = (@TYPE1@ *)a_src->ve_adr;
+    @TYPE2@ *d_idx = (@TYPE2@ *)a_idx->ve_adr;
+    @TYPE1@ *d_out = (@TYPE1@ *)a_out->ve_adr;
+    if (d_src == NULL || d_idx == NULL || d_out == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+    if (a_src->size == 0 || a_idx->size == 0 || a_out->size == 0) {
+        return NLCPY_ERROR_OK;
+    }
+
+/////////
+// 0-d //
+/////////
+    if (a_idx->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        d_out[0] = d_src[d_idx[0]];
+} /* omp single */
+
+/////////
+// 1-d //
+/////////
+    } else if (a_idx->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        int64_t n_inner_idx = a_idx->ndim - 1;
+        int64_t i0x = a_idx->strides[n_inner_idx] / a_idx->itemsize;
+        for (i = 0; i < a_out->size; i++) {
+            int64_t idx_out = d_idx[i*i0x];
+            if (idx_out < 0) idx_out += index_range;
+            if (ldim != 1) idx_out += (i / (cdim * rdim)) * index_range;
+            if (rdim != 1) idx_out = idx_out * rdim + i % rdim;
+            d_out[i] = d_src[idx_out];
+        }
+} /* omp single */
+
+/////////
+// N-d //
+/////////
+    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+// TODO: parallelization
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t *cnt_idx = (int64_t*)alloca(sizeof(int64_t)*a_idx->ndim);
+        int64_t totalcnt = 0;
+        int64_t i, j;
+        int64_t n_inner_idx = a_idx->ndim - 1;
+        nlcpy__reset_coords(cnt_idx, a_idx->ndim);
+        
+        uint64_t idx = 0;
+        uint64_t iout = 0;
+        uint64_t idx0 = a_idx->strides[n_inner_idx] / a_idx->itemsize;
+        uint64_t iout0 = a_out->strides[a_out->ndim-1] / a_out->itemsize;
+        for(;;) {
+            for (i = 0; i < a_idx->shape[n_inner_idx]; i++) {
+                int64_t idx_out = d_idx[i*idx0+idx];
+                if (idx_out < 0) idx_out += index_range;
+                if (ldim != 1) idx_out += (totalcnt / (cdim * rdim)) * index_range;
+                if (rdim != 1) idx_out = idx_out * rdim + totalcnt % rdim;
+                d_out[i*iout0+iout] = d_src[idx_out];
+                totalcnt++;
+            }
+            for (j = n_inner_idx - 1; j >= 0; j--) {
+                if (++cnt_idx[j] < a_idx->shape[j]) {
+                    idx += a_idx->strides[j] / a_idx->itemsize;
+                    iout += a_out->strides[j] / a_out->itemsize;
+                    break;
+                }
+                cnt_idx[j] = 0;
+                idx -= (a_idx->strides[j] / a_idx->itemsize) * (a_idx->shape[j] - 1);
+                iout -= (a_out->strides[j] / a_out->itemsize) * (a_out->shape[j] - 1);
+            }
+            if (j < 0) break;
+        }
+} /* omp single */
+
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+

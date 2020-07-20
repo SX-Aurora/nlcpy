@@ -1,0 +1,361 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#if defined(argmax) || defined(argmin)
+#define_switch (x->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ z->dtype:i64)
+#endif
+
+/****************************
+ *
+ *       @OPERATOR_NAME@
+ *
+ * **************************/
+
+uint64_t FILENAME(ve_arguments *args, int32_t *psw)
+{
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+    ve_array *x = &(args->argfunc.x);
+    ve_array *y = &(args->argfunc.y);
+    ve_array *z = &(args->argfunc.z);
+    ve_array *initial = &(args->argfunc.initial);
+    int64_t corder = (args->argfunc.corder);
+    int64_t axis = (args->argfunc.axis);
+#begin_switch
+    @TYPE1@ *px = (@TYPE1@ *)x->ve_adr;
+    if (px == NULL) {
+        px = (@TYPE1@ *)nlcpy__get_scalar(x);
+        if (px == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    @TYPE1@ *py = (@TYPE1@ *)y->ve_adr;
+    if (py == NULL) {
+        py = (@TYPE1@ *)nlcpy__get_scalar(y);
+        if (px == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    @TYPE2@ *pz = (@TYPE2@ *)z->ve_adr;
+    if (pz == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+    @TYPE1@ *pi = (@TYPE1@ *)initial->ve_adr;
+    if (pi == NULL) {
+        pi = (@TYPE1@ *)nlcpy__get_scalar(initial);
+        if (pi == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    bool tmp = 0;
+
+    // initialize
+    for (uint64_t i=0; i<y->size;i++) py[i] = *pi;
+    for (uint64_t i=0; i<z->size;i++) pz[i] = 0;
+/////////
+// 0-d //
+/////////
+    if (x->ndim == 0) {
+        *pz = 0;
+
+/////////
+// 1-d //
+/////////
+    } else if (x->ndim == 1) {
+        const uint64_t ix = x->strides[0]/x->itemsize;
+#pragma _NEC ivdep
+        for (uint64_t i0 = 0; i0 < x->shape[0]; i0++) {
+            @BINARY_OPERATOR_WITH_DTYPES@(px[i0*ix],@TYPE1_DTAG@,*py,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+            if (tmp) {
+                *py = px[i0*ix];
+                *pz = i0;
+            }
+        }
+
+/////////
+// 2-d //
+/////////
+    } else if (x->ndim == 2) {
+        const uint64_t i0x = x->strides[0]/x->itemsize;
+        const uint64_t i1x = x->strides[1]/x->itemsize;
+        const uint64_t i0y = (axis>=0&&axis!=0) ? y->strides[0]/y->itemsize : 0;
+        const uint64_t i1y = (axis>=0&&axis!=1) ? y->strides[1]/y->itemsize : 0;
+        int32_t cnt = 0;
+        for (uint64_t i0 = 0; i0 < x->shape[0]; i0++) { 
+            @TYPE1@ *px0 = px + i0*i0x;
+            @TYPE1@ *py0 = py + i0*i0y;
+            @TYPE2@ *pz0 = pz + i0*i0y;
+            if (i1y!=0) {
+#pragma _NEC ivdep
+                for (uint64_t i1 = 0; i1 < x->shape[1]; i1++) { 
+                    @TYPE1@ *px1 = px0 + i1*i1x;
+                    @TYPE1@ *py1 = py0 + i1*i1y;
+                    @TYPE2@ *pz1 = pz0 + i1*i1y;
+                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@TYPE1_DTAG@,*py1,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                    if(tmp) {
+                        *py1 = *px1;
+                        if (axis == 0) {
+                            *pz1 = i0;
+                        }
+                    }
+                    cnt += 1;
+                }
+            } else {
+                @TYPE1@ *py1 = py0;
+                @TYPE2@ *pz1 = pz0;
+#pragma _NEC ivdep
+                for (uint64_t i1 = 0; i1 < x->shape[1]; i1++) { 
+                    @TYPE1@ *px1 = px0 + i1*i1x;
+                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@TYPE1_DTAG@,*py1,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                    if (tmp) {
+                        *py1 = *px1;
+                        if (axis < 0) {
+                            *pz1 = cnt;
+                        } else {
+                            *pz1 = i1;
+                        }
+                    }
+                    cnt += 1;
+                }
+            }
+        }
+
+/////////
+// 3-d //
+/////////
+    } else if (x->ndim == 3) {
+        const uint64_t i0x = x->strides[0]/x->itemsize;
+        const uint64_t i1x = x->strides[1]/x->itemsize;
+        const uint64_t i2x = x->strides[2]/x->itemsize;
+               
+        const uint64_t i0y = (axis>=0&&axis!=0) ? y->strides[0]/y->itemsize : 0;
+        const uint64_t i1y = (axis>=0&&axis!=1) ? y->strides[1]/y->itemsize : 0;
+        const uint64_t i2y = (axis>=0&&axis!=2) ? y->strides[2]/y->itemsize : 0;
+        int32_t cnt = 0;
+        for (uint64_t i0 = 0; i0 < x->shape[0]; i0++) { 
+            @TYPE1@ *px0 = px + i0*i0x;
+            @TYPE1@ *py0 = py + i0*i0y;
+            @TYPE2@ *pz0 = pz + i0*i0y;
+            for (uint64_t i1 = 0; i1 < x->shape[1]; i1++) { 
+                @TYPE1@ *px1 = px0 + i1*i1x;
+                @TYPE1@ *py1 = py0 + i1*i1y;
+                @TYPE2@ *pz1 = pz0 + i1*i1y;
+                if (i2y!=0) {
+#pragma _NEC ivdep
+                    for (uint64_t i2 = 0; i2 < x->shape[2]; i2++) {
+                        @TYPE1@ *px2 = px1 + i2*i2x;
+                        @TYPE1@ *py2 = py1 + i2*i2y;
+                        @TYPE2@ *pz2 = pz1 + i2*i2y;
+                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@TYPE1_DTAG@,*py2,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                        if (tmp) {
+                            *py2 = *px2;
+                            if (axis == 0) {
+                                *pz2 = i0;
+                            } else if (axis == 1) {
+                                *pz2 = i1;
+                            }
+                        }
+                        cnt += 1;
+                    }
+                } else {
+                    @TYPE1@ *py2 = py1;
+                    @TYPE2@ *pz2 = pz1;
+#pragma _NEC ivdep
+                    for (uint64_t i2 = 0; i2 < x->shape[2]; i2++) { 
+                        @TYPE1@ *px2 = px1 + i2*i2x;
+                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@TYPE1_DTAG@,*py2,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                        if (tmp) {
+                            *py2 = *px2;
+                            if (axis < 0) {
+                                *pz2 = cnt;
+                            } else {
+                                *pz2 = i2;
+                            }
+                        }
+                        cnt += 1;
+                    }
+                }
+            }
+        }
+
+
+/////////
+// 4-d //
+/////////
+    } else if (x->ndim == 4) {
+        const uint64_t i0x = x->strides[0]/x->itemsize;
+        const uint64_t i1x = x->strides[1]/x->itemsize;
+        const uint64_t i2x = x->strides[2]/x->itemsize;
+        const uint64_t i3x = x->strides[3]/x->itemsize;
+        const uint64_t i0y = (axis>=0&&axis!=0) ? y->strides[0]/y->itemsize : 0;
+        const uint64_t i1y = (axis>=0&&axis!=1) ? y->strides[1]/y->itemsize : 0;
+        const uint64_t i2y = (axis>=0&&axis!=2) ? y->strides[2]/y->itemsize : 0;
+        const uint64_t i3y = (axis>=0&&axis!=3) ? y->strides[3]/y->itemsize : 0;
+        int32_t cnt = 0;
+        for (uint64_t i0 = 0; i0 < x->shape[0]; i0++) { 
+            @TYPE1@ *px0 = px + i0*i0x;
+            @TYPE1@ *py0 = py + i0*i0y;
+            @TYPE2@ *pz0 = pz + i0*i0y;
+            for (uint64_t i1 = 0; i1 < x->shape[1]; i1++) { 
+                @TYPE1@ *px1 = px0 + i1*i1x;
+                @TYPE1@ *py1 = py0 + i1*i1y;
+                @TYPE2@ *pz1 = pz0 + i1*i1y;
+                for (uint64_t i2 = 0; i2 < x->shape[2]; i2++) { 
+                    @TYPE1@ *px2 = px1 + i2*i2x;
+                    @TYPE1@ *py2 = py1 + i2*i2y;
+                    @TYPE2@ *pz2 = pz1 + i2*i2y;
+                    @TYPE1@ maxval = (*px2);
+                    if (i3y!=0) {
+#pragma _NEC ivdep
+                        for (uint64_t i3 = 0; i3 < x->shape[3]; i3++) { 
+                            @TYPE1@ *px3 = px2 + i3*i3x;
+                            @TYPE1@ *py3 = py2 + i3*i3y;
+                            @TYPE2@ *pz3 = pz2 + i3*i3y;
+
+                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@TYPE1_DTAG@,*py3,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                            if (tmp) {
+                                *py3 = *px3;
+                                if (axis == 0) {
+                                    *pz3 = i0;
+                                } else if (axis == 1) {
+                                    *pz3 = i1;
+                                } else if (axis == 2) {
+                                    *pz3 = i2;
+                                }
+                            }
+                            cnt += 1;
+                        }
+                    } else {
+                        @TYPE1@ *py3 = py2;
+                        @TYPE2@ *pz3 = pz2;
+#pragma _NEC ivdep
+                        for (uint64_t i3 = 0; i3 < x->shape[3]; i3++) { 
+                            @TYPE1@ *px3 = px2 + i3*i3x;
+                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@TYPE1_DTAG@,*py3,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                            if (tmp) {
+                                *py3 = *px3;
+                                if (axis < 0) {
+                                    *pz3 = cnt;
+                                } else {
+                                    *pz3 = i3;
+                                }
+                            }
+                            cnt += 1;
+                        }
+                    }
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (x->ndim > 4 && x->ndim <= NLCPY_MAXNDIM) {
+        int64_t *coords_x = (int64_t*)alloca(sizeof(int64_t)*x->ndim);
+        int64_t *coords_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t *coords_z = (int64_t*)alloca(sizeof(int64_t)*z->ndim);
+        nlcpy__reset_coords(coords_x, x->ndim);
+        nlcpy__reset_coords(coords_y, y->ndim);
+        nlcpy__reset_coords(coords_z, z->ndim);
+        int64_t i;
+        uint64_t adr_x = (uint64_t)x->ve_adr;
+        uint64_t adr_y = (uint64_t)y->ve_adr;
+        uint64_t adr_z = (uint64_t)z->ve_adr;
+        int64_t stride0 = 1;
+        int64_t stride1 = 1;
+        if (corder) {
+#pragma _NEC novector
+            for (i = 0; i < x->size; i++) {
+                @TYPE1@ *pxi = (@TYPE1@ *)adr_x;
+                @TYPE1@ *pyi = (@TYPE1@ *)adr_y;
+                @TYPE2@ *pzi = (@TYPE2@ *)adr_z;
+
+                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@TYPE1_DTAG@,*pyi,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                if (tmp) {
+                    *pyi = *pxi;
+                    if (axis < 0) {
+                        *pzi = i;
+                    } else {
+                        *pzi = coords_x[axis];
+                    }
+                }
+
+                adr_x = nlcpy__array_next       (x, adr_x, coords_x);
+                adr_y = nlcpy__array_reduce_next(y, adr_y, coords_y, x);
+                adr_z = nlcpy__array_reduce_next(z, adr_z, coords_z, x);
+            }
+        } else {
+#pragma _NEC novector
+            for (i = 0; i < x->size; i++) {
+                @TYPE1@ *pxi = (@TYPE1@ *)adr_x;
+                @TYPE1@ *pyi = (@TYPE1@ *)adr_y;
+                @TYPE2@ *pzi = (@TYPE2@ *)adr_z;
+
+                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@TYPE1_DTAG@,*pyi,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                if (tmp) {
+                    *pyi = *pxi;
+                    if (axis < 0) {
+                        *pzi = i;
+                    } else if (axis == 0) {
+                        for (int64_t idx = 1; idx < x->ndim; idx++) { stride0 *= x->shape[idx]; }
+                        *pzi = i / stride0;
+                        stride0 = 1;
+                    } else if (axis == x->ndim-1) {
+                        *pzi = i % x->shape[axis];
+                    } else {
+                        for (int64_t idx = 1 + (axis-1); idx < x->ndim; idx++) { stride0 *= x->shape[idx]; }
+                        for (int64_t idx = 1 + axis    ; idx < x->ndim; idx++) { stride1 *= x->shape[idx]; }
+                        *pzi = (i % stride0) / stride1;
+                        stride0 = 1;
+                        stride1 = 1;
+                    }
+                }
+
+                adr_x = nlcpy__array_next       (x, adr_x, coords_x);
+                adr_y = nlcpy__array_reduce_next(y, adr_y, coords_y, x);
+                adr_z = nlcpy__array_reduce_next(z, adr_z, coords_z, x);
+            }
+        }
+    } else {
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+
+} /* omp single */
+
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}

@@ -1,0 +1,1179 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+@#include "nlcpy.h"
+@#define C_CONTIGUOUS  0
+@#define F_CONTIGUOUS  1
+@#define KEEP          2
+@#define OTHER         3
+
+#define_switch (a->dtype @ b->dtype)
+
+static uint64_t get_max_shape_dim(const ve_array *a){
+  uint64_t max_shape = 0;
+  uint64_t max_shape_dim;
+  for(uint64_t i = 0; i < a->ndim; ++i){
+    if(a->shape[i] > max_shape){
+      max_shape = a->shape[i];
+      max_shape_dim = i;
+    }
+  }
+  return max_shape_dim;
+}
+
+static void get_first_coord(uint64_t *coord, const uint64_t N, const uint64_t *shape,
+                            uint64_t pos, const uint64_t loop_dim){
+  for(uint64_t i = 0; i < N; ++i){
+    if(i == loop_dim){
+      coord[i] = 0;
+    } else {
+       coord[i] = pos % shape[i];
+       pos /= shape[i];
+    }
+  }
+}
+
+static void get_next_coord(uint64_t *coord, const uint64_t N, const uint64_t *shape,
+                           const uint64_t loop_dim){
+  for(uint64_t i = 0; i < N; ++i){
+    if(i == loop_dim)  continue; // keep 0 on loop_dim
+    if(++coord[i] == shape[i]){
+      coord[i] = 0;
+    } else{
+      break;
+    }
+  }
+}
+
+static uint64_t dot(const uint64_t N, const uint64_t *x, const uint64_t *y){
+  uint64_t sum = 0;
+  for(uint64_t i = 0; i < N; ++i){
+    sum += x[i] * y[i];
+  }
+  return sum;
+}
+
+/****************************
+ *
+ *       OUTER OPERATOR
+ *
+ * **************************/
+
+
+
+#if defined(DTYPE_i32)
+
+uint64_t FILENAME_i32(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  int32_t *pout = (int32_t *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],i32)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],i32)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_i64)
+
+uint64_t FILENAME_i64(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  int64_t *pout = (int64_t *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],i64)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],i64)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_u32)
+
+uint64_t FILENAME_u32(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  uint32_t *pout = (uint32_t *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],u32)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],u32)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_u64)
+
+uint64_t FILENAME_u64(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  uint64_t *pout = (uint64_t *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],u64)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],u64)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_f32)
+
+uint64_t FILENAME_f32(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  float *pout = (float *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],f32)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],f32)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_f64)
+
+uint64_t FILENAME_f64(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  double *pout = (double *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],f64)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],f64)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_c64)
+
+uint64_t FILENAME_c64(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  float _Complex *pout = (float _Complex *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],c64)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],c64)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_c128)
+
+uint64_t FILENAME_c128(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  double _Complex *pout = (double _Complex *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],c128)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],c128)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+#if defined(DTYPE_bool)
+
+uint64_t FILENAME_bool(ve_array *out, const ve_array *a, const ve_array *b, const int32_t where_vectorize)
+{
+  int32_t *pout = (int32_t *)out->ve_adr;
+
+#begin_switch
+  const @TYPE1@ *pa  = (@TYPE1@ *) a->ve_adr;
+  const @TYPE2@ *pb  = (@TYPE2@ *) b->ve_adr;
+
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  if (where_vectorize == 0){ // vectorize for input 0 (a)
+    const uint64_t str_i = b->size * it / nt;
+    const uint64_t end_i = b->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE2@ b_val = pb[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < a->size; ++j){
+        @BINARY_OPERATOR@(pa[j],b_val,pout[i*a->size + j],bool)
+      }
+    }
+  } else { // vectorize for input 1 (b)
+    const uint64_t str_i = a->size * it / nt;
+    const uint64_t end_i = a->size * (it+1) / nt;
+    for(uint64_t i = str_i; i < end_i; ++i){
+      const @TYPE1@ a_val = pa[i];
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < b->size; ++j){
+        @BINARY_OPERATOR@(a_val,pb[j],pout[i*b->size + j],bool)
+      }
+    }
+  }
+#end_switch
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+#endif
+
+static uint64_t broadcast_i32(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  int32_t *pout = (int32_t *)out->ve_adr;
+  int32_t *psrc = (int32_t *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(int32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(int32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_i64(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  int64_t *pout = (int64_t *)out->ve_adr;
+  int64_t *psrc = (int64_t *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(int64_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(int64_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_u32(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  uint32_t *pout = (uint32_t *)out->ve_adr;
+  uint32_t *psrc = (uint32_t *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(uint32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(uint32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_u64(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  uint64_t *pout = (uint64_t *)out->ve_adr;
+  uint64_t *psrc = (uint64_t *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(uint64_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(uint64_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_f32(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  float *pout = (float *)out->ve_adr;
+  float *psrc = (float *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(float *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(float *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_f64(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  double *pout = (double *)out->ve_adr;
+  double *psrc = (double *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(double *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(double *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_c64(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  float _Complex *pout = (float _Complex *)out->ve_adr;
+  float _Complex *psrc = (float _Complex *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(float _Complex *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(float _Complex *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_c128(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  double _Complex *pout = (double _Complex *)out->ve_adr;
+  double _Complex *psrc = (double _Complex *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(double _Complex *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(double _Complex *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+static uint64_t broadcast_bool(const ve_array *src, ve_array *out, const ve_array *bcast_dim,
+                             uint32_t flag_where, const ve_array *where){
+  int32_t *pout = (int32_t *)out->ve_adr;
+  int32_t *psrc = (int32_t *)src->ve_adr;
+  const Bint *pbcast_dim = (Bint *)bcast_dim->ve_adr;
+  const uint64_t loop_dim = get_max_shape_dim(out);
+  const uint64_t out_stride_loop = out->strides[loop_dim];
+  const uint64_t nouter_loop = out->size / out->shape[loop_dim];
+  uint64_t src_steps[out->ndim];
+  const Bint *pwhere = (Bint *)where->ve_adr;
+
+  uint64_t accumelate_size = 1;
+  // src is created to be c_contiguous in python
+  for (int k = (int)out->ndim -1; 0 <= k; --k){
+    if(pbcast_dim[k]){
+      src_steps[k] = 0;
+    } else {
+      src_steps[k] = accumelate_size;
+      accumelate_size *= out->shape[k];
+    }
+  }
+
+  const uint64_t src_step_loop = src_steps[loop_dim];
+@#ifdef _OPENMP
+  const int nt = omp_get_num_threads();
+  const int it = omp_get_thread_num();
+@#else
+  const int nt = 1;
+  const int it = 0;
+@#endif /* _OPENMP */
+  const uint64_t str_i = nouter_loop * it / nt;
+  const uint64_t end_i = nouter_loop * (it+1) / nt;
+  uint64_t coord[out->ndim];
+  for(uint64_t i = str_i; i < end_i; ++i){
+    // get coord when inner loop starts
+    if(i == str_i){
+      get_first_coord(coord, out->ndim, out->shape, str_i, loop_dim);
+    } else {
+      get_next_coord(coord, out->ndim, out->shape, loop_dim);
+    }
+
+    const uint64_t src_spos = dot(out->ndim, src_steps, coord);
+    const uint64_t out_sadr = (uint64_t)pout + dot(out->ndim, out->strides, coord);
+    if(!flag_where){
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        *(int32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+      }
+    } else {
+      const uint64_t where_step = where->strides[loop_dim]/where->itemsize;
+      const uint64_t where_spos = dot(where->ndim, where->strides, coord)/where->itemsize;
+#pragma _NEC ivdep
+      for(uint64_t j = 0; j < out->shape[loop_dim]; ++j){
+        if(pwhere[where_spos + j * where_step]){
+          *(int32_t *)(out_sadr + out_stride_loop * j) = psrc[src_spos + src_step_loop * j];
+        }
+      }
+    }
+  }
+
+  return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+uint64_t FILENAME(ve_arguments *args, int32_t *psw)
+{
+  uint64_t err = NLCPY_ERROR_OK;
+  ve_array *out = &(args->outer.out);
+  ve_array *a = &(args->outer.x);
+  ve_array *b = &(args->outer.y);
+  int32_t where_vectorize = args->outer.where_vectorize;
+  int32_t flag_where = args->outer.flag_where;
+  ve_array *where = &(args->outer.where);
+  int32_t flag_bcast = args->outer.flag_bcast;
+  ve_array *bcast_dim = &(args->outer.bcast_dim);
+  ve_array *workspace = &(args->outer.workspace);
+  ve_array * bcast_src = &(args->outer.bcast_src);
+
+  switch (workspace->dtype) {
+#if defined(DTYPE_i32)
+  case ve_i32: err = FILENAME_i32(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_i64)
+  case ve_i64: err = FILENAME_i64(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_u32)
+  case ve_u32: err = FILENAME_u32(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_u64)
+  case ve_u64: err = FILENAME_u64(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_f32)
+  case ve_f32: err = FILENAME_f32(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_f64)
+  case ve_f64: err = FILENAME_f64(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_c64)
+  case ve_c64: err = FILENAME_c64(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_c128)
+  case ve_c128: err = FILENAME_c128(workspace, a, b, where_vectorize); break;
+#endif
+#if defined(DTYPE_bool)
+  case ve_bool: err = FILENAME_bool(workspace, a, b, where_vectorize); break;
+#endif
+  default: err = NLCPY_ERROR_DTYPE;
+  }
+
+  ve_array *temp_pout;
+  int32_t temp_where_flag;
+  if (flag_bcast){
+    temp_pout = bcast_src;
+    temp_where_flag = 0; // ignore where
+  } else {
+    temp_pout = out;
+    temp_where_flag = flag_where;
+  }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+  int32_t pswc;
+  switch(out->dtype){
+#if defined(DTYPE_OUT_i32)
+  case ve_i32: err |= nlcpy_cast_i32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_i64)
+  case ve_i64: err |= nlcpy_cast_i64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_u32)
+  case ve_u32: err |= nlcpy_cast_u32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_u64)
+  case ve_u64: err |= nlcpy_cast_u64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_f32)
+  case ve_f32: err |= nlcpy_cast_f32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_f64)
+  case ve_f64: err |= nlcpy_cast_f64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_c64)
+  case ve_c64: err |= nlcpy_cast_c64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_c128)
+  case ve_c128: err |= nlcpy_cast_c128(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+#if defined(DTYPE_OUT_bool)
+  case ve_bool: err |= nlcpy_cast_bool(workspace, temp_pout, temp_where_flag, where, &pswc); break;
+#endif
+  default: err = NLCPY_ERROR_DTYPE;
+  }
+  *psw |= pswc;
+
+  // broadcast
+  if(flag_bcast){
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    switch(out->dtype){
+#if defined(DTYPE_OUT_i32)
+    case ve_i32: err |= broadcast_i32(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_i64)
+    case ve_i64: err |= broadcast_i64(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_u32)
+    case ve_u32: err |= broadcast_u32(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_u64)
+    case ve_u64: err |= broadcast_u64(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_f32)
+    case ve_f32: err |= broadcast_f32(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_f64)
+    case ve_f64: err |= broadcast_f64(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_c64)
+    case ve_c64: err |= broadcast_c64(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_c128)
+    case ve_c128: err |= broadcast_c128(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+#if defined(DTYPE_OUT_bool)
+    case ve_bool: err |= broadcast_bool(bcast_src, out, bcast_dim, flag_where, where); break;
+#endif
+    default: err = NLCPY_ERROR_DTYPE;
+    }
+  }
+
+  return (uint64_t)err;
+}

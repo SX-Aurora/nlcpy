@@ -1,0 +1,106 @@
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+##
+# @if(lang_ja)
+# @else
+# @page installation Installation
+# This page describes installation of NLCPy.
+# <h1> Requirements </h1>
+#    Before the installation of NLCPy, the following components are required to be 
+#    installed on your x86 Node of SX-Aurora TSUBASA.
+#      <ul>
+#        <li> <a href="https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf">NEC SDK</a>
+#          <ul>
+#            <li> required NEC C/C++ compiler version: >= 3.0.4</li>
+#            <li> required NLC version: >= 2.1.0 </li>
+#          </ul>
+#        </li>
+#        <li> <a href="https://veos-sxarr-nec.github.io/aveo/">Alternative VE Offloading (AVEO)</a>@n
+#             To install the packages to run programs by @c yum, execute the following command as root.
+#          <ul>
+#            <li> If you install NLCpy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
+# @verbatim
+# # yum install veoffload-aveo veoffload-aveorun
+# @endverbatim
+#            </li>
+#            <li> If you install NLCpy from source, the development packages of Alternative VE Offloading(AVEO) are required.
+# @verbatim
+# # yum install veoffload-aveo-devel veoffload-aveorun-devel
+# @endverbatim
+#            </li>
+#          </ul>
+#        </li>
+#        <li> <a href="https://www.python.org/">Python</a>
+#          <ul>
+#            <li> required version: >=3.6
+#            </li>
+#          </ul>
+#        </li>
+#      </ul>
+#
+# <h1> Install from wheel </h1>
+#    You can install NLCPy by executing either of following commands.
+#    <ul>
+#      <li> Install from PyPI
+# @verbatim
+# $ pip install nlcpy
+# @endverbatim
+#      </li>
+#      <li> Install from your local computer
+#        <ol>
+#          <li> Download the wheel package from <a href="https://github.com/SX-Aurora/nlcpy/">GitHub</a>.
+#          </li>
+#          <li> Put the wheel package to your any directory.
+#          </li>
+#          <li> Install the local wheel package via pip command.
+# @verbatim
+# $ pip install <path_to_wheel>
+# @endverbatim
+#          </li>
+#        </ol>
+#      </li>
+#    </ul>
+#    The shared objects for Vector Engine, which are included in the wheel package, are compiled  and tested by using NEC C/C++ Version 3.0.4.
+#
+# <h1> Install from source (with building)</h1>
+#    Before building source files, please install following packages.
+# @verbatim
+# $ pip install numpy cython wheel
+# @endverbatim
+#    And, entering these commands in the environment where <em>gcc</em> and <em>ncc</em> commands are available.
+# @verbatim
+# $ git clone https://github.com/SX-Aurora/nlcpy.git
+# $ cd nlcpy
+# $ pip install .
+# @endverbatim
+#    @n    
+#
+# @endif
+

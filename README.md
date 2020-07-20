@@ -62,7 +62,7 @@ $ pip install numpy cython wheel
 And, entering these commands in the environment where gcc and ncc commands are available.  
 
 ```
-$ git clone https://github.com/SX-Aurora/nlcpy/
+$ git clone https://github.com/SX-Aurora/nlcpy.git
 $ cd nlcpy
 $ pip install .
 ```  

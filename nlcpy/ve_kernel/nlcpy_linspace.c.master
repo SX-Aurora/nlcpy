@@ -1,0 +1,122 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (out_array->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ start_array->dtype:f64,c128)
+
+uint64_t nlcpy_linspace(ve_arguments *args, int32_t *psw) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+    ve_array *out_array = &(args->linspace.out);
+    ve_array *start_array = &(args->linspace.start);
+    ve_array *stop_array = &(args->linspace.stop);
+    int64_t num = args->linspace.num;
+    int64_t endpoint = args->linspace.endpoint;
+    int64_t axis = args->linspace.axis;
+    int64_t dim_start = start_array->size;
+    int64_t dim_stop = stop_array->size;
+    assert(start_array->dtype == stop_array->dtype);
+    assert(num >= 0);
+
+#begin_switch
+    @TYPE1@ *out = (@TYPE1@ *)out_array->ve_adr;
+    if (out == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+    @TYPE2@ *start = (@TYPE2@ *)start_array->ve_adr;
+    if  (start == NULL) {
+        start = (@TYPE2@ *)nlcpy__get_scalar(start_array);
+        if (start == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    @TYPE2@ *stop = (@TYPE2@ *)stop_array->ve_adr;
+    if  (stop == NULL) {
+        stop = (@TYPE2@ *)nlcpy__get_scalar(stop_array);
+        if (stop == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    int64_t i, j;
+    int64_t inc_start, inc_stop;
+    int64_t dim;
+    int64_t div = num;
+    if (endpoint != 0) {
+       div = num - 1;
+    }
+
+    if (dim_start > dim_stop) {
+       dim = dim_start;
+    }
+    else {
+       dim = dim_stop;
+    }
+
+    inc_start = 1;
+    inc_stop  = 1;
+    if (dim_start == 1) {
+       inc_start = 0;
+    }
+    if (dim_stop == 1) {
+       inc_stop = 0;
+    }
+    for(j = 0; j < dim; j++){
+       @TYPE2@ tmp = start[j*inc_start];
+       @TYPE2@ delta = stop[j*inc_stop] - start[j*inc_start];
+       @TYPE2@ step_tmp = 0;
+
+       if (num > 1) {
+          step_tmp = delta / div;
+          if (step_tmp == 0) {
+              for (i = 0; i < num; i++) {
+                  out[i*dim+j] = (@TYPE1@)tmp;
+              }
+          }
+          else {
+              for (i = 0; i < num; i++) {
+                  out[i*dim+j] = (@TYPE1@)(tmp + step_tmp*i);
+              }
+          }
+       }
+       else {
+          out[0+j] = (@TYPE1@)tmp;
+       }
+    }
+#end_switch
+}
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+

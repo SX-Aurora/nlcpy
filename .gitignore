@@ -1,0 +1,10 @@
+*.o
+*.so
+*.log
+*_log\.*
+*.npy
+*.egg-info
+/build/
+/dist/
+/obj/
+__pycache__

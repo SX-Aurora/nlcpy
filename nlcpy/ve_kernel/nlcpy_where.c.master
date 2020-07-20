@@ -1,0 +1,177 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (out->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
+) {
+    ve_array *out = &(args->where.out);
+    ve_array *condition = &(args->where.condition);
+    ve_array *x = &(args->where.x);
+    ve_array *y = &(args->where.y);
+    assert(out->size == condition->size);
+    //assert(x->size == y->size);
+
+#begin_switch
+    @TYPE1@ *pout = (@TYPE1@ *)nlcpy__get_ptr(out);
+    if  (pout == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+    Bint *pcond = (Bint *)nlcpy__get_ptr(condition);
+    if  (pcond == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if  (px == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+    @TYPE1@ *py = (@TYPE1@ *)nlcpy__get_ptr(y);
+    if  (py == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+/////////
+// 0-d //
+/////////
+    if (out->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if(pcond[0]) {
+            pout[0] = px[0];
+        } else {
+            pout[0] = py[0];
+        }
+} /* omp single */
+
+/////////
+// 1-d //
+/////////
+    } else if (out->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        const int64_t n_inner = out->ndim - 1;
+        const int64_t n_outer = 0;
+        const uint64_t iout0 = out->strides[n_inner] / out->itemsize;
+        const uint64_t icond0 = condition->strides[n_inner] / condition->itemsize;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        for(int64_t i = 0; i < out->size; i++) {
+            if(pcond[i*icond0]) {
+                pout[i*iout0] = px[i*ix0];
+            } else {
+                pout[i*iout0] = py[i*iy0];
+            }
+        }
+} /* omp single */
+
+/////////
+// N-d //
+/////////
+    } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM) {
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__rearrange_axis(out, idx);
+        int64_t *cnt_out = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        int64_t i, j, k;
+        const int64_t n_inner = out->ndim - 1;
+        const int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_out, out->ndim);
+        
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iout = 0;
+        uint64_t icond = 0;
+        const uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        const uint64_t iout0 = out->strides[n_inner2] / out->itemsize;
+        const uint64_t icond0 = condition->strides[n_inner2] / condition->itemsize;
+        const int64_t lenm = out->shape[n_outer2];
+        const int64_t cnt_s = lenm * it / nt;
+        const int64_t cnt_e = lenm * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iout = cnt * out->strides[n_outer2] / out->itemsize;
+            icond = cnt * condition->strides[n_outer2] / condition->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                for (i = 0; i < out->shape[n_inner2]; i++) {
+                    if(pcond[i*icond0+icond]) {
+                        pout[i*iout0+iout] = px[i*ix0+ix];
+                    } else {
+                        pout[i*iout0+iout] = py[i*iy0+iy];
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_out[kk] < out->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iout += out->strides[kk] / out->itemsize;
+                        icond += condition->strides[kk] / condition->itemsize;
+                        break;
+                    }
+                    cnt_out[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iout -= (out->strides[kk] / out->itemsize) * (out->shape[kk] - 1); 
+                    icond -= (condition->strides[kk] / condition->itemsize) * (condition->shape[kk] - 1); 
+                }
+                if (k < 1) break;
+            }
+        }
+
+    } else {
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+

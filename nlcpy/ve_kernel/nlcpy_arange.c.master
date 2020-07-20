@@ -1,0 +1,82 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (x->dtype:bool,i64,u64,f64,c128 @ z->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+uint64_t nlcpy_arange(ve_arguments *args, int32_t *psw) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+    ve_array *x = &(args->binary.x);
+    ve_array *y = &(args->binary.y);
+    ve_array *z = &(args->binary.z);
+    assert(z->ndim < 2);
+    /*
+     * x: start
+     * y: step
+     * z: out
+     */
+#begin_switch
+    @TYPE1@ *px = (@TYPE1@ *)x->ve_adr;
+    if  (px == NULL) {
+        px = (@TYPE1@ *)nlcpy__get_scalar(x);
+        if (px == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    @TYPE1@ *py = (@TYPE1@ *)y->ve_adr;
+    if  (py == NULL) {
+        py = (@TYPE1@ *)nlcpy__get_scalar(y);
+        if (py == NULL) {
+            return NLCPY_ERROR_MEMORY;
+        }
+    }
+    @TYPE2@ *pz = (@TYPE2@ *)z->ve_adr;
+    if (pz == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+    int64_t i;
+    @TYPE1@ tmp = *px;
+    for (i = 0; i < z->size; i++) {
+        pz[i] = (@TYPE2@)tmp;
+        tmp += (@TYPE2@)*py;
+    }
+#end_switch
+} /* omp single */
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+

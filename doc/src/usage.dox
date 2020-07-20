@@ -1,0 +1,327 @@
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+##
+# @if(lang_ja)
+# @else
+# @page usage Usage
+#
+# This page describes the usage of NLCPy from your Python scripts:
+# @li @subpage basic_usage
+# @li @subpage interop
+# @li @subpage execution
+# @endif
+#
+
+##
+# @if(lang_ja)
+# @else
+# @page basic_usage Basic Usage
+#
+# # Preparation #
+# @anchor preparation_a
+#
+# NLCPy uses the functions of <a href="https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/">
+# NEC Numeric Library Collection (NLC)</a>. 
+# Before importing this package, you need to execute the environment setup script @c nlcvars.sh
+# or @c nlcvars.csh once in advance. @n@n
+#
+# When using @c sh or its variant:
+# @verbatim
+# $ source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.sh 
+# @endverbatim
+#
+# When using @c csh or its variant:
+# @verbatim
+# % source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.csh 
+# @endverbatim
+# Here, @b X.X.X denotes the version number of NEC Numeric Library Collection on your x86 node(Vector Host).
+#
+# # Import Package #
+# @anchor import_a
+#
+# When you use NLCPy in your Python scripts, the package @c nlcpy must be imported.@n@n
+#
+# @li When running the scripts using NLCPy in interactive mode: 
+# @verbatim
+# $ python
+# >>> import nlcpy
+# @endverbatim
+# @li When running the scripts using NLCPy in non-interactive mode:
+# @verbatim
+# import nlcpy
+# @endverbatim
+#
+# If you get something similar to the following errors, NLCPy or NEC Numeric Library Collection probably is not installed,
+# or is not executed the environment setup script mentioned above.
+# Please see also @ref installation.
+# @verbatim
+# import nlcpy
+# ...
+# ModuleNotFoundError: No module named 'nlcpy.core.core'
+# @endverbatim
+# , or
+# @verbatim
+# import nlcpy
+# ...
+# RuntimeError: veo_load_library 'b'/path_to_nlcpy/lib/nlcpy_ve_kernel_no_fast_math.so'' failed
+# @endverbatim
+#
+# After you import @c nlcpy successfully in Python scripts, the scripts can use @ref n-dimensional_array "ndarray" of NLCPy and functions described in @ref Reference "reference".@n@n
+#
+# An easy example of NLCPy script is shown below:
+# @code
+# >>> import nlcpy as vp
+# >>> vp.add(1.0, 4.0)
+# array(5.)
+# >>> x1 = vp.arange(9.0).reshape((3, 3))
+# >>> x2 = vp.arange(3.0)
+# >>> vp.add(x1, x2)
+# array([[  0.,   2.,   4.],
+#        [  3.,   5.,   7.],
+#        [  6.,   8.,  10.]])
+# @endcode
+# In addition, the current version of NLCPy provides the following operators of the @ref n-dimensional_array "ndarray" class:
+#      <table>
+#      <tr><td>Assignment operator</td><td>@c =</td></tr>
+#      <tr><td>Arithmetic operators</td><td>@c +, @c -, @c *, @c /, @c //, @c %, @c **</td></tr>
+#      <tr><td>Arithmetic assignment operators</td><td>@c +=, @c -=, @c *=, @c /=, @c //=, @c %=, @c **=</td></tr>
+#      <tr><td>Matrix multiplication operator</td><td>@c \@</td></tr>
+#      <tr><td>Comparison operators</td><td>@c ==, @c !=, @c >, @c >=, @c <, @c <=</td></tr>
+#      <tr><td>Bitwise operators</td><td>@c &, @c |, @c ^, @c ~</td></tr>
+#      <tr><td>Bitwise assignment operators</td><td>@c &=, @c |=, @c ^=</td></tr>
+#      <tr><td>Bit-shift operators</td><td>@c <<, @c >></td></tr>
+#      <tr><td>Bit-shift assignment operators</td><td>@c <<=, @c >>=</td></tr>
+#      <tr><td>Logical operators</td><td>@c and, @c or, @c xor, @c not</td></tr>
+#      </table>
+# @attention
+#   @li In-place matrix multiplication operator @c \@= is not implemented yet.@n
+#
+# @endif
+
+##
+# @page interop Interoperability between NumPy and NLCPy
+# @anchor interop_a
+#
+# <p>
+# NLCPy provides a subset of NumPy API. 
+# However, NLCPy ndarray(@c nlcpy.core.core.ndarray) implements @em \_\_array\_\_ method. 
+# It enables you to pass NLCPy ndarray to a NumPy function.@n
+# </p>
+# @li Example 1:
+# @code
+# >>> import nlcpy
+# >>> import numpy
+# >>>
+# >>> x = nlcpy.arange(3)
+# >>> y = nlcpy.arange(3)
+# >>> numpy.meshgrid(x, y)
+# [array([[0, 1, 2],
+#        [0, 1, 2],
+#        [0, 1, 2]]), array([[0, 0, 0],
+#        [1, 1, 1],
+#        [2, 2, 2]])]
+# @endcode
+# <p>
+# Please note that <a href="https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html">numpy.meshgrid</a> is the NumPy function, whereas @c x and @c y are both NLCPy ndarrays.@n@n
+#
+# You can also pass a NLCPy ndarray to a function of other packages which uses @c numpy.ndarray.@n
+# Here are easy examples of Matplotlib and Pandas.
+# </p>
+# @li Example 2 (Matplotlib):
+# @code
+# >>> import nlcpy as vp
+# >>> import matplotlib.pylab as plt
+# >>>
+# >>> x = vp.linspace(-vp.pi, vp.pi, 201)
+# >>> type(x)
+# <class 'nlcpy.core.core.ndarray'> 
+# >>>
+# >>> plt.plot(x, vp.sin(x))
+# >>> plt.xlabel('Angle [rad]')
+# >>> plt.ylabel('sin(x)')
+# >>> plt.axis('tight')
+# >>> plt.show()
+# @endcode
+# @n
+# @par Result
+# @image html sine.jpg
+# @li Example 3 (Pandas):
+# @code
+# >>> import nlcpy as vp
+# >>> import pandas as pd
+# >>>
+# >>> x = vp.random.rand(3,3)
+# >>> pd.DataFrame(x, index=list('abc'), columns=list('ABC'))
+#           A                      B                   C
+# a  0.6575677252840251     0.7966675218194723  0.5927528077736497
+# b  0.1310200293082744  0.0033949704375118017  0.4242931657936424
+# c   0.343795241555199       0.88619629223831  0.9364728704094887
+# @endcode
+#
+# <p>
+# If you convert between @c nlcpy.core.core.ndarray and @c numpy.ndarray, 
+# you should use nlcpy.asarray() and <a href="https://numpy.org/doc/stable/reference/generated/numpy.asarray.html">numpy.asarray()</a>.
+# In Example 4, nlcpy.asarray() transfers a NumPy ndarray from Vector Host(VH) to Vector Engine(VE), and then the ndarray is represented as a NLCPy ndarray. Conversely, 
+# <a href="https://numpy.org/doc/stable/reference/generated/numpy.asarray.html">numpy.asarray()</a> transfers a ndarray from VE
+# to VH.@n
+# </p>
+# @li Example 4:
+# @code
+# >>> x = numpy.arange(5)
+# >>> type(x)
+# <class 'numpy.ndarray'>
+# >>>
+# >>> x = nlcpy.asarray(x)             # converts from numpy.ndarray to nlcpy.core.core.ndarray
+# >>> type(x)
+# <class 'nlcpy.core.core.ndarray'> 
+# >>>
+# >>> x = numpy.asarray(x)             # converts from nlcpy.core.core.ndarray to numpy.ndarray
+# >>> type(x)
+# <class 'numpy.ndarray'>
+# >>>
+# >>> x
+# array([0, 1, 2, 3, 4])
+# @endcode
+# <p>
+# In addition, @ref core::get "ndarray.get"() returns a NumPy array on VH that copied from VE.
+# </p>
+# @li Example 5:
+# @code
+# >>> x = nlcpy.arange(5)
+# >>> type(x)
+# <class 'nlcpy.core.core.ndarray'> 
+# >>>
+# >>> y = x.get()            # converts from nlcpy.core.core.ndarray to numpy.ndarray.
+# >>> type(y)
+# <class 'numpy.ndarray'>
+# >>>
+# >>> y
+# array([0, 1, 2, 3, 4])
+# @endcode
+# @n
+# @note 
+# When both @c nlcpy.core.core.ndarray and @c numpy.ndarray are passed to a NLCPy function,
+# the function returns the result as @c nlcpy.core.core.ndarray. Conversely, a NumPy
+# function returns the result as @c numpy.ndarray.
+# @code
+# >>> import numpy, nlcpy
+# >>> x = nlcpy.arange(10)
+# >>> y = numpy.arange(10)
+# >>>
+# >>> type(x+y)
+# <class 'nlcpy.core.core.ndarray'>   # ndarray of nlcpy
+# >>>
+# >>> type(nlcpy.add(x,y))
+# <class 'nlcpy.core.core.ndarray'>   # ndarray of nlcpy
+# >>>
+# >>> type(numpy.add(x,y))
+# <class 'numpy.ndarray'>             # ndarray of numpy
+# @endcode
+#
+
+##
+# @page execution Execution
+# @anchor execution_a
+#
+# # Parallel Execution #
+# Python scripts using NLCPy can gain performance when it is executed in parallel by multithreading on a Vector Engine(VE). The default number of parallel threads can be specified by the environment variable @c VE_OMP_NUM_THREADS at the time of execution. If the @c VE_OMP_NUM_THREADS is undefined or has an invalid value, the maximum number of the available CPU cores on the system is set.
+#
+# Examples are shown below.
+#
+# @li Interactive mode: 
+# @verbatim
+# $ VE_OMP_NUM_THREADS=4 python
+# >>> import nlcpy
+# @endverbatim
+# Subsequent computations will be performed by 4 parallel threads on a VE.
+#
+# @li Non-interactive mode: 
+# @verbatim
+# $ VE_OMP_NUM_THREADS=4 python example.py
+# @endverbatim
+# Computations in example.py will be performed by 4 parallel threads on a VE.
+#
+# When you want to specify VE Node number, you should use the environment variable @c VE_NODE_NUMBER as follows.
+# @li Interactive mode: 
+# @verbatim
+# $ VE_NODE_NUMBER=1 VE_OMP_NUM_THREADS=4 python
+# >>> import nlcpy
+# @endverbatim
+# Subsequent computations will be performed by 4 parallel threads on VE Node #1.
+#
+# @li Non-interactive mode: 
+# @verbatim
+# $ VE_NODE_NUMBER=1 VE_OMP_NUM_THREADS=4 python example.py
+# @endverbatim
+# Computations in example.py will be performed by 4 parallel threads on VE Node #1.
+#
+# @note
+# If you execute two or more NLCPy programs on a VE, context switching occurs.
+# In such a case, the performance becomes significantly slower.
+#
+# # Optimization for Mathematical Functions #
+# When the environment variable @c VE_NLCPY_FAST_MATH is set to @c yes or @c YES,
+# it enables NLCPy to call shared objects @em nlcpy_ve_kernel_fast_math.so, which is executed on a VE. By default, VE_NLCPY_FAST_MATH is undefined.
+# The following compiling options in NEC C/C++ compiler are specified when the shared objects are created by the compiler.
+# @li @em -ffast-math @n
+#     Uses fast scalar version mathematical functions outside of vectorized loops. 
+# @li @em -mno-vector-intrinsic-check @n
+#     Disable vectorized mathematical functions to check the value ranges of arguments.
+#     The target mathematical functions of this option are as follows:@n
+#     <em>acos, acosh, asin, atan, atan2, atanh, cos, cosh, cotan, exp, exp10, exp2, expm1,
+#     log10, log2, log, pow, sin, sinh, sqrt, tan, tanh </em>
+# @li @em -freciprocal-math @n
+#     Allows change an expression <span class="pre">x/y</span> to <span class="pre">x * (1/y)</span>.@n
+# @li @em -mvector-power-to-explog @n
+#     Allows to replace <span class="pre">pow(R1,R2)</span> in a vectorized loop with <span class="pre">exp(R2*log(R1))</span>. <span class="pre">powf()</span> is
+#     replaced, too. By the replacement, the execution time would be shortened, but
+#     numerical error occurs rarely in the calculation.@n
+# @li @em -mvector-low-precise-divide-function @n
+#     Allows to use low precise version for vector floating divide operation. It is faster than
+#     the normal precise version but the result may include at most one bit numerical error
+#     in mantissa.
+#     @n
+#
+# <p>
+# These optimizations cause side-effects. For example, @c nan or @c inf might not be
+# obtained correctly. However, it should be able to reduce computation time on a VE.@n
+# </p>
+# You can set @c VE_NLCPY_FAST_MATH as follows:
+#
+# @li Interactive mode: 
+# @verbatim
+# $ VE_NLCPY_FAST_MATH=yes python
+# >>> import nlcpy
+# @endverbatim
+#
+# @li Non-interactive mode: 
+# @verbatim
+# $ VE_NLCPY_FAST_MATH=yes python example.py
+# @endverbatim

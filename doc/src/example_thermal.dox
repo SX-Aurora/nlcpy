@@ -1,0 +1,189 @@
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+##
+# @if(lang_ja)
+# @else
+# @page example_thermal Example: Thermal Simulation
+#
+# <h1> Objective </h1>
+# We will simulate the temporal change in temperature of the 
+# copper rectangle whose length is 50 cm (= LX), width is 30 cm (= LY) 
+# using a finite-difference method.
+#
+# <h1> Physics </h1>
+# <h3> Governing Equation </h3>
+# @f[ \frac{\partial}{\partial t} T=\frac{k}{\rho c}\left(\frac{\partial^2}{\partial x^2}+\frac{\partial^2}{\partial y^2}\right)T @f]
+#
+# <table>
+#   <tr> 
+#     <th>Variable</th>  
+#     <th>Description</th> 
+#   </tr>
+#   <tr> 
+#     <td>@f$ T @f$</td> 
+#     <td>Temperature [K]</td> 
+#   </tr>
+#   <tr> 
+#     <td>@f$ t @f$</td> 
+#     <td>Time [s]</td> 
+#   </tr>
+#   <tr> 
+#     <td>@f$ x @f$</td> 
+#     <td>x coordinate [m]</td> 
+#   </tr>
+#   <tr> 
+#     <td>@f$ y @f$</td> 
+#     <td>y coordinate [m]</td> 
+#   </tr>
+# </table>
+# 
+# <table>
+#     <tr> <th>Constant</th> <th>Description</th> <th>Value of Copper</th> </tr>
+#     <tr> <td>@f$ k @f$</td> <td>Thermal conductivity</td> <td>398.0 [W/m K]</td> </tr>
+#     <tr> <td>@f$ \rho @f$</td> <td>Density</td> <td>8960.0 [kg/m<sup>3</sup>]</td> </tr>
+#     <tr> <td>@f$ c @f$</td> <td>Specific heat capacity</td> <td>385.0 [J/kg K]</td> </tr>
+# </table>
+#
+# <h3> Boundary Conditions </h3>
+# @f{eqnarray*}{ 
+#   T &=& T_1  ~ (x=0, x={\rm LX}, y=0) \\
+#   T &=& T_1+T_2 \sin \frac{\pi x}{\mathrm LX} ~ (y={\rm LY}) \\
+#   \frac{\partial}{\partial x}T &=& 0 ~ (x=0, x={\rm LX}) \\
+#   \frac{\partial}{\partial y}T &=& 0 ~ (y=0, y={\rm LY}) \\
+#   T_1 &=& 40 ~ [^\circ C] \\
+#   T_2 &=& 60 ~ [^\circ C] \\
+# @f}
+#
+# <h3> Initial Conditions </h3>
+# @f{eqnarray*}{ 
+#   T &=& T_0 \\
+#   T_0 &=& 20 ~ [^\circ C]
+# @f}
+#
+# <h1> Program </h1>
+# @code
+# import nlcpy as vp
+# from matplotlib import pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
+# from matplotlib import animation
+# from matplotlib.animation import PillowWriter
+# 
+# LX = 50e-2
+# LY = 30e-2
+# T0 = 20.0
+# T1 = 40.0
+# T2 = 60.0
+# HC = 398.0 / (8960.0 * 385.0)
+# 
+# def initialize(grid):
+#     grid.fill(T0)
+#     grid[:, 0] = T1
+#     grid[:, -1] = T1
+#     grid[0] = T1
+#     grid[-1] = T1 + T2 * \
+#             vp.sin(vp.pi * vp.linspace(0, LX, grid.shape[1]) / LX)
+# 
+# def compute(grid, coef, temp, mx, my):
+#     vp.multiply(grid[2:my, 1:mx-1], coef[0], out=temp)
+#     temp += grid[1:my-1, 2:mx] * coef[1]
+#     temp += grid[1:my-1, 1:mx-1] * coef[2]
+#     temp += grid[0:my-2, 1:mx-1] * coef[0]
+#     temp += grid[1:my-1, 0:mx-2] * coef[1]
+#     grid[1:my-1, 1:mx-1] = temp[...]
+# 
+# def plot(grid, ax, ims):
+#     x = vp.linspace(0, LX, grid.shape[1])
+#     y = vp.linspace(0, LY, grid.shape[0])
+#     try:
+#         # meshgrid is not implemented yet.
+#         xx, yy = vp.meshgrid(x, y)
+#     except AttributeError:
+#         import numpy as np
+#         xx, yy = np.meshgrid(x, y)
+# 
+#     im = ax.plot_wireframe(xx, yy, grid, rstride=10, cstride=10)
+#     ims.append([im])
+# 
+# def create_animation(fig, ims):
+#     ani = animation.ArtistAnimation(fig, ims, interval=200)
+#     ani.save("thermal_simulation.gif", writer='pillow')
+# 
+# def heatequation(
+#         nx, # The number of grid points in X-direction.
+#         ny, # The number of grid points in Y-direction.
+#         dt, # The time step interval.
+#         mt, # The maximum number of time steps.
+#         kp, # The number of time steps for drawing interval.
+#     ):
+#     mx = nx + 2
+#     my = ny + 2
+#     grid = vp.empty((my, mx), dtype='f8')
+#     temp = vp.empty((ny, nx), dtype='f8')
+# 
+#     dx = LX / (nx + 1)
+#     dy = LY / (ny + 1)
+# 
+#     coef = [
+#         (HC * dt) / (dx * dx),
+#         (HC * dt) / (dy * dy),
+#         1.0 - HC * dt * (2.0 / (dx * dx) + 2.0 / (dy * dy)),
+#     ]
+# 
+#     print("initializing grid...", end="", flush=True)
+#     initialize(grid)
+#     print("done", flush=True)
+# 
+#     ims = []
+#     fig = plt.figure()
+#     ax = Axes3D(fig, rect=(0., 0., .95, 1.))
+#     ax.set_xlabel("x[m]")
+#     ax.set_ylabel("y[m]")
+#     ax.set_zlabel("T[$^{\circ}$C]")
+#     ax.zaxis.set_rotate_label(False)
+#     print("computing difference method...", end="", flush=True)
+#     for i in range(int(mt/dt)):
+#         compute(grid, coef, temp, mx, my)
+#         if i % int(kp/dt) == 0:
+#             plot(grid, ax, ims)
+#     print("done", flush=True)
+# 
+#     print("creating animation...", end="", flush=True)
+#     create_animation(fig, ims)
+#     print("done", flush=True)
+# 
+# if __name__ == "__main__":
+#     heatequation(500, 300, 0.001, 30, 1.)
+# @endcode
+#
+# <h1> Simulation Result </h1>
+# @image html "thermal_simulation.gif"
+#
+# @endif
+

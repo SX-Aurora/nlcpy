@@ -68,7 +68,7 @@ $ pip install .
 ```  
 
 ## Documentation
-- [NLCPy User's Guide](https://www.hpc.nec/documents/)**TODO: edit URL**
+- [NLCPy User's Guide](https://www.hpc.nec/documents/nlcpy/en/index.html)
 
 ## License
 

@@ -178,7 +178,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         keepdims = True
 
     if (initial is None or (initial is nlcpy._NoValue and not op_has_identity)) and \
-       any([a.shape[i] == 0 for i in axis]):
+       a.ndim > 0 and any([a.shape[i] == 0 for i in axis]):
         _op_name = 'true_divide' if op_name == 'divide' \
             else 'remainder' if op_name == 'mod' else op_name
         raise ValueError("zero-size array to reduction operation "

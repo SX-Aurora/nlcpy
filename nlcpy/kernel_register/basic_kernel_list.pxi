@@ -57,12 +57,6 @@ _basic_kernel_list = {
             ]
     },
 
-    "nlcpy_stack_array": {
-        "ret": "int64_t",
-        "args": ["uint64_t", "uint64_t"],
-    },
-
-
     "run_request": {
         "ret": "uint64_t",
         "args":

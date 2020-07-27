@@ -120,26 +120,11 @@ def resize(a, new_shape):
         n_copies = n_copies + 1
         extra = Na - extra
 
-    # a = nlcpy.concatenate((a,) * n_copies)
-    a = _dummy_concatenate((a,) * n_copies)
+    a = nlcpy.concatenate((a,) * n_copies)
     if extra > 0:
         a = a[:-extra]
 
     return nlcpy.reshape(a, new_shape)
-
-
-def _dummy_concatenate(arrays, axis=None, out=None):
-    # XXX:temporary implementation for only nlcpy.resize()
-    nlcpy.request.flush()
-    narrays = len(arrays)
-    if narrays < 0:
-        return None
-    dst = nlcpy.ndarray(arrays[0].size * narrays, dtype=arrays[0].dtype)
-    v = veo.VeoAlloc()
-    args = (arrays[0]._ve_array, dst._ve_array)
-    req = v.lib.func[b"nlcpy_stack_array"](v.ctx, *args)
-    req.wait_result()
-    return dst
 
 
 def trim_zeros(filt, trim='fb'):

@@ -9,14 +9,16 @@ from numpy import _NoValue  # NOQA
 import os  # NOQA
 ve_num_threads = os.environ.get('VE_OMP_NUM_THREADS', '8')
 os.environ['VE_OMP_NUM_THREADS'] = ve_num_threads
+from nlcpy import _path  # NOQA
+_here = _path._here
+_ve_ld_library_path = os.environ.get('VE_LD_LIBRARY_PATH', '')
+os.environ['VE_LD_LIBRARY_PATH'] = _here + '/lib:' + _ve_ld_library_path
 
 # --------------------------------------------------
 # parameter
 # --------------------------------------------------
 from nlcpy.core import set_boundary_size  # NOQA
 from nlcpy.core import get_boundary_size  # NOQA
-from nlcpy import _path  # NOQA
-_here = _path._here
 from nlcpy import _version  # NOQA
 __version__ = _version.__version__
 

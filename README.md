@@ -39,7 +39,7 @@ You can install NLCPy by executing either of following commands.
 
 - Install from your local computer
 
-    1. Download the wheel package from [GitHub](https://github.com/SX-Aurora/nlcpy/).
+    1. Download [the wheel package](https://github.com/SX-Aurora/nlcpy/releases/tag/v1.0.0b1) from GitHub.
 
     2. Put the wheel package to your any directory. 
 

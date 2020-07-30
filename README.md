@@ -72,5 +72,5 @@ $ pip install .
 
 ## License
 
-NLCPy is available as free software under the 3-clause BSD license. (see `LICENSE` file).  
-
+The BSD-3-Clause license (see `LICENSE` file).
+NLCPy is derived from NumPy, CuPy, and PyVEO (see `LICENSE_DETAIL/LICENSE_DETAIL` file).

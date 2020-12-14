@@ -80,7 +80,7 @@ uint64_t nlcpy_random_shuffle_$1(ve_array *x, ve_array *idx, ve_array *work, int
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;

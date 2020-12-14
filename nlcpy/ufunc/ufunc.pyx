@@ -419,11 +419,12 @@ cdef class ufunc:
                             .format(dtype_out, name))
 
         args = convert_args_to_ndarray(args)
-        order = guess_out_order(order, args)
 
         if self.name is 'nlcpy_matmul':
-            return cblas_wrapper.cblas_gemm(args[0], args[1], out=None,
+            return cblas_wrapper.cblas_gemm(args[0], args[1], out=out_args,
                                             order=order, dtype=dtype_out)
+
+        order = guess_out_order(order, args)
 
         if out_args is None:
             ret = <int32_t>0    # set dummy value
@@ -949,14 +950,16 @@ cpdef parse_argument(self, kwargs):
 
 
 cpdef guess_out_order(order, args):
+    if order is None:
+        order = 'K'
     order_char = internal._normalize_order(order)
     if order_char == b'F':
         order_out = 'F'
     elif order_char == b'C':
         order_out = 'C'
-    elif order_char == b'K':
+    elif order_char == b'K' or order_char == b'A':
         for x in args:
-            if not x.flags.c_contiguous:
+            if x.flags.f_contiguous and not x.flags.c_contiguous:
                 order_out = 'F'
                 break
         else:

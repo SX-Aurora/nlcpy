@@ -40,5 +40,4 @@ _linalg_kernel_list = {
                 b"int32_t *",
             ],
     },
-
 }

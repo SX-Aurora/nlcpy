@@ -47,7 +47,7 @@ uint64_t random_generate(ve_array* ve_input){
     int64_t num = ve_input->size;
 
 #ifdef _OPENMP
-    const int nt = omp_get_num_threads();
+    const int nt = omp_get_max_threads();
 #else
     const int nt = 1;
 #endif /* _OPENMP */
@@ -141,7 +141,7 @@ uint64_t nlcpy_random_generate_integers(void* out, void* work, int64_t low, uint
     }
 
 #ifdef _OPENMP
-    const int nt = omp_get_num_threads();
+    const int nt = omp_get_max_threads();
 #else
     const int nt = 1;
 #endif /* _OPENMP */
@@ -193,7 +193,7 @@ uint64_t nlcpy_random_generate_unsigned_integers(void* out, void* work, uint64_t
     }
 
 #ifdef _OPENMP
-    const int nt = omp_get_num_threads();
+    const int nt = omp_get_max_threads();
 #else
     const int nt = 1;
 #endif /* _OPENMP */

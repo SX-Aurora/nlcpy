@@ -79,6 +79,7 @@ cdef class VeoRequest(object):
 
 cdef class VeoMemRequest(VeoRequest):
     cdef Py_buffer data
+
     @staticmethod
     cdef create(VeoCtxt ctx, req, Py_buffer data)
 

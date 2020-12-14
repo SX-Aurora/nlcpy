@@ -308,7 +308,7 @@ cpdef dict funcTypeList = {
 }
 
 
-cdef check_error(uint64_t err):
+cpdef check_error(uint64_t err):
     if err == NLCPY_ERROR_OK:
         return
     elif err & NLCPY_ERROR_DTYPE:

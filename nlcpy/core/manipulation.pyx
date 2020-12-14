@@ -107,25 +107,6 @@ cdef _ndarray_shape_setter(ndarray self, newshape):
     self._update_f_contiguity()
 
 
-cdef _copyto(ndarray dst, ndarray src, casting, where):
-    if where is True:
-        where = <int32_t>0    # set dummy value
-    else:
-        if isinstance(where, (ndarray, numpy.ndarray)):
-            if not numpy.can_cast(where, 'bool'):
-                raise TypeError("Cannot cast array data from dtype('%s') "
-                                "to dtype('%s') according to the rule 'safe'"
-                                % (where.dtype, 'bool'))
-        where = nlcpy.asanyarray(where, dtype='bool')
-
-    src = broadcast.broadcast_to(src, dst.shape)
-    request._push_request(
-        "nlcpy_copy",
-        "creation_op",
-        (src, dst),
-    )
-
-
 cdef ndarray _ndarray_ravel(ndarray self, order):
     cdef int order_char
     cdef vector[Py_ssize_t] shape

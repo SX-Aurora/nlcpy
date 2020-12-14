@@ -38,7 +38,7 @@
 #      <ul>
 #        <li> <a href="https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf">NEC SDK</a>
 #          <ul>
-#            <li> required NEC C/C++ compiler version: >= 3.0.4</li>
+#            <li> required NEC C/C++ compiler version: >= 3.1.0</li>
 #            <li> required NLC version: >= 2.1.0 </li>
 #          </ul>
 #        </li>

@@ -71,6 +71,16 @@ uint64_t nlcpy__get_ptr(ve_array *a) {
     if (a->ve_adr == 0LU) {
         return nlcpy__get_scalar(a);
     } else {
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+        int64_t strides = 0;
+        for (int64_t i = 0; i < NLCPY_MAXNDIM; i++) {
+            strides += a->strides[i];
+        }
+        if (strides == 0) a->size = 1;
+} /* omp single */
         return a->ve_adr;
     }
 }
@@ -116,9 +126,11 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
     }
 
     // find top 2 max shape
-    i = 0; //outer
-    for (j = i + 1; j < a->ndim; j++) {
+    i = a->ndim-1; //inner
+    for (j = i; j >= 0; j--) {
         if (wk_a[i] < wk_a[j]) {
+            if (a->strides[j] >= 8 * 256)
+                continue;
             tmp = wk_a[i];
             wk_a[i] = wk_a[j];
             wk_a[j] = tmp;
@@ -127,8 +139,8 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
             wk_idx[j] = tmp;
         }
     }
-    i = a->ndim-1; //inner
-    for (j = i; j >= 1; j--) {
+    i = 0; //outer
+    for (j = i + 1; j < a->ndim-1; j++) {
         if (wk_a[i] < wk_a[j]) {
             tmp = wk_a[i];
             wk_a[i] = wk_a[j];

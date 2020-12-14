@@ -63,11 +63,10 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
 
     dtype_out = numpy.result_type(x.dtype, y.dtype)
 
-    values, out_shape = broadcast._broadcast_core((x, y))
     v = veo.VeoAlloc()
 
     if out is None:
-        out = nlcpy.ndarray(1, dtype=dtype_out)
+        out = nlcpy.ndarray(shape=(), dtype=dtype_out)
 
     if x.dtype == numpy.float32 and y.dtype == numpy.float32:
         request._push_request(
@@ -108,21 +107,27 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
     return out
 
 
-# TODO: implement argument out is not None case.
 cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
     order_char = internal._normalize_order(order)
     if order_char == b'F':
         order_out = 'F'
     elif order_char == b'C':
         order_out = 'C'
-    elif order_char == b'K':
+    elif order_char == b'A':
         if x._f_contiguous and not x._c_contiguous and \
                 y._f_contiguous and not y._c_contiguous:
             order_out = 'F'
         else:
             order_out = 'C'
+    elif order_char == b'K':
+        order_out = 'C'
     else:
         raise ValueError('unknown order was detected.')
+
+    if not x._c_contiguous and not x._f_contiguous:
+        x = x.copy(order=order_out)
+    if not y._c_contiguous and not y._f_contiguous:
+        y = y.copy(order=order_out)
 
     if (max(x.ndim, y.ndim) > 2):
         raise NotImplementedError('not supported for ndim > 2.')
@@ -183,9 +188,7 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
     if out is None:
         z = ndarray(shape=shape, dtype=dtype, order=order_out)
     else:
-        if dtype != out.dtype:
-            raise TypeError('Cannot cast dtype')
-        z = out
+        raise NotImplementedError('out is not implemented yet.')
     if z.ve_adr == 0:
         raise MemoryError()
     # quick return

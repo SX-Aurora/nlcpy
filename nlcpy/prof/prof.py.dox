@@ -189,11 +189,14 @@ def profile_alloc_mem(func):
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)
+        pre_wait_result = _prof.t_wait_result
         s = time.time()
         res = func(*args, **kwargs)
         e = time.time()
         _prof.n_alloc_mem += 1
         _prof.t_alloc_mem += (e - s)
+        if pre_wait_result != _prof.t_wait_result:
+            _prof.t_alloc_mem -= (_prof.t_wait_result - pre_wait_result)
         return res
     return wrap_func
 

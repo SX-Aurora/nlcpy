@@ -244,11 +244,14 @@ def _make_decorator(check_func, name, type_check, accept_error, sp_name=None,
 
             # shape check
             for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
-                assert numpy_r.shape == nlcpy_r.shape
+                if type(numpy_r) is numpy.ndarray:
+                    assert numpy_r.shape == nlcpy_r.shape
 
             # type check
             if type_check:
                 for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
+                    if type(numpy_r) is not numpy.ndarray:
+                        continue
                     if numpy_r.dtype != nlcpy_r.dtype:
                         msg = ['\n']
                         msg.append(
@@ -327,12 +330,12 @@ def numpy_nlcpy_allclose(rtol=1e-7, atol=0, err_msg='', verbose=True,
         #         n_array = n.A
         array.assert_allclose(v_array, n_array, rtol, atol, err_msg, verbose)
         if contiguous_check and isinstance(n, numpy.ndarray):
-            if n.flags.c_contiguous and not v.flags.c_contiguous:
+            if n.flags.c_contiguous != v.flags.c_contiguous:
                 raise AssertionError(
                     'The state of c_contiguous flag is false. '
                     '(nlcpy_result:{} numpy_result:{})'.format(
                         v.flags.c_contiguous, n.flags.c_contiguous))
-            if n.flags.f_contiguous and not v.flags.f_contiguous:
+            if n.flags.f_contiguous != v.flags.f_contiguous:
                 raise AssertionError(
                     'The state of f_contiguous flag is false. '
                     '(nlcpy_result:{} numpy_result:{})'.format(

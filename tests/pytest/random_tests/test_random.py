@@ -124,8 +124,7 @@ class TestBinomial(object):
         # binomial(0, p) should be zero for any p in [0, 1].
         zeros = np.zeros(2, dtype='int')
         for p in [0, .5, 1]:
-            # assert_(random.binomial(0, p).get().tolist() == 0)
-            assert_(random.binomial(0, p).get().tolist() == [0])
+            assert_(random.binomial(0, p).get().tolist() == 0)
             # assert_array_equal(
             #   random.binomial(zeros, p).get().tolist(),
             #   zeros.get().tolist())
@@ -951,7 +950,7 @@ class TestRandomDist(object):
 
     def test_gamma_0(self):
         actual = np.random.gamma(shape=0, scale=0)
-        assert_equal(actual.get().tolist(), np.array(0))
+        assert_equal(actual.get().tolist(), 0)
         assert_raises(ValueError, np.random.gamma, shape=-0.1, scale=-0.1)
 
     def test_geometric(self):

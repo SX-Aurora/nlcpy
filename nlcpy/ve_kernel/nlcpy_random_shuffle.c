@@ -79,7 +79,7 @@ uint64_t nlcpy_random_shuffle_bool(ve_array *x, ve_array *idx, ve_array *work, i
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -170,7 +170,7 @@ uint64_t nlcpy_random_shuffle_i32(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -261,7 +261,7 @@ uint64_t nlcpy_random_shuffle_i64(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -352,7 +352,7 @@ uint64_t nlcpy_random_shuffle_u32(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -443,7 +443,7 @@ uint64_t nlcpy_random_shuffle_u64(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -534,7 +534,7 @@ uint64_t nlcpy_random_shuffle_f32(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -625,7 +625,7 @@ uint64_t nlcpy_random_shuffle_f64(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -716,7 +716,7 @@ uint64_t nlcpy_random_shuffle_c64(ve_array *x, ve_array *idx, ve_array *work, in
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;
@@ -807,7 +807,7 @@ uint64_t nlcpy_random_shuffle_c128(ve_array *x, ve_array *idx, ve_array *work, i
 /////////
     } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
 #ifdef _OPENMP
-        const int nt = omp_get_num_threads();
+        const int nt = omp_get_max_threads();
         const int it = omp_get_thread_num();
 #else
         const int nt = 1;

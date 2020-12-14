@@ -77,8 +77,15 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
 ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 @#pragma _NEC novector
 @-->)dnl
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],$1)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],$1)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],$1)
+            }
         }
 } /* omp single */
 
@@ -118,8 +125,15 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 @#pragma _NEC novector
 @-->)dnl
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],$1)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],$1)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],$1)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {

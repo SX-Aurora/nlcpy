@@ -162,6 +162,15 @@ uint64_t nlcpy_sort_$1(ve_array *x, int32_t *psw)
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+    /* restore thread count */
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+    asl_library_set_thread_count(nt);
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }

@@ -1,5 +1,3 @@
-import atexit
-
 import numpy  # NOQA
 from numpy import _NoValue  # NOQA
 
@@ -89,8 +87,16 @@ from nlcpy.statistics.order import amax  # NOQA
 from nlcpy.statistics.order import amin  # NOQA
 from nlcpy.statistics.order import nanmax  # NOQA
 from nlcpy.statistics.order import nanmin  # NOQA
-from nlcpy.statistics import *  # NOQA
-
+from nlcpy.statistics.average import median # NOQA
+from nlcpy.statistics.average import average # NOQA
+from nlcpy.statistics.average import mean # NOQA
+from nlcpy.statistics.average import std # NOQA
+from nlcpy.statistics.average import var # NOQA
+from nlcpy.statistics.average import nanmean # NOQA
+from nlcpy.statistics.average import nanstd # NOQA
+from nlcpy.statistics.average import nanvar # NOQA
+from nlcpy.statistics.correlating import cov # NOQA
+from nlcpy.statistics.correlating import corrcoef # NOQA
 # --------------------------------------------------
 # logic functions
 # --------------------------------------------------
@@ -267,17 +273,6 @@ except KeyError:
 # -----------------------------------------------------------------------------
 from nlcpy import random  # NOQA
 
-
-@atexit.register
-def _asluni_finalize():
-    v = veo.VeoAlloc()
-    try:
-        req = v.lib.func[b"random_destroy_handle"](v.ctx, None)
-        req.wait_result()
-        req = v.lib.func[b"asl_library_finalize"](v.ctx, None)
-        req.wait_result()
-    except KeyError:
-        pass
 
 # -----------------------------------------------------------------------------
 # warm up

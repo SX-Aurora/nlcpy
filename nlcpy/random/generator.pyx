@@ -1442,9 +1442,9 @@ class RandomState():
 
     def _generate_random_uniform(self, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         out = ndarray(shape=size, dtype=dtype)
         fpe_flags = numpy.empty(1, dtype=numpy.int32)
@@ -1459,9 +1459,9 @@ class RandomState():
 
     def _generate_random_integers(self, low, high, size=None, dtype=int):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         out = ndarray(shape=size, dtype=dtype)
         work = ndarray(shape=size, dtype=nlcpy.uint64)
@@ -1488,9 +1488,9 @@ class RandomState():
 
     def _generate_random_normal(self, loc, scale, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if scale == 0.:
             return nlcpy.zeros(size, dtype=int)
@@ -1514,9 +1514,9 @@ class RandomState():
 
     def _generate_random_gamma(self, shape, scale, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if shape == 0. or scale == 0.:
             return nlcpy.zeros(size, dtype=int)
@@ -1540,9 +1540,9 @@ class RandomState():
 
     def _generate_random_poisson(self, lam, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if lam == 0:
             return nlcpy.zeros(size, int)
@@ -1565,9 +1565,9 @@ class RandomState():
 
     def _generate_random_logistic(self, loc, scale, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         out = ndarray(shape=size, dtype=dtype)
         fpe_flags = numpy.empty(1, dtype=numpy.int32)
@@ -1588,9 +1588,9 @@ class RandomState():
 
     def _generate_random_weibull(self, a, b, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if a == 0.:
             return nlcpy.zeros(size, dtype=int)
@@ -1614,9 +1614,9 @@ class RandomState():
 
     def _generate_random_exponential(self, scale=1.0, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if scale == 0.:
             return nlcpy.zeros(size, dtype=int)
@@ -1640,9 +1640,9 @@ class RandomState():
 
     def _generate_random_cauchy(self, a=0.0, b=1.0, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         out = ndarray(shape=size, dtype=dtype)
         fpe_flags = numpy.empty(1, dtype=numpy.int32)
@@ -1664,9 +1664,9 @@ class RandomState():
     def _generate_random_lognormal(
             self, mean=0.0, sigma=1.0, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if sigma == 0.:
             return nlcpy.ones(size, dtype)
@@ -1691,9 +1691,9 @@ class RandomState():
     def _generate_random_gumbel(
             self, loc=0.0, scale=1.0, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if scale == 0.:
             return nlcpy.zeros(size, dtype=int)
@@ -1717,9 +1717,9 @@ class RandomState():
 
     def _generate_random_geometric(self, p, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         out = ndarray(shape=size, dtype=dtype)
         fpe_flags = numpy.empty(1, dtype=numpy.int32)
@@ -1734,9 +1734,9 @@ class RandomState():
 
     def _generate_random_binomial(self, n, p, size=None, dtype=float):
         if size is None:
-            size = 1
+            size = ()
         if not numpy.isscalar(size) and len(size) == 0:
-            size = 1
+            size = ()
 
         if n == 0 or p == 0 or p == 1:
             return nlcpy.zeros(size, int)

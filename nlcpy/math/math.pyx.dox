@@ -133,8 +133,8 @@ from nlcpy.request cimport request
 #
 # @sa
 # @li @ref cumsum : Returns the cumulative %sum of the elements along a given axis.
-# @li @ref function_base.mean "mean" : Computes the arithmetic mean along the specified axis.
-# @li @ref function_base.average "average" : Computes the weighted average along the specified axis.
+# @li @ref average.mean "mean" : Computes the arithmetic mean along the specified axis.
+# @li @ref average.average "average" : Computes the weighted average along the specified axis.
 #
 # @note
 # @li @ref ufunc::reduce "nlcpy.reduce.add" is called in this function.

@@ -7,7 +7,7 @@ include $(BASEDIR)/make.inc
 NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -r |head -1)
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
-LIB_NLC=-lasl_openmp_i64 -lcblas -lblas_openmp
+LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp
 
 LIB_COMMON=$(LIBDIR)/libnlcpy_ve_kernel_common.so
 ifeq ($(FAST_MATH),yes)
@@ -358,9 +358,6 @@ VE_ARGFUNC = $(VE_ARGMAX) $(VE_ARGMIN)
 
 # Linear Algebra
 VE_DOT = nlcpy_dot.c
-VE_LINALG = $(VE_DOT)
-
-
 
 VE_BASIC_MASTER =\
   nlcpy_arange.c.master\
@@ -388,7 +385,6 @@ VE_RANDOM_KERNEL =\
   nlcpy_random.c\
   nlcpy_random_shuffle.c
 
-
 VE_CBLAS_WRAPPER = cblas_wrapper.c
 
 OBJS = \
@@ -396,6 +392,7 @@ OBJS = \
   nlcpy_mempool_ve.o\
   $(VE_UNARY_FUNCTION:.c=.o)\
   $(VE_COPY_FUNCTION:.c=.o)\
+  $(VE_COPY_MASKED_FUNCTION:.c=.o)\
   $(VE_BINARY_FUNCTION:.c=.o)\
   $(VE_MATMUL_OPERATOR:.c=.o)\
   $(VE_RANDOM_KERNEL:.c=.o)\
@@ -403,7 +400,7 @@ OBJS = \
   $(VE_SORT_WRAPPER:.c=.o)\
   $(VE_SORTING:.c=.o)\
   $(VE_ARGFUNC:.c=.o)\
-  $(VE_LINALG:.c=.o)\
+  $(VE_DOT:.c=.o)\
   $(VE_CAST:.c=.o)\
   $(VE_BASIC_KERNEL:.c=.o)\
   $(VE_CONTROLLER:.c=.o)\
@@ -418,7 +415,6 @@ OBJS_COMMON = \
   $(VE_REDUCEAT_COMMON:.c=.o)\
   $(VE_ACCUMULATE_COMMON:.c=.o)\
   $(VE_OUTER_COMMON:.c=.o)
-
 
 
 ifeq ($(FAST_MATH),yes)
@@ -455,7 +451,7 @@ perl: \
 	$(VE_OUTER)\
 	$(VE_OUTER_COMMON)\
 	$(VE_ARGFUNC)\
-	$(VE_LINALG)
+	$(VE_DOT)\
 
 $(VE_UNARY_FUNCTION): unary_operator.c.master unary_operator.c.master2
 	rm -f $@
@@ -497,7 +493,7 @@ $(VE_ARGFUNC): argfunc.c.master
 	rm -f $@
 	$(CPP) $(CPPFLAGS) $? $@
 
-$(VE_LINALG): $(VE_LINALG:.c=.c.master)
+$(VE_DOT): $(VE_DOT:.c=.c.master)
 	rm -f $@
 	$(CPP) $(CPPFLAGS) $? $@
 
@@ -521,4 +517,4 @@ clean:
 	cd $(OBJDIR) && rm -rf $(VE_BINARY_FUNCTION)
 	cd $(OBJDIR) && rm -rf $(VE_MATMUL_OPERATOR)
 	cd $(OBJDIR) && rm -rf $(VE_ARGFUNC)
-	cd $(OBJDIR) && rm -rf $(VE_LINALG)
+	cd $(OBJDIR) && rm -rf $(VE_DOT)

@@ -149,8 +149,13 @@
 #        [2, 2, 2]])]
 # @endcode
 # <p>
-# Please note that <a href="https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html">numpy.meshgrid</a> is the NumPy function, whereas @c x and @c y are both NLCPy ndarrays.@n@n
+# Please note that <a href="https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html">numpy.meshgrid</a> is the NumPy function, whereas @c x and @c y are both NLCPy ndarrays.@n
 #
+# @note
+# NumPy functions run on an x86 Node (VH). Most of NLCPy functions
+# offload automatically input ndarrays to a Vector Engine (VE), and then run on the VE.@n
+# </p>
+# <p>
 # You can also pass a NLCPy ndarray to a function of other packages which uses @c numpy.ndarray.@n
 # Here are easy examples of Matplotlib and Pandas.
 # </p>
@@ -188,7 +193,7 @@
 # <p>
 # If you convert between @c nlcpy.core.core.ndarray and @c numpy.ndarray, 
 # you should use nlcpy.asarray() and <a href="https://numpy.org/doc/stable/reference/generated/numpy.asarray.html">numpy.asarray()</a>.
-# In Example 4, nlcpy.asarray() transfers a NumPy ndarray from Vector Host(VH) to Vector Engine(VE), and then the ndarray is represented as a NLCPy ndarray. Conversely, 
+# In Example 4, nlcpy.asarray() transfers a NumPy ndarray from VH to VE, and then the ndarray is represented as a NLCPy ndarray. Conversely, 
 # <a href="https://numpy.org/doc/stable/reference/generated/numpy.asarray.html">numpy.asarray()</a> transfers a ndarray from VE
 # to VH.@n
 # </p>
@@ -251,7 +256,7 @@
 # @anchor execution_a
 #
 # # Parallel Execution #
-# Python scripts using NLCPy can gain performance when it is executed in parallel by multithreading on a Vector Engine(VE). The default number of parallel threads can be specified by the environment variable @c VE_OMP_NUM_THREADS at the time of execution. If the @c VE_OMP_NUM_THREADS is undefined or has an invalid value, the maximum number of the available CPU cores on the system is set.
+# Python scripts using NLCPy can gain performance when it is executed in parallel by multithreading on a Vector Engine (VE). The default number of parallel threads can be specified by the environment variable @c VE_OMP_NUM_THREADS at the time of execution. If the @c VE_OMP_NUM_THREADS is undefined or has an invalid value, the maximum number of the available CPU cores on the system is set.
 #
 # Examples are shown below.
 #

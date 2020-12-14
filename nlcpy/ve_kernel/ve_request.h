@@ -191,8 +191,6 @@ typedef struct copy_op_arguments_tag {
 } copy_op_arguments;
 
 
-
-
 typedef union ve_arguments_tag{
     binary_op_arguments binary;
     unary_op_arguments unary;

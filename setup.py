@@ -55,7 +55,6 @@ extra_compile_args = ['-O2']
 ext_modules = {
     'veo': [
         'nlcpy.veo._veo',
-
     ],
     'mempool': [
         'nlcpy.mempool.mempool',
@@ -89,6 +88,9 @@ ext_modules = {
         'nlcpy.ufunc.reduceat',
         'nlcpy.ufunc.accumulate',
         'nlcpy.statistics.function_base',
+        'nlcpy.statistics.order',
+        'nlcpy.statistics.average',
+        'nlcpy.statistics.correlating',
     ],
 }
 
@@ -168,9 +170,6 @@ for key in ext_modules:
 # set custom cmdclass
 #####################################################
 
-cmdclass = {}
-
-
 class custom_bdist_wheel(bdist_wheel):
     def run(self):
         ret = subprocess.call(['make', '-f', os.getcwd() + '/Makefile'])
@@ -179,18 +178,16 @@ class custom_bdist_wheel(bdist_wheel):
         bdist_wheel.run(self)
 
 
-cmdclass['bdist_wheel'] = custom_bdist_wheel
-
-
 class custom_build_ext(build_ext.build_ext):
     def run(self):
         ret = subprocess.call(['make', '-f', os.getcwd() + '/Makefile'])
         if ret != 0:
             raise RuntimeError('Failed to build VE kernel.')
-        cythonize(extensions)
         build_ext.build_ext.run(self)
 
 
+cmdclass = {}
+cmdclass['bdist_wheel'] = custom_bdist_wheel
 cmdclass['build_ext'] = custom_build_ext
 
 #####################################################

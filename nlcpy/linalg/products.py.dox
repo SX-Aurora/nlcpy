@@ -42,7 +42,7 @@ from nlcpy.linalg import cblas_wrapper
 # @pydoc
 # @brief Computes a dot product of two arrays.
 #
-# @details 
+# @details
 # @li If both @em a and @em b are 1-D arrays,
 #     it is inner product of vectors (without complex conjugation).
 # @li If both @em a and @em b are 2-D arrays, it is matrix multiplication,
@@ -50,19 +50,19 @@ from nlcpy.linalg import cblas_wrapper
 # @li If either @em a or @em b is 0-D (scalar), it is equivalent to multiply
 #     and using <span class="pre">nlcpy.multiply(a,b)</span> or
 #     <span class="pre">a * b</span> is preferred.
-# @param a : array_like@n
+# @param a : <em>array_like</em> @n
 #   Input arrays or scalars.
 #
-# @param b : array_like@n
+# @param b : <em>array_like</em> @n
 #   Input arrays or scalars.
 #
-# @param out : @ref n-dimensional_array "ndarray", @b optional @n
+# @param out : <em>@ref n-dimensional_array "ndarray", @b optional</em> @n
 #   Output argument. This must have the exact kind that would be
 #   returned if it was not used.
 #   In particular, @em out.dtype must be the dtype that would be
 #   returned for @em dot(a,b).
 #
-# @retval output : @ref n-dimensional_array "ndarray"@n
+# @retval output : <em>@ref n-dimensional_array "ndarray" </em> @n
 #   Returns the dot product of @em a and @em b.
 #   If @em a and @em b are both scalars or both 1-D arrays
 #   then this function returns the result as a 0-dimention array.

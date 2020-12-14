@@ -172,11 +172,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
     if numpy.asarray(keepdims).size != 1:
         raise TypeError("only size-1 arrays can be converted to Python scalars")
 
-    if keepdims == 0:
-        keepdims = False
-    else:
-        keepdims = True
-
     if (initial is None or (initial is nlcpy._NoValue and not op_has_identity)) and \
        a.ndim > 0 and any([a.shape[i] == 0 for i in axis]):
         _op_name = 'true_divide' if op_name == 'divide' \
@@ -184,7 +179,43 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         raise ValueError("zero-size array to reduction operation "
                          + _op_name + " which has no identity")
 
-    if a.size < 1 and not keepdims:
+    if keepdims == 0:
+        keepdims = False
+    else:
+        keepdims = True
+    if keepdims:
+        if axis_save is None:
+            if out is not None:
+                raise ValueError("output parameter for reduction operation "
+                                 + op_name + " has too many dimensions")
+            lst = list(a.shape)
+            for i in range(a.ndim):
+                lst[i] = 1
+        else:
+            lst = list(a.shape)
+            if a.ndim > 0:
+                for axis_i in axis:
+                    lst[axis_i] = 1
+    else:
+        if axis_save is None:
+            if out is not None and out.ndim > 0:
+                raise ValueError("output parameter for reduction operation "
+                                 + op_name + " has too many dimensions")
+            lst=[]
+        else:
+            lst = list(a.shape)
+            if a.ndim > 0:
+                axis_desc = sorted(axis, reverse=True)
+                for i in axis_desc:
+                    lst.pop(i)
+
+    shape_out = tuple(lst)
+    if out is not None and shape_out != out.shape:
+        raise NotImplementedError(
+            "out.shape must equal to " + str(shape_out) +
+            "; implicit reduction or broadcasting with 'out' is not implemented yet.")
+
+    if a.size < 1:
         is_identity = False
         if initial is nlcpy._NoValue and op_has_identity:
             initial = nlcpy_identity[op_name]
@@ -203,26 +234,25 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                 elif a.dtype == 'uint32':
                     _dtype = 'uint64'
 
-        if axis != []:
-            if initial is not nlcpy._NoValue:
-                if type(initial) == complex and \
-                        _dtype not in ('bool', 'complex64', 'complex128'):
-                    initial = initial.real
-                if initial == nlcpy.inf:
-                    initial = get_plus_infinity(_dtype, op_name, is_identity)
-                elif initial == -nlcpy.inf:
-                    initial = get_minus_infinity(_dtype, op_name, is_identity)
-                else:
-                    initial = nlcpy.asanyarray(initial, dtype=_dtype)
-                if out is not None:
-                    out[()] = initial
-                    return out
-                return nlcpy.array(initial)
+        if axis != [] and initial is not nlcpy._NoValue:
+            if type(initial) == complex and \
+                    _dtype not in ('bool', 'complex64', 'complex128'):
+                initial = initial.real
+            if initial == nlcpy.inf:
+                initial = get_plus_infinity(_dtype, op_name, is_identity).get()
+            elif initial == -nlcpy.inf:
+                initial = get_minus_infinity(_dtype, op_name, is_identity).get()
+            if out is not None:
+                out.fill(initial)
+                return out
+            ret = nlcpy.empty(shape_out, dtype=_dtype)
+            ret.fill(initial)
+            return ret
         else:
             if out is not None:
-                out[()] = []
+                out.fill(0)
                 return out
-            return nlcpy.array([], dtype=_dtype)
+            return nlcpy.zeros(shape_out, dtype=_dtype)
 
     _flag_initial = numpy.isscalar(initial)
     if op_name == "power" and (a.size + _flag_initial) > 1 and \
@@ -268,38 +298,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
     if flag_where and a.shape != where.shape:
         raise NotImplementedError(
             "broadcast of 'where' is not implemented yet.")
-
-    if keepdims:
-        if axis_save is None:
-            if out is not None:
-                raise ValueError("output parameter for reduction operation "
-                                 + op_name + " has too many dimensions")
-            lst = list(a.shape)
-            for i in range(a.ndim):
-                lst[i] = 1
-        else:
-            lst = list(a.shape)
-            if a.ndim > 0:
-                for axis_i in axis:
-                    lst[axis_i] = 1
-    else:
-        if axis_save is None:
-            if out is not None and out.ndim > 0:
-                raise ValueError("output parameter for reduction operation "
-                                 + op_name + " has too many dimensions")
-            lst=[]
-        else:
-            lst = list(a.shape)
-            if a.ndim > 0:
-                axis_desc = sorted(axis, reverse=True)
-                for i in axis_desc:
-                    lst.pop(i)
-
-    shape_out = tuple(lst)
-    if out is not None and shape_out != out.shape:
-        raise NotImplementedError(
-            "out.shape must equal to " + str(shape_out) +
-            "; implicit reduction or broadcasting with 'out' is not implemented yet.")
 
     if out is not None:
         odt = out.dtype

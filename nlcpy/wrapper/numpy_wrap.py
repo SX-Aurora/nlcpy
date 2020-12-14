@@ -1,12 +1,11 @@
-/*
 #
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +16,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,48 +28,52 @@
 #     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-*/
 
-@#include <stdio.h>
-@#include <stdint.h>
-@#include <stdbool.h>
-@#include <stdlib.h>
-@#include <limits.h>
-@#include <alloca.h>
-@#include <assert.h>
-
-@#include "nlcpy.h"
-
-#define_switch (a_src->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+import numpy
+import nlcpy
 
 
-@#ifdef __cplusplus
-extern "C" {
-@#endif
+def numpy_wrap(func):
+    def wrap_func(*args, **kwargs):
+        is_out = False
+        try:
+            return func(*args, **kwargs)
+        except NotImplementedError:
+            f = getattr(numpy, func.__name__)
+            # retrieve input ndarrays of NLCPy from VE
+            largs = list(args)
+            for i, _l in enumerate(largs):
+                if isinstance(_l, nlcpy.ndarray):
+                    largs[i] = _l.get()
+            for k, v in kwargs.items():
+                if isinstance(v, nlcpy.ndarray):
+                    kwargs[k] = v.get()
+                if k == 'out':
+                    is_out = True
+                    in_out = v
+                else:
+                    is_out = False
 
-/* dummy implementation */
-uint64_t nlcpy_stack_array(
-            ve_array *a_src,
-            ve_array *a_dst
-) {
-    assert(a_src->dtype == a_dst->dtype);
-    assert(a_src->ndim < 2);
-    assert(a_dst->ndim < 2);
-    int64_t str_src = a_src->strides[0] / a_src->itemsize;
-    int64_t str_dst = a_dst->strides[0] / a_dst->itemsize;
+            # call NumPy function
+            ret = f(*largs, **kwargs)
+            # transfer the return values to VE
+            if isinstance(ret, numpy.ndarray) or numpy.isscalar(ret):
+                vp_ret = nlcpy.asarray(ret)
+                if is_out:
+                    in_out[...] = vp_ret
+                return vp_ret
+            elif hasattr(ret, "__iter__"):
+                lret = list(ret)
+                for i, _l in enumerate(lret):
+                    if isinstance(_l, numpy.ndarray) or numpy.isscalar(_l):
+                        lret[i] = nlcpy.asarray(_l)
+                    else:
+                        lret[i] = _l
+                vp_ret = tuple(lret)
+                if is_out:
+                    raise NotImplementedError
+                return vp_ret
+            else:
+                raise NotImplementedError
 
-#begin_switch
-    @TYPE1@ * dat_src = (@TYPE1@ *) a_src->ve_adr;
-    @TYPE1@ * dat_dst = (@TYPE1@ *) a_dst->ve_adr;
-    for (int64_t i = 0; i < a_dst->size; i++) {
-        int64_t j = i % a_src->size;
-        dat_dst[i * str_dst] = dat_src[j * str_src];
-    }
-#end_switch
-    return 0;
-}
-
-
-@#ifdef __cplusplus
-}
-@#endif
+    return wrap_func

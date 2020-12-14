@@ -710,7 +710,7 @@ class TestRandomDist(object):
 
         random = Generator(MT19937(self.seed))
         actual = random.random()
-        assert_array_almost_equal(actual[0].get(), desired[0, 0], decimal=15)
+        assert_array_almost_equal(actual.get(), desired[0, 0], decimal=15)
 
     def test_random_float(self):
         random = Generator(MT19937(self.seed))
@@ -759,7 +759,7 @@ class TestRandomDist(object):
         random = Generator(MT19937(self.seed))
         actual = random.random(dtype=np.float32)
         desired = 0.0969992
-        assert_array_almost_equal(actual.get()[0], desired, decimal=7)
+        assert_array_almost_equal(actual.get(), desired, decimal=7)
 
     def test_random_type_error(self):
         assert_raises(TypeError, random.random, dtype='int32')
@@ -1490,7 +1490,7 @@ class TestRandomDist(object):
         random = Generator(MT19937(self.seed))
         actual = random.standard_gamma(3, dtype=np.float32)
         desired = 7.1144938399353027
-        assert_array_almost_equal(actual[0].get(), desired, decimal=6)
+        assert_array_almost_equal(actual.get(), desired, decimal=6)
 
     def test_standard_gamma_float(self):
         random = Generator(MT19937(self.seed))

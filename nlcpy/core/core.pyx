@@ -77,6 +77,9 @@ from nlcpy.ufunc import operations as ufunc_op
 from nlcpy.request cimport request
 from nlcpy.request.ve_kernel cimport *
 from nlcpy.error_handler import error_handler
+from nlcpy.statistics.average import mean
+from nlcpy.statistics.average import var
+from nlcpy.statistics.average import std
 import numpy
 cimport numpy as cnp
 
@@ -1094,6 +1097,54 @@ cdef class ndarray:
         return ret
 
     # -------------------------------------------------------------------------
+    #  statistics methods
+    # -------------------------------------------------------------------------
+
+    def mean(self, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
+        """Computes the arithmetic mean along the specified axis.
+
+        Returns the average of the array elements. The average is taken over the
+        flattened array by default, otherwise over the specified axis. float64
+        intermediate and return values are used for integer inputs. Refer to `nlcpy.mean`
+        for full documentation.
+
+        See Also:
+            average::mean : Equivalent function.
+
+        """
+        ret = nlcpy.statistics.average.mean(self, axis, dtype, out, keepdims)
+        return ret
+
+    def var(self, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
+        """Computes the variance along the specified axis.
+
+        Returns the variance of the array elements, a measure of the spread of a
+        distribution. The variance is computed for the flattened array by default,
+        otherwise over the specified axis. Refer to `nlcpy.var` for full documentation.
+
+        See Also:
+            average::var : Equivalent function.
+
+        """
+        ret = nlcpy.statistics.average.var(self, axis, dtype, out, ddof, keepdims)
+        return ret
+
+    def std(self, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
+        """Computes the standard deviation along the specified axis.
+
+        Returns the standard deviation, a measure of the spread of a distribution, of the
+        array elements. The standard deviation is computed for the flattened array by
+        default, otherwise over the specified axis. Refer to `nlcpy.std` for full
+        documentation.
+
+        See Also:
+            average::std : Equivalent function.
+
+        """
+        ret = nlcpy.statistics.average.std(self, axis, dtype, out, ddof, keepdims)
+        return ret
+
+    # -------------------------------------------------------------------------
     # nlcpy original attributes and methods
     # -------------------------------------------------------------------------
     cpdef get(self, order='K'):
@@ -1343,9 +1394,6 @@ cpdef ndarray array(obj, dtype=None, bint copy=True, order='K',
             elif issubclass(elem_type, ndarray):
                 # obj is Seq[nlcpy.ndarray]
                 lst = _flatten_list(obj)
-                if len(shape) == 1:
-                    # convert each scalar (0-dim) ndarray to 1-dim
-                    lst = [nlcpy.expand_dims(x, 0) for x in lst]
 
                 a = (nlcpy.concatenate(lst, 0)
                      .reshape(shape)
@@ -1422,6 +1470,10 @@ cdef list _flatten_list(object obj):
         for elem in obj:
             ret += _flatten_list(elem)
         return ret
+    if isinstance(obj, ndarray):
+        if obj.ndim == 0:
+            # convert each scalar (0-dim) ndarray to 1-dim
+            obj = nlcpy.expand_dims(obj, 0)
     return [obj]
 
 
@@ -1627,3 +1679,13 @@ def finalize():
     global _exit_mode
     _exit_mode = True
     request.flush()
+
+    # destroy handle
+    v = veo.VeoAlloc()
+    try:
+        req = v.lib.func[b"random_destroy_handle"](v.ctx, None)
+        req.wait_result()
+        req = v.lib.func[b"asl_library_finalize"](v.ctx, None)
+        req.wait_result()
+    except KeyError:
+        pass

@@ -33,6 +33,7 @@
 
 @#include "nlcpy.h"
 
+
 #define_switch (x->dtype)
 
 /****************************
@@ -74,8 +75,15 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i32)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],i32)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i32)
+            }
         }
 } /* omp single */
 
@@ -112,8 +120,15 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i32)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -174,8 +189,15 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i64)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],i64)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i64)
+            }
         }
 } /* omp single */
 
@@ -212,8 +234,15 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i64)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -274,8 +303,15 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u32)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],u32)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u32)
+            }
         }
 } /* omp single */
 
@@ -312,8 +348,15 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u32)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -374,8 +417,15 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u64)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],u64)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u64)
+            }
         }
 } /* omp single */
 
@@ -412,8 +462,15 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u64)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -474,8 +531,15 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f32)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],f32)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f32)
+            }
         }
 } /* omp single */
 
@@ -512,8 +576,15 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f32)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -574,8 +645,15 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f64)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],f64)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f64)
+            }
         }
 } /* omp single */
 
@@ -612,8 +690,15 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f64)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -674,8 +759,15 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c64)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],c64)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c64)
+            }
         }
 } /* omp single */
 
@@ -712,8 +804,15 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c64)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -774,8 +873,15 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c128)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],c128)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c128)
+            }
         }
 } /* omp single */
 
@@ -812,8 +918,15 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t *psw)
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c128)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
@@ -875,8 +988,15 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t *psw)
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
 @#pragma _NEC novector
-        for (i = 0; i < y->size; i++) {
-            @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],bool)
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px_s,py[i*iy0],bool)
+            }
+        } else {
+            for (i = 0; i < y->size; i++) {
+                @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],bool)
+            }
         }
 } /* omp single */
 
@@ -914,8 +1034,15 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t *psw)
             for (;;) {
                 // most inner loop for vectorize
 @#pragma _NEC novector
-                for (i = 0; i < y->shape[n_inner2]; i++) {
-                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px_s,py[i*iy0+iy],bool)
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {

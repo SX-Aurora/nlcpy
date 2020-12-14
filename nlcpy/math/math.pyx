@@ -130,8 +130,8 @@ def sum(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue,
 
     See Also:
         cumsum : Returns the cumulative sum of the elements along a given axis.
-        function_base.mean : Computes the arithmetic mean along the specified axis.
-        function_base.average : Computes the weighted average along the specified axis.
+        average.mean : Computes the arithmetic mean along the specified axis.
+        average.average : Computes the weighted average along the specified axis.
 
     Examples:
         >>> import nlcpy as vp

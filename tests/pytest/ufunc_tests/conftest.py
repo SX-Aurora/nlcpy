@@ -30,8 +30,6 @@
 #
 
 import pytest
-import datetime
-import os
 
 
 def pytest_addoption(parser):
@@ -55,12 +53,3 @@ def pytest_runtest_setup(item):
     else:
         pytest.skip(
             "need --test=full or --test=small option to run this test")
-
-
-def pytest_configure(config):
-    if not config.option.resultlog:
-        timestamp = datetime.datetime.strftime(
-            datetime.datetime.now(), '%Y-%m-%d_%H-%M-%S')
-        filepath = os.path.dirname(os.path.abspath(__file__)) + \
-            '/../result/ufunc_log.' + timestamp
-        config.option.resultlog = filepath

@@ -344,4 +344,4 @@ cdef extern from "../ve_kernel/ve_error.h":
     cdef uint64_t NLCPY_ERROR_INDEX
     cdef uint64_t NLCPY_ERROR_ASL
 
-cdef check_error(uint64_t err)
+cpdef check_error(uint64_t err)

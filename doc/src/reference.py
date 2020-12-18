@@ -1086,19 +1086,19 @@
 #      </table>
 # ## Averages and Variances ##
 #      <table>
-#      <tr><td>@ref function_base::average   </td><td>Computes the weighted average along the specified axis.</td></tr>
-#      <tr><td>@ref function_base::mean      </td><td>Computes the arithmetic mean along the specified axis.</td></tr>
-#      <tr><td>@ref function_base::median    </td><td>Computes the median along the specified axis.</td></tr>
-#      <tr><td>@ref function_base::nanmean   </td><td>Computes the arithmetic mean along the specified axis, ignoring NaNs.</td></tr>
-#      <tr><td>@ref function_base::nanstd    </td><td>Computes the standard deviation along the specified axis, while ignoring NaNs.</td></tr>
-#      <tr><td>@ref function_base::nanvar    </td><td>Computes the variance along the specified axis, while ignoring NaNs.</td></tr>
-#      <tr><td>@ref function_base::std       </td><td>Computes the standard deviation along the specified axis.</td></tr>
-#      <tr><td>@ref function_base::var       </td><td>Computes the variance along the specified axis.</td></tr>
+#      <tr><td>@ref average::average   </td><td>Computes the weighted average along the specified axis.</td></tr>
+#      <tr><td>@ref average::mean      </td><td>Computes the arithmetic mean along the specified axis.</td></tr>
+#      <tr><td>@ref average::median    </td><td>Computes the median along the specified axis.</td></tr>
+#      <tr><td>@ref average::nanmean   </td><td>Computes the arithmetic mean along the specified axis, ignoring NaNs.</td></tr>
+#      <tr><td>@ref average::nanstd    </td><td>Computes the standard deviation along the specified axis, while ignoring NaNs.</td></tr>
+#      <tr><td>@ref average::nanvar    </td><td>Computes the variance along the specified axis, while ignoring NaNs.</td></tr>
+#      <tr><td>@ref average::std       </td><td>Computes the standard deviation along the specified axis.</td></tr>
+#      <tr><td>@ref average::var       </td><td>Computes the variance along the specified axis.</td></tr>
 #      </table>
 # ## Correlating ##
 #      <table>
-#      <tr><td>@ref function_base::corrcoef  </td><td>Returns Pearson product-moment correlation coefficients.</td></tr>
-#      <tr><td>@ref function_base::cov       </td><td>Estimates a covariance matrix, given data and weights.</td></tr>
+#      <tr><td>@ref correlating::corrcoef  </td><td>Returns Pearson product-moment correlation coefficients.</td></tr>
+#      <tr><td>@ref correlating::cov       </td><td>Estimates a covariance matrix, given data and weights.</td></tr>
 #      </table>
 #
 

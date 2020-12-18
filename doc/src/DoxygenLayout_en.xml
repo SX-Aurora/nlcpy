@@ -451,17 +451,17 @@
           <tab type="user" visible="yes" title="nanmin" url="@ref order::nanmin"/>
           <tab type="user" visible="yes" title="nanmax" url="@ref order::nanmax"/>
 
-          <tab type="user" visible="yes" title="average" url="@ref function_base::average"/>
-          <tab type="user" visible="yes" title="mean" url="@ref function_base::mean"/>
-          <tab type="user" visible="yes" title="median" url="@ref function_base::median"/>
-          <tab type="user" visible="yes" title="nanmean" url="@ref function_base::nanmean"/>
-          <tab type="user" visible="yes" title="nanstd" url="@ref function_base::nanstd"/>
-          <tab type="user" visible="yes" title="nanvar" url="@ref function_base::nanvar"/>
-          <tab type="user" visible="yes" title="std" url="@ref function_base::std"/>
-          <tab type="user" visible="yes" title="var" url="@ref function_base::var"/>
+          <tab type="user" visible="yes" title="average" url="@ref average::average"/>
+          <tab type="user" visible="yes" title="mean" url="@ref average::mean"/>
+          <tab type="user" visible="yes" title="median" url="@ref average::median"/>
+          <tab type="user" visible="yes" title="nanmean" url="@ref average::nanmean"/>
+          <tab type="user" visible="yes" title="nanstd" url="@ref average::nanstd"/>
+          <tab type="user" visible="yes" title="nanvar" url="@ref average::nanvar"/>
+          <tab type="user" visible="yes" title="std" url="@ref average::std"/>
+          <tab type="user" visible="yes" title="var" url="@ref average::var"/>
 
-          <tab type="user" visible="yes" title="corrcoef" url="@ref function_base::corrcoef"/>
-          <tab type="user" visible="yes" title="cov" url="@ref function_base::cov"/>
+          <tab type="user" visible="yes" title="corrcoef" url="@ref correlating::corrcoef"/>
+          <tab type="user" visible="yes" title="cov" url="@ref correlating::cov"/>
       </tab>
       <tab type="usergroup" visible="yes" title="Linear Algebra" url="@ref Linear_algebra">
           <tab type="user" visible="yes" title="dot" url="@ref products::dot"/>

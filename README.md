@@ -1,7 +1,7 @@
 
-# NLCPy : NumPy script accelerator for SX-Aurora TSUBASA
+# NLCPy : NumPy-like API accelerated with SX-Aurora TSUBASA
 
-*NLCPy* is a package for accelerating performance of Python scripts using `NumPy` on SX-Aurora TSUBASA. Python programmers can use this package on Linux/x86 of SX-Aurora TSUBASA. NLCPy API is designed based on NumPy one. The current version provides a subset of NumPy API.
+*NLCPy* is a library for accelerating performance of Python scripts using `NumPy` on SX-Aurora TSUBASA. Python programmers can use this package on Linux/x86 of SX-Aurora TSUBASA. NLCPy's API is designed based on NumPy one. The current version provides a subset of NumPy's API.
 
 ### Requirements
 
@@ -39,7 +39,7 @@ You can install NLCPy by executing either of following commands.
 
 - Install from your local computer
 
-    1. Download [the wheel package](https://github.com/SX-Aurora/nlcpy/releases/tag/v1.0.0b1) from GitHub.
+    1. Download [the wheel package](https://github.com/SX-Aurora/nlcpy/releases/tag/v1.0.0b2) from GitHub.
 
     2. Put the wheel package to your any directory. 
 

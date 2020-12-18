@@ -1670,14 +1670,14 @@ EOS
 'arccos'       => { 
      'float _Complex'  => '@op2@ = cacosf((float _Complex)@op1@);',
      'double _Complex' => '@op2@ = cacos ((double _Complex)@op1@);',
-     'float'           => '@op2@ =  acosf((float)(@op1@)); if (fabsf((float)@op1@)>1) @op2@ = nanf("n");',
-     'others'          => '@op2@ =  acos ((double)(@op1@)); if (fabs((double)@op1@)>1) @op2@ = nan("n");',
+     'float'           => '@op2@ =  acosf((float)(@op1@));',
+     'others'          => '@op2@ =  acos ((double)(@op1@));',
 },
 'arctanh'       => { 
      'float _Complex'  => '@op2@ = catanhf((float _Complex)@op1@);',
      'double _Complex' => '@op2@ = catanh ((double _Complex)@op1@);',
-     'float'           => '@op2@ =  atanhf((float)(@op1@)); if (fabsf((float)@op1@)==1) @op2@ = 1/(fabs((float)@op1@)-1);',
-     'others'          => '@op2@ =  atanh ((double)(@op1@)); if (fabs((double)@op1@)==1) @op2@ = 1/(fabs((double)@op1@)-1);',
+     'float'           => '@op2@ =  atanhf((float)(@op1@));',
+     'others'          => '@op2@ =  atanh ((double)(@op1@));',
 },
 'ldexp'       => { 
      'float'  => {

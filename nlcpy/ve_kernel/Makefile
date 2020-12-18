@@ -7,7 +7,7 @@ include $(BASEDIR)/make.inc
 NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -r |head -1)
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
-LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp
+LIB_NLC=-lasl_openmp_i64 -lcblas -lblas_openmp
 
 LIB_COMMON=$(LIBDIR)/libnlcpy_ve_kernel_common.so
 ifeq ($(FAST_MATH),yes)

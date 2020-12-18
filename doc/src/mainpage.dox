@@ -37,10 +37,10 @@
 # @else
 #   <h1> Overview </h1>
 #   <p>
-#   NLCPy is a package for accelerating performance of Python scripts using NumPy on SX-Aurora TSUBASA.
+#   NLCPy is a library for accelerating performance of Python scripts using NumPy on SX-Aurora TSUBASA.
 #   Python programmers can use this package on Linux/x86 of SX-Aurora TSUBASA. 
-#   NLCPy API is designed based on <a href="https://numpy.org/">NumPy</a> one.
-#   The current version provides a subset of NumPy API.@n
+#   NLCPy's API is designed based on <a href="https://numpy.org/">NumPy</a> one.
+#   The current version provides a subset of NumPy's API.@n
 #   @image html nlcpy_image1.png
 #   NLCPy enables Python scripts to compute on Vector Engine(VE) of SX-Aurora TSUBASA by VE offloading.
 #   To gain the performance on VE, NLCPy uses the functions of <a href="https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/">
@@ -65,4 +65,4 @@
 #
 #   <h1> Version </h1>
 #      @li This manual targets: <b>NLCPy 1.0.0b2</b>
-#      @li This manual version: <b>1.0.0b2-2012-31</b>
+#      @li This manual version: <b>1.0.0b2-2012-25</b>

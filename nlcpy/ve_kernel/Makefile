@@ -391,12 +391,17 @@ OBJS = \
   array_utility.o\
   nlcpy_mempool_ve.o\
   $(VE_UNARY_FUNCTION:.c=.o)\
+  $(VE_BINARY_FUNCTION:.c=.o)\
+  $(VE_REDUCE:.c=.o)\
+  $(VE_REDUCEAT:.c=.o)\
+  $(VE_ACCUMULATE:.c=.o)\
+  $(VE_OUTER:.c=.o)
+
+OBJS_COMMON = \
   $(VE_COPY_FUNCTION:.c=.o)\
   $(VE_COPY_MASKED_FUNCTION:.c=.o)\
-  $(VE_BINARY_FUNCTION:.c=.o)\
   $(VE_MATMUL_OPERATOR:.c=.o)\
   $(VE_RANDOM_KERNEL:.c=.o)\
-  $(VE_CBLAS_WRAPPER:.c=.o)\
   $(VE_SORT_WRAPPER:.c=.o)\
   $(VE_SORTING:.c=.o)\
   $(VE_ARGFUNC:.c=.o)\
@@ -404,12 +409,7 @@ OBJS = \
   $(VE_CAST:.c=.o)\
   $(VE_BASIC_KERNEL:.c=.o)\
   $(VE_CONTROLLER:.c=.o)\
-  $(VE_REDUCE:.c=.o)\
-  $(VE_REDUCEAT:.c=.o)\
-  $(VE_ACCUMULATE:.c=.o)\
-  $(VE_OUTER:.c=.o)
-
-OBJS_COMMON = \
+  $(VE_CBLAS_WRAPPER:.c=.o)\
   $(VE_BINARY_FUNCTION_COMMON:.c=.o)\
   $(VE_REDUCE_COMMON:.c=.o)\
   $(VE_REDUCEAT_COMMON:.c=.o)\

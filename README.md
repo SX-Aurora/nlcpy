@@ -1,3 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/SX-Aurora/nlcpy)](https://github.com/SX-Aurora/nlcpy/blob/master/LICENSE)
+[![Downloads](https://pepy.tech/badge/nlcpy)](https://pepy.tech/project/nlcpy)
 
 # NLCPy : NumPy-like API accelerated with SX-Aurora TSUBASA
 

@@ -15,7 +15,7 @@ Before the installation, the following components are required to be installed o
 	- required NEC C/C++ compiler version: >= 3.1.0
 	- required NLC version: >= 2.1.0
 
-- [Alternative VE Offloading (AVEO)](https://veos-sxarr-nec.github.io/aveo/index.html)
+- [Alternative VE Offloading (AVEO)](https://www.hpc.nec/documents/veos/en/aveo/index.html)
 	- If you install NLCpy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required. 
     
         ```

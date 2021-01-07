@@ -1,6 +1,8 @@
 [![GitHub license](https://img.shields.io/github/license/SX-Aurora/nlcpy)](https://github.com/SX-Aurora/nlcpy/blob/master/LICENSE)
 [![Downloads](https://pepy.tech/badge/nlcpy)](https://pepy.tech/project/nlcpy)
 
+![NLCPy_banner](https://github.com/SX-Aurora/nlcpy/blob/master/banner/NLCPy_banner.png)
+
 # NLCPy : NumPy-like API accelerated with SX-Aurora TSUBASA
 
 *NLCPy* is a library for accelerating performance of Python scripts using `NumPy` on SX-Aurora TSUBASA. Python programmers can use this package on Linux/x86 of SX-Aurora TSUBASA. NLCPy's API is designed based on NumPy one. The current version provides a subset of NumPy's API.

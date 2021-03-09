@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -34,49 +34,55 @@ import nlcpy
 def all(a, axis=None, out=None, keepdims=nlcpy._NoValue):
     """Tests whether all array elements along a given axis evaluate to True.
 
-    Args:
-        a : array_like
-            Input array or object that can be converted to an array.
-        axis : None or int or tuple of ints, optional
-            Axis or axes along which a logical AND reduction is performed. The default
-            (axis = None) is to perform a logical AND over all the dimensions of the
-            input array. axis may be negative, in which case it counts from the last to
-            the first axis.
-            If this is a tuple of ints, a reduction is performed on multiple axes.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. It must have the same
-            shape as the expected output and its type is preserved (e.g., if dtype(out)
-            is float, the result will consist of 0.0's and 1.0's).
-        keepdims : bool, optional
-            If this is set to True, the axes which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the input array.
+    Parameters
+    ----------
+    a : array_like
+        Input array or object that can be converted to an array.
+    axis : None or int or tuple of ints, optional
+        Axis or axes along which a logical AND reduction is performed. The default
+        (*axis* = *None*) is to perform a logical AND over all the dimensions of the
+        input array. *axis* may be negative, in which case it counts from the last to the
+        first axis.
+        If this is a tuple of ints, a reduction is performed on multiple axes.
+    out : ndarray, optional
+        Alternate output array in which to place the result. It must have the same shape
+        as the expected output and its type is preserved (e.g., if ``dtype(out)`` is
+        float, the result will consist of 0.0's and 1.0's).
+    keepdims : bool, optional
+        If this is set to True, the axes which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the input array.
 
-    Returns:
-        all : `ndarray`
-            A new array is returned unless out is specified, in which case a reference to
-            out is returned.
+    Returns
+    -------
+    all : ndarray
+        A new array is returned unless *out* is specified, in which case a reference to
+        *out* is returned.
 
-    Note:
-        Not a Number (NaN), positive infinity and negative infinity evaluate to True
-        because these are not equal to zero.
-        >>> import nlcpy as vp
-        >>> vp.all([[True, False], [True, True]])
-        array(False)
-        >>> vp.all([[True,False],[True,True]], axis=0)
-        array([ True, False])
-        >>> vp.all([-1, 4, 5])
-        array(True)
-        >>> vp.all([1.0, vp.nan])
-        array(True)
-        >>> o=vp.array(False)
-        >>> z=vp.all([-1, 4, 5], out=o)
-        >>> id(z), id(o), z
-        (140052379774144, 140052379774144, array(True)) # may vary
+    Note
+    ----
 
-    See Also:
-        any : Tests whether any array element along a given axis
-            evaluates to True.
+    Not a Number (NaN), positive infinity and negative infinity evaluate to `True`
+    because these are not equal to zero.
+
+    >>> import nlcpy as vp
+    >>> vp.all([[True, False], [True, True]])
+    array(False)
+    >>> vp.all([[True,False],[True,True]], axis=0)
+    array([ True, False])
+    >>> vp.all([-1, 4, 5])
+    array(True)
+    >>> vp.all([1.0, vp.nan])
+    array(True)
+    >>> o=vp.array(False)
+    >>> z=vp.all([-1, 4, 5], out=o)
+    >>> id(z), id(o), z   # doctest: +SKIP
+    (140052379774144, 140052379774144, array(True)) # may vary
+
+    See Also
+    --------
+    any : Tests whether any array element along a given axis
+        evaluates to True.
 
     """
     args = dict()
@@ -89,53 +95,58 @@ def all(a, axis=None, out=None, keepdims=nlcpy._NoValue):
 def any(a, axis=None, out=None, keepdims=nlcpy._NoValue):
     """Tests whether any array elements along a given axis evaluate to True.
 
-    Args:
-        a : array_like
-            Input array or object that can be converted to an array.
-        axis : None or int or tuple of ints, optional
-            Axis or axes along which a logical OR reduction is performed. The default
-            (axis = None) is to perform a logical OR over all the dimensions of the input
-            array. axis may be negative, in which case it counts from the last to the
-            first axis.
-            If this is a tuple of ints, a reduction is performed on multiple axes.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. It must have the same
-            shape as the expected output and its type is preserved (e.g., if dtype(out)
-            is float, the result will consist of 0.0's and 1.0's).
-        keepdims : bool, optional
-            If this is set to True, the axes which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the input array.
+    Parameters
+    ----------
+    a : array_like
+        Input array or object that can be converted to an array.
+    axis : None or int or tuple of ints, optional
+        Axis or axes along which a logical OR reduction is performed. The default (axis =
+        None) is to perform a logical OR over all the dimensions of the input array. axis
+        may be negative, in which case it counts from the last to the first axis.
+        If this is a tuple of ints, a reduction is performed on multiple axes.
+    out : ndarray, optional
+        Alternate output array in which to place the result. It must have the same shape
+        as the expected output and its type is preserved (e.g., if ``dtype(out)`` is
+        float, the result will consist of 0.0's and 1.0's).
+    keepdims : bool, optional
+        If this is set to True, the axes which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the input array.
 
-    Returns:
-        any : `ndarray`
-            A new array is returned unless out is specified, in which case a reference to
-            out is returned.
+    Returns
+    -------
+    any : ndarray
+        A new array is returned unless out is specified, in which case a reference to out
+        is returned.
 
-    Note:
-        Not a Number (NaN), positive infinity and negative infinity evaluate to True
-        because these are not equal to zero.
-        >>> import nlcpy as vp
-        >>> vp.any([[True, False], [True, True]])
-        array(True)
-        >>> vp.all([[True,False],[False,False]], axis=0)
-        array([ True, False])
-        >>> vp.all([-1, 0, 5])
-        array(True)
-        >>> vp.all(vp.nan)
-        array(True)
-        >>> o=vp.array(False)
-        >>> z=vp.any([-1, 4, 5], out=o)
-        >>> z, o
-        (array(True), array(True))
-        >>> z is o
-        True
-        >>> id(z), id(o)
-        (140052379774480, 140052379774480)
+    Note
+    ----
 
-    See Also:
-        all : Tests whether all array element along a given axis
-            evaluates to True.
+    Not a Number (NaN), positive infinity and negative infinity evaluate to True because
+    these are not equal to zero.
+
+    >>> import nlcpy as vp
+    >>> vp.any([[True, False], [True, True]])
+    array(True)
+    >>> vp.any([[True,False],[False,False]], axis=0)
+    array([ True, False])
+    >>> vp.any([-1, 0, 5])
+    array(True)
+    >>> vp.any(vp.nan)
+    array(True)
+    >>> o=vp.array(False)
+    >>> z=vp.any([-1, 4, 5], out=o)
+    >>> z, o
+    (array(True), array(True))
+    >>> z is o
+    True
+    >>> id(z), id(o)  # doctest: +SKIP
+    (140196865556152, 140196865556152)  # may vary
+
+    See Also
+    --------
+    all : Tests whether all array element along a given axis
+        evaluates to True.
 
     """
     args = dict()

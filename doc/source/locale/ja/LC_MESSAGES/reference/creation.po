@@ -1,0 +1,216 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/reference/creation.rst:2
+msgid "Array Creation Routines"
+msgstr ""
+
+#: ../../source/reference/creation.rst:4
+msgid "The following tables show array creation routines provided by NLCPy."
+msgstr ""
+
+#: ../../source/reference/creation.rst:7
+msgid "Ones and Zeros"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.empty <nlcpy.empty>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a new array of given shape and type, without initializing entries."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.empty_like <nlcpy.empty_like>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a new array with the same shape and type as a given array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.eye <nlcpy.eye>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a 2-D array with ones on the diagonal and zeros elsewhere."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.identity <nlcpy.identity>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ""
+"Returns the identity array.The identity array is a square array with ones"
+" on the main diagonal."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.ones <nlcpy.ones>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a new array of given shape and type, filled with ones."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.ones_like <nlcpy.ones_like>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns an array of ones with the same shape and type as a given array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.zeros <nlcpy.zeros>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a new array of given shape and type, filled with zeros."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.zeros_like <nlcpy.zeros_like>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns an array of zeros with the same shape and type as a given array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.full <nlcpy.full>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a new array of given shape and type, filled with *fill_value*."
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.full_like <nlcpy.full_like>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:24:<autosummary>:1
+msgid "Returns a full array with the same shape and type as a given array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:26
+msgid "From Exixting Data"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.array <nlcpy.array>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Creates an array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.asarray <nlcpy.asarray>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Converts the input to an array."
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.asanyarray <nlcpy.asanyarray>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Converts the input to an array, but passes ndarray subclasses through."
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.copy <nlcpy.copy>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Returns an array copy of the given object."
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.fromfile <nlcpy.fromfile>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Constructs an array from data in a text or binary file."
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.loadtxt <nlcpy.loadtxt>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:39:<autosummary>:1
+msgid "Loads data from a text file."
+msgstr ""
+
+#: ../../source/reference/creation.rst:41
+msgid "Numerical Ranges"
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid ":obj:`nlcpy.arange <nlcpy.arange>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid "Returns evenly spaced values within a given interval."
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid ":obj:`nlcpy.linspace <nlcpy.linspace>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid "Returns evenly spaced numbers over a specified interval."
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid ":obj:`nlcpy.logspace <nlcpy.logspace>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid "Returns numbers spaced evenly on a log scale."
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid ":obj:`nlcpy.meshgrid <nlcpy.meshgrid>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:52:<autosummary>:1
+msgid "Returns coordinate matrices from coordinate vectors."
+msgstr ""
+
+#: ../../source/reference/creation.rst:54
+msgid "Building Matrices"
+msgstr ""
+
+#: ../../source/reference/creation.rst:60:<autosummary>:1
+msgid ":obj:`nlcpy.diag <nlcpy.diag>`"
+msgstr ""
+
+#: ../../source/reference/creation.rst:60:<autosummary>:1
+msgid "Extracts a diagonal or constructs a diagonal array."
+msgstr ""
+
+#~ msgid "Returns a new array of given shape and type, filled with *fill_value.*"
+#~ msgstr ""
+

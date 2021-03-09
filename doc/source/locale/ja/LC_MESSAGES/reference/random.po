@@ -1,0 +1,480 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+
+#: ../../source/reference/random.rst:4
+msgid "Random Sampling"
+msgstr ""
+
+#: ../../source/reference/random.rst:8
+msgid ""
+"NLCPy random number routines produce pseudo random numbers and create "
+"sample from different statistical distributions."
+msgstr ""
+
+#: ../../source/reference/random.rst:11
+msgid "Generator"
+msgstr ""
+
+#: ../../source/reference/random.rst:13
+msgid ""
+"The Generator provides access to a wide variety of probability "
+"distributions, and serves as a replacement for RandomState."
+msgstr ""
+
+#: ../../source/reference/random.rst:15
+msgid "An easy example of Generator is below:"
+msgstr ""
+
+#: ../../source/reference/random.rst:23
+msgid "And, an easy example of using default_rng is below:"
+msgstr ""
+
+#: ../../source/reference/random.rst:33 ../../source/reference/random.rst:107
+msgid "Available Functions and Methods"
+msgstr ""
+
+#: ../../source/reference/random.rst:35
+msgid ""
+"The following tables show that nlcpy.random.Generator class methods to "
+"generate random numbers."
+msgstr ""
+
+#: ../../source/reference/random.rst:38
+msgid "Construct Generator"
+msgstr ""
+
+#: ../../source/reference/random.rst:45:<autosummary>:1
+msgid ":obj:`nlcpy.random.default_rng <nlcpy.random.default_rng>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:45:<autosummary>:1
+msgid ""
+"Constructs a new nlcpy.random.Generator with the default BitGenerator "
+"(MT19937)."
+msgstr ""
+
+#: ../../source/reference/random.rst:47 ../../source/reference/random.rst:121
+msgid "Simple Random Data"
+msgstr ""
+
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.bytes <nlcpy.random.Generator.bytes>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid "Returns random bytes."
+msgstr ""
+
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.integers <nlcpy.random.Generator.integers>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid ""
+"Returns random integers from *low* (inclusive) to *high* (exclusive), or "
+"if endpoint=True, *low* (inclusive) to *high* (inclusive)."
+msgstr ""
+
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.random <nlcpy.random.Generator.random>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+#: ../../source/reference/random.rst:56:<autosummary>:1
+msgid "Returns random floats in the half-open interval ``[0.0, 1.0)``."
+msgstr ""
+
+#: ../../source/reference/random.rst:58 ../../source/reference/random.rst:139
+msgid "Permutations"
+msgstr ""
+
+#: ../../source/reference/random.rst:66:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.permutation "
+"<nlcpy.random.Generator.permutation>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:147:<autosummary>:1
+#: ../../source/reference/random.rst:66:<autosummary>:1
+msgid "Randomly permutes a sequence, or returns a permuted range."
+msgstr ""
+
+#: ../../source/reference/random.rst:66:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.shuffle <nlcpy.random.Generator.shuffle>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:147:<autosummary>:1
+#: ../../source/reference/random.rst:66:<autosummary>:1
+msgid "Modifies a sequence in-place by shuffling its contents."
+msgstr ""
+
+#: ../../source/reference/random.rst:68 ../../source/reference/random.rst:149
+msgid "Distributions"
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.binomial <nlcpy.random.Generator.binomial>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a binomial distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.exponential "
+"<nlcpy.random.Generator.exponential>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from an exponential distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.gamma <nlcpy.random.Generator.gamma>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a Gamma distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.geometric <nlcpy.random.Generator.geometric>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a geometric distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.gumbel <nlcpy.random.Generator.gumbel>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a Gumbel distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.logistic <nlcpy.random.Generator.logistic>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a logistic distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.lognormal <nlcpy.random.Generator.lognormal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a log-normal distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.normal <nlcpy.random.Generator.normal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws random samples from a normal (Gaussian) distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.poisson <nlcpy.random.Generator.poisson>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a Poisson distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.standard_cauchy "
+"<nlcpy.random.Generator.standard_cauchy>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a standard Cauchy distribution with mode = 0."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.standard_exponential "
+"<nlcpy.random.Generator.standard_exponential>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a standard exponential distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.standard_gamma "
+"<nlcpy.random.Generator.standard_gamma>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a standard Gamma distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.Generator.standard_normal "
+"<nlcpy.random.Generator.standard_normal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a standard Normal distribution (mean=0, stdev=1)."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.uniform <nlcpy.random.Generator.uniform>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a uniform distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid ":obj:`nlcpy.random.Generator.weibull <nlcpy.random.Generator.weibull>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+#: ../../source/reference/random.rst:90:<autosummary>:1
+msgid "Draws samples from a Weibull distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:92
+msgid "RandomState"
+msgstr ""
+
+#: ../../source/reference/random.rst:94
+msgid ""
+"The RandomState provides access to legacy generators. An easy example of "
+"RandomState is below:"
+msgstr ""
+
+#: ../../source/reference/random.rst:110
+msgid "Seeding and State"
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.get_state "
+"<nlcpy.random.RandomState.get_state>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid "Returns a ndarray representing the internal state of the generator."
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.seed <nlcpy.random.RandomState.seed>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid ""
+"Reseeds a default bit generator(MT19937), which provide a stream of "
+"random bits."
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.set_state "
+"<nlcpy.random.RandomState.set_state>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:119:<autosummary>:1
+msgid "Sets the internal state of the generator from a ndarray."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.bytes <nlcpy.random.RandomState.bytes>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.rand <nlcpy.random.RandomState.rand>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid "Random values in a given shape."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.randint <nlcpy.random.RandomState.randint>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid "Returns random integers from *low* (inclusive) to *high* (exclusive)."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.randn <nlcpy.random.RandomState.randn>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid "Returns a sample (or samples) from the \"standard normal\" distribution."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.random <nlcpy.random.RandomState.random>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.random_integers "
+"<nlcpy.random.RandomState.random_integers>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ""
+"Random integers of type nlcpy.int64/nlcpy.int32 between *low* and *high*,"
+" inclusive."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.random_sample "
+"<nlcpy.random.RandomState.random_sample>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.ranf <nlcpy.random.RandomState.ranf>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid "This is an alias of random_sample."
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.sample <nlcpy.random.RandomState.sample>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.tomaxint "
+"<nlcpy.random.RandomState.tomaxint>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:137:<autosummary>:1
+msgid "Random integers between 0 and ``nlcpy.iinfo(nlcpy.int).max``, inclusive."
+msgstr ""
+
+#: ../../source/reference/random.rst:147:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.permutation "
+"<nlcpy.random.RandomState.permutation>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:147:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.shuffle <nlcpy.random.RandomState.shuffle>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.binomial "
+"<nlcpy.random.RandomState.binomial>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.exponential "
+"<nlcpy.random.RandomState.exponential>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.gamma <nlcpy.random.RandomState.gamma>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.geometric "
+"<nlcpy.random.RandomState.geometric>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.gumbel <nlcpy.random.RandomState.gumbel>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.logistic "
+"<nlcpy.random.RandomState.logistic>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.lognormal "
+"<nlcpy.random.RandomState.lognormal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.normal <nlcpy.random.RandomState.normal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.poisson <nlcpy.random.RandomState.poisson>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.standard_cauchy "
+"<nlcpy.random.RandomState.standard_cauchy>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.standard_exponential "
+"<nlcpy.random.RandomState.standard_exponential>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.standard_gamma "
+"<nlcpy.random.RandomState.standard_gamma>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":obj:`nlcpy.random.RandomState.standard_normal "
+"<nlcpy.random.RandomState.standard_normal>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.uniform <nlcpy.random.RandomState.uniform>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ":obj:`nlcpy.random.RandomState.weibull <nlcpy.random.RandomState.weibull>`"
+msgstr ""
+

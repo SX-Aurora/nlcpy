@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ include "cblas_kernel_list.pxi"
 include "searching_kernel_list.pxi"
 include "linalg_kernel_list.pxi"
 include "random_kernel_list.pxi"
+include "fft_kernel_list.pxi"
 include "reduceat_kernel_list.pxi"
 
 _here = _path._here
@@ -67,6 +68,7 @@ def _register_ve_kernel(p):
         **_searching_kernel_list,
         **_linalg_kernel_list,
         **_random_kernel_list,
+        **_fft_kernel_list,
         **_reduceat_kernel_list,
     }
     for k, v in all_kernel_list.items():

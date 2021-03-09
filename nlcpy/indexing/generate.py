@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -36,55 +36,72 @@ from nlcpy.request import request
 
 
 def where(condition, x=None, y=None):
-    """Returns elements chosen from x or y depending on condition.
+    """Returns elements chosen from *x* or *y* depending on *condition*.
 
-    Args:
-        condition : array_like, bool
-            Where True, yield x, otherwise yield y.
-        x, y : array_like
-            Values from which to choose. x, y and condition need to be broadcastable to
-            some shape.
+    Note
+    ----
+    When only condition is provided, this function is a shorthand for
+    ``nlcpy.asarray(condition).nonzero()``. Using nonzero directly should be preferred,
+    as it behaves correctly for subclasses. The rest of this documentation covers only
+    the case where all three arguments are provided.
 
-    Returns:
-        out : `ndarray`
-            An array with elements from x where condition is True, and elements from y
-            elsewhere.
+    Parameters
+    ----------
+    condition : array_like, bool
+        Where True, yield *x*, otherwise yield *y*.
+    x, y : array_like
+        Values from which to choose. *x*, *y* and *condition* need to be broadcastable to
+        some shape.
 
-    Note:
-        If all the arrays are 1-D, where is equivalent to:
+    Returns
+    -------
+    out : ndarray
+        An array with elements from *x* where *condition* is True, and elements from *y*
+        elsewhere.
+
+    Note
+    ----
+    If all the arrays are 1-D, :func:`where` is equivalent to::
+
         [xv if c else yv for c, xv, yv in zip(condition, x, y)]
 
-    See Also:
-        searching.nonzero : Returns the indices of the elements
-            that are non-zero.
+    See Also
+    --------
+    nonzero : Returns the indices of the elements
+        that are non-zero.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.arange(10)
-        >>> a
-        array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-        >>> vp.where(a < 5, a, 10*a)
-        array([ 0,  1,  2,  3,  4, 50, 60, 70, 80, 90])
-        This can be used on multidimensional arrays too:
-        >>> vp.where([[True, False], [True, True]],
-        ...          [[1, 2], [3, 4]],
-        ...          [[9, 8], [7, 6]])
-        array([[1, 8],
-               [3, 4]])
-        The shapes of x, y, and the condition are broadcast together:
-        >>> x = vp.arange(3).reshape([3,1])
-        >>> y = vp.arange(4).reshape([1,4])
-        >>> vp.where(x < y, x, 10 + y)  # both x and 10+y are broadcast
-        array([[10,  0,  0,  0],
-               [10, 11,  1,  1],
-               [10, 11, 12,  2]])
-        >>> a = vp.array([[0, 1, 2],
-        ...               [0, 2, 4],
-        ...               [0, 3, 6]])
-        >>> vp.where(a < 4, a, -1)  # -1 is broadcast
-        array([[ 0,  1,  2],
-               [ 0,  2, -1],
-               [ 0,  3, -1]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.arange(10)
+    >>> a
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> vp.where(a < 5, a, 10*a)
+    array([ 0,  1,  2,  3,  4, 50, 60, 70, 80, 90])
+
+    This can be used on multidimensional arrays too:
+
+    >>> vp.where([[True, False], [True, True]],
+    ...          [[1, 2], [3, 4]],
+    ...          [[9, 8], [7, 6]])
+    array([[1, 8],
+           [3, 4]])
+
+    The shapes of x, y, and the condition are broadcast together:
+
+    >>> x = vp.arange(3).reshape([3,1])
+    >>> y = vp.arange(4).reshape([1,4])
+    >>> vp.where(x < y, x, 10 + y)  # both x and 10+y are broadcast
+    array([[10,  0,  0,  0],
+           [10, 11,  1,  1],
+           [10, 11, 12,  2]])
+    >>> a = vp.array([[0, 1, 2],
+    ...               [0, 2, 4],
+    ...               [0, 3, 6]])
+    >>> vp.where(a < 4, a, -1)  # -1 is broadcast
+    array([[ 0,  1,  2],
+           [ 0,  2, -1],
+           [ 0,  3, -1]])
 
     """
 

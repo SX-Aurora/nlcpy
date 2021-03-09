@@ -1,0 +1,212 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-12 11:33+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/installation.rst:4
+msgid "Installation Guide"
+msgstr "インストール"
+
+#: ../../source/installation.rst:6
+msgid "This page describes installation of NLCPy."
+msgstr "このページではNLCPyのインストール方法について説明します。"
+
+#: ../../source/installation.rst:9
+msgid ""
+"Since April 2021, NLCPy has been provided as a software of NEC SDK (NEC "
+"Software Development Kit for Vector Engine). If NEC SDK on your machine "
+"has been properly installed or updated after that, NLCPy is available by "
+"using ``/usr/bin/python3`` command, and the installation described in "
+"this page is not needed. However, when you use another Python command "
+"such as ``/usr/local/bin/python3`` and `python3` in a virtual "
+"environment, please install NLCPy from a wheel package or source files "
+"described in this page."
+msgstr ""
+"2021年4月から、NLCPyはNEC SDK (NEC Software Development Kit for Vector "
+"Engine)の中で提供されています。それ以降にNEC "
+"SDKがマシンに適切にインストールまたは更新されていれば、本ページに記載のインストールを実施することなく、 "
+"``/usr/bin/python3`` コマンドを使ってNLCPyをご利用いただけます。しかし、その他のPythonコマンド( "
+"``/usr/local/bin/python3`` や仮想環境の `python3` "
+"等)をご利用の場合は、本ページに記載の通りにwheelパッケージまたはソースからインストールしてください。"
+
+#: ../../source/installation.rst:18
+msgid ""
+"`SX-Aurora TSUBASA Installation Guide "
+"<https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
+msgstr ""
+"`SX-Aurora TSUBASA インストレーションガイド "
+"<https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
+
+#: ../../source/installation.rst:21
+msgid ""
+"The libraries of NLCPy are located in the following directory after NEC "
+"SDK is installed or updated::"
+msgstr "NEC SDKがインストールされたら、NLCPyのライブラリは以下のディレクトリにあります。"
+
+#: ../../source/installation.rst:26
+msgid ""
+"Here, X.X.X denotes the version of NLCPy. If you install or update NEC "
+"SDK, the directory of the latest version of NLCPy is added in Python "
+"module search path. When you use a specific version of NLCPy, the "
+"evironmental variable **PYTHONPATH** must be set as follows::"
+msgstr ""
+"ここで、X.X.XはNLCPyのバージョン番号を表します。もし、NEC "
+"SDKをインストールまたはアップデートした場合は、NLCPyの最新バージョンのディレクトリがPythonモジュール検索パスに追加されます。NLCPyの特定のバージョンを使用するときは、環境変数"
+" **PYTHONPATH** を以下のように設定してください。"
+
+#: ../../source/installation.rst:35
+msgid "Requirements"
+msgstr "インストール要件"
+
+#: ../../source/installation.rst:37
+msgid ""
+"Before the installation of NLCPy, the following components are required "
+"to be installed on your x86 Node of SX-Aurora TSUBASA."
+msgstr "NLCPyをインストールする前に、以下のコンポーネントをSX-Aurora TSUBASAのx86ノードにインストールする必要があります。"
+
+#: ../../source/installation.rst
+msgid ""
+"`NEC SDK "
+"<https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
+msgstr ""
+
+#: ../../source/installation.rst:42
+msgid "required NEC C/C++ compiler version: >= 3.1.1"
+msgstr "必要なNEC C/C++ コンパイラバージョン: >= 3.1.1"
+
+#: ../../source/installation.rst:43
+msgid "required NLC version: >= 2.2.0"
+msgstr "必要なNLCバージョン: >= 2.2.0"
+
+#: ../../source/installation.rst
+msgid ""
+"`Alternative VE Offloading (AVEO) "
+"<https://www.hpc.nec/documents/veos/en/aveo/index.html>`_"
+msgstr ""
+"`Alternative VE Offloading (AVEO) "
+"<https://www.hpc.nec/documents/veos/en/aveo/index.html>`_"
+
+#: ../../source/installation.rst
+msgid ""
+"The following installation of AVEO is not necessary if VEOS 2.5.1 or later is installed on your machine."
+msgstr ""
+"VEOS 2.5.1以降がマシンにインストールされていれば、以下のAVEOパッケージのインストールは不要です。"
+
+#: ../../source/installation.rst
+msgid ""
+"To install the packages to run programs by `yum`, execute the following "
+"command as root."
+msgstr "`yum` コマンドでパッケージをインストールするためには、root権限で以下のコマンドを実行します。"
+
+#: ../../source/installation.rst:53
+msgid ""
+"If you install NLCPy from wheel, the runtime packages of Alternative VE "
+"Offloading(AVEO) are required."
+msgstr ""
+"NLCPyをwheelパッケージからインストールする場合は、Alternative VE "
+"Offloading(AVEO)のランタイムパッケージが必要です。"
+
+#: ../../source/installation.rst:59
+msgid ""
+"If you install NLCPy from source, the development packages of Alternative"
+" VE Offloading(AVEO) are required."
+msgstr ""
+"NLCPyをソースコードからビルドしてインストールする場合は、Alternative VE "
+"Offloading(AVEO)のdevelopmentパッケージが必要です。"
+
+#: ../../source/installation.rst
+msgid "`Python <https://www.python.org/>`_"
+msgstr ""
+
+#: ../../source/installation.rst:67
+msgid "required version: 3.6, 3.7, or 3.8"
+msgstr "必要なバージョン: 3.6, 3.7, 3.8 のいずれか"
+
+#: ../../source/installation.rst
+msgid "`NumPy <https://www.numpy.org/>`_"
+msgstr ""
+
+#: ../../source/installation.rst:71
+msgid "required version: v1.17, v1.18, v1.19, or v1.20"
+msgstr "必要なバージョン: v1.17, v1.18, v1.19, or v1.20 のいずれか"
+
+#: ../../source/installation.rst:75
+msgid "Install from wheel"
+msgstr "wheelパッケージからインストール"
+
+#: ../../source/installation.rst:77
+msgid "You can install NLCPy by executing either of following commands."
+msgstr "NLCPyは、次のいずれかのコマンドを実行してインストールできます。"
+
+#: ../../source/installation.rst:79
+msgid "Install from PyPI"
+msgstr "PyPIからのインストール"
+
+#: ../../source/installation.rst:86
+msgid "Install from your local computer"
+msgstr "ローカルコンピュータからインストール"
+
+#: ../../source/installation.rst:88
+msgid ""
+"Download the wheel package from `GitHub <https://github.com/SX-"
+"Aurora/nlcpy/>`_."
+msgstr "`GitHub <https://github.com/SX-Aurora/nlcpy/>`_ からwheelパッケージをダウンロード"
+
+#: ../../source/installation.rst:89
+msgid "Put the wheel package to your any directory."
+msgstr "wheelパッケージを任意のディレクトリに配置"
+
+#: ../../source/installation.rst:89
+msgid "Install the local wheel package via pip command."
+msgstr "pipコマンドを使用してローカルのwheelパッケージをインストール"
+
+#: ../../source/installation.rst:96
+msgid ""
+"The shared objects for Vector Engine, which are included in the wheel "
+"package, are compiled and tested by using NEC C/C++ Version 3.1.1 and "
+"NumPy v1.17.4."
+msgstr ""
+"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ バージョン3.1.1とNumPy "
+"v1.17.4を使用してコンパイルおよびテストしています。"
+
+#: ../../source/installation.rst:100
+msgid "Install from source (with building)"
+msgstr "ソースからインストール（ビルドあり）"
+
+#: ../../source/installation.rst:102
+msgid "Before building source files, please install following packages."
+msgstr "ソースファイルをビルドする前に、以下のパッケージをインストールしてください。"
+
+#: ../../source/installation.rst:108
+msgid ""
+"And, entering the following commands in the environment where `gcc` and "
+"`ncc` commands are available."
+msgstr "そして、`gcc` および `ncc` コマンドが使用可能な環境で以下のコマンドを入力します。"
+
+#~ msgid ""
+#~ "Here, X.X denotes the version of "
+#~ "NLCPy. If you install or update "
+#~ "NEC SDK, the directory of the "
+#~ "latest NLCPy is added in Python "
+#~ "module search path. When you use a"
+#~ " specific version of NLCPy, the "
+#~ "evironmental variable **PYTHONPATH** must be"
+#~ " set as follows::"
+#~ msgstr ""
+#~ "ここで、X.XはNLCPyのバージョンを意味します。もし、NEC "
+#~ "SDKをインストールまたは更新した場合は、NLCPyの最新のバージョンがPythonのモジュール検索パスに追加されます。NLCPyの特定のバージョンを指定して使用するときは、環境変数"
+#~ " **PYTHONPATH** を以下のように設定してください。"
+

@@ -1,16 +1,31 @@
 import numpy  # NOQA
 from numpy import _NoValue  # NOQA
+import os  # NOQA
+from distutils.version import StrictVersion  # NOQA
 
 # -----------------------------------------------------------------------------
 # set environment variable
 # -----------------------------------------------------------------------------
-import os  # NOQA
 ve_num_threads = os.environ.get('VE_OMP_NUM_THREADS', '8')
 os.environ['VE_OMP_NUM_THREADS'] = ve_num_threads
 from nlcpy import _path  # NOQA
 _here = _path._here
 _ve_ld_library_path = os.environ.get('VE_LD_LIBRARY_PATH', '')
 os.environ['VE_LD_LIBRARY_PATH'] = _here + '/lib:' + _ve_ld_library_path
+
+# XXX: This is a temporary workaround
+# find NCC directory and set VE_LD_PRELOAD
+base = '/opt/nec/ve/ncc'
+files = os.listdir(base)
+dirs = [os.path.join(base, f)
+        for f in files
+        if os.path.isdir(os.path.join(base, f))]
+dirs.sort(key=lambda s: [int(u) for u in os.path.basename(s).split('.')], reverse=True)
+NCC_PATH = dirs[0]
+NCC_COMP_VER = '3.0.7'
+if StrictVersion(os.path.basename(NCC_PATH)) >= StrictVersion(NCC_COMP_VER):
+    _ve_ld_preload = os.environ.get('VE_LD_PRELOAD', '')
+    os.environ['VE_LD_PRELOAD'] = NCC_PATH + '/lib/libncc.so.2:' + _ve_ld_preload
 
 # --------------------------------------------------
 # parameter
@@ -47,8 +62,12 @@ from nlcpy.creation.from_data import array  # NOQA
 from nlcpy.creation.from_data import asarray  # NOQA
 from nlcpy.creation.from_data import asanyarray  # NOQA
 from nlcpy.creation.from_data import copy  # NOQA
+from nlcpy.creation.from_data import fromfile  # NOQA
+from nlcpy.creation.from_data import loadtxt  # NOQA
 from nlcpy.creation.ranges import arange  # NOQA
 from nlcpy.creation.ranges import linspace  # NOQA
+from nlcpy.creation.ranges import logspace  # NOQA
+from nlcpy.creation.ranges import meshgrid  # NOQA
 from nlcpy.creation.matrices import diag  # NOQA
 
 # --------------------------------------------------
@@ -59,21 +78,30 @@ from nlcpy.manipulation.shape import reshape  # NOQA
 from nlcpy.manipulation.shape import ravel  # NOQA
 from nlcpy.manipulation.trans import moveaxis  # NOQA
 from nlcpy.manipulation.trans import rollaxis  # NOQA
-from nlcpy.manipulation.trans import swapaxes  # NOQA
 from nlcpy.manipulation.trans import transpose  # NOQA
 from nlcpy.manipulation.dims import broadcast_to  # NOQA
 from nlcpy.manipulation.dims import expand_dims  # NOQA
 from nlcpy.manipulation.dims import squeeze  # NOQA
 from nlcpy.manipulation.join import concatenate  # NOQA
+from nlcpy.manipulation.join import stack  # NOQA
+from nlcpy.manipulation.join import hstack  # NOQA
+from nlcpy.manipulation.join import vstack  # NOQA
 from nlcpy.manipulation.add_remove import resize  # NOQA
-from nlcpy.manipulation.add_remove import trim_zeros  # NOQA
-from nlcpy.manipulation.add_remove import unique  # NOQA
+from nlcpy.manipulation.add_remove import append  # NOQA
+from nlcpy.manipulation.add_remove import insert  # NOQA
+from nlcpy.manipulation.add_remove import delete  # NOQA
 from nlcpy.manipulation.tiling import tile  # NOQA
+from nlcpy.manipulation.tiling import repeat  # NOQA
+from nlcpy.manipulation.basic import copyto  # NOQA
+from nlcpy.manipulation.rearranging import flip  # NOQA
+from nlcpy.manipulation.rearranging import fliplr  # NOQA
+from nlcpy.manipulation.rearranging import flipud  # NOQA
 
 # --------------------------------------------------
 # ufunc operations
 # --------------------------------------------------
-from nlcpy.ufunc.operations import *  # NOQA
+from nlcpy.ufuncs import *  # NOQA
+from nlcpy.ufuncs import ufunc  # NOQA
 
 # --------------------------------------------------
 # mathmatical functions
@@ -87,16 +115,29 @@ from nlcpy.statistics.order import amax  # NOQA
 from nlcpy.statistics.order import amin  # NOQA
 from nlcpy.statistics.order import nanmax  # NOQA
 from nlcpy.statistics.order import nanmin  # NOQA
+from nlcpy.statistics.order import ptp # NOQA
+from nlcpy.statistics.order import percentile # NOQA
+from nlcpy.statistics.order import nanpercentile # NOQA
+from nlcpy.statistics.order import quantile # NOQA
+from nlcpy.statistics.order import nanquantile # NOQA
 from nlcpy.statistics.average import median # NOQA
 from nlcpy.statistics.average import average # NOQA
 from nlcpy.statistics.average import mean # NOQA
 from nlcpy.statistics.average import std # NOQA
 from nlcpy.statistics.average import var # NOQA
+from nlcpy.statistics.average import nanmedian # NOQA
 from nlcpy.statistics.average import nanmean # NOQA
 from nlcpy.statistics.average import nanstd # NOQA
 from nlcpy.statistics.average import nanvar # NOQA
-from nlcpy.statistics.correlating import cov # NOQA
 from nlcpy.statistics.correlating import corrcoef # NOQA
+from nlcpy.statistics.correlating import correlate # NOQA
+from nlcpy.statistics.correlating import cov # NOQA
+from nlcpy.statistics.histograms import histogram # NOQA
+from nlcpy.statistics.histograms import histogram2d # NOQA
+from nlcpy.statistics.histograms import histogramdd # NOQA
+from nlcpy.statistics.histograms import bincount # NOQA
+from nlcpy.statistics.histograms import histogram_bin_edges # NOQA
+from nlcpy.statistics.histograms import digitize # NOQA
 # --------------------------------------------------
 # logic functions
 # --------------------------------------------------
@@ -107,6 +148,8 @@ from nlcpy.logic.testing import any  # NOQA
 # linear algebra
 # --------------------------------------------------
 from nlcpy.linalg.products import dot  # NOQA
+from nlcpy.linalg.products import inner  # NOQA
+from nlcpy.linalg.products import outer  # NOQA
 
 # --------------------------------------------------
 # Indexing functions
@@ -133,6 +176,12 @@ from nlcpy.sorting.sort import argsort  # NOQA
 # misc
 # --------------------------------------------------
 from nlcpy.core.core import may_share_memory  # NOQA
+
+# --------------------------------------------------
+# Input and Output
+# --------------------------------------------------
+from nlcpy.io.npz import NpzFile  # NOQA
+from nlcpy.io.npz import load  # NOQA
 
 # =============================================================================
 # Data types (borrowed from NumPy)
@@ -172,6 +221,7 @@ from numpy import int8  # NOQA
 from numpy import int16  # NOQA
 from numpy import int32  # NOQA
 from numpy import int64  # NOQA
+from numpy import int  # NOQA
 
 # -----------------------------------------------------------------------------
 # Unsigned integers
@@ -198,6 +248,7 @@ from numpy import longfloat  # NOQA
 from numpy import float16  # NOQA
 from numpy import float32  # NOQA
 from numpy import float64  # NOQA
+from numpy import float  # NOQA
 
 # from numpy import float96
 # from numpy import float128
@@ -272,6 +323,12 @@ except KeyError:
 # random
 # -----------------------------------------------------------------------------
 from nlcpy import random  # NOQA
+
+
+# -----------------------------------------------------------------------------
+# fft
+# -----------------------------------------------------------------------------
+from nlcpy import fft # NOQA
 
 
 # -----------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -271,6 +271,8 @@ creation_op get_creation_func(int64_t func_num) {
         return nlcpy_eye;
     case VE_FUNC_LINSPACE   :
         return nlcpy_linspace;
+    case VE_FUNC_COPY_MASKED :
+        return nlcpy_copy_masked;
     default:
         return nlcpy__select_err;
     }
@@ -280,8 +282,14 @@ creation_op get_creation_func(int64_t func_num) {
 manipulation_op get_manipulation_func(int64_t func_num) {
     //printf("func_num = %d\n", func_num);
     switch (func_num) {
+    case VE_FUNC_DELETE :
+        return nlcpy_delete;
+    case VE_FUNC_INSERT :
+        return nlcpy_insert;
     case VE_FUNC_TILE   :
         return nlcpy_tile;
+    case VE_FUNC_REPEAT   :
+        return nlcpy_repeat;
     default:
         return nlcpy__select_err;
     }

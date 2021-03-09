@@ -1,0 +1,557 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/reference/mathematical.rst:2
+msgid "Mathematical Functions"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:4
+msgid "The following tables show mathematical functions provided by NLCPy."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:7
+msgid "Trigonometric Functions"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.sin <nlcpy.sin>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise sine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.cos <nlcpy.cos>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise cosine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.tan <nlcpy.tan>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise tangent."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.arcsin <nlcpy.arcsin>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise inverse sine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.arccos <nlcpy.arccos>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise inverse cosine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.arctan <nlcpy.arctan>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the element-wise inverse tangent."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.arctan2 <nlcpy.arctan2>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ""
+"Computes the element-wise inverse tangent of *x1*/*x2* choosing the "
+"quadrant correctly."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.hypot <nlcpy.hypot>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Computes the \"legs\" of a right triangle."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.degrees <nlcpy.degrees>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Converts angles from radians to degrees."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.radians <nlcpy.radians>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid "Converts angles from degrees to radians."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.deg2rad <nlcpy.deg2rad>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:25:<autosummary>:1
+msgid ":obj:`nlcpy.rad2deg <nlcpy.rad2deg>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:27
+msgid "Hyperbolic Functions"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.sinh <nlcpy.sinh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise hyperbolic sine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.cosh <nlcpy.cosh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise hyperbolic cosine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.tanh <nlcpy.tanh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise hyperbolic tangent."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.arcsinh <nlcpy.arcsinh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic sine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.arccosh <nlcpy.arccosh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic cosine."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.arctanh <nlcpy.arctanh>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:38:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic tangent."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:40
+msgid "Rounding"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid ":obj:`nlcpy.floor <nlcpy.floor>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid "Returns the floor of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid ":obj:`nlcpy.ceil <nlcpy.ceil>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid "Returns the ceiling of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid ":obj:`nlcpy.trunc <nlcpy.trunc>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:48:<autosummary>:1
+msgid "Returns the truncated value of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:50
+msgid "Sums, Products, Differences"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid ":obj:`nlcpy.prod <nlcpy.prod>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid "Return the product of array elements over a given axis."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid ":obj:`nlcpy.sum <nlcpy.sum>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid "Sum of array elements over a given axis."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid ":obj:`nlcpy.cumsum <nlcpy.cumsum>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid "Returns the cumulative sum of the elements along a given axis."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid ":obj:`nlcpy.diff <nlcpy.diff>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:59:<autosummary>:1
+msgid "Calculates the n-th discrete difference along the given axis."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:61
+msgid "Exponents and Logarithms"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.exp <nlcpy.exp>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the exponential of all elements in the input array."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.exp2 <nlcpy.exp2>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes `2**x` for all elements in the array."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.log <nlcpy.log>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of *x*."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.log10 <nlcpy.log10>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the element-wise base-10 logarithm of *x*."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.expm1 <nlcpy.expm1>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes `exp(x) - 1` for all elements in the array."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.log1p <nlcpy.log1p>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of *1 + x*."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.logaddexp <nlcpy.logaddexp>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of :math:`exp(x1) + exp(x2)`."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.logaddexp2 <nlcpy.logaddexp2>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Computes the element-wise base-2 logarithm of :math:`2^{x1} + 2^{x2}`."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.signbit <nlcpy.signbit>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Returns True where signbit is set (less than zero), element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.copysign <nlcpy.copysign>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Changes the sign of x1 to that of x2, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.spacing <nlcpy.spacing>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ""
+"Returns the distance between *x* and the nearest adjacent number, "
+"element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid ":obj:`nlcpy.ldexp <nlcpy.ldexp>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:78:<autosummary>:1
+msgid "Returns :math:`x1 * 2^{x2}`, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:80
+msgid "Arithmetic Operations"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.add <nlcpy.add>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise addition of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.subtract <nlcpy.subtract>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise subtraction of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.multiply <nlcpy.multiply>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise multiplication of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.divide <nlcpy.divide>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise division of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.true_divide <nlcpy.true_divide>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.floor_divide <nlcpy.floor_divide>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise floor division of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.negative <nlcpy.negative>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes numerical negative, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.positive <nlcpy.positive>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes numerical positive, element-wise."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.power <nlcpy.power>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise exponentiation of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.remainder <nlcpy.remainder>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise remainder of division."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.mod <nlcpy.mod>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.fmod <nlcpy.fmod>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.absolute <nlcpy.absolute>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise absolute value."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid ":obj:`nlcpy.reciprocal <nlcpy.reciprocal>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:99:<autosummary>:1
+msgid "Computes the element-wise reciprocal of the input."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:101
+msgid "Handling Complex Numbers"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid ":obj:`nlcpy.angle <nlcpy.angle>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid "Returns the angle of the complex argument."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid ":obj:`nlcpy.real <nlcpy.real>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid "Returns the real part of the complex argument."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid ":obj:`nlcpy.imag <nlcpy.imag>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid "Returns the imaginary part of the complex argument."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid ":obj:`nlcpy.conj <nlcpy.conj>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid "Returns the element-wise complex conjugate."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:111:<autosummary>:1
+msgid ":obj:`nlcpy.conjugate <nlcpy.conjugate>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:113
+msgid "Miscellaneous"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.sqrt <nlcpy.sqrt>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes the element-wise square-root of the input."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.cbrt <nlcpy.cbrt>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes the element-wise cubic-root of the input."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.square <nlcpy.square>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes the element-wise square of the input."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.fabs <nlcpy.fabs>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.sign <nlcpy.sign>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Returns the element-wise indication of the sign of a number."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.heaviside <nlcpy.heaviside>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes Heaviside step function."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.maximum <nlcpy.maximum>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes the element-wise maximum of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.minimum <nlcpy.minimum>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid "Computes the element-wise minimum of the inputs."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.fmax <nlcpy.fmax>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
+msgstr ""
+

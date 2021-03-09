@@ -3,7 +3,7 @@
 #
 #  # NLCPy License #
 #
-#      Copyright (c) 2020 NEC Corporation
+#      Copyright (c) 2020-2021 NEC Corporation
 #      All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -139,9 +139,13 @@ cpdef dict funcNumList = {
     "nlcpy_copy": ve_funcnum.VE_FUNC_COPY,
     "nlcpy_eye": ve_funcnum.VE_FUNC_EYE,
     "nlcpy_linspace": ve_funcnum.VE_FUNC_LINSPACE,
+    "nlcpy_copy_masked": ve_funcnum.VE_FUNC_COPY_MASKED,
 
     #  manipulation functions
+    "nlcpy_delete": ve_funcnum.VE_FUNC_DELETE,
     "nlcpy_tile": ve_funcnum.VE_FUNC_TILE,
+    "nlcpy_repeat": ve_funcnum.VE_FUNC_REPEAT,
+    "nlcpy_insert": ve_funcnum.VE_FUNC_INSERT,
 
     #  cblas wrapper functions
     "wrapper_cblas_sdot": ve_funcnum.VE_FUNC_CBLAS_SDOT,

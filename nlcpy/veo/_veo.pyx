@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 #     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-from libveo cimport *
+from nlcpy.veo.libveo cimport *
 
 #
 # EF: commented out veo_api_version until it finds its way into the VEO mainline.
@@ -40,7 +40,6 @@ from libveo cimport *
 
 import os
 import numbers
-import psutil
 import atexit
 import sys
 import nlcpy
@@ -396,14 +395,10 @@ cdef class VeoCtxt(object):
     """
 
     def __init__(self, VeoProc proc):
-        cdef set _otids, _ctids
-        _otids = set([_thr.id for _thr in psutil.Process().threads()])
         self.proc = proc
         self.thr_ctxt = veo_context_open(proc.proc_handle)
         if self.thr_ctxt == NULL:
             raise RuntimeError("veo_context_open failed")
-        _ctids = set([_thr.id for _thr in psutil.Process().threads()])
-        # self.tid = list(_ctids - _otids)[0]
 
     def __dealloc__(self):
         veo_context_close(self.thr_ctxt)
@@ -458,7 +453,11 @@ cdef class VeoCtxt(object):
 # Memory Pool Threashold
 # If the allocated memory size on VE is larger than pool_threashold,
 # the memory pool implementation is not used.
-DEF pool_threashold = 0x00000003ffffffff
+# DEF pool_threashold = 0x0000000000000000
+# 512 Mbyte
+DEF pool_threashold = 0x0000000020000000
+# 1 Gbyte
+# DEF pool_threashold = 0x0000000040000000
 
 cdef class VeoProc(object):
 
@@ -467,8 +466,6 @@ cdef class VeoProc(object):
         self.nodeid = nodeid
         self.context = list()
         self.lib = dict()
-        cdef set _otids, _ptids
-        _otids = set([_thr.id for _thr in psutil.Process().threads()])
         if veorun_bin is not None:
             self.proc_handle = veo_proc_create_static(nodeid, veorun_bin)
             if self.proc_handle == NULL:
@@ -478,8 +475,6 @@ cdef class VeoProc(object):
             self.proc_handle = veo_proc_create(nodeid)
             if self.proc_handle == NULL:
                 raise RuntimeError("veo_proc_create(%d) failed" % nodeid)
-        _ptids = set([_thr.id for _thr in psutil.Process().threads()])
-        # self.tid = list(_ptids - _otids)[0]
         if len(_proc_init_hook) > 0:
             for init_func in _proc_init_hook:
                 init_func(self)

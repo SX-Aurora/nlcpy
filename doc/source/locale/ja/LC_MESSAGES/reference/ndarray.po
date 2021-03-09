@@ -1,0 +1,98 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-12 11:33+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/reference/ndarray.rst:2
+msgid "Multi-Dimensional Array (ndarray)"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:4
+msgid ""
+":class:`nlcpy.ndarray` is the NLCPy counterpart of NumPy "
+":class:`numpy.ndarray`. It provides an intuitive interface for a fixed-"
+"size multidimensional array which resides in a VE."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:8
+msgid ""
+"For the basic concept of ``ndarray``, please refer to the `NumPy "
+"documentation "
+"<https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html>`_."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:11
+msgid "ndarray class"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:19:<autosummary>:1
+msgid ":obj:`nlcpy.ndarray <nlcpy.ndarray>`"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:19:<autosummary>:1
+msgid "N-dimensional array class for VE."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:21
+msgid "Array Indexing"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:23
+msgid ""
+"Arrays can be indexed using an extended Python slicing syntax, "
+"array[selection]. For the basic concept of indexing arrays, please refer "
+"to the `NumPy Array Indexing "
+"<https://numpy.org/doc/stable/reference/arrays.indexing.html#arrays-"
+"indexing>`_."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:28
+msgid "Differences from NumPy"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:30
+msgid "**Out-of-bounds indices**"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:32
+msgid ""
+"NLCPy handles out-of-bounds indices differently by default from NumPy "
+"when using integer array indexing. NumPy handles them by raising an "
+"error, but NLCPy wraps around them."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:49
+msgid "**Multiple boolean indices**"
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:51
+msgid ""
+"NLCPy does not support slices that consists of more than one boolean "
+"arrays."
+msgstr ""
+
+#: ../../source/reference/ndarray.rst:55
+msgid ":ref:`Notices and Restrictions <notices>`"
+msgstr ""
+
+#~ msgid ""
+#~ "For the basic concept of ``ndarray``\\s,"
+#~ " please refer to the `NumPy "
+#~ "documentation "
+#~ "<https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html>`_."
+#~ msgstr ""
+

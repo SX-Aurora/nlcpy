@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,19 @@
 
 import unittest
 
+import numpy
 import nlcpy
 
 from nlcpy import testing
 
 
+class DummyError(Exception):
+    pass
+
+
 class TestJoin(unittest.TestCase):
 
+    # Test for concatenate
     @testing.for_all_dtypes(name='dtype')
     @testing.numpy_nlcpy_array_equal()
     def test_concatenate1(self, xp, dtype):
@@ -141,3 +147,242 @@ class TestJoin(unittest.TestCase):
         c = nlcpy.empty((4, 4, 4))
         with self.assertRaises(ValueError):
             nlcpy.concatenate((a, b, c))
+
+    # Test for stack
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_simple(self, xp, dtype):
+        arrays = [testing.shaped_random((2, 3, 4), xp, dtype) for i in range(5)]
+        return xp.stack(arrays)
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_0d(self, xp, dtype):
+        arrays = [testing.shaped_random((), xp, dtype) for i in range(5)]
+        return xp.stack(arrays)
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_diff_dtype(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((3, 5), xp, a_dtype)
+        b = testing.shaped_random((3, 5), xp, b_dtype)
+        c = testing.shaped_random((3, 5), xp, c_dtype)
+        return xp.stack((a, b, c))
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.for_all_axis(-4, 4)
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_axis(self, xp, dtype, axis):
+        arrays = [testing.shaped_random((2, 3, 4), xp, dtype) for i in range(5)]
+        return xp.stack(arrays, axis=axis)
+
+    @testing.for_all_dtypes(name='in_dtype')
+    @testing.for_all_dtypes(name='out_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_out1(self, xp, in_dtype, out_dtype):
+        if numpy.can_cast(in_dtype, out_dtype, casting='same_kind'):
+            arrays = [testing.shaped_random((2, 3, 4), xp, in_dtype) for i in range(5)]
+            out = xp.empty((5, 2, 3, 4), dtype=out_dtype)
+            return xp.stack(arrays, out=out)
+        else:
+            return 0
+
+    @testing.for_all_dtypes(name='in_dtype')
+    @testing.for_all_dtypes(name='out_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_stack_out2(self, xp, in_dtype, out_dtype):
+        if numpy.can_cast(in_dtype, out_dtype, casting='same_kind'):
+            arrays = [testing.shaped_random((2, 3, 4), xp, in_dtype) for i in range(5)]
+            out = xp.empty((2, 5, 3, 4), dtype=out_dtype)
+            axis = 1
+            return xp.stack(arrays, axis=axis, out=out)
+        else:
+            return 0
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err__empty_arrays(self, xp):
+        arrays = ()
+        return xp.stack(arrays)
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_axis1(self, xp):
+        arrays = [testing.shaped_random((2, 3, 4), xp, 'float64') for i in range(5)]
+        axis = 4
+        return xp.stack(arrays, axis=axis)
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_axis2(self, xp):
+        arrays = [testing.shaped_random((2, 3, 4), xp, 'float64') for i in range(5)]
+        axis = -5
+        return xp.stack(arrays, axis=axis)
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_axis3(self, xp):
+        arrays = [testing.shaped_random((2, 3, 4), xp, 'float64') for i in range(5)]
+        axis = (2,)
+        return xp.stack(arrays, axis=axis)
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_axis4(self, xp):
+        arrays = [testing.shaped_random((2, 3, 4), xp, 'float64') for i in range(5)]
+        axis = 1.2
+        return xp.stack(arrays, axis=axis)
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_diff_shape(self, xp, dtype):
+        arrays = [testing.shaped_random((2, 3, 4), xp, dtype) for i in range(4)]
+        arrays += (testing.shaped_random((2, 3, 5), xp, dtype),)
+        return xp.stack(arrays)
+
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_out_shape(self, xp):
+        arrays = [testing.shaped_random((2, 3, 4), xp, 'float64') for i in range(5)]
+        out = xp.empty((5, 3, 3, 4), dtype='float64')
+        return xp.stack(arrays, out=out)
+
+    @testing.for_all_dtypes(name='in_dtype')
+    @testing.for_all_dtypes(name='out_dtype')
+    @testing.numpy_nlcpy_raises()
+    def test_stack_err_out_dtype(self, xp, in_dtype, out_dtype):
+        if not numpy.can_cast(in_dtype, out_dtype, casting='same_kind'):
+            arrays = [testing.shaped_random((2, 3, 4), xp, in_dtype) for i in range(5)]
+            out = xp.empty((5, 2, 3, 4), dtype=out_dtype)
+            return xp.stack(arrays, out=out)
+        else:
+            raise DummyError()
+
+    # Test for vstack
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_vstack_0d_a(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((), xp, a_dtype)
+        b = testing.shaped_random((3, 1), xp, b_dtype)
+        c = testing.shaped_random((5, 1), xp, c_dtype)
+        return xp.vstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_vstack_1d_a(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((2,), xp, a_dtype)
+        b = testing.shaped_random((3, 2), xp, b_dtype)
+        c = testing.shaped_random((5, 2), xp, c_dtype)
+        return xp.vstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_vstack_2d(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((2, 3), xp, a_dtype)
+        b = testing.shaped_random((3, 3), xp, b_dtype)
+        c = testing.shaped_random((4, 3), xp, c_dtype)
+        return xp.vstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_vstack_large(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((2, 3, 4), xp, a_dtype)
+        b = testing.shaped_random((3, 3, 4), xp, b_dtype)
+        c = testing.shaped_random((4, 3, 4), xp, c_dtype)
+        return xp.vstack((a, b, c) * 5)
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_vstack_f_contiguous_a(self, xp, dtype):
+        a = testing.shaped_random((4, 3, 2), xp, dtype).T  # a.shape = (2, 3, 4)
+        b = testing.shaped_random((3, 3, 4), xp, dtype)
+        c = testing.shaped_random((4, 3, 4), xp, dtype)
+        return xp.vstack((a, b, c))
+
+    @testing.numpy_nlcpy_raises()
+    def test_vstack_wrong_arg(self, xp):
+        xp.vstack(1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_vstack_wrong_ndim(self, xp):
+        a = testing.shaped_random((2, 2, 2), xp)
+        b = testing.shaped_random((2, 2), xp)
+        xp.vstack((a, b))
+
+    @testing.numpy_nlcpy_raises()
+    def test_vstack_wrong_shape(self, xp):
+        a = testing.shaped_random((2, 2), xp)
+        b = testing.shaped_random((2, 3), xp)
+        xp.vstack((a, b))
+
+    # Test for hstack
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_hstack_0d_a(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((), xp, a_dtype)
+        b = testing.shaped_random((3,), xp, b_dtype)
+        c = testing.shaped_random((5,), xp, c_dtype)
+        return xp.hstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_hstack_1d(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((2,), xp, a_dtype)
+        b = testing.shaped_random((3,), xp, b_dtype)
+        c = testing.shaped_random((5,), xp, c_dtype)
+        return xp.hstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_hstack_2d(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((3, 2), xp, a_dtype)
+        b = testing.shaped_random((3, 3), xp, b_dtype)
+        c = testing.shaped_random((3, 4), xp, c_dtype)
+        return xp.hstack((a, b, c))
+
+    @testing.for_all_dtypes(name='a_dtype')
+    @testing.for_all_dtypes(name='b_dtype')
+    @testing.for_all_dtypes(name='c_dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_hstack_large(self, xp, a_dtype, b_dtype, c_dtype):
+        a = testing.shaped_random((2, 2, 4), xp, a_dtype)
+        b = testing.shaped_random((2, 3, 4), xp, b_dtype)
+        c = testing.shaped_random((2, 4, 4), xp, c_dtype)
+        return xp.hstack((a, b, c) * 5)
+
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_hstack_f_contiguous_a(self, xp, dtype):
+        a = testing.shaped_random((4, 2, 2), xp, dtype).T  # a.shape = (2, 2, 4)
+        b = testing.shaped_random((2, 3, 4), xp, dtype)
+        c = testing.shaped_random((2, 4, 4), xp, dtype)
+        return xp.hstack((a, b, c))
+
+    @testing.numpy_nlcpy_raises()
+    def test_hstack_wrong_arg(self, xp):
+        xp.hstack(1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_hstack_wrong_ndim(self, xp):
+        a = testing.shaped_random((2, 2, 2), xp)
+        b = testing.shaped_random((2, 2), xp)
+        xp.hstack((a, b))
+
+    @testing.numpy_nlcpy_raises()
+    def test_hstack_wrong_shape(self, xp):
+        a = testing.shaped_random((2, 2), xp)
+        b = testing.shaped_random((3, 2), xp)
+        xp.hstack((a, b))

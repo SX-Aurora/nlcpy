@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,7 @@ import itertools
 import sys
 import types
 import unittest
-
-import six
+import io
 
 
 def _gen_case(base, module, i, param):
@@ -68,7 +67,7 @@ def _gen_case(base, module, i, param):
         return '%s  parameter: %s' % (name, param)
 
     mb = {'__str__': __str__}
-    for k, v in six.iteritems(param):
+    for k, v in param.items():
         if isinstance(v, types.FunctionType):
 
             def create_new_v():
@@ -94,20 +93,17 @@ def _gen_case(base, module, i, param):
             except unittest.SkipTest:
                 raise
             except Exception as e:
-                s = six.StringIO()
+                s = io.StringIO()
                 s.write('Parameterized test failed.\n\n')
                 s.write('Base test method: {}.{}\n'.format(
                     base.__name__, method.__name__))
                 s.write('Test parameters:\n')
-                for k, v in six.iteritems(param):
+                for k, v in param.items():
                     s.write('  {}: {}\n'.format(k, v))
                 s.write('\n')
                 s.write('{}: {}\n'.format(type(e).__name__, e))
                 e_new = AssertionError(s.getvalue())
-                if sys.version_info < (3,):
-                    six.reraise(AssertionError, e_new, sys.exc_info()[2])
-                else:
-                    six.raise_from(e_new.with_traceback(e.__traceback__), None)
+                raise e_new.with_traceback(e.__traceback__) from None
         return wrap
 
     # ismethod for Python 2 and isfunction for Python 3
@@ -145,5 +141,5 @@ def product(parameter):
 
 def product_dict(*parameters):
     return [
-        {k: v for dic in dicts for k, v in six.iteritems(dic)}
+        {k: v for dic in dicts for k, v in dic.items()}
         for dicts in itertools.product(*parameters)]

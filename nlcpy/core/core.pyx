@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -73,10 +73,11 @@ from nlcpy.core cimport math
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core import error
-from nlcpy.ufunc import operations as ufunc_op
+from nlcpy.ufuncs import operations as ufunc_op
 from nlcpy.request cimport request
 from nlcpy.request.ve_kernel cimport *
 from nlcpy.error_handler import error_handler
+from nlcpy.statistics.order import ptp
 from nlcpy.statistics.average import mean
 from nlcpy.statistics.average import var
 from nlcpy.statistics.average import std
@@ -100,30 +101,35 @@ cdef class ndarray:
     (refer to the See Also section below). The parameters given here refer to a low-level
     method (ndarray(...)) for instantiating an array.
 
-    Args:
-        shape : tuple of ints
-            Shape of created array.
-        dtype : dtype, optional
-            Any object that can be interpreted as a numpy or nlcpy data type.
-        strides : tuple of ints
-            Strides of data in memory.
-        order : {'C','F'}, optional
-            Row-major (C-style) or column-major (Fortran-style) order.
+    Parameters
+    ----------
+    shape : tuple of ints
+        Shape of created array.
+    dtype : dtype, optional
+        Any object that can be interpreted as a numpy or nlcpy data type.
+    strides : tuple of ints
+        Strides of data in memory.
+    order : {'C','F'}, optional
+        Row-major (C-style) or column-major (Fortran-style) order.
 
-    See Also:
-        from_data::array : Constructs an array.
-        basic::zeros : Creates an array, each element of
-            which is zero.
-        basic::empty : Creates an array, but leave its
-            allocated memory unchanged.
+    See Also
+    --------
+    array : Constructs an array.
+    zeros : Creates an array, each element of
+        which is zero.
+    empty : Creates an array, but leave its
+        allocated memory unchanged.
 
-    Examples:
-        This example illustrate the low-level `ndarray` constructor. Refer to the See
-        Also section above for easier ways of constructing an ndarray.
-        >>> import nlcpy as vp
-        >>> vp.ndarray(shape=(2,2), dtype=float, order='F')
-        array([[0., 0.],
-              [0., 0.]])
+    Examples
+    --------
+
+    This example illustrate the low-level ndarray constructor. Refer to the See Also
+    section above for easier ways of constructing an ndarray.
+
+    >>> import nlcpy as vp
+    >>> vp.ndarray(shape=(2,2), dtype=float, order='F') # doctest: +SKIP
+    array([[0., 0.],     # may vary
+           [0., 0.]])
 
     """
 
@@ -241,7 +247,7 @@ cdef class ndarray:
         return complex(self.get())
 
     def __index__(self):
-        return self.__int__()
+        return self.get().__index__()
 
     def __array__(self, dtype=None):
         if dtype is None or self.dtype == dtype:
@@ -304,7 +310,20 @@ cdef class ndarray:
         return self.size * self.itemsize
 
     @property
+    def effective_nbytes(self):
+        """
+        Total effective number of bytes for all elements that allocated on VE.
+        """
+        if self.base is None:
+            return self.nbytes
+        else:
+            return self.base.nbytes
+
+    @property
     def T(self):
+        """
+        Transposed array.
+        """
         if self.ndim < 2:
             return self
         else:
@@ -312,6 +331,9 @@ cdef class ndarray:
 
     @property
     def flags(self):
+        """
+        Information about the memory layout of the array.
+        """
         return flags.Flags(self._c_contiguous, self._f_contiguous, self.base is None)
 
     # -------------------------------------------------------------------------
@@ -435,6 +457,9 @@ cdef class ndarray:
 
     @property
     def real(self):
+        """
+        Real part.
+        """
         return math._ndarray_real_getter(self)
 
     @real.setter
@@ -443,6 +468,9 @@ cdef class ndarray:
 
     @property
     def imag(self):
+        """
+        Imaginary part.
+        """
         return math._ndarray_imag_getter(self)
 
     @imag.setter
@@ -455,26 +483,29 @@ cdef class ndarray:
     def reshape(self, *shape, order='C'):
         """Returns an array containing the same data with a new shape.
 
-        Refer to `nlcpy.reshape` for full documentation.
+        Refer to :func:`nlcpy.reshape` for full documentation.
 
-        Note:
-            Unlike the free function `nlcpy.reshape`, this method on `ndarray` allows the
-            elements of the shape parameter to be passed in as separate arguments. For
-            example, a.reshape(10, 11) is equivalent to a.reshape((10, 11)).
+        Note
+        ----
+        Unlike the free function :func:`nlcpy.reshape`, this method on
+        :func:`ndarray.reshape` allows the elements of the shape parameter
+        to be passed in as separate arguments.
+        For example, ``a.reshape(10, 11)`` is equivalent to ``a.reshape((10, 11))``.
 
-        See Also:
-            shape::reshape : Equivalent function.
-
+        See Also
+        --------
+        nlcpy.reshape : Equivalent function.
         """
         return manipulation._ndarray_reshape(self, shape, order)
 
     def ravel(self, order='C'):
         """Returns a flattened array.
 
-        Refer to `nlcpy.ravel` for full documentation.
+        Refer to :func:`nlcpy.ravel` for full documentation.
 
-        See Also:
-            shape::ravel : Equivalent function.
+        See Also
+        --------
+        nlcpy.ravel : Equivalent function.
 
         """
         return manipulation._ndarray_ravel(self, order)
@@ -482,61 +513,73 @@ cdef class ndarray:
     def resize(self, *new_shape, refcheck=True):
         """Changes shape and size of array in-place.
 
-        Args:
-            new_shape : tuple of ints, or n ints
-                Shape of resized array.
-            refcheck : bool, optional
-                If False, reference count will not be checked. Default is True.
+        Parameters
+        ----------
+        new_shape : tuple of ints, or n ints
+            Shape of resized array.
+        refcheck : bool, optional
+            If False, reference count will not be checked. Default is True.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
 
-        Note:
-            This reallocates space for the data area if necessary.
-            Only contiguous arrays (data elements consecutive in memory) can be resized.
-            The purpose of the reference count check is to make sure you do not use this
-            array as a buffer for another Python object and then reallocate the memory.
-            However, reference counts can increase in other ways so if you are sure that
-            you have not shared the memory for this array with another Python object,
-            then you may safely set refcheck to False.
+        Note
+        ----
+        This reallocates space for the data area if necessary.
 
-        See Also:
-            add_remove::resize : Returns a new array
-                with the specified shape.
+        Only contiguous arrays (data elements consecutive in memory) can be resized.
 
-        Examples:
-            Shrinking an array: array is flattened (in the order that the data are stored
-            in memory), resized, and reshaped:
-            >>> import nlcpy as vp
-            >>> a = vp.array([[0, 1], [2, 3]], order='C')
-            >>> a.resize((2, 1))
-            >>> a
-            array([[0],
-                   [1]])
-            >>> a = vp.array([[0, 1], [2, 3]], order='F')
-            >>> a.resize((2, 1))
-            >>> a
-            array([[0],
-                   [2]])
-            Enlarging an array: as above, but missing entries are filled with zeros:
-            >>> b = vp.array([[0, 1], [2, 3]])
-            >>> b.resize(2, 3) # new_shape parameter doesn't have to be a tuple
-            >>> b
-            array([[0, 1, 2],
-                   [3, 0, 0]])
-            Referencing an array prevents resizing...
-            >>> c = a
-            >>> a.resize((1, 1))
-            Traceback (most recent call last):
-            ...
-            ValueError: cannot resize an array that references or is referenced ...
-            Unless refcheck is False:
-            >>> a.resize((1, 1), refcheck=False)
-            >>> a
-            array([[0]])
-            >>> c
-            array([[0]])
+        The purpose of the reference count check is to make sure you do not use this
+        array as a buffer for another Python object and then reallocate the memory.
+        However, reference counts can increase in other ways so if you are sure that you
+        have not shared the memory for this array with another Python object, then you
+        may safely set `refcheck` to False.
 
+        See Also
+        --------
+        nlcpy.resize : Returns a new array with the specified shape.
+
+        Examples
+        --------
+        Shrinking an array: array is flattened (in the order that the data are stored in
+        memory), resized, and reshaped:
+
+        >>> import nlcpy as vp
+        >>> a = vp.array([[0, 1], [2, 3]], order='C')
+        >>> a.resize((2, 1))
+        >>> a
+        array([[0],
+               [1]])
+        >>> a = vp.array([[0, 1], [2, 3]], order='F')
+        >>> a.resize((2, 1))
+        >>> a
+        array([[0],
+               [2]])
+
+        Enlarging an array: as above, but missing entries are filled with zeros:
+
+        >>> b = vp.array([[0, 1], [2, 3]])
+        >>> b.resize(2, 3) # new_shape parameter doesn't have to be a tuple
+        >>> b
+        array([[0, 1, 2],
+               [3, 0, 0]])
+
+        Referencing an array prevents resizing...
+
+        >>> c = a
+        >>> a.resize((1, 1))   # doctest: +SKIP
+        Traceback (most recent call last):
+        ...
+        ValueError: cannot resize an array that references or is referenced ...
+
+        Unless *refcheck* is False:
+
+        >>> a.resize((1, 1), refcheck=False)
+        >>> a
+        array([[0]])
+        >>> c
+        array([[0]])
         """
         return manipulation._ndarray_resize(self, new_shape, refcheck)
 
@@ -548,40 +591,44 @@ cdef class ndarray:
         must be added. a[:, nlcpy.newaxis] achieves this. For a 2-D array, this is a
         standard matrix transpose. For an n-D array, if axes are given, their order
         indicates how the axes are permuted (see Examples). If axes are not provided and
-        a.shape = (i[0], i[1], ... i[n-2], i[n-1]), then
-        a.transpose().shape = (i[n-1], i[n-2], ... i[1], i[0]).
+        ``a.shape = (i[0], i[1], ... i[n-2], i[n-1])``, then
+        ``a.transpose().shape = (i[n-1], i[n-2], ... i[1], i[0])``.
 
-        Args:
-            axes : None, tuple of ints, or n ints
-                - None or no argument: reverses the order of the axes.
-                - tuple of ints: i in the j-th place in the tuple means a's i-th axis
-                becomes a.transpose()'s j-th axis.
-                - n ints: same as an n-tuple of the same ints (this form is intended
-                simply as a "convenience" alternative to the tuple form)
+        Parameters
+        ----------
+        axes : None, tuple of ints, or n ints
+            - None or no argument: reverses the order of the axes.
+            - tuple of ints: *i* in the *j-th* place in the tuple means *a's* *i-th*
+              axis becomes *a.transpose()'s* *j-th* axis.
+            - *n* ints: same as an n-tuple of the same ints (this form is intended
+              simply as a "convenience" alternative to the tuple form)
 
-        Returns:
-            out : `ndarray`
-                View of a, with axes suitably permuted.
+        Returns
+        -------
+        out : ndarray
+            View of *a*, with axes suitably permuted.
 
-        See Also:
-            reshape : Returns an array containing
-                the same data with a new shape.
+        See Also
+        --------
+        ndarray.reshape : Returns an array containing
+            the same data with a new shape.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> a = vp.array([[1, 2], [3, 4]])
-            >>> a
-            array([[1, 2],
-                   [3, 4]])
-            >>> a.transpose()
-            array([[1, 3],
-                   [2, 4]])
-            >>> a.transpose((1, 0))
-            array([[1, 3],
-                   [2, 4]])
-            >>> a.transpose(1, 0)
-            array([[1, 3],
-                   [2, 4]])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> a = vp.array([[1, 2], [3, 4]])
+        >>> a
+        array([[1, 2],
+               [3, 4]])
+        >>> a.transpose()
+        array([[1, 3],
+               [2, 4]])
+        >>> a.transpose((1, 0))
+        array([[1, 3],
+               [2, 4]])
+        >>> a.transpose(1, 0)
+        array([[1, 3],
+               [2, 4]])
 
         """
         if len(axes)==1:
@@ -593,31 +640,36 @@ cdef class ndarray:
     def flatten(self, order='C'):
         """Returns a copy of the array collapsed into one dimension.
 
-        Args:
-            order : {'C','F','A','K'}, optional
-                'C' means to flatten in row-major (C-style) order. 'F' means to flatten
-                in column-major (Fortran-style) order. 'A' means to flatten in
-                column-major order if a is Fortran contiguous in memory, row-major order
-                otherwise. 'K' means to flatten a in the order the elements occur in
-                memory. The default is 'C'.
+        Parameters
+        ----------
+        order : {'C','F','A','K'}, optional
+            'C' means to flatten in row-major (C-style) order. 'F' means to flatten in
+            column-major (Fortran-style) order. 'A' means to flatten in column-major
+            order if a is Fortran contiguous in memory, row-major order otherwise. 'K'
+            means to flatten a in the order the elements occur in memory. The default is
+            'C'.
 
-        Returns:
-            out : `ndarray`
-                A copy of the input array, flattened to one dimension.
+        Returns
+        -------
+        out : ndarray
+            A copy of the input array, flattened to one dimension.
 
-        Raises:
-            order = 'F' : NotImplementedError occurs.
-            order = 'A' or 'K' : NotImplementedError occurs when
-                a is using Fortran-style order
+        Restriction
+        -----------
+        * If order = 'F' : *NotImplementedError* occurs.
+        * | If order = 'A' or 'K' : *NotImplementedError* occurs wheni *a* is using
+          |                         Fortran-style order
 
-        See Also:
-            shape::ravel : Returns a flattened array.
+        See Also
+        --------
+        nlcpy.ravel : Returns a flattened array.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> a = np.array([[1,2], [3,4]])
-            >>> a.flatten()
-            array([1, 2, 3, 4])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> a = vp.array([[1,2], [3,4]])
+        >>> a.flatten()
+        array([1, 2, 3, 4])
 
         """
         return manipulation._ndarray_flatten(self, order)
@@ -625,51 +677,65 @@ cdef class ndarray:
     def squeeze(self, axis=None):
         """Removes single-dimensional entries from the shape of an array.
 
-        Refer to `nlcpy.squeeze` for full documentation.
+        Refer to :func:`nlcpy.squeeze` for full documentation.
 
-        See Also:
-            dims::squeeze : Equivalent function.
+        See Also
+        --------
+        nlcpy.squeeze : Equivalent function.
 
         """
         return manipulation._ndarray_squeeze(self, axis=axis)
+
+    def repeat(self, repeats, axis=None):
+        """Repeats elements of an array.
+
+        Refer to `nlcpy.repeat` for full documentation.
+
+        See Also:
+            tiling::repeat : Equivalent function.
+
+        """
+        return manipulation._ndarray_repeat(self, repeats, axis)
     # -------------------------------------------------------------------------
     # sorting, searching, counting
     # -------------------------------------------------------------------------
     cpdef sort(self, axis=-1, kind=None, order=None):
         """Sorts an array in-place.
 
-        Refer to `nlcpy.sort` for full documentation.
+        Refer to :func:`nlcpy.sort` for full documentation.
 
-        Args:
-            axis : int, optional
-                Axis along which to sort. Default is -1, which means sort along the last
-                axis.
-            kind : {'stable'}, optional
-                Sorting algorithm.
-            order : str or list of str, optional
-                Not implemented.
+        Parameters
+        ----------
+        axis : int, optional
+            Axis along which to sort. Default is -1, which means sort along the last
+            axis.
+        kind : {'stable'}, optional
+            Sorting algorithm.
+        order : str or list of str, optional
+            Not implemented.
 
-        Raises:
-            kind is not None and not 'stable' : NotImplementedError occurs.
-            order is not None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * *kind* is not None and not 'stable' : NotImplementedError occurs.
+        * *order* is not None : NotImplementedError occurs.
 
-        See Also:
-            sort::sort : Returns a sorted copy of an array.
-            argsort : Returns the indices that would
-                sort an array.
+        See Also
+        --------
+        nlcpy.sort : Returns a sorted copy of an array.
+        nlcpy.argsort : Returns the indices that would sort an array.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> a = vp.array([[1,4], [3,1]])
-            >>> a.sort(axis=1)
-            >>> a
-            array([[1, 4],
-                   [1, 3]])
-            >>> a.sort(axis=0)
-            >>> a
-            array([[1, 3],
-                   [1, 4]])
-
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> a = vp.array([[1,4], [3,1]])
+        >>> a.sort(axis=1)
+        >>> a
+        array([[1, 4],
+               [1, 3]])
+        >>> a.sort(axis=0)
+        >>> a
+        array([[1, 3],
+               [1, 4]])
         """
         if kind is not None and kind is not 'stable':
             raise NotImplementedError('kind only supported \'stable\'.')
@@ -682,10 +748,11 @@ cdef class ndarray:
     cpdef ndarray argsort(self, axis=-1, kind=None, order=None):
         """Returns the indices that would sort this array.
 
-        Refer to `nlcpy.argsort` for full documentation.
+        Refer to :func:`nlcpy.argsort` for full documentation.
 
-        See Also:
-            sort::argsort : Equivalent function.
+        See Also
+        --------
+        nlcpy.argsort : Equivalent function.
 
         """
         if kind is not None and kind is not 'stable':
@@ -700,90 +767,105 @@ cdef class ndarray:
     # array conversion
     # -------------------------------------------------------------------------
     cpdef tolist(self):
-        """Returns the array as an a.ndim-levels deep nested list of Python scalars.
+        """Returns the array as an ``a.ndim``-levels deep nested list of Python scalars.
 
         Returns a copy of the array data as a (nested) Python list. Data items are
         converted to the nearest compatible builtin Python type, via the item function.
-        If a.ndim is 0, then since the depth of the nested list is 0, it will not be a
-        list at all, but a simple Python scalar.
+        If ``a.ndim`` is 0, then since the depth of the nested list is 0, it will not be
+        a list at all, but a simple Python scalar.
 
-        Args:
-            none
+        Parameters
+        ----------
+        none
 
-        Returns:
-            y : object, or list of object, or list of list of object,
-                or...
-                The possibly nested list of array elements.
+        Returns
+        -------
+        y : object, or list of object, or list of list of object, or...
+            The possibly nested list of array elements.
 
-        Note:
-            The array may be recreated via a = nlcpy.array(a.tolist()), although this may
-            sometimes lose precision.
+        Note
+        ----
+        The array may be recreated via ``a = nlcpy.array(a.tolist())``, although this may
+        sometimes lose precision.
 
-        Examples:
-            For a 1D array, a.tolist() is almost the same as list(a):
-            >>> import nlcpy as vp
-            >>> a = vp.array([1, 2])
-            >>> list(a)
-            [array(1), array(2)]
-            >>> a.tolist()
-            [1, 2]
-            However, for a 2D array, tolist applies recursively
-            >>> a = vp.array([[1, 2], [3, 4]])
-            >>> list(a)
-            [array([1, 2]), array([3, 4])]
-            >>> a.tolist()
-            [[1, 2], [3, 4]]
-            The base case for this recursion is a 0D array:
-            >>> a = vp.array(1)
-            >>> list(a)
-            Traceback (most recent call last):
-             ...
-            TypeError: iteration over a 0-d array
-            >>> a.tolist()
-            1
+        Examples
+        --------
+        For a 1D array, ``a.tolist()`` is almost the same as ``list(a)``:
 
+        >>> import nlcpy as vp
+        >>> a = vp.array([1, 2])
+        >>> list(a)
+        [array(1), array(2)]
+        >>> a.tolist()
+        [1, 2]
+
+        However, for a 2D array, ``tolist`` applies recursively
+
+        >>> a = vp.array([[1, 2], [3, 4]])
+        >>> list(a)
+        [array([1, 2]), array([3, 4])]
+        >>> a.tolist()
+        [[1, 2], [3, 4]]
+
+        The base case for this recursion is a 0D array:
+
+        >>> a = vp.array(1)
+        >>> list(a)
+        Traceback (most recent call last):
+         ...
+        TypeError: iteration over a 0-d array
+        >>> a.tolist()
+        1
         """
         return self.get().tolist()
 
     cpdef ndarray view(self, dtype=None):
         """Returns a new view of array with the same data.
 
-        Args:
-            dtype : dtype, optional
-                Data-type descriptor of the returned view, e.g., float32 or int64. The
-                default, None, results in the view having the same data-type as a.
+        Parameters
+        ----------
+        dtype : dtype, optional
+            Data-type descriptor of the returned view, e.g., float32 or int64. The
+            default, None, results in the view having the same data-type as *a.*
 
-        Raises:
-            type is specified : TypeError occurs in the current NLCPy.
+        Restriction
+        -----------
+        * *type* is specified : TypeError occurs in the current NLCPy.
 
-        Note:
-            a.view() is used two different ways:
-            a.view(some_dtype) or a.view(dtype=some_dtype) constructs a view of the
-            array's memory with a different dtype. This can cause a reinterpretation of
-            the bytes of memory.
-            For a.view(some_dtype), if some_dtype has a different number of bytes per
-            entry than the previous dtype (for example, converting a regular array to a
-            structured array), then the behavior of the view cannot be predicted just
-            from the superficial appearance of a (shown by print(a)). It also depends on
-            exactly how a is stored in memory. Therefore if a is C-ordered versus
-            fortran-ordered, versus defined as a slice or transpose, etc., the view may
-            give different results.
+        Note
+        ----
+        ``a.view()`` is used two different ways:
 
-        Examples:
-            Viewing array data using a different dtype:
-            >>> import nlcpy as vp
-            >>> x = vp.array([(1, 2)], dtype=vp.int32)
-            >>> y = x.view(dtype=vp.int64)
-            >>> y
-            array([[8589934593]])
-            Making changes to the view changes the underlying array
-            >>> x = vp.array([(1, 2),(3,4)], dtype=vp.int32)
-            >>> xv = x.view(dtype=vp.int32).reshape(-1,2)
-            >>> xv[0,1] = 20
-            >>> x
-            array([[ 1, 20],
-                   [ 3,  4]], dtype=int32)
+        ``a.view(some_dtype)`` or ``a.view(dtype=some_dtype)`` constructs a view of the
+        array's memory with a different dtype. This can cause a reinterpretation of the
+        bytes of memory.
 
+        For ``a.view(some_dtype)``, if ``some_dtype`` has a different number of bytes per
+        entry than the previous dtype (for example, converting a regular array to a
+        structured array), then the behavior of the view cannot be predicted just from
+        the superficial appearance of ``a`` (shown by ``print(a)``). It also depends on
+        exactly how ``a`` is stored in memory. Therefore if a is C-ordered versus
+        fortran-ordered, versus defined as a slice or transpose, etc., the view may give
+        different results.
+
+        Examples
+        --------
+        Viewing array data using a different dtype:
+
+        >>> import nlcpy as vp
+        >>> x = vp.array([(1, 2)], dtype=vp.int32)
+        >>> y = x.view(dtype=vp.int64)
+        >>> y
+        array([[8589934593]])
+
+        Making changes to the view changes the underlying array
+
+        >>> x = vp.array([(1, 2),(3,4)], dtype=vp.int32)
+        >>> xv = x.view(dtype=vp.int32).reshape(-1,2)
+        >>> xv[0,1] = 20
+        >>> x
+        array([[ 1, 20],
+               [ 3,  4]], dtype=int32)
         """
         cdef Py_ssize_t ndim
         cdef object vh_view = None
@@ -796,16 +878,18 @@ cdef class ndarray:
     cpdef ndarray copy(self, order='C'):
         """Returns a copy of the array.
 
-        Args:
-            order : {'C','F','A','K'}, optional
-                Controls the memory layout of the copy. 'C' means C-order, 'F' means
-                F-order, 'A' means 'F' if a is Fortran contiguous, 'C' otherwise. 'K'
-                means match the layout of a as closely as possible. (Note that this
-                function and `nlcpy.copy` are very similar, but have different default
-                values for their order= arguments.)
+        Parameters
+        ----------
+        order : {'C','F','A','K'}, optional
+            Controls the memory layout of the copy. 'C' means C-order, 'F' means F-order,
+            'A' means 'F' if a is Fortran contiguous, 'C' otherwise. 'K' means match the
+            layout of a as closely as possible. (Note that this function and nlcpy.copy
+            are very similar, but have different default values for their order=
+            arguments.)
 
-        See Also:
-            from_data::copy : Equivalent function.
+        See Also
+        --------
+        nlcpy.copy : Equivalent function.
 
         """
         cdef int order_char = (
@@ -835,37 +919,40 @@ cdef class ndarray:
     cpdef ndarray astype(self, dtype, order='K', casting=None, subok=None, copy=True):
         """Returns a copy of the array, casts to a specified type.
 
-        Args:
-            dtype : str or dtype
-                Typecode or data-type to which the array is cast.
-            order : {'C','F','A','K'}, optional
-                Controls the memory layout order of the result. 'C' means C order, 'F'
-                means Fortran order, 'A' means 'F' order if all the arrays are Fortran
-                contiguous, 'C' order otherwise, and 'K' means as close to the order the
-                array elements appear in memory as possible. Default is 'K'.
-            casting : str, optional
-                This argument is not supported. The default is None.
-            subok : bool, optional
-                This argument is not supported. The default is None.
-            copy : bool, optional
-                By default, astype always returns a newly allocated array. If this is set
-                to false, and the dtype, order requirements are satisfied, the input
-                array is returned instead of a copy.
+        Parameters
+        ----------
+        dtype : str or dtype
+            Typecode or data-type to which the array is cast.
+        order : {'C','F','A','K'}, optional
+            Controls the memory layout order of the result. 'C' means C order, 'F' means
+            Fortran order, 'A' means 'F' order if all the arrays are Fortran contiguous,
+            'C' order otherwise, and 'K' means as close to the order the array elements
+            appear in memory as possible. Default is 'K'.
+        casting : str, optional
+            This argument is not supported. The default is None.
+        subok : bool, optional
+            This argument is not supported. The default is None.
+        copy : bool, optional
+            By default, astype always returns a newly allocated array. If this is set to
+            false, and the dtype, order requirements are satisfied, the input array is
+            returned instead of a copy.
 
-        Returns:
-            arr_t : `ndarray`
-                Unless copy is False and the other conditions for returning the input
-                array are satisfied (see description for copy input parameter), arr_t is
-                a new array of the same shape as the input array, with dtype, order given
-                by dtype, order.
+        Returns
+        -------
+        arr_t : ndarray
+            Unless copy is False and the other conditions for returning the input array
+            are satisfied (see description for copy input parameter), arr_t is a new
+            array of the same shape as the input array, with dtype, order given by dtype,
+            order.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> x = vp.array([1, 2, 2.5])
-            >>> x
-            array([1. , 2. , 2.5])
-            >>> x.astype(int)
-            array([1, 2, 2])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> x = vp.array([1, 2, 2.5])
+        >>> x
+        array([1. , 2. , 2.5])
+        >>> x.astype(int)
+        array([1, 2, 2])
 
         """
         if casting is not None:
@@ -905,20 +992,22 @@ cdef class ndarray:
     cpdef fill(self, value):
         """Fills the array with a scalar value.
 
-        Args:
-            value : scalar
-                All elements of the ndarray will be assigned this value.
+        Parameters
+        ----------
+        value : scalar
+            All elements of the ndarray will be assigned this value.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> a = vp.array([1, 2])
-            >>> a.fill(0)
-            >>> a
-            array([0, 0])
-            >>> a = vp.empty(2)
-            >>> a.fill(1)
-            >>> a
-            array([1., 1.])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> a = vp.array([1, 2])
+        >>> a.fill(0)
+        >>> a
+        array([0, 0])
+        >>> a = vp.empty(2)
+        >>> a.fill(1)
+        >>> a
+        array([1., 1.])
 
         """
         if isinstance(value, numpy.ndarray):
@@ -946,24 +1035,27 @@ cdef class ndarray:
         default is 'C'-order). 'Any' order means C-order unless the F_CONTIGUOUS flag in
         the array is set, in which case it means 'Fortran' order.
 
-        Args:
-            order : order : {'C', 'F', None}, optional
-                Order of the data for multidimensional arrays: C, Fortran, or the same as
-                for the original array.
+        Parameters
+        ----------
+        order : order : {'C', 'F', None}, optional
+            Order of the data for multidimensional arrays: C, Fortran, or the same as for
+            the original array.
 
-        Returns:
-            s : bytes
-                Python bytes exhibiting a copy of a's raw data.
+        Returns
+        -------
+        s : bytes
+            Python bytes exhibiting a copy of *a's* raw data.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> x = vp.array([[0, 1], [2, 3]], dtype='<u4')
-            >>> x.tobytes()
-            b'\\x00\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x02\\x00\\x00\\x00\\x03\\x00\\x00\\x00'
-            >>> x.tobytes('C') == x.tobytes()
-            True
-            >>> x.tobytes('F')
-            b'\\x00\\x00\\x00\\x00\\x02\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x03\\x00\\x00\\x00'
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> x = vp.array([[0, 1], [2, 3]], dtype='<u4')
+        >>> x.tobytes()
+        b'\\x00\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x02\\x00\\x00\\x00\\x03\\x00\\x00\\x00'
+        >>> x.tobytes('C') == x.tobytes()
+        True
+        >>> x.tobytes('F')
+        b'\\x00\\x00\\x00\\x00\\x02\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x03\\x00\\x00\\x00'
 
         """
         # ndarray.get() is numpy.ndarray value.
@@ -975,10 +1067,11 @@ cdef class ndarray:
     cpdef ndarray take(self, indices, axis=None, out=None):
         """Takes elements from an array along an axis.
 
-        Refer to `nlcpy.take` for full documentation.
+        Refer to :func:`nlcpy.take` for full documentation.
 
-        See Also:
-            indexing::take : Equivalent function.
+        See Also
+        --------
+        nlcpy.take : Equivalent function.
 
         """
         return indexing._ndarray_take(self, indices, axis, out)
@@ -986,10 +1079,11 @@ cdef class ndarray:
     cpdef ndarray diagonal(self, offset=0, axis1=0, axis2=1):
         """Returns specified diagonals.
 
-        Refer to `nlcpy.diagonal` for full documentation.
+        Refer to nlcpy.diagonal for full documentation.
 
-        See Also:
-            indexing::diagonal : Equivalent function.
+        See Also
+        --------
+        nlcpy.diagonal : Equivalent function.
 
         """
         return indexing._ndarray_diagonal(self, offset, axis1, axis2)
@@ -1001,10 +1095,11 @@ cdef class ndarray:
                       initial=nlcpy._NoValue, where=True):
         """Returns the maximum along a given axis.
 
-        Refer to `nlcpy.amax` for full documentation.
+        Refer to :func:`nlcpy.amax` for full documentation.
 
-        See Also:
-            order::amax : Equivalent function.
+        See Also
+        --------
+        nlcpy.amax : Equivalent function.
 
         """
         return ufunc_op.maximum.reduce(
@@ -1016,10 +1111,11 @@ cdef class ndarray:
                       initial=nlcpy._NoValue, where=True):
         """Returns the minimum along a given axis.
 
-        Refer to `nlcpy.amin` for full documentation.
+        Refer to :func:`nlcpy.amin` for full documentation.
 
-        See Also:
-            order::amin : Equivalent function.
+        See Also
+        --------
+        nlcpy.amin : Equivalent function.
 
         """
         return ufunc_op.minimum.reduce(
@@ -1033,10 +1129,11 @@ cdef class ndarray:
     cpdef ndarray argmax(self, axis=None, out=None):
         """Returns indices of the maximum values along the given axis.
 
-        Refer to `nlcpy.argmax` for full documentation.
+        Refer to :func:`nlcpy.argmax` for full documentation.
 
-        See Also:
-            searching::argmax : Equivalent function.
+        See Also
+        --------
+        nlcpy.argmax : Equivalent function.
 
         """
         return searching.argmax(self, axis, out)
@@ -1044,10 +1141,11 @@ cdef class ndarray:
     cpdef ndarray argmin(self, axis=None, out=None):
         """Returns indices of the minimum values along the given axis.
 
-        Refer to `nlcpy.argmin` for full documentation.
+        Refer to :func:`nlcpy.argmin` for full documentation.
 
-        See Also:
-            searching::argmin : Equivalent function.
+        See Also
+        --------
+        nlcpy.argmin : Equivalent function.
 
         """
         return searching.argmin(self, axis, out)
@@ -1055,10 +1153,11 @@ cdef class ndarray:
     cpdef nonzero(self):
         """Returns the indices of the elements that are non-zero.
 
-        Refer to `nlcpy.nonzero` for full documentation.
+        Refer to :func:`nlcpy.nonzero` for full documentation.
 
-        See Also:
-            searching::nonzero : Equivalent function.
+        See Also
+        --------
+        nlcpy.nonzero : Equivalent function.
 
         """
         return searching.nonzero(self)
@@ -1069,10 +1168,11 @@ cdef class ndarray:
     cpdef all(self, axis=None, out=None, keepdims=False):
         """Returns True if all elements evaluate to True.
 
-        Refer to `nlcpy.all` for full documentation.
+        Refer to :func:`nlcpy.all` for full documentation.
 
-        See Also:
-            testing::all : Equivalent function.
+        See Also
+        --------
+        nlcpy.all : Equivalent function.
 
         """
         if keepdims is nlcpy._NoValue:
@@ -1084,10 +1184,11 @@ cdef class ndarray:
     cpdef any(self, axis=None, out=None, keepdims=False):
         """Returns True if any elements evaluate to True.
 
-        Refer to `nlcpy.any` for full documentation.
+        Refer to :func:`nlcpy.any` for full documentation.
 
-        See Also:
-            testing::any : Equivalent function.
+        See Also
+        --------
+        nlcpy.any : Equivalent function.
 
         """
         if keepdims is nlcpy._NoValue:
@@ -1099,17 +1200,31 @@ cdef class ndarray:
     # -------------------------------------------------------------------------
     #  statistics methods
     # -------------------------------------------------------------------------
+    def ptp(self, axis=None, out=None, keepdims=nlcpy._NoValue):
+        """Range of values (maximum - minimum) along an axis.
+
+        Refer to :func:`nlcpy.ptp` for full documentation.
+
+        See Also
+        --------
+        nlcpy.ptp : Equivalent function.
+
+        """
+        ret = nlcpy.statistics.order.ptp(self, axis, out, keepdims)
+        return ret
 
     def mean(self, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
         """Computes the arithmetic mean along the specified axis.
 
         Returns the average of the array elements. The average is taken over the
         flattened array by default, otherwise over the specified axis. float64
-        intermediate and return values are used for integer inputs. Refer to `nlcpy.mean`
-        for full documentation.
+        intermediate and return values are used for integer inputs.
 
-        See Also:
-            average::mean : Equivalent function.
+        Refer to :func:`nlcpy.mean` for full documentation.
+
+        See Also
+        --------
+        nlcpy.mean : Equivalent function.
 
         """
         ret = nlcpy.statistics.average.mean(self, axis, dtype, out, keepdims)
@@ -1120,10 +1235,13 @@ cdef class ndarray:
 
         Returns the variance of the array elements, a measure of the spread of a
         distribution. The variance is computed for the flattened array by default,
-        otherwise over the specified axis. Refer to `nlcpy.var` for full documentation.
+        otherwise over the specified axis.
 
-        See Also:
-            average::var : Equivalent function.
+        Refer to :func:`nlcpy.var` for full documentation.
+
+        See Also
+        --------
+        nlcpy.var : Equivalent function.
 
         """
         ret = nlcpy.statistics.average.var(self, axis, dtype, out, ddof, keepdims)
@@ -1134,14 +1252,86 @@ cdef class ndarray:
 
         Returns the standard deviation, a measure of the spread of a distribution, of the
         array elements. The standard deviation is computed for the flattened array by
-        default, otherwise over the specified axis. Refer to `nlcpy.std` for full
-        documentation.
+        default, otherwise over the specified axis.
 
-        See Also:
-            average::std : Equivalent function.
+        Refer to :func:`nlcpy.std` for full documentation.
+
+        See Also
+        --------
+        nlcpy.std : Equivalent function.
 
         """
         ret = nlcpy.statistics.average.std(self, axis, dtype, out, ddof, keepdims)
+        return ret
+
+    def conj(self, out=None, where=True, casting='same_kind',
+             order='K', dtype=None, subok=False):
+        """Function that operates element by element on whole arrays.
+
+        See Also
+        --------
+            nlcpy.conj : Equivalent function.
+        """
+        ret = nlcpy.ufunc_op.conj(self, out=out, where=where,
+                                  casting=casting, order=order, dtype=dtype, subok=subok)
+        return ret
+
+    def conjugate(self, out=None, where=True, casting='same_kind',
+                  order='K', dtype=None, subok=False):
+        """Function that operates element by element on whole arrays.
+
+        See Also
+        --------
+            nlcpy.conjugate : Equivalent function.
+        """
+        ret = nlcpy.ufunc_op.conjugate(self, out=out, where=where,
+                                       casting=casting, order=order, dtype=dtype,
+                                       subok=subok)
+        return ret
+
+    def dot(self, b, out=None):
+        """Computes a dot product of two arrays.
+
+        See Also
+        --------
+            nlcpy.dot : Equivalent function.
+
+        """
+        ret = nlcpy.dot(self, b, out=out)
+        return ret
+
+    def cumsum(self, axis=None, dtype=None, out=None):
+        """Returns the cumulative sum of the elements along a given axis.
+
+        See Also
+        --------
+            nlcpy.cumsum : Equivalent function.
+        """
+        ret = nlcpy.cumsum(self, axis=axis, dtype=dtype, out=out)
+        return ret
+
+    def prod(self, axis=None, dtype=None, out=None, keepdims=False,
+             initial=nlcpy._NoValue, where=True):
+        """Returns the product of the array elements over the given axis.
+
+        See Also
+        --------
+            nlcpy.prod : Equivalent function.
+        """
+        ret = nlcpy.prod(self, axis=axis, dtype=dtype, out=out,
+                         keepdims=keepdims, initial=initial, where=where)
+        return ret
+
+    def sum(self, axis=None, dtype=None, out=None, keepdims=False,
+            initial=0, where=True):
+        """Returns the sum of the array elements over the given axis.
+
+        See Also
+        --------
+            nlcpy.sum : Equivalent function.
+        """
+        ret = nlcpy.sum(self, axis=axis, dtype=dtype, out=out,
+                        keepdims=keepdims, initial=initial, where=where)
         return ret
 
     # -------------------------------------------------------------------------
@@ -1150,9 +1340,10 @@ cdef class ndarray:
     cpdef get(self, order='K'):
         """Returns a NumPy array on VH that copied from VE.
 
-        Args:
-            order : {'C','F','A','K'}, optional
-                Controls the memory layout order of the result. The default is 'K'.
+        Parameters
+        ----------
+        order : {'C','F','A','K'}, optional
+            Controls the memory layout order of the result. The default is 'K'.
 
         """
         if (self._memloc == on_VH or
@@ -1521,6 +1712,38 @@ cpdef int _update_order_char(ndarray a, int order_char):
 # memory check
 # -------------------------------------------------------------------------
 def may_share_memory(a, b, max_work=None):
+    """Determine if two arrays might share memory.
+
+    A return of True does not necessarily mean that the two arrays share any element.
+    It just means that they might.
+
+    Parameters
+    ----------
+    a, b : ndarray
+        Input arrays
+    max_work : int, optional
+        Effort to spend on solving the overlap problem.
+        Please note that the current version supports only when max_work is None.
+
+    Returns
+    -------
+    out : bool
+        Dictionary containing the old settings.
+
+    Restriction
+    -----------
+    - If *max_work* is not None, *NotImplementedError* occurs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.may_share_memory(vp.array([1,2]), vp.array([5,8,9]))
+    False
+    >>> x = vp.zeros([3, 4])
+    >>> vp.may_share_memory(x[:,0], x[:,1])
+    True
+
+    """
     if isinstance(a, ndarray) and isinstance(b, ndarray):
         if max_work is not None:
             raise NotImplementedError("Only supported for `max_work` "
@@ -1684,6 +1907,8 @@ def finalize():
     v = veo.VeoAlloc()
     try:
         req = v.lib.func[b"random_destroy_handle"](v.ctx, None)
+        req.wait_result()
+        req = v.lib.func[b"nlcpy_fft_destroy_handle"](v.ctx, None)
         req.wait_result()
         req = v.lib.func[b"asl_library_finalize"](v.ctx, None)
         req.wait_result()

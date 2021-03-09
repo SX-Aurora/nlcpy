@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -139,9 +139,13 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         VE_FUNC_COPY
         VE_FUNC_EYE
         VE_FUNC_LINSPACE
+        VE_FUNC_COPY_MASKED
 
         # manipulation functions
+        VE_FUNC_DELETE
         VE_FUNC_TILE
+        VE_FUNC_REPEAT
+        VE_FUNC_INSERT
 
         # cblas wrapper functions
         VE_FUNC_CBLAS_SDOT

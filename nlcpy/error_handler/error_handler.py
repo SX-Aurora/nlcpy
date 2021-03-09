@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,63 @@ import numpy
 # ----------------------------------------------------------------------------
 
 def seterr(all=None, divide=None, over=None, under=None, invalid=None):
+    """Sets how floating-point errors are handled.
+
+    Parameters
+    ----------
+    all : {'ignore', 'warn', 'raise', 'print'}, optional
+        Sets treatment for all types of floating-point errors at once:
+
+            - ignore: Take no action when the exception occurs.
+            - warn: Print a *RuntimeWarning*.
+            - raise: Raise a *FloatingPointError*.
+            - print: Print a warning directly to stdout.
+
+        The default is not to change the current behavior.
+    divide : {'ignore', 'warn', 'raise', 'print'}, optional
+        Treatment for division by zero.
+    over : {'ignore', 'warn', 'raise', 'print'}, optional
+        Treatment for floating-point overflow.
+    under : {'ignore', 'warn', 'raise', 'print'}, optional
+        Treatment for floating-point underflow.
+    invalid : {'ignore', 'warn', 'raise', 'print'}, optional
+        Treatment for invalid floating-point operation.
+
+    Returns
+    -------
+    old_settings : dict
+        Dictionary containing the old settings.
+
+    Restriction
+    -----------
+    - If the 'call' mode or the 'log' mode is specified for each parameter,
+      *NotImplementedError* occurs.
+
+    Note
+    ----
+    - This function is the wrapper function to utilize :func:`numpy.seterr`.
+    - The floating-point exceptions are defined in the IEEE 754 standard:
+
+        - Division by zero: infinite result obtained from finite numbers.
+        - Overflow: result too large to be expressed.
+        - Underflow: result so close to zero that some precision was lost.
+        - Invalid operation: result is not an expressible number, typically
+          indicates that a NaN was produced.
+
+    See Also
+    --------
+    geterr : Gets the current way of handling floating-point errors.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> old_settings = vp.seterr(all='ignore')  #seterr to known value
+    >>> vp.seterr(over='raise')
+    {'divide': 'ignore', 'over': 'ignore', 'under': 'ignore', 'invalid': 'ignore'}
+    >>> vp.seterr(**old_settings)  # reset to default
+    {'divide': 'ignore', 'over': 'raise', 'under': 'ignore', 'invalid': 'ignore'}
+
+    """
     if all in ('call', 'log'):
         raise NotImplementedError('all=%s in seterr is not implemented yet.' % all)
     if divide in ('call', 'log'):
@@ -61,24 +118,36 @@ def seterr(all=None, divide=None, over=None, under=None, invalid=None):
 # ----------------------------------------------------------------------------
 
 def geterr():
+    """Gets the current way of handling floating-point errors.
+
+    Returns
+    -------
+    res : dict
+        A dictionary with keys "divide", "over", "under", and "invalid",
+        whose values are from the strings  "ignore", "print", "warn", and "raise".
+        The keys represent possible floating-point exceptions, and the values
+        define how these exceptions are handled.
+        The elements of the shape tuple give the lengths of the corresponding array
+        dimensions.
+
+    Note
+    ----
+    - For complete documentation of the types of floating-point exceptions and treatment
+      options, see :func:`nlcpy.seterr`.
+    - This function is the wrapper function to utilize :func:`numpy.geterr`.
+
+    See Also
+    --------
+    seterr : Sets how floating-point errors are handled.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> from collections import OrderedDict
+    >>> sorted(vp.geterr().items())
+    [('divide', 'warn'), ('invalid', 'warn'), ('over', 'warn'), ('under', 'ignore')]
+    >>> vp.arange(3.) / vp.arange(3.)
+    array([nan,  1.,  1.])
+
+    """
     return numpy.geterr()
-
-
-# ----------------------------------------------------------------------------
-# Set the floating-point error callback function or log object.
-# see: https://docs.scipy.org/doc/numpy/reference/generated/
-#                                      numpy.seterrcall.html#numpy.seterrcall
-# ----------------------------------------------------------------------------
-
-def seterrcall(func):
-    return numpy.seterrcall(func)
-
-
-# ----------------------------------------------------------------------------
-# Return the current callback function used on floating-point errors.
-# see: https://docs.scipy.org/doc/numpy/reference/generated/
-#                                     numpy.geterrcall.html#numpy.geterrcall
-# ----------------------------------------------------------------------------
-
-def geterrcall():
-    return numpy.geterrcall()

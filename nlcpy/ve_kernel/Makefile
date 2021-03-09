@@ -4,10 +4,10 @@ BASEDIR = ../..
 
 include $(BASEDIR)/make.inc
 
-NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -r |head -1)
+NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -rV |head -1)
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
-LIB_NLC=-lasl_openmp_i64 -lcblas -lblas_openmp
+LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp
 
 LIB_COMMON=$(LIBDIR)/libnlcpy_ve_kernel_common.so
 ifeq ($(FAST_MATH),yes)
@@ -18,7 +18,7 @@ endif
 
 CC=ncc
 CFLAGS=-fpic -O2 -report-all -fopenmp
-LDFLAGS=-shared $(LIBPATH) $(LIB_NLC) -L$(LIBDIR) -l$(patsubst lib%.so,%,$(notdir $(LIB_COMMON))) -fopenmp
+LDFLAGS=-shared -L$(LIBDIR) -l$(patsubst lib%.so,%,$(notdir $(LIB_COMMON))) $(LIBPATH) $(LIB_NLC) -fopenmp
 LDFLAGS_COMMON=-shared $(LIBPATH) $(LIB_NLC) -fopenmp
 ifeq ($(FTRACE),yes)
 CFLAGS+=-ftrace
@@ -55,7 +55,6 @@ endif
 VE_SORTING = \
 	nlcpy_sort.c\
 	nlcpy_argsort.c
-VE_SORT_WRAPPER  = asl_sort_wrapper.c
 
 # UNARY FUNCTION
 ifneq ($(NO_OPERATOR),yes)
@@ -113,6 +112,9 @@ endif
 VE_COPY_FUNCTION =\
   nlcpy_copy.c\
   nlcpy_angle.c
+
+VE_COPY_MASKED_FUNCTION =\
+  nlcpy_copy_masked.c\
 
 # BINARY OPERATOR
 ifneq ($(NO_OPERATOR),yes)
@@ -358,6 +360,17 @@ VE_ARGFUNC = $(VE_ARGMAX) $(VE_ARGMIN)
 
 # Linear Algebra
 VE_DOT = nlcpy_dot.c
+VE_LINALG = \
+  nlcpy_solve.c\
+  nlcpy_inv.c\
+  nlcpy_lstsq.c\
+  nlcpy_svd.c\
+  nlcpy_eig.c\
+  nlcpy_eigh.c\
+  nlcpy_norm.c\
+  nlcpy_cholesky.c\
+  nlcpy_qr.c
+
 
 VE_BASIC_MASTER =\
   nlcpy_arange.c.master\
@@ -371,7 +384,10 @@ VE_BASIC_MASTER =\
   nlcpy_where.c.master\
   nlcpy_argwhere.c.master\
   nlcpy_tile.c.master\
-  nlcpy_diff.c.master
+  nlcpy_repeat.c.master\
+  nlcpy_diff.c.master\
+  nlcpy_delete.c.master\
+  nlcpy_insert.c.master
 
 
 VE_CONTROLLER =\
@@ -385,11 +401,16 @@ VE_RANDOM_KERNEL =\
   nlcpy_random.c\
   nlcpy_random_shuffle.c
 
+VE_FFT_KERNEL =\
+  nlcpy_fft.c
+
 VE_CBLAS_WRAPPER = cblas_wrapper.c
 
+VE_UTILITY = array_utility.c
+
+VE_MEMPOOL = nlcpy_mempool_ve.c
+
 OBJS = \
-  array_utility.o\
-  nlcpy_mempool_ve.o\
   $(VE_UNARY_FUNCTION:.c=.o)\
   $(VE_BINARY_FUNCTION:.c=.o)\
   $(VE_REDUCE:.c=.o)\
@@ -398,23 +419,27 @@ OBJS = \
   $(VE_OUTER:.c=.o)
 
 OBJS_COMMON = \
+  $(VE_UTILITY:.c=.o)\
+  $(VE_MEMPOOL:.c=.o)\
   $(VE_COPY_FUNCTION:.c=.o)\
   $(VE_COPY_MASKED_FUNCTION:.c=.o)\
   $(VE_MATMUL_OPERATOR:.c=.o)\
   $(VE_RANDOM_KERNEL:.c=.o)\
-  $(VE_SORT_WRAPPER:.c=.o)\
+  $(VE_FFT_KERNEL:.c=.o)\
+  $(VE_CBLAS_WRAPPER:.c=.o)\
   $(VE_SORTING:.c=.o)\
   $(VE_ARGFUNC:.c=.o)\
   $(VE_DOT:.c=.o)\
+  $(VE_LINALG:.c=.o)\
   $(VE_CAST:.c=.o)\
   $(VE_BASIC_KERNEL:.c=.o)\
   $(VE_CONTROLLER:.c=.o)\
-  $(VE_CBLAS_WRAPPER:.c=.o)\
   $(VE_BINARY_FUNCTION_COMMON:.c=.o)\
   $(VE_REDUCE_COMMON:.c=.o)\
   $(VE_REDUCEAT_COMMON:.c=.o)\
   $(VE_ACCUMULATE_COMMON:.c=.o)\
-  $(VE_OUTER_COMMON:.c=.o)
+  $(VE_OUTER_COMMON:.c=.o)\
+  xerbla.o
 
 
 ifeq ($(FAST_MATH),yes)
@@ -428,16 +453,17 @@ make.dep:
 	sh $(TOOLDIR)/make_dep.sh
 
 $(LIB): $(OBJS) $(LIB_COMMON)
-	mkdir -p $(LIBDIR) && $(CC) ${LDFLAGS} -o $@ $(OBJS)
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $(OBJS) ${LDFLAGS}
 
 $(LIB_COMMON): $(OBJS_COMMON)
-	mkdir -p $(LIBDIR) && $(CC) ${LDFLAGS_COMMON} -o $@ $^
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${LDFLAGS_COMMON}
 
 include make.dep
 
 perl: \
 	$(VE_UNARY_FUNCTION)\
 	$(VE_COPY_FUNCTION)\
+	$(VE_COPY_MASKED_FUNCTION)\
 	$(VE_BINARY_FUNCTION)\
 	$(VE_BINARY_FUNCTION_COMMON)\
 	$(VE_MATMUL_OPERATOR)\
@@ -452,14 +478,19 @@ perl: \
 	$(VE_OUTER_COMMON)\
 	$(VE_ARGFUNC)\
 	$(VE_DOT)\
+	$(VE_LINALG)
 
 $(VE_UNARY_FUNCTION): unary_operator.c.master unary_operator.c.master2
 	rm -f $@
 	$(CPP) $(CPPFLAGS) unary_operator.c.master $@
 
 $(VE_COPY_FUNCTION): copy.c.master
-	@rm -f $@
-	@$(CPP) $(CPPFLAGS) $? $@
+	rm -f $@
+	$(CPP) $(CPPFLAGS) $? $@
+
+$(VE_COPY_MASKED_FUNCTION): copy_masked.c.master
+	rm -f $@
+	$(CPP) $(CPPFLAGS) $? $@
 
 $(VE_BINARY_FUNCTION) $(VE_BINARY_FUNCTION_COMMON): binary_operator.c.master binary_operator.c.master2
 	rm -f $@
@@ -498,8 +529,8 @@ $(VE_DOT): $(VE_DOT:.c=.c.master)
 	$(CPP) $(CPPFLAGS) $? $@
 
 %.c: %.c.master
-	@rm -f $@
-	@$(CPP) $(CPPFLAGS) $< $@
+	rm -f $@
+	$(CPP) $(CPPFLAGS) $< $@
 
 %.o: %.c
 	$(CC) -c ${CFLAGS} -o $@ $(@F:%.o=%.c) ${INCPATH}
@@ -508,6 +539,7 @@ ifneq ($(FAST_MATH),yes)
 nlcpy_remainder.o:CFLAGS+=-mno-vector-fma
 nlcpy_mod.o:CFLAGS+=-mno-vector-fma
 nlcpy_floor_divide.o:CFLAGS+=-mno-vector-fma
+nlcpy_absolute.o:CFLAGS+=-mno-vector-intrinsic-check
 endif
 
 clean:
@@ -517,4 +549,5 @@ clean:
 	cd $(OBJDIR) && rm -rf $(VE_BINARY_FUNCTION)
 	cd $(OBJDIR) && rm -rf $(VE_MATMUL_OPERATOR)
 	cd $(OBJDIR) && rm -rf $(VE_ARGFUNC)
+	cd $(OBJDIR) && rm -rf $(VE_LINALG)
 	cd $(OBJDIR) && rm -rf $(VE_DOT)

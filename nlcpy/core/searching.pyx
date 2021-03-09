@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -79,47 +79,54 @@ cimport numpy as cnp
 cpdef argmax(a, axis=None, out=None):
     """Returns the indices of the maximum values along an axis.
 
-    Args:
-        a : array_like
-            Input array.
-        axis : int, optional
-            By default, the index is into the flattened array, otherwise along the
-            specified axis.
-        out : `ndarray`, optional
-            If provided, the result will be inserted into this array. It should be of the
-            appropriate shape and dtype.
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+    axis : int, optional
+        By default, the index is into the flattened array, otherwise along the specified
+        axis.
+    out : ndarray, optional
+        If provided, the result will be inserted into this array. It should be of the
+        appropriate shape and dtype.
 
-    Returns:
-        index_array : `ndarray` of ints
-            Array of indices into the array. It has the same shape as a.shape with the
-            dimension along axis removed.
+    Returns
+    -------
+    index_array : ndarray of ints
+        Array of indices into the array. It has the same shape as *a.shape* with the
+        dimension along *axis* removed.
 
-    Note:
-        In case of multiple occurrences of the maximum values, the indices corresponding
-        to the first occurrence are returned.
+    Note
+    ----
 
-    See Also:
-        argmin : Returns the indices of the minimum values along an axis.
-        order.amax : Returns the maximum of an array or maximum along an axis.
+    In case of multiple occurrences of the maximum values, the indices corresponding to
+    the first occurrence are returned.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.arange(6).reshape(2,3) + 10
-        >>> a
-        array([[10, 11, 12],
-               [13, 14, 15]])
-        >>> vp.argmax(a)
-        array(5)
-        >>> vp.argmax(a, axis=0)
-        array([1, 1, 1])
-        >>> vp.argmax(a, axis=1)
-        array([2, 2])
-        >>> b = vp.arange(6)
-        >>> b[1] = 5
-        >>> b
-        array([0, 5, 2, 3, 4, 5])
-        >>> vp.argmax(b)  # Only the first occurrence is returned.
-        array(1)
+    See Also
+    --------
+    argmin : Returns the indices of the minimum values along an axis.
+    amax : Returns the maximum of an array or maximum along an axis.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.arange(6).reshape(2,3) + 10
+    >>> a
+    array([[10, 11, 12],
+           [13, 14, 15]])
+    >>> vp.argmax(a)
+    array(5)
+    >>> vp.argmax(a, axis=0)
+    array([1, 1, 1])
+    >>> vp.argmax(a, axis=1)
+    array([2, 2])
+
+    >>> b = vp.arange(6)
+    >>> b[1] = 5
+    >>> b
+    array([0, 5, 2, 3, 4, 5])
+    >>> vp.argmax(b)  # Only the first occurrence is returned.
+    array(1)
 
     """
     # check None
@@ -259,47 +266,54 @@ cpdef argmax(a, axis=None, out=None):
 cpdef argmin(a, axis=None, out=None):
     """Returns the indices of the minimum values along an axis.
 
-    Args:
-        a : array_like
-            Input array.
-        axis : int, optional
-            By default, the index is into the flattened array, otherwise along the
-            specified axis.
-        out : `ndarray`, optional
-            If provided, the result will be inserted into this array. It should be of the
-            appropriate shape and dtype.
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+    axis : int, optional
+        By default, the index is into the flattened array, otherwise along the specified
+        axis.
+    out : ndarray, optional
+        If provided, the result will be inserted into this array. It should be of the
+        appropriate shape and dtype.
 
-    Returns:
-        index_array : `ndarray` of ints
-            Array of indices into the array. It has the same shape as a.shape with the
-            dimension along axis removed.
+    Returns
+    -------
+    index_array : ndarray of ints
+        Array of indices into the array. It has the same shape as *a.shape* with the
+        dimension along *axis* removed.
 
-    Note:
-        In case of multiple occurrences of the minimum values, the indices corresponding
-        to the first occurrence are returned.
+    Note
+    ----
 
-    See Also:
-        argmax : Returns the indices of the maximum values along an axis.
-        order.amin : Returns the minimum of an array or minimum along an axis.
+    In case of multiple occurrences of the minimum values, the indices corresponding to
+    the first occurrence are returned.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.arange(6).reshape(2,3) + 10
-        >>> a
-        array([[10, 11, 12],
-               [13, 14, 15]])
-        >>> vp.argmin(a)
-        array(0)
-        >>> vp.argmin(a, axis=0)
-        array([0, 0, 0])
-        >>> vp.argmin(a, axis=1)
-        array([0, 0])
-        >>> b = vp.arange(6) + 10
-        >>> b[4] = 10
-        >>> b
-        array([10, 11, 12, 13, 10, 15])
-        >>> vp.argmin(b)  # Only the first occurrence is returned.
-        array(0)
+    See Also
+    --------
+    argmax : Returns the indices of the maximum values along an axis.
+    amin : Returns the minimum of an array or minimum along an axis.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.arange(6).reshape(2,3) + 10
+    >>> a
+    array([[10, 11, 12],
+           [13, 14, 15]])
+    >>> vp.argmin(a)
+    array(0)
+    >>> vp.argmin(a, axis=0)
+    array([0, 0, 0])
+    >>> vp.argmin(a, axis=1)
+    array([0, 0])
+
+    >>> b = vp.arange(6) + 10
+    >>> b[4] = 10
+    >>> b
+    array([10, 11, 12, 13, 10, 15])
+    >>> vp.argmin(b)  # Only the first occurrence is returned.
+    array(0)
 
     """
     # check None
@@ -439,55 +453,65 @@ cpdef argmin(a, axis=None, out=None):
 cpdef nonzero(a):
     """Returns the indices of the elements that are non-zero.
 
-    Returns a tuple of arrays, one for each dimension of a, containing the indices of the
-    non-zero elements in that dimension. The values in a are always tested and returned
-    in row-major, C-style order.
-    To group the indices by element, rather than dimension, use `argwhere`, which returns
-    a row for each non-zero element.
+    Returns a tuple of arrays, one for each dimension of *a*, containing the indices of
+    the non-zero elements in that dimension. The values in *a* are always tested and
+    returned in row-major, C-style order.
+    To group the indices by element, rather than dimension, use :func:`argwhere`,
+    which returns a row for each non-zero element.
 
-    Args:
-        a : array_like
-            Input array.
+    Parameters
+    ----------
+    a : array_like
+        Input array.
 
-    Returns:
-        tuple_of_arrays : tuple
-            Indices of elements that are non-zero.
+    Returns
+    -------
+    tuple_of_arrays : tuple
+        Indices of elements that are non-zero.
 
-    Note:
-        While the nonzero values can be obtained with a[nonzero(a)], it is recommended to
-        use x[x.astype(bool)] or x[x != 0] instead, which will correctly handle 0-d
-        arrays.
+    Note
+    ----
+    While the nonzero values can be obtained with ``a[nonzero(a)]``, it is recommended to
+    use ``x[x.astype(bool)]`` or ``x[x != 0]`` instead, which will correctly handle 0-d
+    arrays.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.array([[3, 0, 0], [0, 4, 0], [5, 6, 0]])
-        >>> x
-        array([[3, 0, 0],
-               [0, 4, 0],
-               [5, 6, 0]])
-        >>> vp.nonzero(x)
-        (array([0, 1, 2, 2]), array([0, 1, 0, 1]))
-        >>> x[vp.nonzero(x)]
-        array([3, 4, 5, 6])
-        A common use for nonzero is to find the indices of an array, where a condition is
-        True. Given an array a, the condition a > 3 is a boolean array and since False is
-        interpreted as 0, np.nonzero(a > 3) yields the indices of the a where the
-        condition is true.
-        >>> a = vp.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-        >>> a > 3
-        array([[False, False, False],
-               [ True,  True,  True],
-               [ True,  True,  True]])
-        >>> vp.nonzero(a > 3)
-        (array([1, 1, 1, 2, 2, 2]), array([0, 1, 2, 0, 1, 2]))
-        Using this result to index a is equivalent to using the mask directly:
-        >>> a[vp.nonzero(a > 3)]
-        array([4, 5, 6, 7, 8, 9])
-        >>> a[a > 3]  # prefer this spelling
-        array([4, 5, 6, 7, 8, 9])
-        nonzero can also be called as a method of the array.
-        >>> (a > 3).nonzero()
-        (array([1, 1, 1, 2, 2, 2]), array([0, 1, 2, 0, 1, 2]))
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.array([[3, 0, 0], [0, 4, 0], [5, 6, 0]])
+    >>> x
+    array([[3, 0, 0],
+           [0, 4, 0],
+           [5, 6, 0]])
+    >>> vp.nonzero(x)
+    (array([0, 1, 2, 2]), array([0, 1, 0, 1]))
+    >>> x[vp.nonzero(x)]
+    array([3, 4, 5, 6])
+
+    A common use for ``nonzero`` is to find the indices of an array, where a condition is
+    True. Given an array *a*, the condition *a* > 3 is a boolean array and since False is
+    interpreted as 0, ``nlcpy.nonzero(a > 3)`` yields the indices of the *a* where the
+    condition is true.
+
+    >>> a = vp.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    >>> a > 3
+    array([[False, False, False],
+           [ True,  True,  True],
+           [ True,  True,  True]])
+    >>> vp.nonzero(a > 3)
+    (array([1, 1, 1, 2, 2, 2]), array([0, 1, 2, 0, 1, 2]))
+
+    Using this result to index *a* is equivalent to using the mask directly:
+
+    >>> a[vp.nonzero(a > 3)]
+    array([4, 5, 6, 7, 8, 9])
+    >>> a[a > 3]  # prefer this spelling
+    array([4, 5, 6, 7, 8, 9])
+
+    nonzero can also be called as a method of the array.
+
+    >>> (a > 3).nonzero()
+    (array([1, 1, 1, 2, 2, 2]), array([0, 1, 2, 0, 1, 2]))
 
     """
     errcnt = 0
@@ -554,33 +578,39 @@ cpdef nonzero(a):
 cpdef ndarray argwhere(a):
     """Finds the indices of array elements that are non-zero, grouped by element.
 
-    Args:
-        a : array_like
-            Input data.
+    Parameters
+    ----------
+    a : array_like
+        Input data.
 
-    Returns:
-        index_array : `ndarray`
-            Indices of elements that are non-zero. Indices are grouped by element.
+    Returns
+    -------
+    index_array : ndarray
+        Indices of elements that are non-zero. Indices are grouped by element.
 
-    Note:
-        The output of argwhere is not suitable for indexing arrays. For this purpose use
-        nonzero(a) instead.
+    Note
+    ----
 
-    See Also:
-        generate.where : Returns elements chosen from x or y depending on condition.
-        nonzero : Returns the indices of the elements that are non-zero.
+    The output of argwhere is not suitable for indexing arrays. For this purpose use
+    :func:`nonzero` instead.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.arange(6).reshape(2,3)
-        >>> x
-        array([[0, 1, 2],
-               [3, 4, 5]])
-        >>> vp.argwhere(x>1)
-        array([[0, 2],
-               [1, 0],
-               [1, 1],
-               [1, 2]])
+    See Also
+    --------
+    where : Returns elements chosen from x or y depending on condition.
+    nonzero : Returns the indices of the elements that are non-zero.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(6).reshape(2,3)
+    >>> x
+    array([[0, 1, 2],
+           [3, 4, 5]])
+    >>> vp.argwhere(x>1)
+    array([[0, 2],
+           [1, 0],
+           [1, 1],
+           [1, 2]])
 
     """
     errcnt = 0

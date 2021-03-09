@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -144,9 +144,13 @@ _prof = Profiling()
 def start_profiling():
     """Starts profiling.
 
-    Profiling the code block between start_profiling and `stop_profiling`.
-    See `print_run_stats` or `get_run_stats` for how to display profiling results.
+    Profiling the code block between :func:`nlcpy.prof.start_profiling` and
+    :func:`nlcpy.prof.stop_profiling`.
 
+    See Also
+    --------
+    nlcpy.prof.print_run_stats : Prints NLCPy run stats.
+    nlcpy.prof.get_run_stats : Gets dict of NLCPy run stats.
     """
     _prof.start()
 
@@ -154,9 +158,13 @@ def start_profiling():
 def stop_profiling():
     """Stops profiling.
 
-    Profiling the code block between `start_profiling` and stop_profiling.
-    See `print_run_stats` or `get_run_stats` for how to display profiling results.
+    Profiling the code block between :func:`nlcpy.prof.start_profiling` and
+    :func:`nlcpy.prof.stop_profiling`.
 
+    See Also
+    --------
+    nlcpy.prof.print_run_stats : Prints NLCPy run stats.
+    nlcpy.prof.get_run_stats : Gets dict of NLCPy run stats.
     """
     _prof.stop()
 
@@ -239,37 +247,43 @@ def _print_impl(msg, val, is_exp):
 def print_run_stats():
     """Prints NLCPy run stats.
 
-    Sample Program
-    # sample.py
-    import nlcpy as vp
-    vp.prof.start_profiling()
-    for i in range(10):
-        vp.random.rand(10000)
-    vp.prof.stop_profiling()
-    vp.prof.print_run_stats()
-    Execution
-    $ python sample.py
-    ----------- NLCPy Run Stats ------------
-    alloc memory on VE:
-      total: 1.6927719116210938e-05 [sec]
-      alloc_mem was called 10 times
-    free memory on VE:
-      total: 0.0004165172576904297 [sec]
-      free_mem was called 10 times
-    write memory on VE:
-      total: 0 [sec]
-      veo_write_mem was called 0 times
-    read memory from VE:
-      total: 0 [sec]
-      veo_read_mem was called 0 times
-    VE runtime(include offload overhead):
-      total: 0.0025153160095214844 [sec]
-      veo_wait_result was called 10 times
-    other VH runtime:
-      total: 0.00048661231994628906 [sec]
-    total runtime:
-      total: 0.003435373306274414 [sec]
-    ----------------------------------------
+    Examples
+    --------
+    Sample Program::
+
+        # sample.py
+        import nlcpy as vp
+        vp.prof.start_profiling()
+        for i in range(10):
+            vp.random.rand(10000)
+        vp.prof.stop_profiling()
+        vp.prof.print_run_stats()
+
+    Execution::
+
+        $ python sample.py
+
+        ----------- NLCPy Run Stats ------------
+        alloc memory on VE:
+          total: 1.097e-05 [sec]
+          veo_alloc_mem was called 10 times
+        free memory on VE:
+          total: 9.298e-06 [sec]
+          veo_free_mem was called 10 times
+        write memory on VE:
+          total: 0.000e+00 [sec]
+          veo_write_mem was called 0 times
+        read memory from VE:
+          total: 0.000e+00 [sec]
+          veo_read_mem was called 0 times
+        VE runtime(include offload overhead):
+          total: 3.016e-04 [sec]
+          veo_wait_result was called 10 times
+        other VH runtime:
+          total: 2.632e-04 [sec]
+        total runtime:
+          total: 5.851e-04 [sec]
+        ----------------------------------------
 
     """
     if _prof.status != END_PROFILING:
@@ -307,29 +321,34 @@ def print_run_stats():
 def get_run_stats():
     """Gets dict of NLCPy run stats.
 
-    Sample Program
-    # sample.py
-    import nlcpy as vp
-    from pprint import pprint
-    vp.prof.start_profiling()
-    for i in range(10):
-        vp.random.rand(10000)
-    vp.prof.stop_profiling()
-    stats = vp.prof.get_run_stats()
-    pprint(stats)
-    Execution
-    $ python sample.py
-    {'total_runtime': {'elapsed_time': 0.004348278045654297},
-     'veo_alloc_mem': {'elapsed_time': 2.574920654296875e-05, 'number_of_call': 10},
-     'veo_free_mem': {'elapsed_time': 4.100799560546875e-05, 'number_of_call': 10},
-     'veo_read_mem': {'elapsed_time': 0, 'number_of_call': 0},
-     'veo_wait_result': {'elapsed_time': 0.0034487247467041016,
-                         'number_of_call': 10},
-     'veo_write_mem': {'elapsed_time': 0, 'number_of_call': 0},
-     'vh_runtime': {'elapsed_time': 0.0008327960968017578}}
+    Returns
+    -------
+    out : dict
 
-    Returns:
-        out : dict
+    Examples
+    --------
+    Sample Program::
 
+        # sample.py
+        import nlcpy as vp
+        from pprint import pprint
+        vp.prof.start_profiling()
+        for i in range(10):
+            vp.random.rand(10000)
+        vp.prof.stop_profiling()
+        stats = vp.prof.get_run_stats()
+        pprint(stats)
+
+    Execution::
+
+        $ python sample.py
+        {'total_runtime': {'elapsed_time': 0.004348278045654297},
+        'veo_alloc_mem': {'elapsed_time': 2.574920654296875e-05, 'number_of_call': 10},
+        'veo_free_mem': {'elapsed_time': 4.100799560546875e-05, 'number_of_call': 10},
+        'veo_read_mem': {'elapsed_time': 0, 'number_of_call': 0},
+        'veo_wait_result': {'elapsed_time': 0.0034487247467041016,
+                            'number_of_call': 10},
+        'veo_write_mem': {'elapsed_time': 0, 'number_of_call': 0},
+        'vh_runtime': {'elapsed_time': 0.0008327960968017578}}
     """
     return _prof.get_stats()

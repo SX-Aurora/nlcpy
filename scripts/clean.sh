@@ -16,7 +16,7 @@ rm -rf *.egg-info/
 (cd nlcpy/indexing; rm -rf  __pycache__)
 (cd nlcpy/error_handler; rm -rf  __pycache__)
 (cd nlcpy/manipulation; rm -rf  __pycache__)
-(cd nlcpy/ufunc; rm -rf *.c *.so *.cpp *.o __pycache__)
+(cd nlcpy/ufuncs; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/math; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/error_handler; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/statistics; rm -rf *.c *.so *.cpp *.o __pycache__)
@@ -41,9 +41,5 @@ rm -rf *.egg-info/
 (cd tests/pytest/random_tests; rm -rf __pycache__)
 (cd tests/pytest/logic_tests; rm -rf __pycache__)
 (cd tests/pytest/sorting_tests; rm -rf __pycache__)
-(cd tests/pytest/result; rm -rf *log*)
-(cd doc; rm -rf doxygen doxygen_awf)
-(cd doc/src; rm -rf nlcpy)
-(cd doc/scripts; rm -rf func_reform_list)
+rm -rf .tox
 rm -rf nlcpy/*.so nlcpy/lib/*.so __pycache__
-#python3 setup.py clean

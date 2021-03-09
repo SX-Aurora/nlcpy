@@ -8,6 +8,7 @@ JOBS:=$(shell grep -c ^processor /proc/cpuinfo 2>/dev/null)
 JOBS:=$(shell if [ $(JOBS) -le 16 ]; then echo "8"; else echo "16"; fi)
 
 all: make.dep nlcpy_ve_no_fast_math nlcpy_ve_fast_math
+#all: make.dep nlcpy_ve_no_fast_math
 
 make.dep: $(OBJDIR_NO_FAST_MATH) $(OBJDIR_FAST_MATH)
 	cd $(OBJDIR_NO_FAST_MATH) && sh $(TOOLDIR)/make_dep.sh
@@ -32,9 +33,5 @@ $(OBJDIR_FAST_MATH): FORCE
 	mkdir -p $@
 	cd $(SRCDIR) && $(CPIO) $@
 
-doc:
-	make -f doc/Makefile
-	sh scripts/dox.sh $(BASEDIR)
-	
 clean:
 	sh scripts/clean.sh $(BASEDIR)

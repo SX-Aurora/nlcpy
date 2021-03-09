@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,8 @@ cdef extern from 'nlcpy_mempool.h':
     int  nlcpy_mempool_reserve(mempool_t *pool, const size_t size, uint64_t *ve_adr)
     int  nlcpy_mempool_release(mempool_t *pool, const uint64_t ve_adr)
     void nlcpy_mempool_free(mempool_t *pool)
+    bint nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
 
 cdef class MemPool(object):
     cdef mempool_t *_pool
+    cdef veo_proc_handle *_hnd

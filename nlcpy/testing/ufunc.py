@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -221,11 +221,15 @@ def _precheck_func_for_ufunc(
 
     # shape check
     for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
-        assert numpy_r.shape == nlcpy_r.shape
+        assert numpy.asarray(numpy_r).shape == nlcpy.asarray(nlcpy_r).shape
 
     # type check
     if type_check:
         for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
+            if type(numpy_r) is not numpy.ndarray:
+                numpy_r = numpy.array(numpy_r)
+            if type(nlcpy_r) is not nlcpy.ndarray:
+                nlcpy_r = nlcpy.array(numpy_r)
             if numpy_r.dtype != nlcpy_r.dtype:
                 msg = ['\n']
                 msg.append(' numpy.dtype: {}'.format(numpy_r.dtype))
@@ -256,47 +260,55 @@ def _check_for_unary_with_create_param(
         is_broadcast,
         name_xp,
         name_in1,
+        name_axis,
+        name_indices,
         name_out,
         name_where,
         name_op,
         name_dtype,
-        impl):
+        impl,
+        ufunc_name,
+        axes,
+        indices,
+        keepdims):
     kw[name_op] = op
     shape = (shape,)
     # no out, no where, no dtype
     if not is_out and not is_where and not is_dtype:
         unary._check_unary_no_out_no_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, op, minval,
-            maxval, shape, order1, dtype1, mode)
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_indices, op,
+            minval, maxval, shape, order1, dtype1, mode, ufunc_name, axes, indices)
     # no out, no where, with dtype
     elif not is_out and not is_where and is_dtype:
         unary._check_unary_no_out_no_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_dtype, op,
-            minval, maxval, shape, order1, dtype1, dtype3, mode)
-    # with out, no where, wno dtype
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_indices,
+            name_dtype, op, minval, maxval, shape, order1, dtype1, dtype3, mode,
+            ufunc_name, axes, indices)
+    # with out, no where, no dtype
     elif is_out and not is_where and not is_dtype:
         unary._check_unary_with_out_no_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_out, op,
-            minval, maxval, shape, order1, order2, dtype1, dtype2,
-            mode, is_broadcast)
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_indices, name_out,
+            op, minval, maxval, shape, order1, order2, dtype1, dtype2,
+            mode, is_broadcast, ufunc_name, axes, indices, keepdims)
     # with out, no where, with dtype
     elif is_out and not is_where and is_dtype:
         unary._check_unary_with_out_no_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_out, name_dtype,
-            op, minval, maxval, shape, order1, order2, dtype1, dtype2,
-            dtype3, mode)
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_indices, name_out,
+            name_dtype, op, minval, maxval, shape, order1, order2, dtype1, dtype2,
+            dtype3, mode, ufunc_name, axes, indices, keepdims)
     # with out, with where, no dtype
     elif is_out and is_where and not is_dtype:
         unary._check_unary_with_out_with_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_out,
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_out,
             name_where, op, minval, maxval, shape, order1, order2,
-            order3, dtype1, dtype2, mode, is_broadcast)
+            order3, dtype1, dtype2, mode, is_broadcast, ufunc_name, axes, keepdims)
     # with out, with where, with dtype
     elif is_out and is_where and is_dtype:
         unary._check_unary_with_out_with_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_out,
+            self, args, kw, impl, name_xp, name_in1, name_axis, name_out,
             name_where, name_dtype, op, minval, maxval, shape,
-            order1, order2, order3, dtype1, dtype2, dtype3, mode)
+            order1, order2, order3, dtype1, dtype2, dtype3, mode,
+            ufunc_name, axes, keepdims)
     else:
         raise TypeError(
             'out={}, where={}, dtype={} tests is not supported.'.format(
@@ -315,6 +327,7 @@ def _check_for_binary_with_create_param(
         order2,
         order3,
         order4,
+        order5,
         dtype1,
         dtype2,
         dtype3,
@@ -329,13 +342,19 @@ def _check_for_binary_with_create_param(
         name_xp,
         name_in1,
         name_in2,
+        name_order,
+        name_casting,
         name_out,
         name_where,
         name_op,
         name_dtype,
+        ufunc_name,
+        casting,
         impl):
     kw[name_op] = op
     shape = (shape,)
+    if type(casting) == str:
+        casting = (casting, )
 
     # skip check
     ws = pkg_resources.WorkingSet()
@@ -348,39 +367,41 @@ def _check_for_binary_with_create_param(
     # no out, no where, no dtype
     if not is_out and not is_where and not is_dtype:
         binary._check_binary_no_out_no_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, op,
-            minval, maxval, shape, order1, order2, dtype1, dtype2, mode)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            op, minval, maxval, shape, order1, order2, order5, dtype1,
+            dtype2, mode, ufunc_name, casting)
     # no out, no where, with dtype
     elif not is_out and not is_where and is_dtype:
         binary._check_binary_no_out_no_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, name_dtype,
-            op, minval, maxval, shape, order1, order2, dtype1, dtype2,
-            dtype4, mode)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            name_dtype, op, minval, maxval, shape, order1, order2, order5,
+            dtype1, dtype2, dtype4, mode, ufunc_name, casting)
     # with out, no where, no dtype
     elif is_out and not is_where and not is_dtype:
         binary._check_binary_with_out_no_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, name_out, op,
-            minval, maxval, shape, order1, order2, order3, dtype1, dtype2,
-            dtype3, mode, is_broadcast)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            name_out, op, minval, maxval, shape, order1, order2, order3,
+            order5, dtype1, dtype2, dtype3, mode, is_broadcast, ufunc_name, casting)
     # with out, no where, with dtype
     elif is_out and not is_where and is_dtype:
         binary._check_binary_with_out_no_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, name_out,
-            name_dtype, op, minval, maxval, shape, order1, order2, order3,
-            dtype1, dtype2, dtype3, dtype4, mode)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            name_out, name_dtype, op, minval, maxval, shape, order1, order2, order3,
+            order5, dtype1, dtype2, dtype3, dtype4, mode, ufunc_name, casting)
     # with out, with where, no dtype
     elif is_out and is_where and not is_dtype:
         binary._check_binary_with_out_with_where_no_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, name_out,
-            name_where, op, minval, maxval, shape, order1, order2, order3,
-            order4, dtype1, dtype2, dtype3, mode, is_broadcast)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            name_out, name_where, op, minval, maxval, shape, order1, order2, order3,
+            order4, order5, dtype1, dtype2, dtype3, mode, is_broadcast, ufunc_name,
+            casting)
     # with out, with where, with dtype
     elif is_out and is_where and is_dtype:
         binary._check_binary_with_out_with_where_with_dtype(
-            self, args, kw, impl, name_xp, name_in1, name_in2, name_out,
-            name_where, name_dtype, op, minval, maxval, shape,
-            order1, order2, order3, order4, dtype1, dtype2, dtype3, dtype4,
-            mode)
+            self, args, kw, impl, name_xp, name_in1, name_in2, name_order, name_casting,
+            name_out, name_where, name_dtype, op, minval, maxval, shape,
+            order1, order2, order3, order4, order5, dtype1, dtype2, dtype3, dtype4,
+            mode, ufunc_name, casting)
     else:
         raise TypeError(
             'out={}, where={}, dtype={} tests is not supported.'.format(
@@ -389,8 +410,11 @@ def _check_for_binary_with_create_param(
                 True if is_dtype is True else False))
 
 
-def _guess_tolerance(op, worst_dtype):
-    if op in check_close_op_set:
+def _guess_tolerance(op, worst_dtype, ufunc_name):
+    if op in ('power', 'multiply') and \
+       ufunc_name in ('reduce', 'reduceat', 'accumulate'):
+        return 1e-3, 1e-3
+    elif op in check_close_op_set:
         if worst_dtype in (DT_BOOL, DT_I32, DT_U32, DT_F32, DT_C64):
             if op in ('exp', 'tan'):
                 return TOL_SINGLE_EXCEPTION, TOL_SINGLE_EXCEPTION
@@ -427,12 +451,26 @@ def _nan_inf_care(v, n):
 
 
 def _check_ufunc_result(op, worst_dtype, v, n, in1=None, in2=None,
-                        out=None, where=None, dtype=None):
+                        out=None, where=None, dtype=None, ufunc_name='', n_calc=1):
+
     # nan/inf care
-    v, n = _nan_inf_care(v, n)
-    v_array = v
-    n_array = n
-    atol, rtol = _guess_tolerance(op, worst_dtype)
+    if numpy.isscalar(n):
+        if numpy.isinf(n) and nlcpy.isinf(v) or numpy.isnan(n) and nlcpy.isnan(v):
+            return
+    else:
+        v, n = _nan_inf_care(v, n)
+
+    v_array = nlcpy.asarray(v)
+    n_array = numpy.asarray(n)
+    atol, rtol = _guess_tolerance(op, worst_dtype, ufunc_name)
+    if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
+        atol *= n_calc
+        rtol *= n_calc
+        if numpy.asarray(n).dtype.char in '?ilIL' and \
+           (numpy.asarray(in1).dtype.char not in '?ilIL' or
+           numpy.dtype(dtype).char not in '?ilIL' or
+           op in ('logaddexp', 'logaddexp2', 'arctan2', 'hypot')):
+            atol = 1
 
     # prepare error message
     msg = "\n"

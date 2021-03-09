@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -80,3 +80,95 @@ class TestTileFailure(unittest.TestCase):
     def test_tile_failure(self, xp):
         x = testing.shaped_arange((2, 3, 4), xp)
         xp.tile(x, -3)
+
+
+@testing.parameterize(
+    {'repeats': 0, 'axis': None},
+    {'repeats': 2, 'axis': None},
+    {'repeats': 2, 'axis': 1},
+    {'repeats': 2, 'axis': -1},
+    {'repeats': [0, 0, 0], 'axis': 1},
+    {'repeats': [1, 2, 3], 'axis': 1},
+    {'repeats': [1, 2, 3], 'axis': -2},
+)
+class TestRepeat(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp)
+        return xp.repeat(x, self.repeats, self.axis)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat2(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp)
+        return x.repeat(self.repeats, self.axis)
+
+
+@testing.parameterize(
+    {'repeats': 0},
+    {'repeats': 2},
+)
+class TestScalarRepeat(unittest.TestCase):
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_scalar_repeat(self, xp, dtype):
+        a = xp.array(1, dtype=dtype)
+        return xp.repeat(a, self.repeats, axis=0)
+
+
+@testing.parameterize(
+    {'repeats': [2], 'axis': None},
+    {'repeats': [2], 'axis': 1},
+)
+class TestRepeatListBroadcast(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp)
+        return xp.repeat(x, self.repeats, self.axis)
+
+
+@testing.parameterize(
+    {'repeats': 0, 'axis': None},
+    {'repeats': 2, 'axis': None},
+    {'repeats': 2, 'axis': 0},
+    {'repeats': [1, 2, 3, 4], 'axis': None},
+    {'repeats': [1, 2, 3, 4], 'axis': 0},
+)
+class TestRepeat1D(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat(self, xp):
+        x = testing.shaped_arange((4,), xp)
+        return xp.repeat(x, self.repeats, self.axis)
+
+
+@testing.parameterize(
+    {'repeats': [2], 'axis': None},
+    {'repeats': [2], 'axis': 0},
+)
+class TestRepeat1DListBroadcast(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat(self, xp):
+        x = testing.shaped_arange((4,), xp)
+        return xp.repeat(x, self.repeats, self.axis)
+
+
+@testing.parameterize(
+    {'repeats': -3, 'axis': None},
+    {'repeats': [-3, -3], 'axis': 0},
+    {'repeats': [1, 2, 3], 'axis': None},
+    {'repeats': [1, 2], 'axis': 1},
+    {'repeats': 2, 'axis': -4},
+    {'repeats': 2, 'axis': 3},
+    {'repeats': 1 + 1j, 'axis': None},
+)
+class TestRepeatFailure(unittest.TestCase):
+    @testing.numpy_nlcpy_raises()
+    def test_repeat_failure(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp)
+        xp.repeat(x, self.repeats, self.axis)
+
+
+class TestRepeatFailure2(unittest.TestCase):
+    @testing.numpy_nlcpy_raises()
+    def test_repeat_failure_ndarray_axis(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp)
+        xp.repeat(x, 2, xp.array([1]))

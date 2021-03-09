@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -85,9 +85,10 @@ from nlcpy.random import generator
 def shuffle(x):
     """This function has the same `nlcpy.random.RandomState.shuffle`
 
-    See Also:
-        `nlcpy.random.RandomState.shuffle` : Modify a sequence in-place by shuffling its
-            contents.
+    See Also
+    --------
+    nlcpy.random.RandomState.shuffle : Modify a sequence in-place by shuffling its
+        contents.
 
     """
     rs = generator._get_rand()
@@ -97,9 +98,10 @@ def shuffle(x):
 def permutation(x):
     """This function has the same `nlcpy.random.RandomState.permutation`
 
-    See Also:
-        `nlcpy.random.RandomState.permutation` : Randomly permute a sequence, or return a
-            permuted range.
+    See Also
+    --------
+    nlcpy.random.RandomState.permutation : Randomly permute a sequence, or return a
+        permuted range.
 
     """
     rs = generator._get_rand()

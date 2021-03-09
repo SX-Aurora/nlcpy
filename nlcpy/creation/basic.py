@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -42,41 +42,47 @@ from nlcpy.request import request
 def empty(shape, dtype=float, order='C'):
     """Returns a new array of given shape and type, without initializing entries.
 
-    Args:
-        shape : int or sequence of int
-            Shape of the empty array, e.g., (2, 3) or 2.
-        dtype : dtype, optional
-            Desired output dtype for the array, e.g, nlcpy.int64. Default is
-            nlcpy.float64.
-        order : {'C', 'F'}, optional
-            Whether to store multi-dimensional data in row-major (C-style) or
-            column-major (Fortran-style) order in memory.
+    Parameters
+    ----------
+    shape : int or sequence of int
+        Shape of the empty array, e.g., (2, 3) or 2.
+    dtype : dtype, optional
+        Desired output dtype for the array, e.g, ``nlcpy.int64``.
+        Default is ``nlcpy.float64``.
+    order : {'C', 'F'}, optional
+        Whether to store multi-dimensional data in row-major (C-style) or column-major
+        (Fortran-style) order in memory.
 
-    Returns:
-        out : `ndarray`
-            Array of uninitialized (arbitrary) data of the given shape, dtype, and order.
+    Returns
+    -------
+    out : ndarray
+        Array of uninitialized (arbitrary) data of the given shape, dtype, and order.
 
-    Note:
-        empty, unlike zeros, does not set the array values to zero, and may therefore be
-        marginally faster. On the other hand, it requires the user to manually set all
-        the values in the array, and should be used with caution.
+    Note
+    ----
 
-    See Also:
-        empty_like : Returns a new array with the same shape and type
-            as a given array.
-        ones : Returns a new array of given shape and type, filled with ones.
-        zeros : Returns a new array of given shape and type, filled with zeros.
-        full : Returns a new array of given shape and type,
-            filled with fill_value.
+    :func:`empty`, unlike :func:`zeros`, does not set the array values to zero, and may
+    therefore be marginally faster. On the other hand, it requires the user to manually
+    set all the values in the array, and should be used with caution.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.empty([2, 2])
-        array([[ 0.,   0.],
-               [ 0.,   0.]])         # They are not always zero. (uninitialized)
-        >>> vp.empty([2, 2], dtype=int)
-        array([[ 0,   0],
-               [ 0,   0]])         # They are not always zero. (uninitialized)
+    See Also
+    --------
+    empty_like : Returns a new array with the same shape and type
+        as a given array.
+    ones : Returns a new array of given shape and type, filled with ones.
+    zeros : Returns a new array of given shape and type, filled with zeros.
+    full : Returns a new array of given shape and type,
+        filled with fill_value.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.empty([2, 2]) # doctest: +SKIP
+    array([[0., 0.],
+           [0., 0.]])          # They are not always zero. (uninitialized)
+    >>> vp.empty([2, 2], dtype=int) # doctest: +SKIP
+    array([[0, 0],
+           [0, 0]])            # They are not always zero. (uninitialized)
 
     """
     return nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
@@ -91,52 +97,58 @@ def empty(shape, dtype=float, order='C'):
 def empty_like(prototype, dtype=None, order='K', subok=False, shape=None):
     """Returns a new array with the same shape and type as a given array.
 
-    Args:
-        prototype : array_like
-            The shape and dtype of prototype define these same attributes of the returned
-            array.
-        dtype : dtype, optional
-            Overrides the data type of the result.
-        order : {'C', 'F'}, optional
-            Overrides the memory layout of the result. 'C' means C-order, 'F' means
-            F-order, 'A' means 'F' if prototype is Fortran contiguous, 'C' otherwise. 'K'
-            means match the layout of prototype as closely as possible.
-        subok : bool, optional
-            Not implemented.
-        shape : int or sequence of ints, optional
-            Overrides the shape of the result. If order='K' and the number of dimensions
-            is unchanged, will try to keep order, otherwise, order='C' is implied.
+    Parameters
+    ----------
+    prototype : array_like
+        The shape and dtype of *prototype* define these same attributes of the returned
+        array.
+    dtype : dtype, optional
+        Overrides the data type of the result.
+    order : {'C', 'F'}, optional
+        Overrides the memory layout of the result. 'C' means C-order, 'F' means F-order,
+        'A' means 'F' if *prototype* is Fortran contiguous, 'C' otherwise. 'K' means
+        match the layout of *prototype* as closely as possible.
+    subok : bool, optional
+        Not implemented.
+    shape : int or sequence of ints, optional
+        Overrides the shape of the result. If order='K' and the number of dimensions is
+        unchanged, will try to keep order, otherwise, order='C' is implied.
 
-    Returns:
-        out : `ndarray`
-            Array of uninitialized (arbitrary) data with the same shape and type as
-            prototype.
+    Returns
+    -------
+    out : ndarray
+        Array of uninitialized (arbitrary) data with the same shape and type as
+        *prototype*.
 
-    Note:
-        This function does not initialize the returned array; to do that use zeros_like
-        or ones_like instead. It may be marginally faster than the functions that do set
-        the array values.
+    Note
+    ----
 
-    See Also:
-        ones_like : Returns an array of ones with the same shape and type
-            as a given array.
-        zeros_like : Returns an array of zeros with the same %shape
-            and type as a given array.
-        full_like : Returns a full array with the same %shape
-            and type as a given array.
-        empty : Returns a new array of given shape and type,
-            without initializing entries.
+    This function does not initialize the returned array; to do that use
+    :func:`zeros_like` or :func:`ones_like` instead. It may be marginally faster than the
+    functions that do set the array values.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = ([1,2,3], [4,5,6])                         # a is array-like
-        >>> vp.empty_like(a)
-        array([[-1073741821, -1073741821,           3],    # uninitialized
-               [          0,           0, -1073741821]])
-        >>> a = vp.array([[1., 2., 3.],[4.,5.,6.]])
-        >>> vp.empty_like(a)
-        array([[ -2.00000715e+000,   1.48219694e-323,  -2.00000572e+000], # uninitialized
-               [  4.38791518e-305,  -2.00000715e+000,   4.17269252e-309]])
+    See Also
+    --------
+    ones_like : Returns an array of ones with the same shape and type
+        as a given array.
+    zeros_like : Returns an array of zeros with the same shape
+        and type as a given array.
+    full_like : Returns a full array with the same shape
+        and type as a given array.
+    empty : Returns a new array of given shape and type,
+        without initializing entries.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = ([1,2,3], [4,5,6])                         # a is array-like
+    >>> vp.empty_like(a)    # doctest: +SKIP
+    array([[0, 0, 0],
+           [0, 0, 0]])                                 # uninitialized
+    >>> a = vp.array([[1., 2., 3.],[4.,5.,6.]])
+    >>> vp.empty_like(a)    # doctest: +SKIP
+    array([[0., 0., 0.],
+           [0., 0., 0.]])                              # uninitialized
 
     """
     if subok is not False:
@@ -164,40 +176,42 @@ def empty_like(prototype, dtype=None, order='K', subok=False, shape=None):
 def eye(N, M=None, k=0, dtype=float, order='C'):
     """Returns a 2-D array with ones on the diagonal and zeros elsewhere.
 
-    Args:
-        N : int
-            Number of rows in the output.
-        M : int, optional
-            Number of columns in the output. If None, defaults to N.
-        k : int, optional
-            Index of the diagonal: 0 (the default) refers to the main diagonal, a
-            positive value refers to an upper diagonal, and a negative value to a lower
-            diagonal.
-        dtype : dtype, optional
-            Data-type of the returned array.
-        order : {'C', 'F'}, optional
-            Whether the output should be stored in row-major (C-style) or column-major
-            (Fortran-style) order in memory.
+    Parameters
+    ----------
+    N : int
+        Number of rows in the output.
+    M : int, optional
+        Number of columns in the output. If None, defaults to *N*.
+    k : int, optional
+        Index of the diagonal: 0 (the default) refers to the main diagonal, a positive
+        value refers to an upper diagonal, and a negative value to a lower diagonal.
+    dtype : dtype, optional
+        Data-type of the returned array.
+    order : {'C', 'F'}, optional
+        Whether the output should be stored in row-major (C-style) or column-major
+        (Fortran-style) order in memory.
 
-    Returns:
-        I : `ndarray`
-            An array where all elements are equal to zero, except for the k-th diagonal,
-            whose values are equal to one.
+    Returns
+    -------
+    I : ndarray
+        An array where all elements are equal to zero, except for the k-th diagonal,
+        whose values are equal to one.
 
-    See Also:
-        identity : Returns the identity array.
-        matrices.diag : Extracts a diagonal or construct a diagonal array.
+    See Also
+    --------
+    identity : Returns the identity array.
+    diag : Extracts a diagonal or construct a diagonal array.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.eye(2, dtype=int)
-        array([[1, 0],
-               [0, 1]])
-        >>> vp.eye(3, k=1)
-        array([[0.,  1.,  0.],
-               [0.,  0.,  1.],
-               [0.,  0.,  0.]])
-
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.eye(2, dtype=int)
+    array([[1, 0],
+           [0, 1]])
+    >>> vp.eye(3, k=1)
+    array([[0., 1., 0.],
+           [0., 0., 1.],
+           [0., 0., 0.]])
     """
     if numpy.dtype(dtype).kind == 'V':
         raise NotImplementedError('void dtype in eye is not implemented yet.')
@@ -221,22 +235,25 @@ def identity(n, dtype=None):
     """Returns the identity array.The identity array is a square array with ones on the
     main diagonal.
 
-    Args:
-        n : int
-            Number of rows (and columns) in n x n output.
-        dtype : dtype, optional
-            Data-type of the output. Defaults to nlcpy.float64.
+    Parameters
+    ----------
+    n : int
+        Number of rows (and columns) in *n* x *n* output.
+    dtype : dtype, optional
+        Data-type of the output. Defaults to ``nlcpy.float64``.
 
-    Returns:
-        out : `ndarray`
-            n x n array with its main diagonal set to 1, and all other elements 0.
+    Returns
+    -------
+    out : ndarray
+        *n* x *n* array with its main diagonal set to 1, and all other elements 0.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.identity(3)
-        array([[1.,  0.,  0.],
-               [0.,  1.,  0.],
-               [0.,  0.,  1.]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.identity(3)
+    array([[1., 0., 0.],
+           [0., 1., 0.],
+           [0., 0., 1.]])
 
     """
     return eye(N=n, dtype=dtype)
@@ -245,41 +262,46 @@ def identity(n, dtype=None):
 def ones(shape, dtype=None, order='C'):
     """Returns a new array of given shape and type, filled with ones.
 
-    Args:
-        shape : int or sequence of ints
-            Shape of the new array, e.g., (2, 3) or 2.
-        dtype : dtype, optional
-            The desired dtype for the array, e.g, nlcpy.int64. Default is nlcpy.float64.
-        order : {'C', 'F'}, optional
-            Whether to store multi-dimensional data in row-major (C-style) or
-            column-major (Fortran-style) order in memory.
+    Parameters
+    ----------
+    shape : int or sequence of ints
+        Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+    dtype : dtype, optional
+        The desired dtype for the array, e.g, ``nlcpy.int64``.
+        Default is ``nlcpy.float64``.
+    order : {'C', 'F'}, optional
+        Whether to store multi-dimensional data in row-major (C-style) or column-major
+        (Fortran-style) order in memory.
 
-    Returns:
-        out : `ndarray`
-            Array of ones with the given shape, dtype, and order.
+    Returns
+    -------
+    out : ndarray
+        Array of ones with the given shape, dtype, and order.
 
-    See Also:
-        ones_like : Returns an array of ones with the same shape and type
-            as a given array.
-        empty : Returns a new array of given shape and type,
-            without initializing entries.
-        zeros : Returns a new array of given shape and type, filled with zeros.
-        full : Returns a new array of given shape and type,
-            filled with fill_value.
+    See Also
+    --------
+    ones_like : Returns an array of ones with the same shape and type
+        as a given array.
+    empty : Returns a new array of given shape and type,
+        without initializing entries.
+    zeros : Returns a new array of given shape and type, filled with zeros.
+    full : Returns a new array of given shape and type,
+        filled with fill_value.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.ones(5)
-        array([1., 1., 1., 1., 1.])
-        >>> vp.ones((5,), dtype=int)
-        array([1, 1, 1, 1, 1])
-        >>> vp.ones((2, 1))
-        array([[1.],
-               [1.]])
-        >>> s = (2,2)
-        >>> vp.ones(s)
-        array([[1.,  1.],
-               [1.,  1.]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.ones(5)
+    array([1., 1., 1., 1., 1.])
+    >>> vp.ones((5,), dtype=int)
+    array([1, 1, 1, 1, 1])
+    >>> vp.ones((2, 1))
+    array([[1.],
+           [1.]])
+    >>> s = (2,2)
+    >>> vp.ones(s)
+    array([[1., 1.],
+           [1., 1.]])
 
     """
     if numpy.dtype(dtype).kind == 'V':
@@ -292,49 +314,53 @@ def ones(shape, dtype=None, order='C'):
 def ones_like(a, dtype=None, order='K', subok=False, shape=None):
     """Returns an array of ones with the same shape and type as a given array.
 
-    Args:
-        a : array_like
-            The shape and dtype of a define these same attributes of the returned array.
-        dtype : dtype, optional
-            Overrides the data type of the result.
-        order : {'C', 'F', 'A', or 'K'}, optional
-            Overrides the memory layout of the result. 'C' means C-order, 'F' means
-            F-order, 'A' means 'F' if a is Fortran contiguous, 'C' otherwise. 'K' means
-            match the layout of a as closely as possible.
-        subok : bool, optional
-            Not implemented.
-        shape : int or sequence of ints, optional
-            Overrides the shape of the result. If order='K' and the number of dimensions
-            is unchanged, will try to keep order, otherwise, order='C' is implied.
+    Parameters
+    ----------
+    a : array_like
+        The shape and dtype of *a* define these same attributes of the returned array.
+    dtype : dtype, optional
+        Overrides the data type of the result.
+    order : {'C', 'F', 'A', or 'K'}, optional
+        Overrides the memory layout of the result. 'C' means C-order, 'F' means F-order,
+        'A' means 'F' if *a* is Fortran contiguous, 'C' otherwise. 'K' means match the
+        layout of *a* as closely as possible.
+    subok : bool, optional
+        Not implemented.
+    shape : int or sequence of ints, optional
+        Overrides the shape of the result. If order='K' and the number of dimensions is
+        unchanged, will try to keep order, otherwise, order='C' is implied.
 
-    Returns:
-        out : `ndarray`
-            Array of ones with the same shape and type as a.
+    Returns
+    -------
+    out : ndarray
+        Array of ones with the same shape and type as *a*.
 
-    See Also:
-        empty_like : Returns a new array with the same shape and type
-            as a given array.
-        zeros_like : Returns an array of zeros with the same shape and type
-            as a given array.
-        full_like : Returns a full array with the same shape and type
-            as a given array.
-        ones : Returns a new array of given shape and type, filled with ones.
+    See Also
+    --------
+    empty_like : Returns a new array with the same shape and type
+        as a given array.
+    zeros_like : Returns an array of zeros with the same shape and type
+        as a given array.
+    full_like : Returns a full array with the same shape and type
+        as a given array.
+    ones : Returns a new array of given shape and type, filled with ones.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.arange(6)
-        >>> x = x.reshape((2, 3))
-        >>> x
-        array([[0, 1, 2],
-               [3, 4, 5]])
-        >>> vp.ones_like(x)
-        array([[1, 1, 1],
-               [1, 1, 1]])
-        >>> y = vp.arange(3, dtype=float)
-        >>> y
-        array([0., 1., 2.])
-        >>> vp.ones_like(y)
-        array([1.,  1.,  1.])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(6)
+    >>> x = x.reshape((2, 3))
+    >>> x
+    array([[0, 1, 2],
+           [3, 4, 5]])
+    >>> vp.ones_like(x)
+    array([[1, 1, 1],
+           [1, 1, 1]])
+    >>> y = vp.arange(3, dtype=float)
+    >>> y
+    array([0., 1., 2.])
+    >>> vp.ones_like(y)
+    array([1., 1., 1.])
 
     """
     if subok is not False:
@@ -363,42 +389,47 @@ def ones_like(a, dtype=None, order='K', subok=False, shape=None):
 def zeros(shape, dtype=float, order='C'):
     """Returns a new array of given shape and type, filled with zeros.
 
-    Args:
-        shape : int or sequence of ints
-            Shape of the new array, e.g., (2, 3) or 2.
-        dtype : dtype, optional
-            The desired dtype for the array, e.g, nlcpy.int64. Default is nlcpy.float64.
-        order : {'C', 'F'}, optional
-            Whether to store multi-dimensional data in row-major (C-style) or
-            column-major (Fortran-style) order in memory.
+    Parameters
+    ----------
+    shape : int or sequence of ints
+        Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+    dtype : dtype, optional
+        The desired dtype for the array, e.g, ``nlcpy.int64``.
+        Default is ``nlcpy.float64``.
+    order : {'C', 'F'}, optional
+        Whether to store multi-dimensional data in row-major (C-style) or column-major
+        (Fortran-style) order in memory.
 
-    Returns:
-        out : `ndarray`
-            Array of zeros with the given shape, dtype, and order.
+    Returns
+    -------
+    out : ndarray
+        Array of zeros with the given shape, dtype, and order.
 
-    See Also:
-        zeros_like : Returns an array of zeros with the same %shape
-            and type as a given array.
-        empty : Returns a new array of given shape and type,
-            without initializing entries.
-        ones : Returns a new array of given shape and type,
-            filled with ones.
-        full : Returns a new array of given shape and type,
-            filled with fill_value.
+    See Also
+    --------
+    zeros_like : Returns an array of zeros with the same shape
+        and type as a given array.
+    empty : Returns a new array of given shape and type,
+        without initializing entries.
+    ones : Returns a new array of given shape and type,
+        filled with ones.
+    full : Returns a new array of given shape and type,
+        filled with fill_value.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.zeros(5)
-        array([ 0.,  0.,  0.,  0.,  0.])
-        >>> vp.zeros((5,), dtype=int)
-        array([0, 0, 0, 0, 0])
-        >>> vp.zeros((2, 1))
-        array([[ 0.],
-               [ 0.]])
-        >>> s = (2,2)
-        >>> vp.zeros(s)
-        array([[ 0.,  0.],
-               [ 0.,  0.]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.zeros(5)
+    array([0., 0., 0., 0., 0.])
+    >>> vp.zeros((5,), dtype=int)
+    array([0, 0, 0, 0, 0])
+    >>> vp.zeros((2, 1))
+    array([[0.],
+           [0.]])
+    >>> s = (2,2)
+    >>> vp.zeros(s)
+    array([[0., 0.],
+           [0., 0.]])
 
     """
     if numpy.dtype(dtype).kind == 'V':
@@ -411,50 +442,54 @@ def zeros(shape, dtype=float, order='C'):
 def zeros_like(a, dtype=None, order='K', subok=False, shape=None):
     """Returns an array of zeros with the same shape and type as a given array.
 
-    Args:
-        a : array_like
-            The shape and dtype of a define these same attributes of the returned array.
-        dtype : dtype, optional
-            Overrides the data type of the result.
-        order : {'C', 'F', 'A', or 'K'}, optional
-            Overrides the memory layout of the result. 'C' means C-order, 'F' means
-            F-order, 'A' means 'F' if a is Fortran contiguous, 'C' otherwise. 'K' means
-            match the layout of a as closely as possible.
-        subok : bool, optional
-            Not implemented.
-        shape : int or sequence of ints, optional
-            Overrides the shape of the result. If order='K' and the number of dimensions
-            is unchanged, will try to keep order, otherwise, order='C' is implied.
+    Parameters
+    ----------
+    a : array_like
+        The shape and dtype of *a* define these same attributes of the returned array.
+    dtype : dtype, optional
+        Overrides the data type of the result.
+    order : {'C', 'F', 'A', or 'K'}, optional
+        Overrides the memory layout of the result. 'C' means C-order, 'F' means F-order,
+        'A' means 'F' if *a* is Fortran contiguous, 'C' otherwise. 'K' means match the
+        layout of *a* as closely as possible.
+    subok : bool, optional
+        Not implemented.
+    shape : int or sequence of ints, optional
+        Overrides the shape of the result. If order='K' and the number of dimensions is
+        unchanged, will try to keep order, otherwise, order='C' is implied.
 
-    Returns:
-        out : `ndarray`
-            Array of zeros with the same shape and type as a.
+    Returns
+    -------
+    out : ndarray
+        Array of zeros with the same shape and type as *a*.
 
-    See Also:
-        empty_like : Returns a new array with the same shape and type
-            as a given array.
-        ones_like : Returns an array of ones with the same %shape
-            and type as a given array.
-        full_like : Returns a full array with the same %shape
-            and type as a given array.
-        zeros : Returns a new array of given shape and type,
-            filled with zeros.
+    See Also
+    --------
+    empty_like : Returns a new array with the same shape and type
+        as a given array.
+    ones_like : Returns an array of ones with the same shape
+        and type as a given array.
+    full_like : Returns a full array with the same shape
+        and type as a given array.
+    zeros : Returns a new array of given shape and type,
+        filled with zeros.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.arange(6)
-        >>> x = x.reshape((2, 3))
-        >>> x
-        array([[0, 1, 2],
-               [3, 4, 5]])
-        >>> vp.zeros_like(x)
-        array([[0, 0, 0],
-               [0, 0, 0]])
-        >>> y = vp.arange(3, dtype=float)
-        >>> y
-        array([0., 1., 2.])
-        >>> vp.zeros_like(y)
-        array([0.,  0.,  0.])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(6)
+    >>> x = x.reshape((2, 3))
+    >>> x
+    array([[0, 1, 2],
+           [3, 4, 5]])
+    >>> vp.zeros_like(x)
+    array([[0, 0, 0],
+           [0, 0, 0]])
+    >>> y = vp.arange(3, dtype=float)
+    >>> y
+    array([0., 1., 2.])
+    >>> vp.zeros_like(y)
+    array([0., 0., 0.])
 
     """
     if subok is not False:
@@ -482,41 +517,46 @@ def zeros_like(a, dtype=None, order='K', subok=False, shape=None):
 
 
 def full(shape, fill_value, dtype=None, order='C'):
-    """Returns a new array of given shape and type, filled with fill_value.
+    """Returns a new array of given shape and type, filled with *fill_value*.
 
-    Args:
-        shape : int or sequence of ints
-            Shape of the new array, e.g., (2, 3) or 2.
-        fill_value : scalar
-            Fill value.
-        dtype : dtype, optional
-            The desired dtype for the array, e.g, nlcpy.int64. Default is nlcpy.float64.
-        order : {'C', 'F'}, optional
-            Whether to store multidimensional data in C- or Fortran-contiguous (row- or
-            column-wise) order in memory.
+    Parameters
+    ----------
+    shape : int or sequence of ints
+        Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+    fill_value : scalar
+        Fill value.
+    dtype : dtype, optional
+        The desired dtype for the array, e.g, ``nlcpy.int64``.
+        Default is ``nlcpy.float64``.
+    order : {'C', 'F'}, optional
+        Whether to store multidimensional data in C- or Fortran-contiguous (row- or
+        column-wise) order in memory.
 
-    Returns:
-        out : `ndarray`
-            Array of fill_value with the given shape, dtype, and order.
+    Returns
+    -------
+    out : ndarray
+        Array of *fill_value* with the given shape, dtype, and order.
 
-    See Also:
-        full_like : Returns a full array with the same %shape
-            and type as a given array.
-        empty : Returns a new array of given shape and type,
-            without initializing entries.
-        ones : Returns a new array of given shape and type,
-            filled with ones.
-        zeros : Returns a new array of given shape and type,
-            filled with zeros.
+    See Also
+    --------
+    full_like : Returns a full array with the same shape
+        and type as a given array.
+    empty : Returns a new array of given shape and type,
+        without initializing entries.
+    ones : Returns a new array of given shape and type,
+        filled with ones.
+    zeros : Returns a new array of given shape and type,
+        filled with zeros.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.full((2, 2), vp.inf)
-        array([[inf, inf],
-               [inf, inf]])
-        >>> vp.full((2, 2), 10)
-        array([[10, 10],
-               [10, 10]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.full((2, 2), vp.inf)
+    array([[inf, inf],
+           [inf, inf]])
+    >>> vp.full((2, 2), 10)
+    array([[10, 10],
+           [10, 10]])
 
     """
     if numpy.dtype(dtype).kind == 'V':
@@ -550,51 +590,55 @@ def full(shape, fill_value, dtype=None, order='C'):
 def full_like(a, fill_value, dtype=None, order='K', subok=False, shape=None):
     """Returns a full array with the same shape and type as a given array.
 
-    Args:
-        a : array_like
-            The shape and dtype of a define these same attributes of the returned array.
-        fill_value : scalar
-            Fill value.
-        dtype : dtype, optional
-            Overrides the data type of the result.
-        order : {'C', 'F', 'A', or 'K'}, optional
-            Overrides the memory layout of the result. 'C' means C-order, 'F' means
-            F-order, 'A' means 'F' if a is Fortran contiguous, 'C' otherwise. 'K' means
-            match the layout of a as closely as possible.
-        subok : bool, optional
-            Not implemented.
-        shape : int or sequence of ints, optional
-            Overrides the shape of the result. If order='K' and the number of dimensions
-            is unchanged, will try to keep order, otherwise, order='C' is implied.
+    Parameters
+    ----------
+    a : array_like
+        The shape and dtype of *a* define these same attributes of the returned array.
+    fill_value : scalar
+        Fill value.
+    dtype : dtype, optional
+        Overrides the data type of the result.
+    order : {'C', 'F', 'A', or 'K'}, optional
+        Overrides the memory layout of the result. 'C' means C-order, 'F' means F-order,
+        'A' means 'F' if *a* is Fortran contiguous, 'C' otherwise. 'K' means match the
+        layout of *a* as closely as possible.
+    subok : bool, optional
+        Not implemented.
+    shape : int or sequence of ints, optional
+        Overrides the shape of the result. If order='K' and the number of dimensions is
+        unchanged, will try to keep order, otherwise, order='C' is implied.
 
-    Returns:
-        out : `ndarray`
-            Array of fill_value with the same shape and type as a.
+    Returns
+    -------
+    out : ndarray
+        Array of *fill_value* with the same shape and type as *a*.
 
-    See Also:
-        empty_like : Returns a new array with the same %shape
-            and type as a given array.
-        ones_like : Returns an array of ones with the same %shape
-            and type as a given array.
-        zeros_like : Returns an array of zeros with the same %shape
-            and type as a given array.
-        full : Returns a new array of given shape and type,
-            filled with fill_value.
+    See Also
+    --------
+    empty_like : Returns a new array with the same shape
+        and type as a given array.
+    ones_like : Returns an array of ones with the same shape
+        and type as a given array.
+    zeros_like : Returns an array of zeros with the same shape
+        and type as a given array.
+    full : Returns a new array of given shape and type,
+        filled with fill_value.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.arange(6, dtype=int)
-        >>> vp.full_like(x, 1)
-        array([1, 1, 1, 1, 1, 1])
-        >>> vp.full_like(x, 0.1)
-        array([0, 0, 0, 0, 0, 0])
-        >>> vp.full_like(x, 0.1, dtype=vp.double)
-        array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
-        >>> vp.full_like(x, vp.nan, dtype=vp.double)
-        array([nan, nan, nan, nan, nan, nan])
-        >>> y = vp.arange(6, dtype=vp.double)
-        >>> vp.full_like(y, 0.1)
-        array([0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(6, dtype=int)
+    >>> vp.full_like(x, 1)
+    array([1, 1, 1, 1, 1, 1])
+    >>> vp.full_like(x, 0.1)
+    array([0, 0, 0, 0, 0, 0])
+    >>> vp.full_like(x, 0.1, dtype=vp.double)
+    array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+    >>> vp.full_like(x, vp.nan, dtype=vp.double)
+    array([nan, nan, nan, nan, nan, nan])
+    >>> y = vp.arange(6, dtype=vp.double)
+    >>> vp.full_like(y, 0.1)
+    array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
 
     """
     if subok is not False:

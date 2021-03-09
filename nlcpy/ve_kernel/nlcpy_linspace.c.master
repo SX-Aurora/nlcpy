@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -32,91 +32,156 @@
 */
 @#include "nlcpy.h"
 
-#define_switch (out_array->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ start_array->dtype:f64,c128)
+#define_switch (out->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ start->dtype:f32,f64,c64,c128)
 
 uint64_t nlcpy_linspace(ve_arguments *args, int32_t *psw) {
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
-    ve_array *out_array = &(args->linspace.out);
-    ve_array *start_array = &(args->linspace.start);
-    ve_array *stop_array = &(args->linspace.stop);
-    int64_t num = args->linspace.num;
+    int64_t i, j;
+    ve_array *out = &(args->linspace.out);
+    ve_array *start = &(args->linspace.start);
+    ve_array *stop = &(args->linspace.stop);
+    ve_array *delta = &(args->linspace.delta);
+    ve_array *step = &(args->linspace.step);
+    ve_array *denormal = &(args->linspace.denormal);
+    int64_t *pdenormal = (int64_t *)denormal->ve_adr;
     int64_t endpoint = args->linspace.endpoint;
-    int64_t axis = args->linspace.axis;
-    int64_t dim_start = start_array->size;
-    int64_t dim_stop = stop_array->size;
-    assert(start_array->dtype == stop_array->dtype);
-    assert(num >= 0);
+    int64_t num = out->shape[0];
+    double div = endpoint ? num - 1 : num;
+    int64_t axis = 0;
 
 #begin_switch
-    @TYPE1@ *out = (@TYPE1@ *)out_array->ve_adr;
-    if (out == NULL) {
+    @TYPE1@ *pout = (@TYPE1@ *)out->ve_adr;
+    @TYPE2@ *pdelta = (@TYPE2@ *)delta->ve_adr;
+    @TYPE2@ *pstep = (@TYPE2@ *)step->ve_adr;
+    @TYPE2@ *pstart = (@TYPE2@ *)start->ve_adr;
+    @TYPE2@ *pstop = (@TYPE2@ *)stop->ve_adr;
+    if (!pout || !pstart || !pstop || !pdelta || !pstep) {
         return NLCPY_ERROR_MEMORY;
     }
-    @TYPE2@ *start = (@TYPE2@ *)start_array->ve_adr;
-    if  (start == NULL) {
-        start = (@TYPE2@ *)nlcpy__get_scalar(start_array);
-        if (start == NULL) {
-            return NLCPY_ERROR_MEMORY;
+
+    if (out->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif
+{
+        if (pstep[0] == 0) {
+            for (i = 0; i < out->size; i++) {
+                pout[i] = ((@TYPE2@)(i / div) * pdelta[0]) + pstart[0];
+            }
+        } else {
+            for (i = 0; i < out->size; i++) {
+                pout[i] = i * pstep[0] + pstart[0];
+            }
         }
-    }
-    @TYPE2@ *stop = (@TYPE2@ *)stop_array->ve_adr;
-    if  (stop == NULL) {
-        stop = (@TYPE2@ *)nlcpy__get_scalar(stop_array);
-        if (stop == NULL) {
-            return NLCPY_ERROR_MEMORY;
+        if (endpoint) {
+            pout[out->size - 1] = pstop[0];
         }
-    }
-    int64_t i, j;
-    int64_t inc_start, inc_stop;
-    int64_t dim;
-    int64_t div = num;
-    if (endpoint != 0) {
-       div = num - 1;
-    }
-
-    if (dim_start > dim_stop) {
-       dim = dim_start;
-    }
-    else {
-       dim = dim_stop;
-    }
-
-    inc_start = 1;
-    inc_stop  = 1;
-    if (dim_start == 1) {
-       inc_start = 0;
-    }
-    if (dim_stop == 1) {
-       inc_stop = 0;
-    }
-    for(j = 0; j < dim; j++){
-       @TYPE2@ tmp = start[j*inc_start];
-       @TYPE2@ delta = stop[j*inc_stop] - start[j*inc_start];
-       @TYPE2@ step_tmp = 0;
-
-       if (num > 1) {
-          step_tmp = delta / div;
-          if (step_tmp == 0) {
-              for (i = 0; i < num; i++) {
-                  out[i*dim+j] = (@TYPE1@)tmp;
-              }
-          }
-          else {
-              for (i = 0; i < num; i++) {
-                  out[i*dim+j] = (@TYPE1@)(tmp + step_tmp*i);
-              }
-          }
-       }
-       else {
-          out[0+j] = (@TYPE1@)tmp;
-       }
+}
+    } else {
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif
+        int64_t n_inner = out->ndim - 1;
+        int64_t n_outer = 0;
+        int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__rearrange_axis(step, idx);
+        int64_t n_outer2 = idx[n_outer];
+        int64_t n_inner2 = idx[n_inner];
+        int64_t cntm_s = step->shape[n_outer2] * it / nt;
+        int64_t cntm_e = step->shape[n_outer2] * (it + 1) / nt;
+        int64_t *outstep = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        int64_t *instep = (int64_t*)alloca(sizeof(int64_t) * delta->ndim);
+        for (i = 0; i < out->ndim; i++) {
+            outstep[i] = out->strides[i] / out->itemsize;
+            instep[i] = delta->strides[i] / delta->itemsize;
+        }
+    
+        int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        for (int64_t cntm = cntm_s; cntm < cntm_e; cntm++) {
+            int64_t ii = cntm * instep[n_outer2];
+            nlcpy__reset_coords(cnt, out->ndim);
+            do {
+                for (i = 0; i < step->shape[n_inner2]; i++) {
+                    if (pstep[ii + i * instep[n_inner2]] == 0) {
+                        *pdenormal = 1;
+                        break;
+                    }
+                }
+                for (j = n_inner - 1; j > 0; j--) {
+                    int64_t jj = idx[j];
+                    if (++cnt[jj] < out->shape[jj]) {
+                        ii += instep[jj];
+                        break;
+                    }
+                    ii -= instep[jj] * (out->shape[jj] - 1);
+                    cnt[jj] = 0;
+                }
+            } while(j > 0 && *pdenormal == 0);
+        }
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif
+        nlcpy__rearrange_axis(out, idx);
+        n_outer2 = idx[n_outer];
+        n_inner2 = idx[n_inner];
+        cntm_s = out->shape[n_outer2] * it / nt;
+        cntm_e = out->shape[n_outer2] * (it + 1) / nt;
+        for (int64_t cntm = cntm_s; cntm < cntm_e; cntm++) {
+            int64_t iout = cntm * outstep[n_outer2];
+            int64_t iin = (n_outer2 == axis) ? 0 : cntm * instep[n_outer2];
+            nlcpy__reset_coords(cnt, out->ndim);
+            if (n_outer2 == axis) {
+                cnt[axis] = cntm;
+            }
+            do {
+                if (n_inner2 == axis) {
+                    for (i = 0; i < out->shape[n_inner2]; i++) {
+                        if (*pdenormal) {
+                            pout[iout + i * outstep[n_inner2]] = (@TYPE2@)(i / div) * pdelta[iin] + pstart[iin];
+                        } else {
+                            pout[iout + i * outstep[n_inner2]] = i * pstep[iin] + pstart[iin];
+                        }
+                    }
+                    if (endpoint) {
+                        int64_t pos = (out->shape[n_inner2] - 1);
+                        pout[iout + pos * outstep[n_inner2]] = pstop[iin];
+                    }
+                } else {
+                    if (endpoint && cnt[axis] == out->shape[axis] - 1) {
+                        for (i = 0; i < out->shape[n_inner2]; i++) {
+                            pout[iout + i * outstep[n_inner2]] = pstop[iin + i * instep[n_inner2]];
+                        }
+                    } else {
+                        for (i = 0; i < out->shape[n_inner2]; i++) {
+                            if (*pdenormal) {
+                                pout[iout + i * outstep[n_inner2]] = (@TYPE2@)(cnt[axis] / div) * pdelta[iin + i * instep[n_inner2]] + pstart[iin + i * instep[n_inner2]];
+                            } else {
+                                pout[iout + i * outstep[n_inner2]] = cnt[axis] * pstep[iin + i * instep[n_inner2]] + pstart[iin + i * instep[n_inner2]];
+                            }
+                        }
+                    }
+                }
+                for (j = n_inner - 1; j > 0; j--) {
+                    int64_t jj = idx[j];
+                    if (++cnt[jj] < out->shape[jj]) {
+                        iout += outstep[jj];
+                        if (jj != axis) {
+                            iin += instep[jj];
+                        }
+                        break;
+                    }
+                    iout -= outstep[jj] * (out->shape[jj] - 1);
+                    if (jj != axis) {
+                        iin -= instep[jj] * (delta->shape[jj] - 1);
+                    }
+                    cnt[jj] = 0;
+                }
+            } while(j > 0);
+        }
     }
 #end_switch
-}
     return (uint64_t)NLCPY_ERROR_OK;
 }
-
-

@@ -1,0 +1,201 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-14 10:35+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/copyrights.rst:4
+msgid "Copyrights"
+msgstr "著作権"
+
+#: ../../source/copyrights.rst:6
+msgid "NLCPy is available as free software under the 3-clause BSD license."
+msgstr "NLCPyは、3条項BSDライセンスの下でフリーソフトウェアとして入手できます。"
+
+#: ../../source/copyrights.rst:8
+msgid "NLCPy is derived from NumPy, CuPy, PyVEO, and numpydoc:"
+msgstr "NLCPyは、NumPy、CuPy、PyVEO、およびnumpydocから派生しています。"
+
+#: ../../source/copyrights.rst:10
+msgid ""
+"NLCPy API and documents are based on NumPy, which is published at "
+"https://numpy.org/ and is licensed under the 3-clause BSD license."
+msgstr ""
+"NLCPyのAPIとドキュメントは、https://numpy.org/ で公開されているNumPyに基づいており、"
+"3条項BSDライセンスの下でライセンスされています。"
+
+#: ../../source/copyrights.rst:11
+msgid ""
+"Most of Python and Cython codes of NLCPy, which work on x86/Linux(VH), "
+"are designed based on NumPy and CuPy. CuPy is published at "
+"https://cupy.chainer.org/ and is licensed under the MIT license."
+msgstr ""
+"x86/Linux（VH）で動作するNLCPyのPythonおよびCythonコードのほとんどは、NumPyおよびCuPyに基づいて設計されています。"
+"CuPyは https://cupy.chainer.org/ で公開されており、MITライセンスの下でライセンスされています。"
+
+#: ../../source/copyrights.rst:12
+msgid ""
+"The source codes in the directory nlcpy/veo/ are based on PyVEO created "
+"by Dr. Erich Focht, NEC Deutschland GmbH. PyVEO is published at "
+"https://github.com/SX-Aurora/py-veo."
+msgstr ""
+"ディレクトリ nlcpy/veo/ のソースコードは、NEC Deutschland GmbHのDr.ErichFochtによって作成されたPyVEOに基づいています。"
+"PyVEOは https://github.com/SX-Aurora/py-veo で公開されています。"
+
+#: ../../source/copyrights.rst:13
+msgid ""
+"The source codes in the directory doc/nlcpydoc/ are based on numpydoc. "
+"numpydoc is published at https://github.com/numpy/numpydoc."
+msgstr ""
+"ディレクトリ doc/nlcpydoc/ のソースコードはnumpydocに基づいています。"
+"numpydocは https://github.com/numpy/numpydoc で公開されています。"
+
+#: ../../source/copyrights.rst:14
+msgid ""
+"C programs under the directory nlcpy/ and  the other materials of NLCPy "
+"are developed independently by NEC."
+msgstr ""
+"nlcpy/ ディレクトリの下のCプログラムおよびNLCPyの他の資料は、NECによって独自に開発されています。"
+
+#: ../../source/copyrights.rst:19
+msgid "NLCPy License"
+msgstr "NLCPyライセンス"
+
+#: ../../source/copyrights.rst:26 ../../source/copyrights.rst:47
+#: ../../source/copyrights.rst:81
+msgid ""
+"Redistribution and use in source and binary forms, with or without "
+"modification, are permitted provided that the following conditions are "
+"met:"
+msgstr ""
+
+#: ../../source/copyrights.rst:28 ../../source/copyrights.rst:49
+#: ../../source/copyrights.rst:85
+msgid ""
+"Redistributions of source code must retain the above copyright notice, "
+"this list of conditions and the following disclaimer."
+msgstr ""
+
+#: ../../source/copyrights.rst:30 ../../source/copyrights.rst:51
+msgid ""
+"Redistributions in binary form must reproduce the above copyright notice,"
+" this list of conditions and the following disclaimer listed in this "
+"license in the documentation and/or other materials provided with the "
+"distribution."
+msgstr ""
+
+#: ../../source/copyrights.rst:32
+msgid ""
+"Neither NEC Corporation nor the names of its contributors may be used to "
+"endorse or promote products derived from this software without specific "
+"prior written permission."
+msgstr ""
+
+#: ../../source/copyrights.rst:34 ../../source/copyrights.rst:55
+msgid ""
+"The copyright holders provide no reassurances that the source code "
+"provided does not infringe any patent, copyright, or any other "
+"intellectual property rights of third parties. The copyright holders "
+"disclaim any liability to any recipient for claims brought against "
+"recipient by any third party for infringement of that parties "
+"intellectual property rights."
+msgstr ""
+
+#: ../../source/copyrights.rst:36 ../../source/copyrights.rst:57
+msgid ""
+"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS "
+"IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED "
+"TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A "
+"PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER "
+"OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, "
+"EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, "
+"PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR "
+"PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANYTHEORY OF "
+"LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT(INCLUDING "
+"NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS "
+"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+
+#: ../../source/copyrights.rst:40
+msgid "NumPy License"
+msgstr "NumPyライセンス"
+
+#: ../../source/copyrights.rst:53
+msgid ""
+"Neither the name of the copyright holders nor the names of any "
+"contributors may be used to endorse or promote products derived from this"
+" software without specific prior written permission."
+msgstr ""
+
+#: ../../source/copyrights.rst:61
+msgid "CuPy License"
+msgstr "CuPyライセンス"
+
+#: ../../source/copyrights.rst:68
+msgid ""
+"Permission is hereby granted, free of charge, to any person obtaining a "
+"copy of this software and associated documentation files (the "
+"\"Software\"), to deal in the Software without restriction, including "
+"without limitation the rights to use, copy, modify, merge, publish, "
+"distribute, sublicense, and/or sell copies of the Software, and to permit"
+" persons to whom the Software is furnished to do so, subject to the "
+"following conditions:"
+msgstr ""
+
+#: ../../source/copyrights.rst:70
+msgid ""
+"The above copyright notice and this permission notice shall be included "
+"in all copies or substantial portions of the Software."
+msgstr ""
+
+#: ../../source/copyrights.rst:72
+msgid ""
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS"
+" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF "
+"MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN"
+" NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,"
+" DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR "
+"OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE"
+" USE OR OTHER DEALINGS IN THE SOFTWARE."
+msgstr ""
+
+#: ../../source/copyrights.rst:75
+msgid "numpydoc License"
+msgstr "numpydocライセンス"
+
+#: ../../source/copyrights.rst:87
+msgid ""
+"Redistributions in binary form must reproduce the above copyright notice,"
+" this list of conditions and the following disclaimer in the "
+"documentation and/or other materials provided with the distribution."
+msgstr ""
+
+#: ../../source/copyrights.rst:92
+msgid ""
+"THIS SOFTWARE IS PROVIDED BY THE AUTHOR \\`\\`AS IS'' AND ANY EXPRESS OR "
+"IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES"
+" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. "
+"IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, "
+"INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT "
+"NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,"
+" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY "
+"THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT "
+"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF "
+"THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+msgstr ""
+
+#~ msgid "NLCPy is derived from NumPy, CuPy, and PyVEO:"
+#~ msgstr ""
+

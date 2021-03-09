@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,8 @@ cdef ndarray _ndarray_reshape(ndarray self, tuple shape, order)
 
 cdef _ndarray_shape_setter(ndarray self, newshape)
 
+cpdef _copyto(ndarray dst, src, casting, where)
+
 cdef ndarray _ndarray_ravel(ndarray self, order)
 
 cdef ndarray _ndarray_resize(ndarray self, tuple shape, refcheck)
@@ -87,3 +89,4 @@ cpdef ndarray _moveaxis(ndarray a, source, destination)
 
 cpdef ndarray _expand_dims(ndarray a, axis)
 cpdef ndarray _ndarray_squeeze(ndarray self, axis)
+cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis)

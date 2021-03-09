@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -32,51 +32,146 @@
 import nlcpy
 
 
-def take(a, indices, axis=None, out=None):
+def take(a, indices, axis=None, out=None, mode='raise'):
     """Takes elements from an array along an axis.
 
     When axis is not None, this function does the same thing as "fancy" indexing
     (indexing arrays using arrays); however, it can be easier to use if you need elements
-    along a given axis. A call such as arr.take(indices, axis=3) is equivalent to
-    arr[:,:,:,indices,...].
+    along a given axis. A call such as ``arr.take(indices, axis=3)`` is equivalent to
+    ``arr[:,:,:,indices,...]``.
 
-    Args:
-        a : array_like
-            The source array.
-        indices : array_like
-            The indices of the values to extract. Also allow scalars for indices.
-        axis : int, optional
-            The axis over which to select values. By default, the flattened input array
-            is used.
-        out : `ndarray`, optional
-            If provided, the result will be placed in this array. It should be of the
-            appropriate shape and dtype. Note that out is always buffered if
-            mode='raise'; use other modes for better performance.
+    Parameters
+    ----------
+    a : array_like
+        The source array.
+    indices : array_like
+        The indices of the values to extract. Also allow scalars for indices.
+    axis : int, optional
+        The axis over which to select values. By default, the flattened input array is
+        used.
+    out : ndarray, optional
+        If provided, the result will be placed in this array. It should be of the
+        appropriate shape and dtype.
+    mode : {'wrap', raise', 'clip'}, optional
+        In the current NLCPy, this argument is not supported. The default is 'wrap'.
 
-    Returns:
-        out : `ndarray`
-            This function does not support mode argument. If indices are out-of-bounds,
-            this function always wraps around them.
+    Returns
+    -------
+    out : ndarray
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([4, 3, 5, 7, 6, 8])
-        >>> indices = [0, 1, 4]
-        >>> vp.take(a, indices)
-        array([4, 3, 6])
-        In this example, "fancy" indexing can be used.
-        >>> a[indices]
-        array([4, 3, 6])
-        If indices is not one dimensional, the output also has these dimensions.
-        >>> vp.take(a, [[0, 1], [2, 3]])
-        array([[4, 3],
-              [5, 7]])
+    Restriction
+    -----------
+    - *mode* != 'wrap': *NotImplementedError* occurs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([4, 3, 5, 7, 6, 8])
+    >>> indices = [0, 1, 4]
+    >>> vp.take(a, indices)
+    array([4, 3, 6])
+
+    In this example, "fancy" indexing can be used.
+
+    >>> a[indices]
+    array([4, 3, 6])
+
+    If indices is not one dimensional, the output also has these dimensions.
+
+    >>> vp.take(a, [[0, 1], [2, 3]])
+    array([[4, 3],
+           [5, 7]])
 
     """
+    if mode != 'raise':
+        raise NotImplementedError('mode is not supported yet')
     a = nlcpy.asarray(a)
     return a.take(indices, axis, out)
 
 
 def diagonal(a, offset=0, axis1=0, axis2=1):
+    """Returns specified diagonals.
+
+    If *a* is 2-D, returns the diagonal of *a* with the given offset, i.e.,
+    the collection of elements of the form ``a[i, i+offset]``.
+    If *a* has more than two dimensions, then the axes specified by *axis1*
+    and *axis2* are used to determine the 2-D sub-array whose diagonal is
+    returned.
+    The shape of the resulting array can be determined by removing *axis1*
+    and *axis2* and appending an index to the right equal to the size of the
+    resulting diagonals. This function returns a writable view of the original array.
+
+    Parameters
+    ----------
+    a : array_like
+        Array from which the diagonals are taken.
+
+    offset : int, optional
+        Offset of the diagonal from the main diagonal.
+        Can be positive or negative. Defaults to main diagonal (0).
+
+    axis1 : int, optional
+        Axis to be used as the first axis of the 2-D sub-arrays from which
+        the diagonals should be taken. Defaults to first axis (0).
+
+    axis2 : int, optional
+        Axis to be used as the second axis of the 2-D sub-arrays from which
+        the diagonals should be taken. Defaults to second axis (1).
+
+    Returns
+    -------
+    array_of_diagonals : ndarray
+        If *a* is 2-D, then a 1-D array containing the diagonal and of the same type as
+        *a* is returned. If ``a.ndim > 2``, then the dimensions specified by *axis1*
+        and *axis2* are removed, and a new axis inserted at the end corresponding to
+        the diagonal.
+
+    Note
+    ----
+        ``a.ndim < 2`` : *ValueError* occurs.
+
+    See Also
+    --------
+        diag : Extracts a diagonal or constructs a diagonal array.
+
+    Examples
+    --------
+
+    >>> import nlcpy as vp
+    >>> a = vp.arange(4).reshape(2,2)
+    >>> a
+    array([[0, 1],
+           [2, 3]])
+    >>> a.diagonal()
+    array([0, 3])
+    >>> a.diagonal(1)
+    array([1])
+
+    A 3-D example:
+
+    >>> a = vp.arange(8).reshape(2,2,2); a
+    array([[[0, 1],
+            [2, 3]],
+    <BLANKLINE>
+           [[4, 5],
+            [6, 7]]])
+    >>> a.diagonal(0,  # Main diagonals of two arrays created by skipping
+    ...            0,  # across the outer(left)-most axis last and
+    ...            1)  # the "middle" (row) axis first.
+    array([[0, 6],
+           [1, 7]])
+
+    The sub-arrays whose main diagonals we just obtained;
+    note that each corresponds to fixing the right-most (column) axis,
+    and that the diagonals are “packed” in rows.
+
+    >>> a[:,:,0]  # main diagonal is [0 6]
+    array([[0, 2],
+           [4, 6]])
+    >>> a[:,:,1]  # main diagonal is [1 7]
+    array([[1, 3],
+           [5, 7]])
+
+    """
     a = nlcpy.asarray(a)
     return a.diagonal(offset, axis1, axis2)

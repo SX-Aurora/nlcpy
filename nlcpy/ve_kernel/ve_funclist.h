@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -183,6 +183,7 @@ typedef uint64_t (*creation_op)(ve_arguments *, int32_t *);
 /* function proto types */
 uint64_t nlcpy_arange(ve_arguments *, int32_t *);
 uint64_t nlcpy_copy(ve_arguments *, int32_t *);
+uint64_t nlcpy_copy_masked(ve_arguments *, int32_t *);
 uint64_t nlcpy_eye(ve_arguments *, int32_t *);
 uint64_t nlcpy_linspace(ve_arguments *, int32_t *);
 
@@ -196,6 +197,9 @@ uint64_t nlcpy_linspace(ve_arguments *, int32_t *);
 /* function pointer */
 typedef uint64_t (*manipulation_op)(ve_arguments *, int32_t *);
 /* function proto types */
+uint64_t nlcpy_delete(ve_arguments *, int32_t *);
+uint64_t nlcpy_insert(ve_arguments *, int32_t *);
+uint64_t nlcpy_repeat(ve_arguments *, int32_t *);
 uint64_t nlcpy_tile(ve_arguments *, int32_t *);
 
 

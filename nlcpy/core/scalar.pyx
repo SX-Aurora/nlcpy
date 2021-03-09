@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,6 @@ from libc.stdint cimport uint32_t
 from libc.stdint cimport uint64_t
 
 import numpy
-import six
 
 import nlcpy
 from nlcpy.core cimport dtype as _dtype
@@ -127,7 +126,7 @@ _setup_type_dict()
 
 
 cdef set _python_scalar_type_set = set(
-    six.integer_types + (float, bool, complex))
+    (int, float, bool, complex))
 cdef set _numpy_scalar_type_set = set(_typenames.keys())
 
 
@@ -140,7 +139,6 @@ del _int_iinfo
 
 
 cpdef _python_scalar_to_numpy_scalar(x):
-    # Note that isinstance(x, six_integer_types) matches with bool.
     typ = type(x)
     if typ is bool:
         numpy_type = numpy.bool_

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,6 @@ from nlcpy import veo
 from nlcpy.core.dtype cimport ve_dtype
 
 import numpy
-import six
 cimport cython
 
 all_type_chars = '?bhilqBHILQefdFD'
@@ -98,7 +97,7 @@ cpdef _check_dtype_is_valid(dtype):
     return True
 
 cdef _init_dtype_dict():
-    for i in six.integer_types + (float, bool, complex, None):
+    for i in (int, float, bool, complex, None):
         dtype = numpy.dtype(i)
         if dtype is numpy.dtype('bool'):
             _dtype_dict[i] = (dtype, numpy.dtype('i4').itemsize)
@@ -125,7 +124,7 @@ _init_dtype_dict()
 
 @cython.profile(False)
 cpdef get_dtype(t):
-    if type(t) is numpy.dtype:  # Exact type check
+    if isinstance(t, numpy.dtype):  # Exact type check
         return t
     ret = _dtype_dict.get(t, None)
     if ret is None:
@@ -133,7 +132,7 @@ cpdef get_dtype(t):
     return ret[0]
 
 cdef tuple _convert_dtype(t):
-    if type(t) is numpy.dtype:
+    if isinstance(t, numpy.dtype):
         if t is numpy.dtype('bool'):
             return t, numpy.dtype('i4').itemsize
         elif t.char == 'q':
@@ -147,7 +146,7 @@ cdef tuple _convert_dtype(t):
 
 
 cpdef tuple get_dtype_with_itemsize(t):
-    if type(t) is numpy.dtype:  # Exact type check
+    if isinstance(t, numpy.dtype):  # Exact type check
         return _convert_dtype(t)
     ret = _dtype_dict.get(t, None)
     if ret is None:

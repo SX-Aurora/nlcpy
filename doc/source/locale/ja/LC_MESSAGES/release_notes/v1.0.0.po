@@ -1,0 +1,350 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-18 11:19+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/release_notes/v1.0.0.rst:3
+msgid "What's new in Version 1.0.0 (March 31, 2021)"
+msgstr "バージョン1.0.0の更新事項（2021年3月31日）"
+
+#: ../../source/release_notes/v1.0.0.rst:7
+msgid "New Features"
+msgstr "更新事項"
+
+#: ../../source/release_notes/v1.0.0.rst:9
+msgid "Newly added the following functions and methods."
+msgstr "以下の機能と関数を新たに追加。"
+
+#: ../../source/release_notes/v1.0.0.rst:13
+msgid "Descrete Fourier Transform"
+msgstr "離散フーリエ変換"
+
+#: ../../source/release_notes/v1.0.0.rst:15
+msgid ":func:`nlcpy.fft.fft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:16
+msgid ":func:`nlcpy.fft.ifft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:17
+msgid ":func:`nlcpy.fft.fft2`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:18
+msgid ":func:`nlcpy.fft.ifft2`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:19
+msgid ":func:`nlcpy.fft.fftn`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:20
+msgid ":func:`nlcpy.fft.ifftn`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:21
+msgid ":func:`nlcpy.fft.rfft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:22
+msgid ":func:`nlcpy.fft.irfft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:23
+msgid ":func:`nlcpy.fft.rfft2`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:24
+msgid ":func:`nlcpy.fft.irfft2`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:25
+msgid ":func:`nlcpy.fft.rfftn`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:26
+msgid ":func:`nlcpy.fft.irfftn`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:27
+msgid ":func:`nlcpy.fft.hfft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:28
+msgid ":func:`nlcpy.fft.ihfft`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:29
+msgid ":func:`nlcpy.fft.fftfreq`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:30
+msgid ":func:`nlcpy.fft.rfftfreq`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:31
+msgid ":func:`nlcpy.fft.fftshift`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:32
+msgid ":func:`nlcpy.fft.ifftshift`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:36
+msgid "Linear Algebra"
+msgstr "線形代数"
+
+#: ../../source/release_notes/v1.0.0.rst:38
+msgid ":func:`nlcpy.inner`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:39
+msgid ":func:`nlcpy.outer`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:40
+msgid ":func:`nlcpy.linalg.svd`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:41
+msgid ":func:`nlcpy.linalg.cholesky`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:42
+msgid ":func:`nlcpy.linalg.qr`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:43
+msgid ":func:`nlcpy.linalg.eig`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:44
+msgid ":func:`nlcpy.linalg.eigh`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:45
+msgid ":func:`nlcpy.linalg.eigvals`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:46
+msgid ":func:`nlcpy.linalg.eigvalsh`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:47
+msgid ":func:`nlcpy.linalg.norm`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:48
+msgid ":func:`nlcpy.linalg.solve`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:49
+msgid ":func:`nlcpy.linalg.lstsq`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:50
+msgid ":func:`nlcpy.linalg.inv`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:51
+msgid ":func:`nlcpy.linalg.LinAlgError`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:55
+msgid "Array Creation Routines"
+msgstr "配列の作成ルーチン"
+
+#: ../../source/release_notes/v1.0.0.rst:57
+msgid ":func:`nlcpy.meshgrid`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:58
+msgid ":func:`nlcpy.logspace`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:62
+msgid "Array Manipulation Routines"
+msgstr "配列の操作ルーチン"
+
+#: ../../source/release_notes/v1.0.0.rst:64
+msgid ":func:`nlcpy.copyto`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:65
+msgid ":func:`nlcpy.hstack`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:66
+msgid ":func:`nlcpy.stack`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:67
+msgid ":func:`nlcpy.vstack`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:68
+msgid ":func:`nlcpy.append`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:69
+msgid ":func:`nlcpy.delete`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:70
+msgid ":func:`nlcpy.insert`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:71
+msgid ":func:`nlcpy.fromfile`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:72
+msgid ":func:`nlcpy.loadtxt`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:73
+msgid ":func:`nlcpy.load`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:74
+msgid ":func:`nlcpy.flip`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:75
+msgid ":func:`nlcpy.fliplr`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:76
+msgid ":func:`nlcpy.flipud`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:77
+msgid ":func:`nlcpy.repeat`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:81
+msgid "Statistics Routines"
+msgstr "統計ルーチン"
+
+#: ../../source/release_notes/v1.0.0.rst:83
+msgid ":func:`nlcpy.ptp`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:84
+msgid ":func:`nlcpy.percentile`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:85
+msgid ":func:`nlcpy.nanpercentile`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:86
+msgid ":func:`nlcpy.quantile`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:87
+msgid ":func:`nlcpy.nanquantile`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:88
+msgid ":func:`nlcpy.nanmedian`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:89
+msgid ":func:`nlcpy.correlate`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:90
+msgid ":func:`nlcpy.histogram`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:91
+msgid ":func:`nlcpy.histogram2d`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:92
+msgid ":func:`nlcpy.histogramdd`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:93
+msgid ":func:`nlcpy.histogram_bin_edges`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:94
+msgid ":func:`nlcpy.bincount`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:95
+msgid ":func:`nlcpy.digitize`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:98
+msgid "Mathematical Functons"
+msgstr "数学関数"
+
+#: ../../source/release_notes/v1.0.0.rst:100
+msgid ":func:`nlcpy.prod`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:103
+msgid "Ndarray Methods"
+msgstr "Ndarray メソッド"
+
+#: ../../source/release_notes/v1.0.0.rst:105
+msgid ":meth:`nlcpy.ndarray.ptp`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:106
+msgid ":meth:`nlcpy.ndarray.mean`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:107
+msgid ":meth:`nlcpy.ndarray.var`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:108
+msgid ":meth:`nlcpy.ndarray.std`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:109
+msgid ":meth:`nlcpy.ndarray.conj`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:110
+msgid ":meth:`nlcpy.ndarray.conjugate`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:111
+msgid ":meth:`nlcpy.ndarray.cumsum`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:112
+msgid ":meth:`nlcpy.ndarray.dot`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:113
+msgid ":meth:`nlcpy.ndarray.prod`"
+msgstr ""
+
+#: ../../source/release_notes/v1.0.0.rst:115
+msgid "Problem Fixes"
+msgstr "不具合修正"
+
+#: ../../source/release_notes/v1.0.0.rst:118
+msgid "Fixed abnormal termination that could occur when a large amount of memory were allocated."
+msgstr "大量のメモリを確保しようとすると異常終了する不具合を修正。"
+

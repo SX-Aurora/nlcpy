@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -66,28 +66,29 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
 // 1-d //
 /////////
     } else if (y->ndim == 1) {
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         int64_t i;
         const int64_t n_inner = y->ndim - 1;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
-@#pragma _NEC novector
-@-->)dnl
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
         if (x->size == 1){
             @TYPE1@ px_s = px[0];
-            for (i = 0; i < y->size; i++) {
+            for (i = is; i < ie; i++) {
                 @UNARY_OPERATOR@(px_s,py[i*iy0],$1)
             }
         } else {
-            for (i = 0; i < y->size; i++) {
+            for (i = is; i < ie; i++) {
                 @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],$1)
             }
         }
-} /* omp single */
 
 /////////
 // N-d //
@@ -122,9 +123,6 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
             iy = cnt * y->strides[n_outer2] / y->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
-@#pragma _NEC novector
-@-->)dnl
                 if (x->size == 1){
                     @TYPE1@ px_s = px[0];
                     for (i = 0; i < y->shape[n_inner2]; i++) {

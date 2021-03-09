@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -29,34 +29,74 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import nlcpy
+from nlcpy.core import manipulation
 
 
 def shape(a):
     """Returns the shape of an array.
 
-    Args:
-        a : array_like
-            Input array.
+    Parameters
+    ----------
+    a : array_like
+        Input array.
 
-    Returns:
-        shape : tuple of ints
-            The elements of the shape tuple give the lengths of the corresponding array
-            dimensions.
+    Returns
+    -------
+    shape : tuple of ints
+        The elements of the shape tuple give the lengths of the corresponding array
+        dimensions.
 
-    See Also:
-        core::\\__init__ : Equivalent the array attribute.
+    See Also
+    --------
+    ndarray.shape : Equivalent the array attribute.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.shape(vp.eye(3))
-        (3, 3)
-        >>> vp.shape([[1, 2]])
-        (1, 2)
-        >>> vp.shape([0])
-        (1,)
-        >>> vp.shape(0)
-        ()
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.shape(vp.eye(3))
+    (3, 3)
+    >>> vp.shape([[1, 2]])
+    (1, 2)
+    >>> vp.shape([0])
+    (1,)
+    >>> vp.shape(0)
+    ()
 
     """
     a = nlcpy.asanyarray(a)
     return a.shape
+
+
+def copyto(dst, src, casting='same_kind', where=True):
+    """Copies values from one array to another, broadcasting as necessary.
+
+    Raises a TypeError if the `casting` rule is violated, and if `where` is provided, it
+    selects which elements to copy.
+
+    Parameters
+    ----------
+    dst : ndarray
+        The array into which values are copied.
+    src : array_like
+        The array from which values are copied.
+    casting : {'no', 'equiv', 'safe', 'same_kind', 'unsafe'}, optional
+        Controls what kind of data casting may occur when copying.
+        - 'no' means the data types should not be cast at all.
+        - 'equiv' means only byte-order changes are allowed.
+        - 'safe' means only casts which can preserve values are allowed.
+        - 'same_kind' means only safe casts or casts within a kind, like float64 to
+        float32, are allowed.
+        - 'unsafe' means any data conversions may be done.
+    where : array_like of bool, optional
+        A boolean array which is broadcasted to match the dimensions of `dst`, and
+        selects elements to copy from `src` to `dst` wherever it contains the value
+        True.
+    """
+
+    # first argument must be nlcpy.ndarray
+    if not isinstance(dst, nlcpy.ndarray):
+        dst_type = "None" if dst is None else type(dst).__name__
+        raise TypeError(
+            "copyto() argument 1 must be nlcpy.ndarray, not {}".format(dst_type))
+
+    return manipulation._copyto(dst, src, casting, where)

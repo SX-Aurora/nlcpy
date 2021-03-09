@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ from libcpp.vector cimport vector
 import sys
 import numpy
 import warnings
+import operator
 from nlcpy import veo
 
 from nlcpy.core.core cimport ndarray
@@ -105,6 +106,77 @@ cdef _ndarray_shape_setter(ndarray self, newshape):
     self._shape = shape
     self._strides = strides
     self._update_f_contiguity()
+
+
+cpdef _copyto(ndarray dst, src, casting, where):
+
+    if numpy.isscalar(src):
+        is_sclar_src = True
+    elif isinstance(src, numpy.ndarray):
+        if src.ndim == 0:
+            is_sclar_src = True
+        else:
+            is_sclar_src = False
+    else:  # nlcpy.ndarray, list, tuple
+        is_sclar_src = False
+
+    if is_sclar_src:
+        can_cast = numpy.can_cast(src, dst.dtype, casting=casting)
+        src_dtype = numpy.dtype(type(src))
+        src = core.argument_conversion(src)
+    else:
+        src = core.argument_conversion(src)
+        can_cast = numpy.can_cast(src.dtype, dst.dtype, casting=casting)
+        src_dtype = src.dtype
+
+    if not can_cast:
+        raise TypeError(
+            "Cannot cast scalar from dtype('{}') to dtype('{}')"
+            " according to the rule '{}'".format(src_dtype, dst.dtype, casting))
+
+    if isinstance(where, (ndarray, numpy.ndarray)):
+        if not numpy.can_cast(where.dtype, 'bool', casting='safe'):
+            raise TypeError(
+                "Cannot cast array data from dtype({}) to dtype('bool')"
+                " according to the rule 'safe'".format(where.dtype.name))
+    if where is None:
+        # do not any copy
+        return
+    elif where is True:  # where is scalar and True
+        # do not use where
+        use_where = 0
+    else:
+        # use where
+        use_where = 1
+        where = nlcpy.asanyarray(where, dtype='bool')
+
+    try:
+        src = broadcast.broadcast_to(src, dst.shape)
+    except ValueError:
+        raise ValueError(
+            "could not broadcast input array from shape {} into shape {}"
+            .format(str(src.shape), str(dst.shape)))
+
+    if use_where:
+        try:
+            where = broadcast.broadcast_to(where, dst.shape)
+        except ValueError:
+            raise ValueError(
+                "could not broadcast where mask from shape {} into shape {}"
+                .format(str(where.shape), str(dst.shape)))
+
+    if use_where:
+        request._push_request(
+            "nlcpy_copy_masked",
+            "creation_op",
+            (src, dst, where),
+        )
+    else:
+        request._push_request(
+            "nlcpy_copy",
+            "creation_op",
+            (src, dst),
+        )
 
 
 cdef ndarray _ndarray_ravel(ndarray self, order):
@@ -376,12 +448,20 @@ cpdef ndarray _ndarray_concatenate(op, axis, ret):
         return None
     if n == 0:
         raise ValueError("need at least one array to concatenate")
+
     arrays = []
     for i in range(n):
         item = op[i]
-        arrays.append(core.array(item))
+        if type(item) is ndarray:
+            arrays.append(item)
+        else:
+            arrays.append(core.array(item))
 
-    if axis is not None and isinstance(axis, int) is False:
+    if isinstance(axis, numpy.ndarray) or isinstance(axis, nlcpy.ndarray):
+        if axis.ndim > 0 or axis.dtype.char not in 'ilIL':
+            raise TypeError(
+                'only integer scalar arrays can be converted to a scalar index')
+    elif axis is not None and isinstance(axis, int) is False:
         raise TypeError("'%s' object cannot be interpreted as an integer"
                         % type(axis).__name__)
 
@@ -550,7 +630,7 @@ cdef _normalize_axis_tuple(axis, Py_ssize_t ndim,
     Arguments `allow_duplicate` and `axis_name` are not supported.
 
     """
-    if numpy.isscalar(axis):
+    if numpy.isscalar(axis) or type(axis) is ndarray and axis.ndim == 0:
         axis = (axis,)
 
     for ax in axis:
@@ -618,3 +698,47 @@ cpdef ndarray _ndarray_squeeze(ndarray self, axis):
                 ll.append(i)
 
     return a.reshape(tuple(ll))
+
+
+cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
+    a = self
+    if axis is None:
+        axis = 0
+        a = a.ravel()
+    else:
+        if type(axis) is ndarray and axis.ndim > 0:
+            raise TypeError(
+                'only integer scalar arrays can be converted to a scalar index')
+        axis = operator.index(axis)
+        if axis < -a.ndim or 0 < a.ndim <= axis:
+            raise AxisError(
+                'axis {} is out of bounds for array of dimension {}'.format(
+                    axis, a.ndim))
+
+    if a.ndim == 0:
+        a = a.reshape(1,)
+
+    if axis < 0:
+        axis += a.ndim
+
+    rep = nlcpy.asanyarray(repeats, dtype='l')
+    if rep.dtype.char in 'FD':
+        raise TypeError("can't convert complex to int")
+    if rep.ndim == 0 and rep < 0:
+        raise ValueError('negative dimensions are not allowed')
+
+    rep = nlcpy.broadcast_to(rep, a.shape[axis])
+    out_shape = list(a.shape)
+    out_shape[axis] = nlcpy.sum(rep).get()
+
+    out = nlcpy.empty(out_shape, dtype=a.dtype)
+    aind = nlcpy.empty([out_shape[axis]], dtype=a.dtype)
+    info = nlcpy.array(1, dtype='l')
+    request._push_request(
+        'nlcpy_repeat',
+        'manipulation_op',
+        (a, rep, <int64_t>axis, out, aind, info)
+    )
+    if rep.ndim > 0 and info == -1:
+        raise ValueError('repeats may not contain negative values.')
+    return out

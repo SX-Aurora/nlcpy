@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -63,35 +63,38 @@ import numpy
 def diag(v, k=0):
     """Extracts a diagonal or constructs a diagonal array.
 
-    Args:
-        v : array_like
-            If v is a 2-D array, return a copy of its k-th diagonal. If v is a 1-D array,
-            return a 2-D array with v on the k-th diagonal.
-        k : int, optional
-            Diagonal in question. The default is 0. Use k>0 for diagonals above the main
-            diagonal, and k<0 for diagonals below the main diagonal.
+    Parameters
+    ----------
+    v : array_like
+        If *v* is a 2-D array, return a copy of its *k-th* diagonal. If *v* is a 1-D
+        array, return a 2-D array with *v* on the k-th diagonal.
+    k : int, optional
+        Diagonal in question. The default is 0. Use *k>0* for diagonals above the main
+        diagonal, and *k<0* for diagonals below the main diagonal.
 
-    Returns:
-        out : `ndarray`
-            The extracted diagonal or constructed diagonal array.
+    Returns
+    -------
+    out : ndarray
+        The extracted diagonal or constructed diagonal array.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> x = vp.arange(9).reshape((3,3))
-        >>> x
-        array([[0, 1, 2],
-               [3, 4, 5],
-               [6, 7, 8]])
-        >>> vp.diag(x)
-        array([0, 4, 8])
-        >>> vp.diag(x, k=1)
-        array([1, 5])
-        >>> vp.diag(x, k=-1)
-        array([3, 7])
-        >>> vp.diag(vp.diag(x))
-        array([[0, 0, 0],
-               [0, 4, 0],
-               [0, 0, 8]])
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(9).reshape((3,3))
+    >>> x
+    array([[0, 1, 2],
+           [3, 4, 5],
+           [6, 7, 8]])
+    >>> vp.diag(x)
+    array([0, 4, 8])
+    >>> vp.diag(x, k=1)
+    array([1, 5])
+    >>> vp.diag(x, k=-1)
+    array([3, 7])
+    >>> vp.diag(vp.diag(x))
+    array([[0, 0, 0],
+           [0, 4, 0],
+           [0, 0, 8]])
 
     """
     if isinstance(v, nlcpy.ndarray):

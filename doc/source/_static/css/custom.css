@@ -1,0 +1,77 @@
+@import url('theme.css');
+
+/* Main background color modification */
+.btn-info, .wy-menu-vertical a:active, .wy-side-nav-search, .wy-side-nav-search img, .wy-nav .wy-menu-vertical a:hover, .wy-nav-top img, .wy-tray-item-info, .wy-side-nav-search, .wy-dropdown-menu > dd > a:hover, .wy-dropdown-menu a:hover, .wy-nav-top {
+    background-color: #ffaea2 !important;
+}
+
+.wy-side-nav-search input[type=text] {
+    border-color: #ff747c !important;
+}
+
+/* Note section settings */
+.rst-content .note .admonition-title {
+    background-color: #c9c9c9 !important;
+}
+.rst-content .note {
+    background-color: #e3e3e3 !important;
+}
+
+/* Restriction section settings */
+.rst-content  .admonition-restriction .admonition-title {
+   background: #ff747c
+}
+.rst-content .admonition-restriction {
+   background: #ffdcdf
+}
+
+/* Parameters/Retruns section settings */
+.rst-content dl.field-list dl strong {
+    color: #602020;
+    white-space: nowrap;
+    font-weight: bold;
+}
+html.writer-html5 .rst-content dl dt span.classifier:before{
+    content:" : " !important;
+    font-weight: bold !important;
+    font-style: normal !important;
+    color: black !important;
+}
+.rst-content dl.field-list dl span.classifier {
+    white-space: nowrap;
+    font-weight: bold;
+    font-style: italic;
+}
+.rst-content dl.field-list dl > dt {
+    background: none !important;
+    border: none !important;
+}
+
+/* code style */
+.rst-content table.longtable.docutils code {
+    font-size: 100% !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* reference settings */
+.rst-content a.reference code {
+    color: #3399cc !important;
+}
+.rst-content a.reference code:hover {
+    text-decoration: underline !important;
+    color: #3366cc !important;
+}
+
+/* underbar */
+h1,h2,h3,h4,h5,h6 {
+    border-bottom: 1px solid #ccc;
+}
+
+/* version setting */
+.wy-side-nav-search>div.version {
+    margin-top:-.4045em;
+    margin-bottom:.809em;
+    font-weight:400;
+    color:hsla(0,0%,100%,1)
+}

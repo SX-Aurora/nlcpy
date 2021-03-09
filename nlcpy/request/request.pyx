@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 import cython
 import string
 import os
-import six
 import time
 import nlcpy
 
@@ -49,6 +48,8 @@ import numpy
 cimport numpy as cnp
 
 cdef MAX_REQUEST = 100
+# cdef MAX_NBYTES = 128000000  # 128MB
+cdef MAX_NBYTES = 10 * 10**9  # 10GB
 
 cdef _rm = RequestManager()
 
@@ -64,6 +65,7 @@ cdef class RequestManager:
         readonly uint64_t head
         readonly uint64_t tail
         readonly object reqs_ptr
+        readonly uint64_t total_nbytes
 
     def __init__(self):
         self.reqs = numpy.zeros(N_REQUEST_PACKAGE * MAX_REQUEST, dtype='uint64')
@@ -74,13 +76,12 @@ cdef class RequestManager:
         self.tail = 0
         v = veo.VeoAlloc()
         self.reqs_ptr = v.proc.alloc_mem(self.reqs.nbytes)
+        self.total_nbytes = 0
 
     def __repr__(self):
-        print "size = ", self.reqs.size
         return repr(self.reqs)
 
     def __str__(self):
-        print "size = ", self.reqs.size
         return str(self.reqs)
 
     def flush(self):
@@ -100,7 +101,6 @@ cdef class RequestManager:
         check_error(err)
         core.check_fpe_flags(fpe_flags[0])
         fpe_flags.fill(0)
-        # print "ve_runtime = ", ve_runtime
 
     def clear(self):
         self.reqs.fill(0)
@@ -108,6 +108,7 @@ cdef class RequestManager:
         self.ref.clear()
         self.head = 0
         self.tail = 0
+        self.total_nbytes = 0
 
     def set_timing(self, timing='lazy'):
         self.timing = timing
@@ -118,11 +119,37 @@ cdef class RequestManager:
     def increment_nreq(self):
         self.nreq = self.nreq + 1
 
+    def update_nbytes(self, uint64_t total_nbytes):
+        self.total_nbytes = total_nbytes
+
+    def estimate_nbytes(self, args):
+        cdef uint64_t total_nbytes = self.total_nbytes
+        for arg in args:
+            """
+            if type(arg) is not ndarray:
+                continue
+            is_increment = True
+            for ref in self.ref:
+                for r in ref:
+                    if id(r) == id(arg):
+                        is_increment = False
+                        break
+                if not is_increment:
+                    break
+            if is_increment:
+                total_nbytes += arg.effective_nbytes
+            """
+            if type(arg) is ndarray:
+                total_nbytes += arg.effective_nbytes
+        return total_nbytes
+
     def flush_if_needed(self):
         if self.timing == 'on-the-fly':
             flush()
         elif self.nreq >= MAX_REQUEST:
             flush()
+        # elif self.total_nbytes > MAX_NBYTES:
+        #     flush()
 
     def keep_refs(self, refs):
         self.ref.append(refs)
@@ -134,6 +161,10 @@ cdef class RequestManager:
         v.proc.free_mem(self.reqs_ptr)
 
 cpdef _push_request(name, typ, args):
+    # cdef uint64_t total_nbytes = _rm.estimate_nbytes(args)
+    # if total_nbytes > MAX_NBYTES:
+    #     total_nbytes -= _rm.total_nbytes
+    #     _rm.flush()
     func_num = funcNumList.get(name, -1)
     func_type = funcTypeList.get(typ, -1)
     if func_num == -1:
@@ -144,6 +175,7 @@ cpdef _push_request(name, typ, args):
     _set_request(func_num, func_type, args)
 
     _rm.increment_nreq()
+    # _rm.update_nbytes(total_nbytes)
     _rm.keep_refs(args)  # to avoid deallocation before request is executed.
     _rm.flush_if_needed()
 
@@ -152,7 +184,7 @@ cpdef _clear_requests():
     _rm.clear()
 
 cpdef _print_requests():
-    print _rm
+    print(_rm)
 
 cpdef flush():
     """Flushes stacked requests on VH to VE, and waits until VE exectuion is completed.
@@ -166,13 +198,13 @@ cpdef flush():
 cpdef set_offload_timing_onthefly():
     """Sets kernel offload timing on-the-fly.
 
-    After calling this function, `nlcpy.request.flush` will be called every time requests
-    are stacked on VH.
+    After calling this function, :func:`nlcpy.request.flush` will be called
+    every time requests are stacked on VH.
 
-    Note:
-        This function does not flush stacked requests, so we recommend to execute
-        `nlcpy.request.flush` before calling this function.
-
+    Note
+    ----
+    This function does not flush stacked requests, so we recommend to execute
+    :func:`nlcpy.request.flush` before calling this function.
     """
     _rm.set_timing('on-the-fly')
 
@@ -182,10 +214,9 @@ cpdef set_offload_timing_lazy():
 
     After calling this function, requests will be packaged and flush together to VE.
 
-    Note:
-        Default offload setting is lazy, so you don't need to call this function
-        normally.
-
+    Note
+    ----
+    Default offload setting is 'lazy', so you don't need to call this function normally.
     """
     _rm.set_timing('lazy')
 
@@ -193,17 +224,18 @@ cpdef set_offload_timing_lazy():
 cpdef get_offload_timing():
     """Gets kernel offload timing.
 
-    Returns:
-        out : str
+    Returns
+    -------
+    out : str
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> vp.request.get_offload_timing()
-        "current offload timing is 'lazy'"
-        >>> vp.request.set_offload_timing_onthefly()
-        >>> vp.request.get_offload_timing()
-        "current offload timing is 'on-the-fly'"
-
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.request.get_offload_timing()
+    "current offload timing is 'lazy'"
+    >>> vp.request.set_offload_timing_onthefly()
+    >>> vp.request.get_offload_timing()
+    "current offload timing is 'on-the-fly'"
     """
     return str("current offload timing is \'" + _rm.timing + "\'")
 
@@ -219,7 +251,7 @@ cdef _set_request(func_num, func_type, args):
             _rm.increment_tail(n)
         elif isinstance(x, numpy.number) or \
             isinstance(x, numpy.bool_) or \
-                isinstance(x, numpy.bool):
+                isinstance(x, bool):
             n = _set_ve_array_with_scalar(numpy.array(x), _rm.reqs, _rm.tail)
             _rm.increment_tail(n)
         elif isinstance(x, numpy.ndarray) and x.ndim == 0:
@@ -267,17 +299,18 @@ cdef int _set_ve_array_with_scalar(cnp.ndarray a, cnp.ndarray dst, int offset):
     return N_VE_ARRAY_ELEMENTS
 
 cdef int _set_scalar(cnp.ndarray val, cnp.ndarray dst, int offset):
-    # cast scalar values to 64bit data
+    # cast bool to int32
     if val.dtype == numpy.dtype('bool'):
-        val = val.astype('i8')
-    elif val.dtype == numpy.dtype('i4'):
-        val = val.astype('i8')
-    elif val.dtype == numpy.dtype('u4'):
-        val = val.astype('u8')
-    elif val.dtype == numpy.dtype('f4'):
-        val = val.astype('f8')
+        val = val.astype('i4')
 
+    # fill zero for upper bits
     cdef uint64_t *s_tmp = <uint64_t *>val.data
+    if val.dtype == numpy.dtype('bool') or \
+            val.dtype == numpy.dtype('i4') or \
+            val.dtype == numpy.dtype('u4') or \
+            val.dtype == numpy.dtype('f4'):
+        s_tmp[0] = 0x00000000ffffffff & s_tmp[0]
+
     cdef int n
     if val.dtype == numpy.dtype('c16'):
         dst[offset] = s_tmp[0]
@@ -287,7 +320,6 @@ cdef int _set_scalar(cnp.ndarray val, cnp.ndarray dst, int offset):
         dst[offset] = s_tmp[0]
         n = 1
     return n
-
 
 cdef cnp.ndarray[cnp.uint64_t, ndim=1] _create_ve_array_buffer(ndarray a):
     cdef vector[uint64_t] tmp

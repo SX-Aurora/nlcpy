@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -64,8 +64,9 @@ import unittest
 import warnings
 
 import numpy
-import six
 import re
+import importlib
+from distutils.version import StrictVersion
 
 import nlcpy
 from nlcpy import ndarray
@@ -1192,6 +1193,25 @@ def with_requires(*requirements):
     try:
         ws.require(*requirements)
         skip = False
+    except pkg_resources.DistributionNotFound:
+        for req in requirements:
+            m = re.findall(r'(\w+)\s*([=|>|<|!]+)\s*(.*)', req)
+
+            libname = m[0][0]
+            sign = m[0][1]
+            targver = m[0][2]
+
+            lib = importlib.import_module(libname)
+            statement = ('StrictVersion(lib.__version__) {} '
+                         'StrictVersion(targver)'.format(sign))
+
+            flag = eval(statement, {'lib': lib, 'targver': targver,
+                                    'StrictVersion': StrictVersion})
+            if flag is False:
+                skip = True
+                break
+            else:
+                skip = False
     except pkg_resources.ResolutionError:
         skip = True
 
@@ -1208,6 +1228,19 @@ def numpy_satisfies(version_range):
     spec = 'numpy{}'.format(version_range)
     try:
         pkg_resources.require(spec)
+    except pkg_resources.DistributionNotFound:
+        m = re.findall(r'(\w+)\s*([=|>|<|!]+)\s*(.*)', spec)
+        libname = m[0][0]
+        sign = m[0][1]
+        targver = m[0][2]
+
+        lib = importlib.import_module(libname)
+        statement = ('StrictVersion(lib.__version__) {} '
+                     'StrictVersion(targver)'.format(sign))
+
+        flag = eval(statement, {'lib': lib, 'targver': targver,
+                                'StrictVersion': StrictVersion})
+        return flag
     except pkg_resources.VersionConflict:
         return False
     return True
@@ -1369,23 +1402,33 @@ def numpy_nlcpy_check_for_unary_ufunc(
         is_broadcast=False,  # if True, out/where shape will be expanded twice
         name_xp='xp',
         name_in1='in1',
+        name_axis='axis',
+        name_indices='indices',
         name_out='out',
         name_where='where',
         name_op='op',
-        name_dtype='dtype'):
+        name_dtype='dtype',
+        ufunc_name='',
+        axes=(0,),
+        indices=(None,),
+        keepdims=False,
+        seed=None):
     """Decorator to parameterize tests unary operator.
     """
     def decorator(impl):
         @functools.wraps(impl)
         def test_func(self, *args, **kw):
+            if seed is not None:
+                numpy.random.seed(seed)
             for op in ops:
                 for shape in shapes:
                     ufunc._check_for_unary_with_create_param(
                         self, args, kw, op, shape, order_x, order_out,
                         order_where, dtype_x, dtype_out, dtype_arg,
                         minval, maxval, mode, is_out, is_where,
-                        is_dtype, is_broadcast, name_xp, name_in1,
-                        name_out, name_where, name_op, name_dtype, impl)
+                        is_dtype, is_broadcast, name_xp, name_in1, name_axis,
+                        name_indices, name_out, name_where, name_op, name_dtype, impl,
+                        ufunc_name, axes, indices, keepdims)
         return test_func
     return decorator
 
@@ -1405,6 +1448,7 @@ def numpy_nlcpy_check_for_binary_ufunc(
         order_where=[  # order for where
             'C',
             'F'],
+        order_arg=['K'],  # order for argument
         dtype_x=_float_dtypes,  # dtype for x
         dtype_y=_float_dtypes,  # dtype for y
         dtype_out=_float_dtypes,  # dtype for out
@@ -1419,24 +1463,31 @@ def numpy_nlcpy_check_for_binary_ufunc(
         name_xp='xp',
         name_in1='in1',
         name_in2='in2',
+        name_order='order',
+        name_casting='casting',
         name_out='out',
         name_where='where',
         name_op='op',
-        name_dtype='dtype'):
+        name_dtype='dtype',
+        ufunc_name='',
+        casting=['same_kind', ],
+        seed=None):
     """Decorator to parameterize tests binary operator.
     """
     def decorator(impl):
         @functools.wraps(impl)
         def test_func(self, *args, **kw):
+            if seed is not None:
+                numpy.random.seed(seed)
             for op in ops:
                 for shape in shapes:
                     ufunc._check_for_binary_with_create_param(
                         self, args, kw, op, shape, order_x, order_y,
-                        order_out, order_where, dtype_x, dtype_y, dtype_out,
-                        dtype_arg, minval, maxval, mode, is_out, is_where,
+                        order_out, order_where, order_arg, dtype_x, dtype_y,
+                        dtype_out, dtype_arg, minval, maxval, mode, is_out, is_where,
                         is_dtype, is_broadcast, name_xp, name_in1,
-                        name_in2, name_out, name_where,
-                        name_op, name_dtype, impl)
+                        name_in2, name_order, name_casting, name_out, name_where,
+                        name_op, name_dtype, ufunc_name, casting, impl)
         return test_func
     return decorator
 
@@ -1502,10 +1553,7 @@ class NumpyAliasTestBase(unittest.TestCase):
 class NumpyAliasBasicTestBase(NumpyAliasTestBase):
 
     def test_argspec(self):
-        if six.PY2:
-            f = inspect.getargspec
-        else:
-            f = inspect.signature
+        f = inspect.signature
         assert f(self.nlcpy_func) == f(self.numpy_func)
 
     def test_docstring(self):

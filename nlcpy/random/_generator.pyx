@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -95,18 +95,22 @@ class SeedSequence:
     """SeedSequence mixes sources of entropy in a reproducible way to set the initial
     state for independent and very probably non-overlapping BitGenerators.
 
-    Args:
-        entropy : None or int or sequence[int], optional
-            The entropy for creating a SeedSequence.
+    Parameters
+    ----------
+    entropy : None or int or sequence[int], optional
+        The entropy for creating a SeedSequence.
 
-    Note:
-        Best practice for achieving reproducible bit streams is to use the default None
-        for the initial entropy, and then use SeedSequence. entropy to log/pickle the
-        entropy for reproducibility:
-        >>> import nlcpy as vp
-        >>> sq1 = vp.random.SeedSequence()
-        >>> sq1.entropy
-        >>> array([3641776954])
+    Note
+    ----
+
+    Best practice for achieving reproducible bit streams is to use the default None for
+    the initial entropy, and then use SeedSequence. entropy to log/pickle the entropy for
+    reproducibility:
+
+    >>> import nlcpy as vp
+    >>> sq1 = vp.random.SeedSequence()
+    >>> sq1.entropy
+    >>> array([3641776954])
 
     """
     def __init__(self, entropy=None):
@@ -127,10 +131,11 @@ class BitGenerator:
     """Base Class for generic BitGenerators, which provide a stream of random bits based
     on different algorithms. Must be overridden.
 
-    Args:
-        seed : None or int or array_like[ints], optional
-            A seed to initialize the BitGenerator. If None, then fresh, unpredictable
-            entropy will be pulled from the OS.
+    Parameters
+    ----------
+    seed : None or int or array_like[ints], optional
+        A seed to initialize the BitGenerator. If None, then fresh, unpredictable entropy
+        will be pulled from the OS.
 
     """
     def __init__(self, seed=None):
@@ -156,20 +161,22 @@ class MT19937(BitGenerator):
 class Generator:
     """Container for the BitGenerators.
 
-    Generator exposes a number of methods for generating random numbers drawn from a
+    ``Generator`` exposes a number of methods for generating random numbers drawn from a
     variety of probability distributions. In addition to the distribution-specific
-    arguments, each method takes a keyword argument size that defaults to None. If size
-    is None, then a single value is generated and returned. If size is an integer, then a
-    1-D array filled with generated values is returned. If size is a tuple, then an array
-    with that shape is filled and returned. The function `nlcpy.random.default_rng` will
-    instantiate a Generator with default BitGenerator.
+    arguments, each method takes a keyword argument size that defaults to ``None``. If
+    size is ``None``, then a single value is generated and returned. If size is an
+    integer, then a 1-D array filled with generated values is returned. If size is a
+    tuple, then an array with that shape is filled and returned. The function
+    nlcpy.random.default_rng will instantiate a Generator with default BitGenerator.
 
-    Args:
-        bit_generator : None or BitGenerator or int or array_like[ints], optional
-            BitGenerator to use as the core generator.
+    Parameters
+    ----------
+    bit_generator : None or BitGenerator or int or array_like[ints], optional
+        BitGenerator to use as the core generator.
 
-    See Also:
-        `default_rng` : Recommended constructor for Generator.
+    See Also
+    --------
+    default_rng : Recommended constructor for Generator.
 
     """
     def __init__(self, bit_generator):
@@ -183,54 +190,65 @@ class Generator:
 
     def integers(self, low, high=None, size=None,
                  dtype='int64', endpoint=False):
-        """Returns random integers from low (inclusive) to high (exclusive), or if
-        endpoint=True, low (inclusive) to high (inclusive).
+        """Returns random integers from *low* (inclusive) to *high* (exclusive),
+        or if endpoint=True, *low* (inclusive) to *high* (inclusive).
+        Replaces :func:`nlcpy.random.randint` (with endpoint=False) and
+        :func:`nlcpy.random.random_integers` (with endpoint=True)
 
-        Replaces RandomState.randint (with endpoint=False) and
-        RandomState.random_integers (with endpoint=True) Returns random integers from the
-        "discrete uniform" distribution of the specified dtype. If high is None (the
-        default), then results are from 0 to low.
+        Returns random integers from the "discrete uniform" distribution of the
+        specified dtype. If *high* is None (the default), then results are from
+        0 to *low*.
 
-        Args:
-            low : int
-                Lowest (signed) integer to be drawn from the distribution (unless
-                high=None, in which case this parameter is 0 and this value is used for
-                high).
-            high : int, optional
-                If provided, one above the largest (signed) integer to be drawn from the
-                distribution (see above for behavior if high=None).
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
-            dtype : str or dtype, optional
-                Desired dtype of the result. All dtypes are determined by their name,
-                i.e., 'int64', 'int', etc, so byteorder is not available. The default
-                value is 'nlcpy.int64'.
-            endpoint : bool, optional
-                If true, sample from the interval [low, high] instead of the default
-                [low, high). Defaults to False.
+        Parameters
+        ----------
+        low : int
+            Lowest (signed) integer to be drawn from the distribution (unless
+            ``high=None``, in which case this parameter is 0 and this value is used for
+            *high*).
+        high : int, optional
+            If provided, one above the largest (signed) integer to be drawn from the
+            distribution (see above for behavior if ``high=None``).
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
+        dtype : str or dtype, optional
+            Desired dtype of the result. All dtypes are determined by their name, i.e.,
+            'int64', 'int', etc, so byteorder is not available. The default value is
+            'nlcpy.int64'.
+        endpoint : bool, optional
+            If true, sample from the interval ``[low, high]`` instead of the default
+            ``[low, high)``. Defaults to False.
 
-        Returns:
-            out : `ndarray` of ints
-                size-shaped array of random integers from the appropriate distribution.
+        Returns
+        -------
+        out : ndarray of ints
+            *size*-shaped array of random integers from the appropriate distribution.
 
-        Raises:
-            low is neither a scalar nor None : NotImplementedError occurs
-            high is neither a scalar nor None : NotImplementedError occurs
+        Restriction
+        -----------
+        * If *low* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *high* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            When using broadcasting with uint64 dtypes, the maximum value (2**64) cannot
-            be represented as a standard integer type. The high array (or low if high is
-            None) must have object dtype, e.g., array([2**64]).
+        Note
+        ----
+        When using broadcasting with uint64 dtypes, the maximum value (2**64) cannot be
+        represented as a standard integer type. The high array (or low if high is None)
+        must have object dtype, e.g., array([2**64]).
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> rng = vp.random.default_rng()
-            >>> rng.integers(2, size=10)
-            array([1, 0, 0, 0, 1, 1, 0, 0, 1, 0])  # random
-            >>> rng.integers(1, size=10)
-            array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> rng.integers(2, size=10) # doctest: +SKIP
+        array([1, 0, 0, 0, 1, 1, 0, 0, 1, 0])  # random
+        >>> rng.integers(1, size=10) # doctest: +SKIP
+        array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
+        Generate a 2 x 4 array of ints between 0 and 4, inclusive:
+
+        >>> rng.integers(5, size=(2, 4)) # doctest: +SKIP
+        array([[4, 0, 2, 1],
+               [3, 2, 2, 0]])  # random
         """
         self._rand._is_number(low)
         if high is None:
@@ -243,42 +261,50 @@ class Generator:
         return self._rand.randint(low, high, size=size, dtype=dtype)
 
     def random(self, size=None, dtype='d', out=None):
-        """Returns random floats in the half-open interval [0.0, 1.0).
+        """Returns random floats in the half-open interval ``[0.0, 1.0)``.
 
         Results are from the "continuous uniform" distribution over the stated interval.
-        To sample :math:`Unif[a, b), b > a` multiply the output of random by (b-a) and
-        add a:
-        (b - a) * random() + a
+        To sample :math:`Unif[a, b), b > a` multiply the output of random by
+        *(b-a)* and add *a*::
 
-        Args:
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.  Default is None, in which case a single value is
-                returned.
-            dtype : str or dtype, optional
-                Desired dtype of the result, either 'd' (or 'float64') or 'f' (or
-                'float32'). All dtypes are determined by their name. The default value is
-                'd'.
-            out : `ndarray`, optional
-                Alternative output array in which to place the result. If size is not
-                None,
-                it must have the same shape as the provided size and must match the type
-                of the output values.
+            (b - a) * random() + a
 
-        Returns:
-            out : `ndarray` of floats
-                Array of random floats of shape size.
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.  Default is None, in which case a single value is
+            returned.
+        dtype : str or dtype, optional
+            Desired dtype of the result, either 'd' (or 'float64') or 'f' (or 'float32').
+            All dtypes are determined by their name. The default value is 'd'.
+        out : ndarray, optional
+            Alternative output array in which to place the result. If size is not None,
+            it must have the same shape as the provided size and must match the type of
+            the output values.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> rng = vp.random.default_rng()
-            >>> rng.random()
-            array([0.47108547995356098]) # random
-            >>> type(rng.random())
-            <class 'nlcpy.core.core.ndarray'>
-            >>> rng.random((5,))
-            array([ 0.30220482,  0.86820401,  0.1654503 ,  0.11659149,  0.54323428])
+        Returns
+        -------
+        out : ndarray of floats
+            Array of random floats of shape *size*.
 
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> rng.random()       # doctest: +SKIP
+        array(0.11406583) # random
+        >>> type(rng.random())
+        <class 'nlcpy.core.core.ndarray'>
+        >>> rng.random((5,))   # doctest: +SKIP
+        array([0.68285923, 0.36783394, 0.193222  , 0.38130933, 0.67406266])
+
+        Three-by-two array of random numbers from [-5, 0):
+
+        >>> 5 * rng.random((3, 2)) - 5   # doctest: +SKIP
+        array([[-3.99149989, -0.52338984], # random
+               [-2.99091858, -0.79479508],
+               [-1.23204345, -1.75224494]])
         """
         dt = numpy.dtype(dtype)
         key = dt.name
@@ -295,19 +321,21 @@ class Generator:
     def bytes(self, length):
         """Returns random bytes.
 
-        Args:
-            length : int
-                Number of random bytes.
+        Parameters
+        ----------
+        length : int
+            Number of random bytes.
 
-        Returns:
-            out : str
-                String of length length.
+        Returns
+        -------
+        out : str
+            String of length *length*.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> vp.random.default_rng().bytes(10)
-            b'\\x9fW\\xc5\\x12\\x95\\xfd\\xba\\x0fd\\xff' # random
-
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> vp.random.default_rng().bytes(10)  # doctest: +SKIP
+        b'\\x9fW\\xc5\\x12\\x95\\xfd\\xba\\x0fd\\xff' # random
         """
         return self._rand.bytes(length)
 
@@ -317,58 +345,64 @@ class Generator:
         This function only shuffles the array along the first axis of a multi-dimensional
         array. The order of sub-arrays is changed but their contents remains the same.
 
-        Args:
-            x : array_like
-                The array or list to be shuffled.
+        Parameters
+        ----------
+        x : array_like
+            The array or list to be shuffled.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> rng = vp.random.default_rng()
-            >>> arr = vp.arange(10)
-            >>> rng.shuffle(arr)
-            >>> arr
-            array([7, 1, 5, 6, 0, 8, 4, 2, 9, 3]) # random
-            # Multi-dimensional arrays are only shuffled along the first axis:
-            >>> arr = vp.arange(9).reshape((3, 3))
-            >>> rng.shuffle(arr)
-            >>> arr
-            array([[3, 4, 5], # random
-                   [6, 7, 8],
-                   [0, 1, 2]])
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> arr = vp.arange(10)
+        >>> rng.shuffle(arr)
+        >>> arr   # doctest: +SKIP
+        array([7, 1, 5, 6, 0, 8, 4, 2, 9, 3]) # random
 
+        Multi-dimensional arrays are only shuffled along the first axis:
+
+        >>> arr = vp.arange(9).reshape((3, 3))
+        >>> rng.shuffle(arr)
+        >>> arr   # doctest: +SKIP
+        array([[3, 4, 5], # random
+               [6, 7, 8],
+               [0, 1, 2]])
         """
         return self._rand.shuffle(x)
 
     def permutation(self, x):
         """Randomly permutes a sequence, or returns a permuted range.
 
-        If x is a multi-dimensional array, it is only shuffled along it first index.
+        If *x* is a multi-dimensional array, it is only shuffled along it first index.
 
-        Args:
-            x : int or array_like
-                If x is an integer, randomly permute vp.arange(x). If x is an array, make
-                a copy and shuffle the elements randomly.
+        Parameters
+        ----------
+        x : int or array_like
+            If *x* is an integer, randomly permute ``vp.arange(x)``. If *x* is an array,
+            make a copy and shuffle the elements randomly.
 
-        Returns:
-            out : `ndarray`
-                Permuted sequence or array range.
+        Returns
+        -------
+        out : ndarray
+            Permuted sequence or array range.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> rng = vp.random.default_rng()
-            >>> rng.permutation(10)
-            array([1, 7, 4, 3, 0, 9, 2, 5, 8, 6]) # random
-            >>> rng.permutation([1, 4, 9, 12, 15])
-            array([15,  1,  9,  4, 12]) # random
-            >>> arr = vp.arange(9).reshape((3, 3))
-            >>> rng.permutation(arr)
-            array([[6, 7, 8], # random
-                   [0, 1, 2],
-                   [3, 4, 5]])
-
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> rng.permutation(10)   # doctest: +SKIP
+        array([1, 7, 4, 3, 0, 9, 2, 5, 8, 6]) # random
+        >>> rng.permutation([1, 4, 9, 12, 15])   # doctest: +SKIP
+        array([15,  1,  9,  4, 12]) # random
+        >>> arr = vp.arange(9).reshape((3, 3))
+        >>> rng.permutation(arr)   # doctest: +SKIP
+        array([[6, 7, 8], # random
+               [0, 1, 2],
+               [3, 4, 5]])
         """
         return self._rand.permutation(x)
 
@@ -377,121 +411,160 @@ class Generator:
 
         Samples are drawn from a binomial distribution with specified parameters, n
         trials and p probability of success where n an integer >= 0 and p is in the
-        interval [0,1]. (n may be input as a float, but it is truncated to an integer in
-        use)
+        interval ``[0,1]``. (n may be input as a float, but it is truncated to an integer
+        in use)
 
-        Args:
-            n : int
-                Parameter of the distribution, >= 0. Floats are also accepted, but they
-                will be truncated to integers.
-            p : float
-                Parameter of the distribution, >= 0 and <=1.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        n : int
+            Parameter of the distribution, >= 0. Floats are also accepted, but they will
+            be truncated to integers.
+        p : float
+            Parameter of the distribution, >= 0 and <=1.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized binomial distribution, where each
-                sample is equal to the number of successes over the n trials.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized binomial distribution, where each sample
+            is equal to the number of successes over the n trials.
 
-        Raises:
-            n is neither a scalar nor None : NotImplementedError occurs.
-            p is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *n* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *p* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the binomial distribution is:math:` P(N) = {n
-            \\choose N}p^N(1-p)^{n-N}, `
-            where :math:`n` is the number of trials, :math:`p` is the probability of
-            success, and :math:`N` is the number of successes.
-            When estimating the standard error of a proportion in a population by using a
-            random sample, the normal distribution works well unless the product p*n <=5,
-            where p = population proportion estimate, and n = number of samples, in which
-            case the binomial distribution is used instead.
-            For example, a sample of 15 people shows 4 who are left handed, and 11 who
-            are right handed. Then p = 4/15 = 27. 0.27*15 = 4, so the binomial
-            distribution should be used in this case.
+        Note
+        ----
+        The probability density for the binomial distribution is
 
-        Examples:
-            >>> import nlcpy as vp
-            # Draw samples from the distribution:
-            >>> rng = vp.random.default_rng()
-            >>> n, p = 10, .5  # number of trials, probability of each trial
-            >>> s = rng.binomial(n, p, 1000)
-            # result of flipping a coin 10 times, tested 1000 times.
-            # A real world example. A company drills 9 wild-cat oil exploration
-            # wells, each with an estimated probability of success of 0.1. All nine
-            # wells fail. What is the probability of that happening?
-            # Let's do 20,000 trials of the model, and count the number that
-            # generate zero positive results.
-            >>> sum(rng.binomial(9, 0.1, 20000) == 0)/20000.
-            # array(0.38625), or 38%.
+        .. math:: P(N) = \\binom{n}{N}p^N(1-p)^{n-N},
 
+        where :math:`n` is the number of trials, :math:`p` is the probability of success,
+        and :math:`N` is the number of successes.
+
+        When estimating the standard error of a proportion in a population by using a
+        random sample, the normal distribution works well unless the product p*n <=5,
+        where p = population proportion estimate, and n = number of samples, in which
+        case the binomial distribution is used instead.
+
+        For example, a sample of 15 people shows 4 who are left handed, and 11 who are
+        right handed. Then p = 4/15 = 27%. 0.27*15 = 4, so the binomial distribution
+        should be used in this case.
+
+        Examples
+        --------
+        Draw samples from the distribution:
+
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> n, p = 10, .5  # number of trials, probability of each trial
+        >>> s = rng.binomial(n, p, 1000)
+
+        A real world example. A company drills 9 wild-cat oil exploration
+        wells, each with an estimated probability of success of 0.1. All nine
+        wells fail. What is the probability of that happening?
+
+        Let's do 20,000 trials of the model, and count the number that
+        generate zero positive results.
+
+        >>> sum(rng.binomial(9, 0.1, 20000) == 0)/20000.  # doctest: +SKIP
+        array(0.38625)  #  or 38%.
         """
         return self._rand.binomial(n, p, size=size)
 
     def exponential(self, scale, size=None):
         """Draws samples from an exponential distribution.
 
-        Its probability density function is:math:` f(x; \\frac{1}{\\beta}) =
-        \\frac{1}{\\beta} \\exp(-\\frac{x}{\\beta}), `
-        for x > 0 and 0 elsewhere. :math:`\\beta` is the scale parameter, which is the
-        inverse of the rate parameter :math:` \\lambda = 1/\\beta `.
+        Its probability density function is
 
-        Args:
-            scale : float
-                The scale parameter, :math:` \\beta = 1/\\lambda `. Must be non-negative.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        .. math::
+            f(x; \\frac{1}{\\beta}) =
+            \\frac{1}{\\beta} \\exp(-\\frac{x}{\\beta}),
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized exponential distribution.
+        for ``x > 0`` and 0 elsewhere. :math:`\\beta` is the scale parameter,
+        which is the inverse of the rate parameter :math:`\\lambda = 1/\\beta`.
 
-        Raises:
-            scale is neither a scalar nor None : NotImplementedError occurs.
+        Parameters
+        ----------
+        scale : float
+            The scale parameter, :math:`\\beta = 1/\\lambda`. Must be non-negative.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized exponential distribution.
+
+        Restriction
+        -----------
+        * If *scale* is neither a scalar nor None : *NotImplementedError* occurs.
         """
         return self._rand.exponential(scale, size=size)
 
     def gamma(self, shape, scale=1.0, size=None):
         """Draws samples from a Gamma distribution.
 
-        Samples are drawn from a Gamma distribution with specified parameters, shape
-        (sometimes designated "k") and scale (sometimes designated "theta"), where both
-        parameters are > 0.
+        Samples are drawn from a Gamma distribution with specified parameters, *shape*
+        (sometimes designated "k") and *scale* (sometimes designated "theta"),
+        where both parameters are > 0.
 
-        Args:
-            shape : float
-                The shape of the gamma distribution. Must be non-negative.
-            scale : float, optional
-                The scale of the gamma distribution. Must be non-negative. Default is
-                equal to 1.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        shape : float
+            The shape of the gamma distribution. Must be non-negative.
+        scale : float, optional
+            The scale of the gamma distribution. Must be non-negative. Default is equal
+            to 1.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized gamma distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized gamma distribution.
 
-        Raises:
-            shape is neither a scalar nor None : NotImplementedError occurs.
-            scale is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *shape* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *scale* is neither a scalar nor None * *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the Gamma distribution is:math:` p(x) =
-            x^{k-1}\\frac{e^{-x/\\theta}}{\\theta^k\\Gamma(k)}, `
-            where :math:`k` is the shape and :math:`\\theta` the scale, and
-            :math:`\\Gamma` is the Gamma function.
+        Note
+        ----
+        The probability density for the Gamma distribution is
 
-        Examples:
+        .. math::
+            p(x) =
+            x^{k-1}\\frac{e^{-x/\\theta}}{\\theta^k\\Gamma(k)},
+
+        where :math:`k` is the shape and :math:`\\theta` the scale, and :math:`\\Gamma`
+        is the Gamma function.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> shape, scale = 2., 2.  # mean=4, std=2*sqrt(2)
             >>> s = vp.random.default_rng().gamma(shape, scale, 1000)
 
+            Display the histogram of the samples, along with the probability
+            density function:
+
+            >>> import matplotlib.pyplot as plt
+            >>> import scipy.special as sps
+            >>> count, bins, ignored = plt.hist(s.get(), 50, density=True)
+            >>> y = bins**(shape-1)*(vp.exp(-bins/scale)/(sps.gamma(shape)*scale**shape))
+            >>> plt.plot(bins, y, linewidth=2, color='r') # doctest: +SKIP
+            >>> plt.show()
         """
         return self._rand.gamma(shape, scale, size=size)
 
@@ -501,34 +574,43 @@ class Generator:
         Bernoulli trials are experiments with one of two outcomes: success or failure (an
         example of such an experiment is flipping a coin).  The geometric distribution
         models the number of trials that must be run in order to achieve success.
-        It is therefore supported on the positive integers, k = 1, 2, ....
+        It is therefore supported on the positive integers, ``k = 1, 2, ...``.
+
         The probability mass function of the geometric distribution is
-        :math:` f(k) = (1 - p)^{k - 1} p `
-        where p is the probability of success of an individual trial.
 
-        Args:
-            p : float
-                The probability of success of an individual trial.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        .. math:: f(k) = (1 - p)^{k - 1} p
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized geometric distribution.
+        where *p* is the probability of success of an individual trial.
 
-        Raises:
-            p is neither a scalar nor None : NotImplementedError occurs.
+        Parameters
+        ----------
+        p : float
+            The probability of success of an individual trial.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Examples:
-            >>> import nlcpy as vp
-            # Draw ten thousand values from the geometric distribution,
-            # with the probability of an individual success equal to 0.35:
-            >>> z = vp.random.default_rng().geometric(p=0.35, size=10000)
-            # How many trials succeeded after a single run?
-            >>> (z.get() == 1).sum() / 10000.
-            0.2235  # random
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized geometric distribution.
 
+        Restriction
+        -----------
+        * If *p* is neither a scalar nor None : *NotImplementedError* occurs.
+
+        Examples
+        --------
+        Draw ten thousand values from the geometric distribution,
+        with the probability of an individual success equal to 0.35:
+
+        >>> import nlcpy as vp
+        >>> z = vp.random.default_rng().geometric(p=0.35, size=10000)
+
+        How many trials succeeded after a single run?
+
+        >>> vp.sum(z == 1) / 10000.   # doctest: +SKIP
+        array(0.3453)  # random
         """
         return self._rand.geometric(p, size=size)
 
@@ -536,45 +618,89 @@ class Generator:
         """Draws samples from a Gumbel distribution.
 
         Draws samples from a Gumbel distribution with specified location and scale.  For
-        more information on the Gumbel distribution, see Notes and References below.
+        more information on the Gumbel distribution, see Notes below.
 
-        Args:
-            loc : float, optional
-                The location of the mode of the distribution. Default is 0.
-            scale : float, optional
-                The scale parameter of the distribution. Default is 1. Must be
-                non-negative.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        loc : float, optional
+            The location of the mode of the distribution. Default is 0.
+        scale : float, optional
+            The scale parameter of the distribution. Default is 1. Must be non-negative.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized Gumbel distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized Gumbel distribution.
 
-        Raises:
-            loc is neither a scalar nor None : NotImplementedError occurs.
-            scale is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *loc* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *scale* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the Gumbel distribution is
-            :math:` p(x) = \\frac{e^{-(x - \\mu)/ \\beta}}{\\beta} e^{ -e^{-(x - \\mu)/
-            \\beta}}, `
-            where :math:`\\mu` is the mode, a location parameter, and :math:`\\beta` is
-            the scale parameter.
-            The function has a mean of :math:` \\mu + 0.57721\\beta ` and a variance of
-            :math:` \\frac{\\pi^2}{6}\\beta^2 `.
+        Note
+        ----
+        The probability density for the Gumbel distribution is
 
-        See Also:
-            `weibull` : Draws samples from a Weibull distribution.
+        .. math::
+            p(x) = \\frac{e^{-(x - \\mu)/ \\beta}}{\\beta} e^{ -e^{-(x - \\mu)/
+            \\beta}},
 
-        Examples:
+        where :math:`\\mu` is the mode, a location parameter, and :math:`\\beta` is the
+        scale parameter.
+
+        The function has a mean of :math:`\\mu + 0.57721\\beta` and a variance of
+        :math:`\\frac{\\pi^2}{6}\\beta^2`.
+
+        See Also
+        --------
+        Generator.weibull : Draws samples from a Weibull distribution.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> rng = vp.random.default_rng()
             >>> mu, beta = 0, 0.1 # location and scale
             >>> s = rng.gumbel(mu, beta, 1000)
 
+            Display the histogram of the samples, along with the probability
+            density function:
+
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), 30, density=True)
+            >>> plt.plot(bins, (1/beta)*vp.exp(-(bins - mu)/beta)
+            ...          * vp.exp( -vp.exp( -(bins - mu) /beta) ),
+            ...          linewidth=2, color='r') # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.show()
+
+            Show how an extreme value distribution can arise from a Gaussian
+            process and compare to a Gaussian:
+
+            >>> plt.close()
+            >>> maxima = vp.empty(1000)
+            >>> for i in range(0,1000) :
+            ...    a = rng.normal(mu, beta, 1000)
+            ...    maxima[i] = a.max()
+            >>> count, bins, ignored = plt.hist(maxima.get(), 30, density=True)
+            >>> beta = vp.std(maxima) * vp.sqrt(6) / vp.pi
+            >>> mu = vp.mean(maxima) - 0.57721*beta
+            >>> plt.plot(bins, (1/beta)*vp.exp(-(bins - mu)/beta)
+            ...          * vp.exp(-vp.exp(-(bins - mu)/beta)),
+            ...          linewidth=2, color='r') # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.plot(bins, 1/(beta * vp.sqrt(2 * vp.pi))
+            ...          * vp.exp(-(bins - mu)**2 / (2 * beta**2)),
+            ...          linewidth=2, color='g') # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.show()
         """
         return self._rand.gumbel(loc, scale, size=size)
 
@@ -584,34 +710,56 @@ class Generator:
         Samples are drawn from a logistic distribution with specified parameters, loc
         (location or mean, also median), and scale (>0).
 
-        Args:
-            loc : float, optional
-                Parameter of the distribution. Default is 0.
-            scale : float, optional
-                Parameter of the distribution. Must be non-negative. Default is 1.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        loc : float, optional
+            Parameter of the distribution. Default is 0.
+        scale : float, optional
+            Parameter of the distribution. Must be non-negative. Default is 1.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized logistic distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized logistic distribution.
 
-        Raises:
-            loc is neither a scalar nor None : NotImplementedError occurs.
-            scale is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *loc* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *scale* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the Logistic distribution is:math:` P(x) =
-            \\frac{e^{-(x-\\mu)/s}}{s(1+e^{-(x-\\mu)/s})^2}, `
-            where :math:`\\mu` = location and :math:`s` = scale.
+        Note
+        ----
+        The probability density for the Logistic distribution is
 
-        Examples:
+        .. math::
+            P(x) = \\frac{e^{-(x-\\mu)/s}}{s(1+e^{-(x-\\mu)/s})^2},
+
+        where :math:`\\mu` = location and :math:`s` = scale.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> loc, scale = 10, 1
             >>> s = vp.random.default_rng().logistic(loc, scale, 10000)
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), bins=50)
 
+            Plot against distribution
+
+            >>> def logist(x, loc, scale):
+            ...     return vp.exp((loc-x)/scale)/(scale*(1+vp.exp((loc-x)/scale))**2)
+            >>> lgst_val = logist(bins, loc, scale)
+            >>> plt.plot(bins, lgst_val * count.max() / lgst_val.max()) # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.show()
         """
         return self._rand.logistic(loc, scale, size=size)
 
@@ -623,39 +771,65 @@ class Generator:
         the values for the distribution itself, but of the underlying normal distribution
         it is derived from.
 
-        Args:
-            mean : float, optional
-                Mean value of the underlying normal distribution. Default is 0.
-            sigma : float, optional
-                Standard deviation of the underlying normal distribution. Must be
-                non-negative. Default is 1.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        mean : float, optional
+            Mean value of the underlying normal distribution. Default is 0.
+        sigma : float, optional
+            Standard deviation of the underlying normal distribution. Must be
+            non-negative. Default is 1.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized log-normal distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized log-normal distribution.
 
-        Raises:
-            mean is neither a scalar nor None : NotImplementedError occurs.
-            sigma is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *mean* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *sigma* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            A variable x has a log-normal distribution if log(x) is normally distributed.
-            The probability density function for the log-normal distribution is:
-            :math:` p(x) = \\frac{1}{\\sigma x
-            \\sqrt{2\\pi}}e^{(-\\frac{(ln(x)-\\mu)^2}{2\\sigma^2})} `
-            where :math:`\\mu` is the mean and :math:`\\sigma` is the standard deviation
-            of the normally distributed logarithm of the variable.
+        Note
+        ----
+        A variable x has a log-normal distribution if *log(x)* is normally distributed.
+        The probability density function for the log-normal distribution is:
 
-        Examples:
+        .. math::
+            p(x) = \\frac{1}{\\sigma x
+            \\sqrt{2\\pi}}e^{(-\\frac{(ln(x)-\\mu)^2}{2\\sigma^2})}
+
+        where :math:`\\mu` is the mean and :math:`\\sigma` is the standard deviation of
+        the normally distributed logarithm of the variable.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> rng = vp.random.default_rng()
             >>> mu, sigma = 3., 1. # mean and standard deviation
             >>> s = rng.lognormal(mu, sigma, 1000)
 
+            Display the histogram of the samples, along with the probability
+            density function:
+
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), 100, density=True, align='mid')
+
+            >>> x = vp.linspace(min(bins), max(bins), 10000)
+            >>> pdf = (vp.exp(-(vp.log(x) - mu)**2 / (2 * sigma**2))
+            ...        / (x * sigma * vp.sqrt(2 * vp.pi)))
+
+            >>> plt.plot(x, pdf, linewidth=2, color='r') # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.axis('tight') # doctest: +SKIP
+            >>> plt.show()
         """
         return self._rand.lognormal(mean, sigma, size=size)
 
@@ -666,55 +840,89 @@ class Generator:
         Moivre and 200 years later by both Gauss and Laplace independently, is often
         called the bell curve because of its characteristic shape (see the example
         below).
+
         The normal distributions occurs often in nature.  For example, it describes the
         commonly occurring distribution of samples influenced by a large number of tiny,
         random disturbances, each with its own unique distribution.
 
-        Args:
-            loc : float
-                Mean ("centre") of the distribution.
-            scale : float
-                Standard deviation (spread or "width") of the distribution. Must be
-                non-negative.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        loc : float
+            Mean ("centre") of the distribution.
+        scale : float
+            Standard deviation (spread or "width") of the distribution. Must be
+            non-negative.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized normal distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized normal distribution.
 
-        Raises:
-            loc is neither a scalar nor None : NotImplementedError occurs.
-            scale is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *loc* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *scale* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the Gaussian distribution is:math:` p(x) =
-            \\frac{1}{\\sqrt{ 2 \\pi \\sigma^2 }}e^{ - \\frac{ (x - \\mu)^2 } {2
-            \\sigma^2} }, `
-            where :math:`\\mu` is the mean and :math:`\\sigma` the standard
-            deviation. The square of the standard deviation, :math:`\\sigma^2`, is called
-            the variance.
-            The function has its peak at the mean, and its "spread" increases with the
-            standard deviation (the function reaches 0.607 times its maximum at
-            numpy.random.normal is more likely to return samples lying close to the mean,
-            rather than those far away.
+        Note
+        ----
+        The probability density for the Gaussian distribution is
 
-        Examples:
+        .. math::
+            p(x) =
+                \\frac{1}{\\sqrt{ 2 \\pi \\sigma^2 }}
+                e^{ - \\frac{ (x - \\mu)^2 }{2 \\sigma^2}},
+
+        where :math:`\\mu` is the mean and :math:`\\sigma` the standard deviation.
+        The square of the standard deviation, :math:`\\sigma^2`, is called the
+        variance.
+
+        The function has its peak at the mean, and its "spread" increases with the
+        standard deviation (the function reaches 0.607 times its maximum at
+        :math:`x + \\sigma` and :math:`x - \\sigma`).
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> mu, sigma = 0, 0.1 # mean and standard deviation
             >>> s = vp.random.default_rng().normal(mu, sigma, 1000)
-            # Verify the mean and the variance:
-            >>> abs(mu - vp.mean(s))
+
+            Verify the mean and the variance:
+
+            >>> abs(mu - vp.mean(s)) # doctest: +SKIP
             array(0.00206415)  # may vary
-            >>> abs(sigma - vp.std(s, ddof=1))
+            >>> abs(sigma - vp.std(s, ddof=1)) # doctest: +SKIP
             array(0.00133596)  # may vary
-            # Two-by-four array of samples from N(3, 6.25):
-            >>> vp.random.default_rng().normal(3, 2.5, size=(2, 4))
+
+            Two-by-four array of samples from N(3, 6.25):
+
+            >>> vp.random.default_rng().normal(3, 2.5, size=(2, 4))  # doctest: +SKIP
             array([[-4.49401501,  4.00950034, -1.81814867,  7.29718677],   # random
                    [ 0.39924804,  4.68456316,  4.99394529,  4.84057254]])  # random
 
+            Display the histogram of the samples, along with the probability
+            density function:
+
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), 30, density=True)
+            >>> plt.plot(bins, 1/(sigma * vp.sqrt(2 * vp.pi)) *
+            ...                vp.exp( - (bins - mu)**2 / (2 * sigma**2) ),
+            ...          linewidth=2, color='r')  # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.show()
+
+        Two-by-four array of samples from N(3, 6.25):
+
+        >>> vp.random.default_rng().normal(3, 2.5, size=(2, 4))  # doctest: +SKIP
+        array([[ 1.53904187,  3.36100709, 11.21828966,  6.85936673],  # random
+               [ 1.50665756,  5.35682791,  4.66053878,  3.55770521]]) # random
         """
         return self._rand.normal(loc=loc, scale=scale, size=size)
 
@@ -723,36 +931,54 @@ class Generator:
 
         The Poisson distribution is the limit of the binomial distribution for large N.
 
-        Args:
-            lam : float
-                Expectation of interval, must be >= 0. A sequence of expectation
-                intervals must be broadcastable over the requested size.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        lam : float
+            Expectation of interval, must be >= 0. A sequence of expectation intervals
+            must be broadcastable over the requested size.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized Poisson distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized Poisson distribution.
 
-        Raises:
-            lam is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *lam* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The Poisson distribution:math:` f(k; \\lambda)=\\frac{\\lambda^k
-            e^{-\\lambda}}{k!} `
-            For events with an expected separation :math:`\\lambda` the Poisson
-            distribution :math:`f(k; \\lambda)` describes the probability of :math:`k`
-            events occurring within the observed interval :math:`\\lambda`.
-            Because the output is limited to the range of the C int64 type, a ValueError
-            is raised when lam is within 10 sigma of the maximum representable value.
+        Note
+        ----
+        The Poisson distribution
 
-        Examples:
+        .. math::
+            f(k; \\lambda)=\\frac{\\lambda^k e^{-\\lambda}}{k!}
+
+        For events with an expected separation :math:`\\lambda` the Poisson distribution
+        :math:`f(k; \\lambda)` describes the probability of :math:`k` events occurring
+        within the observed interval :math:`\\lambda`.
+
+        Because the output is limited to the range of the C int64 type, a ValueError is
+        raised when *lam* is within 10 sigma of the maximum representable value.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> rng = vp.random.default_rng()
             >>> s = rng.poisson(5, 10000)
 
+            Display histogram of the sample:
+
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), 14, density=True)
+            >>> plt.show()
         """
         return self._rand.poisson(lam, size=size)
 
@@ -761,26 +987,41 @@ class Generator:
 
         Also known as the Lorentz distribution.
 
-        Args:
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            samples : `ndarray`
-                The drawn samples.
+        Returns
+        -------
+        samples : ndarray
+            The drawn samples.
 
-        Note:
-            The probability density function for the full Cauchy distribution is:math:`
-            P(x; x_0, \\gamma) = \\frac{1}{\\pi \\gamma \\bigl[
-            1+(\\frac{x-x_0}{\\gamma})^2 \\bigr] } `
-            and the Standard Cauchy distribution just sets :math:` x_0=0 ` and
+        Note
+        ----
+        The probability density function for the full Cauchy distribution is
 
-        Examples:
+        .. math::
+            P(x; x_0, \\gamma) =
+            \\frac{1}{\\pi \\gamma \\bigl[ 1+(\\frac{x-x_0}{\\gamma})^2 \\bigr] }
+
+        and the Standard Cauchy distribution just sets :math:`x_0=0` and
+        :math:`\\gamma = 1`
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples and plot the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples and plot the distribution:
+            >>> import matplotlib.pyplot as plt
             >>> s = vp.random.default_rng().standard_cauchy(1000000)
-
+            >>> s = s[(s>-25) & (s<25)]  # truncate distribution so it plots well
+            >>> plt.hist(s.get(), bins=100) # doctest: +SKIP
+            >>> plt.show()
         """
         return self._rand.standard_cauchy(size=size)
 
@@ -791,29 +1032,30 @@ class Generator:
         standard_exponential is identical to the exponential distribution with a scale
         parameter of 1.
 
-        Args:
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
-            dtype : dtype, optional
-                Desired dtype of the result, either 'd' (or 'float64') or 'f' (or
-                'float32'). All dtypes are determined by their name. The default value is
-                'd'.
-            method : str, optional
-                Function by this argument is not implemented.
-            out : `ndarray`, optional
-                Alternative output array in which to place the result. If size is not
-                None, it must have the same shape as the provided size and must match the
-                type of the output values.
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
+        dtype : dtype, optional
+            Desired dtype of the result, either 'd' (or 'float64') or 'f' (or 'float32').
+            All dtypes are determined by their name. The default value is 'd'.
+        method : str, optional
+            Function by this argument is not implemented.
+        out : ndarray, optional
+            Alternative output array in which to place the result. If size is not None,
+            it must have the same shape as the provided size and must match the type of
+            the output values.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> n = vp.random.default_rng().standard_exponential((3, 8000))
-
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> n = vp.random.default_rng().standard_exponential((3, 8000))
         """
         if method is not None:
             raise NotImplementedError('method is None only')
@@ -837,50 +1079,61 @@ class Generator:
         Samples are drawn from a Gamma distribution with specified parameters,shape
         (sometimes designated "k") and scale=1.
 
-        Args:
-            shape : float
-                Parameter, must be non-negative.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
-            dtype : str or dtype, optional
-                Desired dtype of the result, either 'd' (or 'float64') or 'f' (or
-                'float32'). All dtypes are determined by their name. The default value is
-                'd'.
-            out : `ndarray`, optional
-                Alternative output array in which to place the result. If size is not
-                None, it must have the same shape as the provided size and must match the
-                type of the output values.
+        Parameters
+        ----------
+        shape : float
+            Parameter, must be non-negative.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
+        dtype : str or dtype, optional
+            Desired dtype of the result, either 'd' (or 'float64') or 'f' (or 'float32').
+            All dtypes are determined by their name. The default value is 'd'.
+        out : ndarray, optional
+            Alternative output array in which to place the result. If size is not None,
+            it must have the same shape as the provided size and must match the type of
+            the output values.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized standard gamma distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized standard gamma distribution.
 
-        Raises:
-            shape is neither a scalar nor None : NotImplementedError occurs
+        Restriction
+        -----------
+        * If *shape* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density for the Gamma distribution is :math:` p(x) =
-            x^{k-1}\\frac{e^{-x/\\theta}}{\\theta^k\\Gamma(k)}, ` where :math:`k` is the
-            shape and :math:`\\theta` the scale, and :math:`\\Gamma` is the Gamma
-            function.
-            The Gamma distribution is often used to model the times to failure of
-            electronic components, and arises naturally in processes for which the
-            waiting times between Poisson distributed events are relevant.
+        Note
+        ----
+        The probability density for the Gamma distribution is
 
-        Examples:
-            # Draw samples from the distribution.
+        .. math::
+            p(x) = x^{k-1}\\frac{e^{-x/\\theta}}{\\theta^k\\Gamma(k)},
+
+        where :math:`k` is the shape and :math:`\\theta` the scale, and
+        :math:`\\Gamma` is the Gamma function.
+
+        The Gamma distribution is often used to model the times to failure of electronic
+        components, and arises naturally in processes for which the waiting times between
+        Poisson distributed events are relevant.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution.
+
             >>> import nlcpy as vp
             >>> shape, scale = 2., 1. # mean and width
             >>> s = vp.random.default_rng().standard_gamma(shape, 1000000)
             >>> import matplotlib.pyplot as plt
-            >>> import scipy.special as sps # doctest: +SKIP
-            >>> count, bins, ignored = plt.hist(s, 50, density=True)
-            >>> y = bins**(shape-1) * ((vp.exp(-bins/scale))/ # doctest: +SKIP
+            >>> import scipy.special as sps
+            >>> count, bins, ignored = plt.hist(s.get(), 50, density=True)
+            >>> y = bins**(shape-1) * ((vp.exp(-bins/scale))/
             ... (sps.gamma(shape) * scale**shape))
             >>> plt.plot(bins, y, linewidth=2, color='r') # doctest: +SKIP
             >>> plt.show()
-
         """
         self._rand._is_number(shape)
         if shape < 0:
@@ -903,38 +1156,58 @@ class Generator:
     def standard_normal(self, size=None, dtype='d', out=None):
         """Draws samples from a standard Normal distribution (mean=0, stdev=1).
 
-        Args:
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
-            dtype : str or dtype, optional
-                Desired dtype of the result, either 'd' (or 'float64') or 'f' (or
-                'float32'). All dtypes are determined by their name. The default value is
-                'd'.
-            out : `ndarray`, optional
-                Alternative output array in which to place the result. If size is not
-                None, it must have the same shape as the provided size and must match the
-                type of the output values.
+        Parameters
+        ----------
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
+        dtype : str or dtype, optional
+            Desired dtype of the result, either 'd' (or 'float64') or 'f' (or 'float32').
+            All dtypes are determined by their name. The default value is 'd'.
+        out : ndarray, optional
+            Alternative output array in which to place the result. If size is not None,
+            it must have the same shape as the provided size and must match the type of
+            the output values.
 
-        Returns:
-            out : `ndarray`
-                A floating-point array of shape size of drawn samples, if size was not
-                specified.
+        Returns
+        -------
+        out : ndarray
+            A floating-point array of shape ``size`` of drawn samples, if ``size`` was
+            not specified.
 
-        Note:
-            For random samples from :math:`N(\\mu, \\sigma^2)`, use one of:mu + sigma *
-            gen.standard_normal(size=...)
+        Note
+        ----
+        For random samples from :math:`N(\\mu, \\sigma^2)`, use one of::
+
+            mu + sigma * gen.standard_normal(size=...)
             gen.normal(mu, sigma, size=...)
 
-        See Also:
-            `normal` : Draws random samples from a normal (Gaussian) distribution.
+        See Also
+        --------
+        Generator.normal : Draws random samples from a normal (Gaussian) distribution.
 
-        Examples:
-            >>> import nlcpy as vp
-            >>> rng = vp.random.default_rng()
-            >>> rng.standard_normal()
-            array([2.1923875335537315]) # random
+        Examples
+        --------
+        >>> import nlcpy as vp
+        >>> rng = vp.random.default_rng()
+        >>> rng.standard_normal()    # doctest: +SKIP
+        array(0.07802166) # random
 
+        >>> s = rng.standard_normal(8000)
+        >>> s  # doctest: +SKIP
+        array([-0.66533529, -0.26800564,  0.35053523, ..., -0.77485594,
+               -0.31695012, -0.59517798])
+        >>> s.shape
+        (8000,)
+        >>> s = rng.standard_normal(size=(3, 4, 2))
+        >>> s.shape
+        (3, 4, 2)
+
+        Two-by-four array of samples from N(3, 6.25):
+
+        >>> 3 + 2.5 * rng.standard_normal(size=(2, 4)) # doctest: +SKIP
+        array([[2.85310426, 0.13495647, 0.04238584, 4.33929263],
+               [3.61694001, 7.61121584, 2.65205908, 2.07678931]])
         """
         dt = numpy.dtype(dtype)
         key = dt.name
@@ -952,50 +1225,70 @@ class Generator:
     def uniform(self, low=0.0, high=1.0, size=None):
         """Draws samples from a uniform distribution.
 
-        Samples are uniformly distributed over the half-open interval [low, high)
+        Samples are uniformly distributed over the half-open interval ``[low, high)``
         (includes low, but excludes high).  In other words,
         any value within the given interval is equally likely to be drawn by uniform.
 
-        Args:
-            low : float, optional
-                Lower boundary of the output interval.  All values generated will be
-                greater than or equal to low.  The default value is 0.
-            high : float
-                Upper boundary of the output interval.  All values generated will be less
-                than high.  The default value is 1.0.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        Parameters
+        ----------
+        low : float, optional
+            Lower boundary of the output interval.  All values generated will be greater
+            than or equal to low.  The default value is 0.
+        high : float
+            Upper boundary of the output interval.  All values generated will be less
+            than high.  The default value is 1.0.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized uniform distribution.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized uniform distribution.
 
-        Raises:
-            low is neither a scalar nor None : NotImplementedError occurs.
-            high is neither a scalar nor None : NotImplementedError occurs.
+        Restriction
+        -----------
+        * If *low* is neither a scalar nor None : *NotImplementedError* occurs.
+        * If *high* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        Note:
-            The probability density function of the uniform distribution is:math:` p(x) =
-            \\frac{1}{b - a} `
-            anywhere within the interval [a, b), and zero elsewhere.
-            When high == low, values of low will be returned.
+        Note
+        ----
+        The probability density function of the uniform distribution is
 
-        See Also:
-            `integers` : Returns random integers from low (inclusive) to high
-                (exclusive), or if endpoint=True, low (inclusive) to high (inclusive).
-            `random` : Returns random floats in the half-open interval [0.0, 1.0).
+        .. math::
+            p(x) = \\frac{1}{b - a}
 
-        Examples:
+        anywhere within the interval ``[a, b)``, and zero elsewhere.
+
+        When ``high`` == ``low``, values of ``low`` will be returned.
+
+        See Also
+        --------
+        Generator.integers : Returns random integers.
+        Generator.random : Returns random floats.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> s = vp.random.default_rng().uniform(-1,0,1000)
-            # All values are within the given interval:
+
+            All values are within the given interval:
+
             >>> vp.all(s >= -1)
             array(True)
             >>> vp.all(s < 0)
             array(True)
 
+            >>> import matplotlib.pyplot as plt
+            >>> count, bins, ignored = plt.hist(s.get(), 15, density=True)
+            >>> plt.plot(bins, vp.ones_like(bins),
+            ... linewidth=2, color='r') # doctest: +SKIP
+            >>> plt.show()
         """
         return self._rand.uniform(low, high, size=size)
 
@@ -1003,43 +1296,74 @@ class Generator:
         """Draws samples from a Weibull distribution.
 
         Draws samples from a 1-parameter Weibull distribution with the given shape
-        parameter a.
-        :math:` X = (-ln(U))^{1/a} `
-        Here, U is drawn from the uniform distribution over (0,1].
+        parameter *a*.
+
+        .. math:: X = (-ln(U))^{1/a}
+
+        Here, *U* is drawn from the uniform distribution over ``(0,1]``.
         The more common 2-parameter Weibull, including a scale parameter
+        :math:`\\lambda` is just
 
-        Args:
-            a : float
-                Shape parameter of the distribution.  Must be nonnegative.
-            size : int or tuple of ints, optional
-                Output shape.  If the given shape is, e.g., (m, n, k), then m * n * k
-                samples are drawn.
+        .. math:: X = \\lambda(-ln(U))^{1/a}
 
-        Returns:
-            out : `ndarray`
-                Drawn samples from the parameterized Weibull distribution.
+        Parameters
+        ----------
+        a : float
+            Shape parameter of the distribution.  Must be nonnegative.
+        size : int or tuple of ints, optional
+            Output shape.  If the given shape is, e.g., ``(m, n, k)``, then ``m * n * k``
+            samples are drawn.
 
-        Raises:
-            a is neither a scalar nor None : NotImplementedError occurs.
+        Returns
+        -------
+        out : ndarray
+            Drawn samples from the parameterized Weibull distribution.
 
-        Note:
-            The probability density for the Weibull distribution is:math:` p(x) =
-            \\frac{a}{\\lambda}(\\frac{x}{\\lambda})^{a-1}e^{-(x/\\lambda)^a}, `
-            where :math:`a` is the shape and :math:`\\lambda` the scale.
-            The function has its peak (the mode) at
-            :math:` \\lambda(\\frac{a-1}{a})^{1/a}. `
-            When a = 1, the Weibull distribution reduces to the exponential distribution.
+        Restriction
+        -----------
+        * If *a* is neither a scalar nor None : *NotImplementedError* occurs.
 
-        See Also:
-            `gumbel` : Draws samples from a Gumbel distribution.
+        Note
+        ----
+        The probability density for the Weibull distribution is
 
-        Examples:
+        .. math::
+            p(x) =
+            \\frac{a}{\\lambda}(\\frac{x}{\\lambda})^{a-1}e^{-(x/\\lambda)^a},
+
+        where :math:`a` is the shape and :math:`\\lambda` the scale.
+
+        The function has its peak (the mode) at
+        :math:`\\lambda(\\frac{a-1}{a})^{1/a}.`
+
+        When ``a = 1``, the Weibull distribution reduces to the exponential distribution.
+
+        See Also
+        --------
+        Generator.gumbel : Draws samples from a Gumbel distribution.
+
+        Examples
+        --------
+        .. plot::
+            :align: center
+
+            Draw samples from the distribution:
+
             >>> import nlcpy as vp
-            # Draw samples from the distribution:
             >>> rng = vp.random.default_rng()
             >>> a = 5. # shape
             >>> s = rng.weibull(a, 1000)
 
+            >>> import matplotlib.pyplot as plt
+            >>> x = vp.arange(1,100.)/50.
+            >>> def weib(x,n,a):
+            ...     return (a / n) * (x / n)**(a - 1) * vp.exp(-(x / n)**a)
+
+            >>> count, bins, ignored = plt.hist(rng.weibull(5.,1000).get())
+            >>> scale = count.max()/weib(x, 1., 5.).max()
+            >>> plt.plot(x, weib(x, 1., 5.)*scale) # doctest: +SKIP
+            ... # doctest: +ELLIPSIS
+            >>> plt.show()
         """
         return self._rand.weibull(a, size=size)
 
@@ -1066,14 +1390,16 @@ _default_rng = None
 def default_rng(seed=None):
     """Constructs a new nlcpy.random.Generator with the default BitGenerator (MT19937).
 
-    Args:
-        seed : None or int or array_like[ints], optional
+    Parameters
+    ----------
+    seed : None or int or array_like[ints], optional
 
-    Note:
-        When seed is omitted or None, a new BitGenerator and Generator will be
-        instantiated each time.
-        This function does not manage a default global instance.
+    Note
+    ----
 
+    When seed is omitted or ``None``, a new BitGenerator and Generator will be
+    instantiated each time.
+    This function does not manage a default global instance.
     """
     global _default_rng
     if _default_rng is None or seed is not None:

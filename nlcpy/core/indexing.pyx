@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -653,12 +653,13 @@ cdef _copy_without_alloc(ndarray src, ndarray dst):
         (src, dst),
     )
 
-cdef _prepare_array_indexing(ndarray s, ndarray reduced_idx, int a_shape_i, int stride):
-    request._push_request(
-        "nlcpy_prepare_indexing",
-        "indexing_op",
-        (s, reduced_idx, a_shape_i, stride),
-    )
+# cdef _prepare_array_indexing(
+#                 ndarray s, ndarray reduced_idx, int a_shape_i, int stride):
+#     request._push_request(
+#         "nlcpy_prepare_indexing",
+#         "indexing_op",
+#         (s, reduced_idx, a_shape_i, stride),
+#     )
 
 cdef ndarray _ndarray_diagonal(ndarray self, offset, axis1, axis2):
     return _diagonal(self, offset, axis1, axis2)

@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -896,7 +896,7 @@ sub tag_to_Atype {
 }
 
 sub replace_cast_Bint{
-   my $_    = $_[0];
+   $_    = $_[0];
    my $dtag = $_[1];
    my $cast = $_[2];
    my $arg  = $_[3];
@@ -916,7 +916,7 @@ sub replace_cast_Bint{
 }
 
 sub replace_isnan_or_isinf{
-   my $_    = $_[0];
+   $_    = $_[0];
    my $dtag = $_[1];
    my $f    = $_[2];
    my $arg  = $_[3];
@@ -1430,6 +1430,10 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
     'in'  => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
     'out' => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
 },
+'copy_masked'     => {
+    'in'  => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
+    'out' => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
+},
 'arange'     => {
     'in'  => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
     'out' => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
@@ -1658,6 +1662,10 @@ EOS
 },
 'dot'         => '@op3@ += (@ari_dtype@)(@op1@) * (@ari_dtype@)(@op2@);',
 'copy'=> { 
+     'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
+     'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
+},
+'copy_masked'=> { 
      'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
      'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
 },

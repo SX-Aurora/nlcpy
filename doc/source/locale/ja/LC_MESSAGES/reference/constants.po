@@ -1,0 +1,197 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/reference/constants.rst:4
+msgid "Constants"
+msgstr ""
+
+#: ../../source/reference/constants.rst:6
+msgid "NLCPy includes several constants:"
+msgstr ""
+
+#: ../../source/reference/constants.rst:10
+#: ../../source/reference/constants.rst:35
+#: ../../source/reference/constants.rst:47
+#: ../../source/reference/constants.rst:59
+#: ../../source/reference/constants.rst:72
+msgid "IEEE 754 floating point representation of positive infinity."
+msgstr ""
+
+#: ../../source/reference/constants.rst
+msgid "Returns"
+msgstr ""
+
+#: ../../source/reference/constants.rst:15
+#: ../../source/reference/constants.rst:89
+#: ../../source/reference/constants.rst:112
+#: ../../source/reference/constants.rst:157
+#: ../../source/reference/constants.rst:194
+msgid "**y**"
+msgstr ""
+
+msgid "float"
+msgstr ""
+
+#: ../../source/reference/constants.rst:15
+msgid "A floating point representation of positive infinity."
+msgstr ""
+
+#: ../../source/reference/constants.rst:19
+#: ../../source/reference/constants.rst:93
+msgid ":obj:`isinf` :obj:`isnan` :obj:`isfinite`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:25
+#: ../../source/reference/constants.rst:99
+msgid ""
+"NLCPy uses the IEEE Standard for Binary Floating-Point for Arithmetic "
+"(IEEE 754). This means that Not a Number is not equivalent to infinity. "
+"Also that positive infinity is not equivalent to negative infinity. But "
+"infinity is equivalent to positive infinity."
+msgstr ""
+
+#: ../../source/reference/constants.rst:30
+msgid ""
+":data:`Inf`, :data:`Infinity`, :data:`PINF` and :data:`infty` are aliases"
+" for :data:`inf`."
+msgstr ""
+
+#: ../../source/reference/constants.rst:37
+#: ../../source/reference/constants.rst:49
+#: ../../source/reference/constants.rst:61
+#: ../../source/reference/constants.rst:74
+msgid ""
+"Use :data:`inf` because :data:`Inf`, :data:`Infinity`, :data:`PINF` and "
+":data:`infty` are aliases for inf. For more details, see :data:`inf`."
+msgstr ""
+
+#: ../../source/reference/constants.rst:42
+#: ../../source/reference/constants.rst:54
+#: ../../source/reference/constants.rst:66
+#: ../../source/reference/constants.rst:79
+msgid ":data:`inf`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:84
+msgid "IEEE 754 floating point representation of negative infinity."
+msgstr ""
+
+#: ../../source/reference/constants.rst:89
+msgid "A floating point representation of negative infinity."
+msgstr ""
+
+#: ../../source/reference/constants.rst:107
+#: ../../source/reference/constants.rst:128
+#: ../../source/reference/constants.rst:140
+msgid "IEEE 754 floating point representation of Not a Number (NaN)."
+msgstr ""
+
+#: ../../source/reference/constants.rst:112
+msgid "A floating point representation of Not a Number."
+msgstr ""
+
+#: ../../source/reference/constants.rst:116
+msgid ":obj:`isnan` :obj:`isfinite`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:121
+msgid ""
+"NLCPy uses the IEEE Standard for Binary Floating-Point for Arithmetic "
+"(IEEE 754). This means that Not a Number is not equivalent to infinity. "
+":data:`NaN` and :data:`NAN` are aliases of :data:`nan`."
+msgstr ""
+
+#: ../../source/reference/constants.rst:130
+msgid ""
+":data:`NaN` and :data:`NAN` are equivalent definitions of :data:`nan`. "
+"Please use :data:`nan` instead of :data:`NAN`."
+msgstr ""
+
+#: ../../source/reference/constants.rst:135
+#: ../../source/reference/constants.rst:147
+msgid ":data:`nan`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:142
+msgid ""
+":data:`NaN` and :data:`NAN` are equivalent definitions of :data:`nan`. "
+"Please use :data:`nan` instead of :data:`NaN`."
+msgstr ""
+
+#: ../../source/reference/constants.rst:152
+msgid "IEEE 754 floating point representation of negative zero."
+msgstr ""
+
+#: ../../source/reference/constants.rst:157
+msgid "A floating point representation of negative zero."
+msgstr ""
+
+#: ../../source/reference/constants.rst:161
+msgid ":data:`PZERO` :obj:`isinf` :obj:`isnan` :obj:`isfinite`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:168
+msgid ""
+"NLCPy uses the IEEE Standard for Binary Floating-Point for Arithmetic "
+"(IEEE 754). Negative zero is considered to be a finite number."
+msgstr ""
+
+#: ../../source/reference/constants.rst:172
+#: ../../source/reference/constants.rst:209
+msgid "Examples"
+msgstr ""
+
+#: ../../source/reference/constants.rst:189
+msgid "IEEE 754 floating point representation of positive zero."
+msgstr ""
+
+#: ../../source/reference/constants.rst:194
+msgid "A floating point representation of positive zero."
+msgstr ""
+
+#: ../../source/reference/constants.rst:198
+msgid ":data:`NZERO` :obj:`isinf` :obj:`isnan` :obj:`isfinite`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:205
+msgid ""
+"NLCPy uses the IEEE Standard for Binary Floating-Point for Arithmetic "
+"(IEEE 754). Positive zero is considered to be a finite number."
+msgstr ""
+
+#: ../../source/reference/constants.rst:226
+msgid "Euler's constant, base of natural logarithms, Napier's constant."
+msgstr ""
+
+#: ../../source/reference/constants.rst:228
+msgid "``e = 2.71828182845904523536028747135266249775724709369995...``"
+msgstr ""
+
+#: ../../source/reference/constants.rst:232
+msgid ":obj:`exp` :obj:`log`"
+msgstr ""
+
+#: ../../source/reference/constants.rst:238
+msgid "``γ = 0.5772156649015328606065120900824024310421...``"
+msgstr ""
+
+#: ../../source/reference/constants.rst:243
+msgid "``pi = 3.1415926535897932384626433...``"
+msgstr ""
+

@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+
+#: ../../source/reference/index.rst:5
+msgid "Reference Manual"
+msgstr "リファレンス（英語）"
+
+#: ../../source/reference/index.rst:7
+msgid "Here is a list of functionalites provided by NLCPy."
+msgstr ""
+
+#: ../../source/reference/index.rst:9
+msgid ":ref:`genindex`"
+msgstr ""
+
+#: ../../source/reference/index.rst:10
+msgid ":ref:`modindex`"
+msgstr ""
+

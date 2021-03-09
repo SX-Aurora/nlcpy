@@ -1,0 +1,24 @@
+=================================================
+What's new in Version 1.0.0b2 (December 25, 2020)
+=================================================
+
+.. currentmodule:: nlcpy
+
+Performance Enhancements
+------------------------
+
+* Improved performance of universal functions with multi-dimensional arrays.
+* Improved performance of broadcasting operations from a scalar value to an :class:`ndarray`.
+* Improved performance of :func:`arccos` and :func:`arctanh`.
+* Improved performance of random number generators by changing the number of threads to be execeted on VE.
+
+Problem Fixes
+-------------
+
+* Fixed a bug in :func:`sort` that might cause a freeze of Python interpreter at the end of the program.
+* Fixed a bug in :func:`matmul` that returned invalid results when input ndarrays (a and b) fulfill any of the following conditions:
+
+    + a.flags.c_congituous is False and a.flags.f_contiguous is False
+    + b.flags.c_congituous is False and b.flags.f_contiguous is False
+
+* Fixed a bug in :func:`prof.print_run_stats` that might showed negative elapsed time.

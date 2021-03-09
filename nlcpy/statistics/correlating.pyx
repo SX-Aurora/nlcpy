@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -77,56 +77,66 @@ from nlcpy.wrapper.numpy_wrap import numpy_wrap
 cimport cython
 cimport cpython
 
+
 cpdef corrcoef(a, y=None, rowvar=True, bias=nlcpy._NoValue, ddof=nlcpy._NoValue):
     """Returns Pearson product-moment correlation coefficients.
 
-    Please refer to the documentation for `cov` for more detail. The relationship between
-    the correlation coefficient matrix, R, and the covariance matrix, C, is ..math::
-    R_{ij} = \\frac{ C_{ij} } { \\sqrt{ C_{ii} * C_{jj} } }  The values of R are between
-    -1 and 1, inclusive.
+    Please refer to the documentation for cov for more detail. The relationship between
+    the correlation coefficient matrix, *R*, and the covariance matrix, *C*, is
 
-    Args:
-        x : array_like
-            A 1-D or 2-D array containing multiple variables and observations. Each row
-            of x represents a variable, and each column a single observation of all those
-            variables. Also see rowvar below.
-        y : array_like, optional
-            An additional set of variables and observations. y has the same shape as x.
-        rowvar : bool, optional
-            If rowvar is True (default), then each row represents a variable, with
-            observations in the columns. Otherwise, the relationship is transposed: each
-            column represents a variable, while the rows contain observations.
-        bias : _NoValue, optional
-            Has no effect, do not use.
-        ddof : _NoValue, optional
-            Has no effect, do not use.
+    .. math::
+        R_{ij} = \\frac{ C_{ij} } { \\sqrt{ C_{ii} * C_{jj} } }
 
-    Returns:
-        R : `ndarray`
-            The correlation coefficient matrix of the variables.
+    The values of *R* are between -1 and 1, inclusive.
 
-    Raises:
-        For complex numbers, NotImplementedError occurs.
+    Parameters
+    ----------
+    x : array_like
+        A 1-D or 2-D array containing multiple variables and observations. Each row of
+        *x* represents a variable, and each column a single observation of all those
+        variables. Also see *rowvar* below.
+    y : array_like, optional
+        An additional set of variables and observations. *y* has the same shape as *x*.
+    rowvar : bool, optional
+        If *rowvar* is True (default), then each row represents a variable, with
+        observations in the columns. Otherwise, the relationship is transposed: each
+        column represents a variable, while the rows contain observations.
+    bias : _NoValue, optional
+        Has no effect, do not use.
+    ddof : _NoValue, optional
+        Has no effect, do not use.
 
-    Note:
-        Due to floating point rounding the resulting array may not be Hermitian, the
-        diagonal elements may not be 1, and the elements may not satisfy the inequality
-        abs(a) ddof.
+    Returns
+    -------
+    R : ndarray
+        The correlation coefficient matrix of the variables.
 
-    See Also:
-        cov : Covariance matrix
+    Restriction
+    -----------
+    * For complex numbers : *NotImplementedError* occurs.
 
-    Examples:
-        >>> import nlcpy as vp
-        x = vp.array([[1,2,1,9,10,3,2,6,7],[2,1,8,3,7,5,10,7,2]])
-        >>> vp.corrcoef(x)
-        array([[ 1.        , -0.05640533],
-               [-0.05640533,  1.        ]])
-        >>> y = vp.array([2,1,1,8,9,4,3,5,7])
-        >>> vp.corrcoef(x,y)
-        array([[ 1.        , -0.05640533,  0.97094584],
-               [-0.05640533,  1.        , -0.01315587],
-               [ 0.97094584, -0.01315587,  1.        ]])
+    Note
+    ----
+    Due to floating point rounding the resulting array may not be Hermitian, the diagonal
+    elements may not be 1, and the elements may not satisfy the inequality abs(a) <= 1.
+    This function accepts but discards arguments bias and *ddof*.
+
+    See Also
+    --------
+    cov : Covariance matrix
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.array([[1,2,1,9,10,3,2,6,7],[2,1,8,3,7,5,10,7,2]])
+    >>> vp.corrcoef(x)   # doctest: +SKIP
+    array([[ 1.        , -0.05640533],
+           [-0.05640533,  1.        ]])
+    >>> y = vp.array([2,1,1,8,9,4,3,5,7])
+    >>> vp.corrcoef(x,y) # doctest: +SKIP
+    array([[ 1.        , -0.05640533,  0.97094584],
+           [-0.05640533,  1.        , -0.01315587],
+           [ 0.97094584, -0.01315587,  1.        ]])
 
     """
     if bias is not nlcpy._NoValue or ddof is not nlcpy._NoValue:
@@ -182,90 +192,103 @@ cpdef cov(a, y=None, rowvar=True, bias=False, ddof=None, fweights=None, aweights
     """Estimates a covariance matrix, given data and weights.
 
     Covariance indicates the level to which two variables vary together. If we examine
-    N-dimensional samples, :math:` X = [x_1, x_2, ... x_N]^T `, then the covariance
-    matrix element :math:` C_{ij} ` is the covariance of :math:` x_i ` and :math:` x_j `.
-    The element :math:` C_{ii} ` is the variance of :math:` x_i `. See the notes for an
+    N-dimensional samples, :math:`X = [x_1, x_2, ... x_N]^T`, then the covariance
+    matrix element :math:`C_{ij}` is the covariance of :math:`x_i` and :math:`x_j`.
+    The element :math:`C_{ii}` is the variance of :math:`x_i`. See the notes for an
     outline of the algorithm.
 
-    Args:
-        m : array_like
-            A 1-D or 2-D array containing multiple variables and observations. Each row
-            of m represents a variable, and each column a single observation of all those
-            variables. Also see rowvar below.
-        y : array_like, optional
-            An additional set of variables and observations. y has the same form as that
-            of m.
-        rowvar : bool, optional
-            If rowvar is True (default), then each row represents a variable, with
-            observations in the columns. Otherwise, the relationship is transposed: each
-            column represents a variable, while the rows contain observations.
-        bias : bool, optional
-            Default normalization (False) is by (N - 1), where N is the number of
-            observations given (unbiased estimate). These arguments had no effect on the
-            return values of the function and can be safely ignored in this and previous
-            versions of nlcpy.
-            If bias is True, then normalization is by N.
-        ddof : int, optional
-            If not None the default value implied by bias is overridden. Note that ddof=1
-            will return the unbiased estimate, even if both fweights and aweights are
-            specified, and ddof=0 will return the simple average. See the notes for the
-            details. The default value is None.
-        fweights : array_like, int, optional
-            1-D array of integer frequency weights; the number of times each observation
-            vector should be repeated.
-        aweights : array_like, optional
-            1-D array of observation vector weights. These relative weights are typically
-            large for observations considered "important" and smaller for observations
-            considered less "important". If ddof=0 the array of weights can be used to
-            assign probabilities to observation vectors.
+    Parameters
+    ----------
+    m : array_like
+        A 1-D or 2-D array containing multiple variables and observations. Each row of
+        *m* represents a variable, and each column a single observation of all those
+        variables. Also see *rowvar* below.
+    y : array_like, optional
+        An additional set of variables and observations. *y* has the same form as that
+        of *m*.
+    rowvar : bool, optional
+        If *rowvar* is True (default), then each row represents a variable, with
+        observations in the columns. Otherwise, the relationship is transposed: each
+        column represents a variable, while the rows contain observations.
+    bias : bool, optional
+        Default normalization (False) is by ``(N - 1)``, where ``N`` is the number of
+        observations given (unbiased estimate). These arguments had no effect on the
+        return values of the function and can be safely ignored in this and previous
+        versions of nlcpy.
+        If bias is True, then normalization is by ``N``.
+    ddof : int, optional
+        If not None the default value implied by bias is overridden. Note that ``ddof=1``
+        will return the unbiased estimate, even if both fweights and aweights are
+        specified, and ``ddof=0`` will return the simple average. See the notes for the
+        details. The default value is None.
+    fweights : array_like, int, optional
+        1-D array of integer frequency weights; the number of times each observation
+        vector should be repeated.
+    aweights : array_like, optional
+        1-D array of observation vector weights. These relative weights are typically
+        large for observations considered "important" and smaller for observations
+        considered less "important". If ``ddof=0`` the array of weights can be used to
+        assign probabilities to observation vectors.
 
-    Returns:
-        out : `ndarray`
-            The covariance matrix of the variables.
+    Returns
+    -------
+    out : ndarray
+        The covariance matrix of the variables.
 
-    Note:
-        Assume that the observations are in the columns of the observation array m and
-        let f = fweights and a = aweights for brevity. The steps to compute the weighted
-        covariance are as follows:
-        >>> import nlcpy as vp
-        >>> m = vp.arange(10, dtype=vp.float64)
-        >>> f = vp.arange(10) * 2
-        >>> a = vp.arange(10) ** 2.
-        >>> ddof = 9 # N - 1
-        >>> w = f * a
-        >>> v1 = vp.sum(w)
-        >>> v2 = vp.sum(w * a)
-        >>> m -= vp.sum(m * w, axis=None, keepdims=True) / v1
-        >>> cov = vp.dot(m * w, m.T) * v1 / (v1**2 - ddof * v2)
-        Note that when a == 1, the normalization factor v1 / (v1**2 - ddof * v2) goes
-        over to 1 / (vp.sum(f) - ddof) as it should.
+    Note
+    ----
+    Assume that the observations are in the columns of the observation array *m* and let
+    ``f = fweights`` and ``a = aweights`` for brevity. The steps to compute the weighted
+    covariance are as follows:
 
-    See Also:
-        corrcoef : Normalized covariance matrix
+    >>> import nlcpy as vp
+    >>> m = vp.arange(10, dtype=vp.float64)
+    >>> f = vp.arange(10) * 2
+    >>> a = vp.arange(10) ** 2.
+    >>> ddof = 9 # N - 1
+    >>> w = f * a
+    >>> v1 = vp.sum(w)
+    >>> v2 = vp.sum(w * a)
+    >>> m -= vp.sum(m * w, axis=None, keepdims=True) / v1
+    >>> cov = vp.dot(m * w, m.T) * v1 / (v1**2 - ddof * v2)
 
-    Examples:
-        Consider two variables, :math:` x_0 ` and :math:` x_1 `,
-        which correlate perfectly,
-        but in opposite directions:
-        >>> import nlcpy as vp
-        >>> x = vp.array([[0, 2], [1, 1], [2, 0]]).T
-        >>> x
-        array([[0, 1, 2],
-              [2, 1, 0]])
-        Note how :math:` x_0 ` increases while :math:` x_1 ` decreases.
-        The covariance matrix shows this clearly:
-        >>> vp.cov(x)
-        array([[ 1., -1.],
-              [-1.,  1.]])
-        Note that element :math:` C_{0,1} `, which shows the correlation betweeni
-        Further, note how x and y are combined:
-        >>> x = [-2.1, -1,  4.3]
-        >>> y = [3,  1.1,  0.12]
-        >>> vp.cov(x, y)
-        array([[11.71      , -4.286     ], # may vary
-               [-4.286     ,  2.14413333]])
-        >>> vp.cov(x)
-        array(11.71)
+    Note that when ``a == 1``, the normalization factor ``v1 / (v1**2 - ddof * v2)`` goes
+    over to ``1 / (vp.sum(f) - ddof)`` as it should.
+
+    See Also
+    --------
+    corrcoef : Normalized covariance matrix
+
+    Examples
+    --------
+    Consider two variables, :math:`x_0` and :math:`x_1`, which correlate perfectly,
+    but in opposite directions:
+
+    >>> import nlcpy as vp
+    >>> x = vp.array([[0, 2], [1, 1], [2, 0]]).T
+    >>> x
+    array([[0, 1, 2],
+           [2, 1, 0]])
+
+    Note how :math:`x_0` increases while :math:`x_1` decreases.
+    The covariance matrix shows this clearly:
+
+    >>> vp.cov(x) # doctest: +SKIP
+    array([[ 1., -1.],
+           [-1.,  1.]])
+
+    Note that element :math:`C_{0,1}`, which shows the correlation between
+    :math:`x_0` and :math:`x_1`, is negative.
+
+    Further, note how *x* and *y* are combined:
+
+    >>> x = [-2.1, -1,  4.3]
+    >>> y = [3,  1.1,  0.12]
+    >>> vp.cov(x, y) # doctest: +SKIP
+    array([[11.71      , -4.286     ],
+           [-4.286     ,  2.14413333]])
+    >>> vp.cov(x)    # doctest: +SKIP
+    array(11.71)
 
     """
 
@@ -376,3 +399,75 @@ cpdef cov(a, y=None, rowvar=True, bias=False, ddof=None, fweights=None, aweights
     ans_cnv2 = nlcpy.squeeze(ans_cnv2)
 
     return ans_cnv2
+
+
+@numpy_wrap
+def correlate(a, v, mode='valid'):
+    """Cross-correlation of two 1-dimensional sequences.
+
+    This function computes the correlation as generally defined in signal processing
+    texts::
+
+        c_{av}[k] = sum_n a[n+k] * conj(v[n])
+
+    with *a* and *v* sequences being zero-padded where necessary and conj being the
+    conjugate.
+
+    Parameters
+    ----------
+    a,v : array_like
+        Input sequences.
+    mode : {'valid','same','full'}, optional
+
+        * 'full' : By default, mode is 'full'. This returns the convolution at each point
+          of overlap, with an output shape of (N+M-1,). At the end-points of the
+          convolution, the signals do not overlap completely, and boundary effects may be
+          seen.
+        * 'same' : Mode 'same' returns output of length ``max(M, N)``. Boundary
+          effects are still visible.
+        * 'valid': Mode 'valid' returns output of length ``max(M, N) - min(M, N) + 1``.
+          The convolution product is only given for points where the signals overlap
+          completely. Values outside the signal boundary have no effect.
+
+    Returns
+    -------
+    out : ndarray
+        Discrete, linear convolution of *a* and *v*.
+
+    Restriction
+    -----------
+    This function is the wrapper function to utilize :func:`numpy.correlate`.
+    Calculations during this function perform on only Vector Host(Linux/x86).
+
+    Note
+    ----
+    The definition of correlation above is not unique and sometimes correlation may be
+    defined differently. Another common definition is::
+
+        c'_{av}[k]=sum_n a[n] conj(v[n+k])
+
+    which is related to ``c_{av}[k] by c'_{av}[k] = c_{av}[-k]``.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.correlate([1, 2, 3], [0, 1, 0.5])
+    array([3.5])
+    >>> vp.correlate([1, 2, 3], [0, 1, 0.5], "same")
+    array([2. , 3.5, 3. ])
+    >>> vp.correlate([1, 2, 3], [0, 1, 0.5], "full")
+    array([0.5, 2. , 3.5, 3. , 0. ])
+
+    Using complex sequences:
+
+    >>> vp.correlate([1+1j, 2, 3-1j], [0, 1, 0.5j], 'full')
+    array([0.5-0.5j, 1. +0.j , 1.5-1.5j, 3. -1.j , 0. +0.j ])
+
+    Note that you get the time reversed, complex conjugated result when the two input
+    sequences change places, i.e., ``c_{va}[k] = c^{*}_{av}[-k]``:
+
+    >>> vp.correlate([0, 1, 0.5j], [1+1j, 2, 3-1j], 'full')
+    array([0. +0.j , 3. +1.j , 1.5+1.5j, 1. +0.j , 0.5+0.5j])
+
+    """
+    raise NotImplementedError

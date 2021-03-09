@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -77,9 +77,10 @@ typedef struct linspace_arguments_tag {
     ve_array out;
     ve_array start;
     ve_array stop;
-    uint64_t num;
+    ve_array delta;
+    ve_array step;
     uint64_t endpoint;
-    uint64_t axis;
+    ve_array denormal;
 } linspace_arguments;
 
 typedef struct nonzero_arguments_tag {
@@ -177,6 +178,33 @@ typedef struct tile_arguments_tag {
     ve_array b;
 } tile_arguments;
 
+typedef struct delete_arguments_tag {
+    ve_array input;
+    ve_array del_obj;
+    uint64_t axis;
+    ve_array idx;
+    ve_array output;
+    ve_array obj_count;
+} delete_arguments;
+
+typedef struct insert_arguments_tag {
+    ve_array a;
+    ve_array obj;
+    ve_array values;
+    ve_array out;
+    int64_t axis;
+    ve_array work;
+} insert_arguments;
+
+typedef struct repeat_arguments_tag {
+    ve_array a;
+    ve_array rep;
+    int64_t axis;
+    ve_array out;
+    ve_array aind;
+    ve_array info;
+} repeat_arguments;
+
 typedef struct diff_arguments_tag {
     ve_array a;
     uint64_t n;
@@ -189,6 +217,13 @@ typedef struct copy_op_arguments_tag {
     ve_array x;
     ve_array y;
 } copy_op_arguments;
+
+typedef struct copy_masked_op_arguments_tag {
+    ve_array x;
+    ve_array y;
+    ve_array where;
+} copy_masked_op_arguments;
+
 
 
 typedef union ve_arguments_tag{
@@ -207,9 +242,13 @@ typedef union ve_arguments_tag{
     reduce_arguments reduce;
     accumulate_arguments accumulate;
     outer_arguments outer;
+    delete_arguments delete_nlcpy;
+    insert_arguments insert;
     tile_arguments tile;
+    repeat_arguments repeat;
     diff_arguments diff;
     copy_op_arguments copy;
+    copy_masked_op_arguments copy_masked;
     /* creation, manipulation, indexing, and more...  */
 } ve_arguments;
 

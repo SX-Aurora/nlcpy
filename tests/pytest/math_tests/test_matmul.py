@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -148,3 +148,46 @@ class TestMatmulInvalidShape(unittest.TestCase):
         x1 = testing.shaped_random(shape1, xp, numpy.float32)
         x2 = testing.shaped_random(shape2, xp, numpy.float32)
         xp.matmul(x1, x2)
+
+
+class TestMatmulDtypeAndOrder(unittest.TestCase):
+
+    @testing.for_orders('CFAK', name='order_x')
+    @testing.for_orders('CFAK', name='order_y')
+    @testing.for_orders('CFAK', name='order_out')
+    @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    def test_matmul_from_array(self, xp, dtype, order_x, order_y, order_out):
+        x = testing.shaped_random((2, 2), xp, dtype)
+        y = testing.shaped_random((2, 2), xp, dtype)
+        x = xp.asarray(x, order=order_x)
+        y = xp.asarray(y, order=order_y)
+        return xp.matmul(x, y, order=order_out, dtype=dtype)
+
+    @testing.for_orders('CFAK', name='order_x')
+    @testing.for_orders('CFAK', name='order_y')
+    @testing.for_orders('CFAK', name='order_out')
+    @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    def test_matmul_from_view(self, xp, dtype, order_x, order_y, order_out):
+        x = testing.shaped_random((2, 2), xp, dtype)
+        y = testing.shaped_random((4, 4), xp, dtype)
+        x = xp.asarray(x, order=order_x)
+        y = xp.asarray(y, order=order_y)
+        y = y[::2, ::2]
+        return xp.matmul(x, y, order=order_out, dtype=dtype)
+
+    # TODO
+    # @testing.for_orders('CFAK', name='order_x')
+    # @testing.for_orders('CFAK', name='order_y')
+    # @testing.for_orders('CFAK', name='order_out')
+    # @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    # @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    # def test_matmul_with_out(self, xp, dtype, order_x, order_y, order_out):
+    #     x = testing.shaped_random((2,2), xp, dtype)
+    #     y = testing.shaped_random((2,2), xp, dtype)
+    #     x = xp.asarray(x, order=order_x)
+    #     y = xp.asarray(y, order=order_y)
+    #     out = xp.empty((2,2), dtype=dtype, order=order_out)
+    #     xp.matmul(x, y, dtype=dtype, out=out)
+    #     return out

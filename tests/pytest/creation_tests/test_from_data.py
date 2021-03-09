@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,9 @@ import unittest
 
 import nlcpy
 from nlcpy import testing
+import tempfile
 import numpy
+from io import StringIO
 
 
 class TestFromData(unittest.TestCase):
@@ -198,6 +200,16 @@ class TestFromData(unittest.TestCase):
         # compares numpy.array(<list of numpy.ndarray>) with
         # nlcpy.array(<list of nlcpy.ndarray>)
         a = [xp.array(i, dtype=dtype) for i in range(2)]
+        return xp.array(a, order=order)
+
+    @testing.for_orders('CFAK')
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal(strides_check=True)
+    def test_array_from_nested_list_of_nlcpy_scalar(self, xp, dtype, order):
+        # compares numpy.array(<list of numpy.ndarray>) with
+        # nlcpy.array(<list of nlcpy.ndarray>)
+        a = [[xp.array(i, dtype=dtype) for i in range(2)],
+             [xp.array(i, dtype=dtype) for i in range(2)]]
         return xp.array(a, order=order)
 
     @testing.for_orders('CFAK')
@@ -463,3 +475,84 @@ class TestArrayInvalidObject(unittest.TestCase):
         a = numpy.array([1, 2, 3], dtype=object)
         with self.assertRaises(NotImplementedError):
             nlcpy.array(a)
+
+
+@testing.parameterize(
+    *testing.product({
+        'count': [-2, -1, 0, 1, 2],
+        'sep': ['', ','],
+        'offset': [0, 8, 16]
+    })
+)
+class TestFromFile(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal
+    @testing.for_all_dtypes()
+    def test_fromfile(self, xp, dtype):
+        a = testing.shaped_random([10], numpy, dtype)
+        with tempfile.TemporaryFile() as fh:
+            a.tofile(fh, sep=self.sep)
+            return xp.fromfile(
+                fh, dtype=dtype, count=self.count, sep=self.sep, offset=self.offset)
+
+
+class TestLoadtxt(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal
+    @testing.for_all_dtypes()
+    def test_loadtxt_dtype(self, xp, dtype):
+        a = testing.shaped_random([2, 3, 4], xp, dtype)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, dtype=dtype)
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_comments(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': '@comment\n', ']': None})))
+        return xp.loadtxt(txt, comments='@')
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_delimiter(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        trans = str.maketrans({'[': None, ']': None, ' ': '@'})
+        txt = StringIO(str(a).translate(trans).replace('\n@', ''))
+        return xp.loadtxt(txt, delimiter='@')
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_converters(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        conv = {1: lambda s: float(s + s)}
+        return xp.loadtxt(txt, converters=conv)
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_skiprows(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, skiprows=1)
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_usecols(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, usecols=1)
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_unpack(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, unpack=True)
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_ndmin(self, xp):
+        a = testing.shaped_random([10], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, ndmin=2)
+
+    @testing.numpy_nlcpy_raises
+    def test_loadtxt_encoding(self, xp):
+        return xp.loadtxt("", encoding="dummy")
+
+    @testing.numpy_nlcpy_array_equal
+    def test_loadtxt_maxrows(self, xp):
+        a = testing.shaped_random([2, 3, 4], xp)
+        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        return xp.loadtxt(txt, max_rows=2)

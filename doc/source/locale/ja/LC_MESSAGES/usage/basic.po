@@ -1,0 +1,204 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-21 15:32+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/usage/basic.rst:4
+msgid "Basic Usage"
+msgstr "基本的な使用法"
+
+#: ../../source/usage/basic.rst:10
+msgid "Preparation"
+msgstr "準備"
+
+#: ../../source/usage/basic.rst:12
+msgid ""
+"NLCPy uses the functions of `NEC Numeric Library collection (NLC) "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_. Before"
+" importing this package, you need to execute the environment setup script"
+" ``nlcvars.sh`` or ``nlcvars.csh`` once in advance."
+msgstr ""
+"NLCPyは、 `NEC Numeric Library collection (NLC) "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_ "
+"の機能を使用します。このパッケージをインポートする前に、事前に環境設定スクリプト ``nlcvars.sh`` または "
+"``nlcvars.csh`` を実行する必要があります。"
+
+#: ../../source/usage/basic.rst:16
+msgid "When using ``sh`` or its variant:"
+msgstr "使用シェルが ``sh`` 系の場合:"
+
+#: ../../source/usage/basic.rst:22
+msgid "When using ``csh`` or its variant:"
+msgstr "使用シェルが ``csh`` 系の場合:"
+
+#: ../../source/usage/basic.rst:28
+msgid ""
+"Here, **X.X.X** denotes the version number of NEC Numeric Library "
+"Collection on your x86 node(Vector Host)."
+msgstr "ここで、**X.X.X** は、x86ノード（Vector Host）上のNEC Numeric Library Collectionのバージョン番号を示します。"
+
+#: ../../source/usage/basic.rst:32
+msgid "Supported Python Versions"
+msgstr "Pythonのバージョン"
+
+#: ../../source/usage/basic.rst:32
+msgid "NLCPy is available from Python version 3.6, 3.7, or 3.8."
+msgstr "NLCPyは、Pythonのバージョン3.6, 3.7または3.8で使用できます。"
+
+#: ../../source/usage/basic.rst:32
+msgid "NLCPy is not supported for Python version 3.5 or earlier."
+msgstr "NLCPyは、Pythonのバージョン3.5またはそれ以前をサポートしていません。"
+
+#: ../../source/usage/basic.rst:32
+msgid "This manual is intended for users who will use Python version 3.6, 3.7, or 3.8."
+msgstr "このマニュアルは、Pythonのバージョン3.6, 3.7または3.8のいずれかを使用するユーザを想定しています。"
+
+#: ../../source/usage/basic.rst:43
+msgid "Import Package"
+msgstr "インポート"
+
+#: ../../source/usage/basic.rst:45
+msgid ""
+"When you use NLCPy in your Python scripts, the package ``nlcpy`` must be "
+"imported."
+msgstr "PythonスクリプトでNLCPyを使用する場合は、パッケージ ``nlcpy`` をインポートする必要があります。"
+
+#: ../../source/usage/basic.rst:47
+msgid "When running the scripts using NLCPy in interactive mode:"
+msgstr "対話モードでNLCPyを使用してスクリプトを実行する場合:"
+
+#: ../../source/usage/basic.rst:54
+msgid "When running the scripts using NLCPy in non-interactive mode:"
+msgstr "非対話モードでNLCPyを使用してスクリプトを実行する場合:"
+
+#: ../../source/usage/basic.rst:61
+msgid ""
+"If you get something similar to the following errors, NLCPy or NEC "
+"Numeric Library Collection probably is not installed, or is not executed "
+"the environment setup script mentioned above. Please see also "
+":ref:`installation guide <installation>`."
+msgstr ""
+"次のようなエラーが発生した場合は、NLCPyまたはNEC Numeric Library "
+"Collectionがインストールされていないか、上記の環境設定スクリプトが実行されていない可能性があります。"
+" :ref:`インストール <installation>` もご覧ください。"
+
+#: ../../source/usage/basic.rst:71
+msgid ", or"
+msgstr "または"
+
+#: ../../source/usage/basic.rst:79
+msgid ""
+"After you import ``nlcpy`` successfully in Python scripts, the scripts "
+"can use :class:`nlcpy.ndarray` of NLCPy and functions described in "
+":ref:`Reference <nlcpy_reference>` ."
+msgstr ""
+"Pythonスクリプトで ``nlcpy`` を正常にインポートすると、スクリプトはNLCPyの :class:`nlcpy.ndarray` と"
+" :ref:`リファレンス <nlcpy_reference>` で説明されている関数を使用できます。"
+
+#: ../../source/usage/basic.rst:83
+msgid "An easy example of NLCPy script is shown below:"
+msgstr "NLCPyスクリプトの簡単な例を以下に示します。"
+
+#: ../../source/usage/basic.rst:98
+msgid ""
+"In addition, the current version of NLCPy provides the following "
+"operators of the :class:`nlcpy.ndarray` class:"
+msgstr "さらに、NLCPyの現行バージョンは、 :class:`nlcpy.ndarray` クラスの次の演算子を提供します。"
+
+#: ../../source/usage/basic.rst:103
+msgid "Assignment operator"
+msgstr "代入演算子"
+
+#: ../../source/usage/basic.rst:103
+msgid "``=``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:104
+msgid "Arithmetic operators"
+msgstr "算術演算子"
+
+#: ../../source/usage/basic.rst:104
+msgid "``+``, ``-``, ``*``, ``/``, ``//``, ``%``, ``**``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:105
+msgid "Arithmetic assignment operators"
+msgstr "算術代入演算子"
+
+#: ../../source/usage/basic.rst:105
+msgid "``+=``, ``-=``, ``*=``, ``/=``, ``//=``, ``%=``, ``**=``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:106
+msgid "Matrix multiplication operator"
+msgstr "行列乗算演算子"
+
+#: ../../source/usage/basic.rst:106
+msgid "``@``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:107
+msgid "Comparison operators"
+msgstr "比較演算子"
+
+#: ../../source/usage/basic.rst:107
+msgid "``==``, ``!=``, ``>``, ``>=``, ``<``, ``<=``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:108
+msgid "Bitwise operators"
+msgstr "ビット演算子"
+
+#: ../../source/usage/basic.rst:108
+msgid "``&``, ``|``, ``^``, ``~``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:109
+msgid "Bitwise assignment operators"
+msgstr "ビット単位の代入演算子"
+
+#: ../../source/usage/basic.rst:109
+msgid "``&=``, ``|=``, ``^=``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:110
+msgid "Bit-shift operators"
+msgstr "ビットシフト演算子"
+
+#: ../../source/usage/basic.rst:110
+msgid "``<<``, ``>>``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:111
+msgid "Bit-shift assignment operators"
+msgstr "ビットシフト代入演算子"
+
+#: ../../source/usage/basic.rst:111
+msgid "``<<=``, ``>>=``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:112
+msgid "Logical operators"
+msgstr "論理演算子"
+
+#: ../../source/usage/basic.rst:112
+msgid "``and``, ``or``, ``xor``, ``not``"
+msgstr ""
+
+#: ../../source/usage/basic.rst:118
+msgid "In-place matrix multiplication operator ``@=`` is not implemented yet."
+msgstr "行列演算の算術代入演算子 ``@=`` は、未実装です。"
+

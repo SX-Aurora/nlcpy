@@ -1,0 +1,121 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-28 10:02+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/usage/interoperability.rst:4
+msgid "Interoperability between NumPy and NLCPy"
+msgstr "NumPyとNLCPyの間の相互運用性"
+
+#: ../../source/usage/interoperability.rst:7
+msgid ""
+"NLCPy provides a subset of NumPy's API. However, NLCPy ndarray "
+"(:class:`nlcpy.ndarray`) implements *__array__* method. It enables you to"
+" pass NLCPy ndarray to a NumPy function."
+msgstr ""
+"NLCPyは、NumPyのAPIのサブセットを提供します。 ただし、NLCPyのndarray(:class:`nlcpy.ndarray`)は "
+"*__array__* メソッドを実装しています。これにより、NLCPyのndarrayをNumPyの関数に渡すことができます。"
+
+#: ../../source/usage/interoperability.rst:11
+msgid "Example 1:"
+msgstr "例1:"
+
+#: ../../source/usage/interoperability.rst:27
+msgid ""
+"Please note that `numpy.meshgrid "
+"<https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html>`_ "
+"is the NumPy function, whereas ``x`` and ``y`` are both NLCPy ndarrays."
+msgstr ""
+"`numpy.meshgrid "
+"<https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html>`_ "
+"はNumPyの関数であるのに対し、 ``x`` と ``y`` はどちらもNLCPyのndarrayであることに注意してください。"
+
+#: ../../source/usage/interoperability.rst:30
+msgid ""
+"NumPy functions run on an x86 Node (VH). On the other hand, most of NLCPy "
+"functions offload automatically input ndarrays to a Vector Engine (VE), "
+"and then run on the VE."
+msgstr ""
+"NumPyの関数はx86ノード（VH）で実行されます。 一方、ほとんどのNLCPyの関数は、自動的にndarrayをVector "
+"Engine（VE）にオフロードしてから、VEで実行します。"
+
+#: ../../source/usage/interoperability.rst:33
+msgid ""
+"You can also pass a NLCPy ndarray to a function of other packages which "
+"uses ``numpy.ndarray``."
+msgstr "NLCPy ndarrayを、 ``numpy.ndarray`` を使用する他のパッケージの関数に渡すこともできます。"
+
+#: ../../source/usage/interoperability.rst:34
+msgid "Here are easy examples of Matplotlib and Pandas."
+msgstr "MatplotlibとPandasの簡単な例を次に示します。"
+
+#: ../../source/usage/interoperability.rst:36
+msgid "Example 2 (Matplotlib):"
+msgstr "例2（Matplotlib）:"
+
+#: ../../source/usage/interoperability.rst:54
+msgid "Example 3 (Pandas):"
+msgstr "例3（Pandas）:"
+
+#: ../../source/usage/interoperability.rst:68
+msgid ""
+"If you convert between :class:`nlcpy.ndarray` and ``numpy.ndarray``, you "
+"should use :func:`nlcpy.asarray` and `numpy.asarray() "
+"<https://numpy.org/doc/stable/reference/generated/numpy.asarray.html>`_."
+msgstr ""
+":class:`nlcpy.ndarray` と ``numpy.ndarray`` の間で変換する場合は、 "
+":func:`nlcpy.asarray` と `numpy.asarray() "
+"<https://numpy.org/doc/stable/reference/generated/numpy.asarray.html>`_ "
+"を使用する必要があります。"
+
+#: ../../source/usage/interoperability.rst:71
+msgid ""
+"In Example 4, :func:`nlcpy.asarray` transfers a NumPy ndarray from VH to "
+"VE, and then the ndarray is represented as a NLCPy ndarray. Conversely, "
+"`numpy.asarray() "
+"<https://numpy.org/doc/stable/reference/generated/numpy.asarray.html>`_ "
+"transfers a ndarray from VE to VH."
+msgstr ""
+"例4では、 :func:`nlcpy.asarray` がNumPy "
+"ndarrayをVHからVEに転送し、ndarrayはNLCPyのndarrayとして表されます。 逆に、 `numpy.asarray() "
+"<https://numpy.org/doc/stable/reference/generated/numpy.asarray.html>`_ "
+"はndarrayをVEからVHに転送します。"
+
+#: ../../source/usage/interoperability.rst:74
+msgid "Example 4:"
+msgstr "例4 :"
+
+#: ../../source/usage/interoperability.rst:93
+msgid ""
+"In addition, :meth:`nlcpy.ndarray.get()` returns a NumPy ndarray whose "
+"data is transferred from VE to VH."
+msgstr "さらに、 :meth:`nlcpy.ndarray.get()` は、VEからVHにデータを転送したNumPyのndarrayを返します。"
+
+#: ../../source/usage/interoperability.rst:95
+msgid "Example 5:"
+msgstr "例5 :"
+
+#: ../../source/usage/interoperability.rst:113
+msgid ""
+"When both :class:`nlcpy.ndarray` and ``numpy.ndarray`` are passed to a "
+"NLCPy function, the function returns the result as "
+":class:`nlcpy.ndarray`. Conversely, a NumPy function returns the result "
+"as ``numpy.ndarray``."
+msgstr ""
+"NLCPyの関数の引数に :class:`nlcpy.ndarray` と ``numpy.ndarray`` の両方を渡すと、関数は結果を "
+":class:`nlcpy.ndarray` として返します。 逆に、NumPyの関数は結果を ``numpy.ndarray`` "
+"として返します。"
+

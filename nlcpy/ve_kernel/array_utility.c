@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -33,27 +33,18 @@
 #include "nlcpy.h"
 
 uint64_t nlcpy__get_scalar(ve_array *val) {
-    double *tmp_f8;
     switch(val->dtype) {
     case ve_bool:
-        return (uint64_t)(&val->scalar.i8);
+        return (uint64_t)(&val->scalar.bint);
     case ve_i32:
-        return (uint64_t)(&val->scalar.i8);
+        return (uint64_t)(&val->scalar.i4);
     case ve_i64:
         return (uint64_t)(&val->scalar.i8);
     case ve_u32:
-        return (uint64_t)(&val->scalar.u8);
+        return (uint64_t)(&val->scalar.u4);
     case ve_u64:
         return (uint64_t)(&val->scalar.u8);
     case ve_f32:
-#ifdef _OPENMP
-#pragma omp single
-#endif /* _OPENMP */
-{
-        /* convert double to float */
-        tmp_f8 = &val->scalar.f8;
-        val->scalar.f4 = (float)*tmp_f8;
-} /* omp single */
         return (uint64_t)(&val->scalar.f4);
     case ve_f64:
         return (uint64_t)(&val->scalar.f8);
@@ -71,16 +62,12 @@ uint64_t nlcpy__get_ptr(ve_array *a) {
     if (a->ve_adr == 0LU) {
         return nlcpy__get_scalar(a);
     } else {
-#ifdef _OPENMP
-#pragma omp single
-#endif /* _OPENMP */
-{
         int64_t strides = 0;
+//#pragma _NEC novector
         for (int64_t i = 0; i < NLCPY_MAXNDIM; i++) {
             strides += a->strides[i];
         }
         if (strides == 0) a->size = 1;
-} /* omp single */
         return a->ve_adr;
     }
 }
@@ -88,6 +75,7 @@ uint64_t nlcpy__get_ptr(ve_array *a) {
 
 void nlcpy__reset_coords(int64_t *coords, int64_t size) {
     int64_t i;
+#pragma _NEC novector
     for (i = 0; i < size; i++) {
         coords[i] = 0;
     }
@@ -96,6 +84,7 @@ void nlcpy__reset_coords(int64_t *coords, int64_t size) {
 void nlcpy__argnsort(ve_array *a, int64_t *idx, int64_t n) {
     int64_t i, j, tmp;
     int64_t wk_a[a->ndim], wk_idx[a->ndim];
+#pragma _NEC novector
     for (i = 0; i < a->ndim; i++) {
         wk_a[i] = a->shape[i];
         wk_idx[i] = i;
@@ -103,6 +92,7 @@ void nlcpy__argnsort(ve_array *a, int64_t *idx, int64_t n) {
 
     // find top n max shape
     for (i = 0; i < n; i++) {
+#pragma _NEC novector
         for (j = i + 1; j < a->ndim; j++) {
             if (wk_a[i] < wk_a[j]) {
                 tmp = wk_a[i];
@@ -114,12 +104,14 @@ void nlcpy__argnsort(ve_array *a, int64_t *idx, int64_t n) {
             }
         } 
     }
+#pragma _NEC novector
     for (i = 0; i < n; i++) idx[i] = wk_idx[i];
 }
 
 void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
     int64_t i, j, tmp;
     int64_t wk_a[a->ndim], wk_idx[a->ndim];
+#pragma _NEC novector
     for (i = 0; i < a->ndim; i++) {
         wk_a[i] = a->shape[i];
         wk_idx[i] = i;
@@ -127,10 +119,9 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
 
     // find top 2 max shape
     i = a->ndim-1; //inner
+#pragma _NEC novector
     for (j = i; j >= 0; j--) {
         if (wk_a[i] < wk_a[j]) {
-            if (a->strides[j] >= 8 * 256)
-                continue;
             tmp = wk_a[i];
             wk_a[i] = wk_a[j];
             wk_a[j] = tmp;
@@ -140,6 +131,7 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
         }
     }
     i = 0; //outer
+#pragma _NEC novector
     for (j = i + 1; j < a->ndim-1; j++) {
         if (wk_a[i] < wk_a[j]) {
             tmp = wk_a[i];
@@ -150,6 +142,7 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
             wk_idx[j] = tmp;
         }
     }
+#pragma _NEC novector
     for (i = 0; i < a->ndim; i++) idx[i] = wk_idx[i];
 }
 
@@ -163,6 +156,7 @@ void nlcpy__exchange_shape_and_strides(ve_array *a) {
     max1_idx = n_inner;
     max2_idx = n_outer;
     // find max and 2nd max shape
+#pragma _NEC novector
     for (i = 0; i < a->ndim; i++) {
         sh = a->shape[i];
         if (smax1 < sh) {
@@ -204,6 +198,7 @@ void nlcpy__exchange_shape_and_strides(ve_array *a) {
 uint64_t nlcpy__array_next(ve_array *a, uint64_t curr_adr, int64_t *coords) {
     int64_t i, ndim_m1;
     ndim_m1 = a->ndim - 1;
+#pragma _NEC novector
     for (i = ndim_m1; i >= 0; i--) {
         if (coords[i] < a->shape[i] - 1) {
             coords[i]++;
@@ -220,6 +215,7 @@ uint64_t nlcpy__array_next(ve_array *a, uint64_t curr_adr, int64_t *coords) {
 uint64_t nlcpy__array_rnext(ve_array *a, uint64_t curr_adr, int64_t *coords) {
     int64_t i, ndim_m1;
     ndim_m1 = a->ndim - 1;
+#pragma _NEC novector
     for (i = 0; i <= ndim_m1; i++) { 
         if (coords[i] < a->shape[i] - 1) {
             coords[i]++;
@@ -236,6 +232,7 @@ uint64_t nlcpy__array_rnext(ve_array *a, uint64_t curr_adr, int64_t *coords) {
 uint64_t nlcpy__array_reduce_next(ve_array *a, uint64_t curr_adr, int64_t *coords, ve_array *b) {
     int64_t i, ndim_m1;
     ndim_m1 = b->ndim - 1;
+#pragma _NEC novector
     for (i = ndim_m1; i >= 0; i--) {
         if (coords[i] < b->shape[i] - 1) {
             coords[i]++;
@@ -254,6 +251,7 @@ uint64_t nlcpy__array_reduce_next(ve_array *a, uint64_t curr_adr, int64_t *coord
 uint64_t nlcpy__array_reduce_rnext(ve_array *a, uint64_t curr_adr, int64_t *coords, ve_array *b) {
     int64_t i, ndim_m1;
     ndim_m1 = b->ndim - 1;
+#pragma _NEC novector
     for (i = 0; i <= ndim_m1; i++) { 
         if (coords[i] < b->shape[i] - 1) {
             coords[i]++;

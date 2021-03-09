@@ -1,0 +1,911 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/reference/ufunc.rst:4
+msgid "Universal Functions (ufunc)"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:8
+msgid ""
+"A universal function (or :class:`nlcpy.ufunc` for short) is a function "
+"that operates on ndarrays in an element-by-element fashion, supporting "
+"array broadcasting, type casting, and several other standard features. "
+"That is, a ufunc is a \"vectorized\" wrapper for a function that takes a "
+"fixed number of specific inputs and produces a fixed number of specific "
+"outputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:10
+msgid ""
+"As with NumPy, Broadcasting rules are applied to input arrays of the "
+"universal functions of NLCPy."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:14
+msgid "Broadcasting"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:16
+msgid ""
+"Each universal function takes array inputs and produces array outputs by "
+"performing the core function element-wise on the inputs (where an element"
+" is generally a scalar, but can be a vector or higher-order sub-array for"
+" generalized ufuncs). Standard broadcasting rules are applied so that "
+"inputs not sharing exactly the same shapes can still be usefully operated"
+" on. Broadcasting can be understood by four rules:"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:18
+msgid ""
+"All input arrays with ndim smaller than the input array of largest ndim, "
+"have 1's prepended to their shapes."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:19
+msgid ""
+"The size in each dimension of the output shape is the maximum of all the "
+"input sizes in that dimension."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:20
+msgid ""
+"An input can be used in the calculation if its size in a particular "
+"dimension either matches the output size in that dimension, or has value "
+"exactly 1."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:21
+msgid ""
+"If an input has a dimension size of 1 in its shape, the first data entry "
+"in that dimension will be used for all calculations along that dimension."
+" In other words, the stepping machinery of the ufunc will simply not step"
+" along that dimension (the stride will be 0 for that dimension)."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:25
+msgid "Examples"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:27
+msgid ""
+"If a.shape is (5,1), b.shape is (1,6), c.shape is (6,) and d.shape is () "
+"so that d is a scalar, then a, b, c, and d are all broadcastable to "
+"dimension (5,6); and"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:29
+msgid "a acts like a (5,6) array where a[:,0] is broadcast to the other columns,"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:30
+msgid "b acts like a (5,6) array where b[0,:] is broadcast to the other rows,"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:31
+msgid ""
+"c acts like a (1,6) array and therefore like a (5,6) array where c[:] is "
+"broadcast to every row, and finally,"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:32
+msgid "d acts like a (5,6) array where the single value is repeated."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:38
+msgid "Available Ufuncs"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:40
+msgid "The following tables show Universal functions(ufuncs) provided by NLCPy."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:43
+msgid "Math Operations"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.add <nlcpy.add>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise addition of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.subtract <nlcpy.subtract>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise subtraction of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.multiply <nlcpy.multiply>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise multiplication of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.matmul <nlcpy.matmul>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Matrix product of two arrays."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.divide <nlcpy.divide>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise division of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.logaddexp <nlcpy.logaddexp>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of :math:`exp(x1) + exp(x2)`."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.logaddexp2 <nlcpy.logaddexp2>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise base-2 logarithm of :math:`2^{x1} + 2^{x2}`."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.true_divide <nlcpy.true_divide>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.floor_divide <nlcpy.floor_divide>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise floor division of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.negative <nlcpy.negative>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes numerical negative, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.positive <nlcpy.positive>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes numerical positive, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.power <nlcpy.power>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise exponentiation of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.remainder <nlcpy.remainder>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise remainder of division."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.mod <nlcpy.mod>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.fmod <nlcpy.fmod>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.absolute <nlcpy.absolute>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise absolute value."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.fabs <nlcpy.fabs>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.rint <nlcpy.rint>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise nearest integer."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.heaviside <nlcpy.heaviside>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes Heaviside step function."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.conj <nlcpy.conj>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Returns the element-wise complex conjugate."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.conjugate <nlcpy.conjugate>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.exp <nlcpy.exp>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the exponential of all elements in the input array."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.exp2 <nlcpy.exp2>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes `2**x` for all elements in the array."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.log <nlcpy.log>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of *x*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.log2 <nlcpy.log2>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise base-2 logarithm of *x*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.log10 <nlcpy.log10>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise base-10 logarithm of *x*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.log1p <nlcpy.log1p>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise natural logarithm of *1 + x*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.expm1 <nlcpy.expm1>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes `exp(x) - 1` for all elements in the array."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.sqrt <nlcpy.sqrt>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise square-root of the input."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.square <nlcpy.square>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise square of the input."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.cbrt <nlcpy.cbrt>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise cubic-root of the input."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid ":obj:`nlcpy.reciprocal <nlcpy.reciprocal>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:80:<autosummary>:1
+msgid "Computes the element-wise reciprocal of the input."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:82
+msgid "Trigonometric Functions"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.sin <nlcpy.sin>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise sine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.cos <nlcpy.cos>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise cosine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.tan <nlcpy.tan>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise tangent."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arcsin <nlcpy.arcsin>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse sine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arccos <nlcpy.arccos>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse cosine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arctan <nlcpy.arctan>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse tangent."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arctan2 <nlcpy.arctan2>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ""
+"Computes the element-wise inverse tangent of *x1*/*x2* choosing the "
+"quadrant correctly."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.hypot <nlcpy.hypot>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the \"legs\" of a right triangle."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.sinh <nlcpy.sinh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise hyperbolic sine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.cosh <nlcpy.cosh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise hyperbolic cosine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.tanh <nlcpy.tanh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise hyperbolic tangent."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arcsinh <nlcpy.arcsinh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic sine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arccosh <nlcpy.arccosh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic cosine."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.arctanh <nlcpy.arctanh>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Computes the element-wise inverse hyperbolic tangent."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.degrees <nlcpy.degrees>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Converts angles from radians to degrees."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.radians <nlcpy.radians>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid "Converts angles from degrees to radians."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.deg2rad <nlcpy.deg2rad>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:105:<autosummary>:1
+msgid ":obj:`nlcpy.rad2deg <nlcpy.rad2deg>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:107
+msgid "Bit-Twiddling Functions"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.bitwise_and <nlcpy.bitwise_and>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Computes the bit-wise AND of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.bitwise_or <nlcpy.bitwise_or>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Computes the bit-wise OR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.bitwise_xor <nlcpy.bitwise_xor>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Computes the bit-wise XOR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.invert <nlcpy.invert>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Computes the bit-wise NOT element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.left_shift <nlcpy.left_shift>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Shifts bits of an integer to the left, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.right_shift <nlcpy.right_shift>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:118:<autosummary>:1
+msgid "Shifts bits of an integer to the right, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:120
+msgid "Comparison Functions"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.greater <nlcpy.greater>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* > *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.greater_equal <nlcpy.greater_equal>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* >= *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.less <nlcpy.less>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* < *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.less_equal <nlcpy.less_equal>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* <= *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.not_equal <nlcpy.not_equal>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* != *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.equal <nlcpy.equal>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Returns (*x1* == *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.logical_and <nlcpy.logical_and>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the logical AND of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.logical_or <nlcpy.logical_or>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the logical OR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.logical_xor <nlcpy.logical_xor>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the logical XOR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.logical_not <nlcpy.logical_not>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the logical NOT of the input array element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.maximum <nlcpy.maximum>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the element-wise maximum of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.minimum <nlcpy.minimum>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid "Computes the element-wise minimum of the inputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.fmax <nlcpy.fmax>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:139:<autosummary>:1
+msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:141
+msgid "Floating Point Functions"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.isfinite <nlcpy.isfinite>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Tests whether input elements are neither inf nor nan, or not."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.isinf <nlcpy.isinf>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Tests whether input elements are inf, or not."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.isnan <nlcpy.isnan>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Tests whether input elements are nan, or not."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.signbit <nlcpy.signbit>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns True where signbit is set (less than zero), element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.copysign <nlcpy.copysign>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Changes the sign of x1 to that of x2, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.sign <nlcpy.sign>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns the element-wise indication of the sign of a number."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.nextafter <nlcpy.nextafter>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ""
+"Returns the next floating-point value after *x1* towards *x2*, element-"
+"wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.spacing <nlcpy.spacing>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ""
+"Returns the distance between *x* and the nearest adjacent number, "
+"element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.ldexp <nlcpy.ldexp>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns :math:`x1 * 2^{x2}`, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.floor <nlcpy.floor>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns the floor of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.ceil <nlcpy.ceil>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns the ceiling of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid ":obj:`nlcpy.trunc <nlcpy.trunc>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:158:<autosummary>:1
+msgid "Returns the truncated value of the input, element-wise."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:160
+msgid "Methods"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:162
+msgid ""
+"In NLCPy, :ref:`ufuncs <available_ufuncs>` are instances of the "
+"``nlcpy.ufunc`` class. ``nlcpy.ufunc`` have four methods. However, these "
+"methods only make sense on scalar ufuncs that take two input arguments "
+"and return one output argument. Attempting to call these methods on other"
+" ufuncs will cause a *ValueError*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid ":obj:`nlcpy.ufunc.reduce <nlcpy.ufunc.reduce>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid ""
+"Reduces one of the dimension of the input array, by applying ufunc along "
+"one axis."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid ":obj:`nlcpy.ufunc.accumulate <nlcpy.ufunc.accumulate>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid "Accumulates the result of applying the operator to all elements."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid ":obj:`nlcpy.ufunc.reduceat <nlcpy.ufunc.reduceat>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid "Performs a (local) reduce with specified slices over a single axis."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid ":obj:`nlcpy.ufunc.outer <nlcpy.ufunc.outer>`"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:175:<autosummary>:1
+msgid "Applies the ufunc *op* to all pairs (a, b) with a in *A* and b in *B*."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:176
+msgid ""
+"The current version of NLCPy does not provide ``nlcpy.ufunc.at()``, which"
+" is supported by NumPy."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:183
+msgid "Optional Keyword Arguments"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:185
+msgid ""
+"All ufuncs take optional keyword arguments. Most of these represent "
+"advanced usage and will not typically be used."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:187
+msgid "**out**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:189
+msgid ""
+"A location into which the result is stored. If provided, it must have a "
+"shape that the inputs broadcast to. If not provided or None, a freshly-"
+"allocated array is returned. A tuple (possible only as a keyword "
+"argument) must have length equal to the number of outputs."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:196
+msgid "**where**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:198
+msgid ""
+"This condition is broadcast over the input. At locations where the "
+"condition is True, the *out* array will be set to the ufunc result. "
+"Elsewhere, the *out* array will retain its original value. Note that if "
+"an uninitialized *out* array is created via the default ``out=None``, "
+"locations within it where the condition is False will remain "
+"uninitialized."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:204
+msgid "**casting**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:206
+msgid "Controls what kind of data casting may occur."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:208
+msgid "'no' means the data types should not be cast at all."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:209
+msgid "'equiv' means only byte-order changes are allowed."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:210
+msgid "'safe' means only casts which can preserve values are allowed."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:211
+msgid ""
+"'same_kind' means only safe casts or casts within a kind, like float64 to"
+" float32, are allowed."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:213
+msgid "NLCPy does NOT support 'unsafe', which is supported in NumPy."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:215
+msgid "**order**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:217
+msgid ""
+"Specifies the calculation iteration order/memory layout of the output "
+"array. Defaults to 'K'. 'C' means the output should be C-contiguous, 'F' "
+"means F-contiguous, 'A' means F-contiguous if the inputs are F-contiguous"
+" and not also not C-contiguous, C-contiguous otherwise, and 'K' means to "
+"match the element ordering of the inputs as closely as possible."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:222
+msgid "**dtype**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:224
+msgid "Overrides the dtype of the calculation and output arrays."
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:226
+msgid "**subok**"
+msgstr ""
+
+#: ../../source/reference/ufunc.rst:228
+msgid "Not implemented in NLCPy."
+msgstr ""
+

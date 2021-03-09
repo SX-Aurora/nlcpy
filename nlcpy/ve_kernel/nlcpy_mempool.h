@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@
 #include <sys/mman.h>
 #endif
 
-#define POOL_THREASHOLD        (size_t)      64*1024*1024 //  64MByte
-#define SMALL_POOL_SIZE        (size_t)      64*1024*1024 //  64MByte
-#define LARGE_POOL_SIZE        (size_t)     256*1024*1024 // 256MByte
+#define POOL_THREASHOLD        (size_t)         64*1024*1024 //  64MByte
+#define SMALL_POOL_SIZE        (size_t)        256*1024*1024 // 256MByte
+#define LARGE_POOL_SIZE        (size_t)     1*1024*1024*1024 //   1GByte
 #define EXPAND_RATIO           2
+#define THREASH_RATIO          0.4
 
 #define DEFAULT_MAXID          (size_t)1024*1024
 #define MAXID                  (size_t)0x7fffffffffffffff
@@ -77,6 +78,7 @@ typedef struct link_tag {
     uint64_t *prev;
     uint64_t  head;
     uint64_t  tail;
+    uint64_t  num;
 } link_t;
 
 typedef struct sort_tag {
@@ -135,6 +137,7 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct
 int        nlcpy_mempool_reserve(mempool_t *pool, const size_t size, uint64_t *ve_adr);
 int        nlcpy_mempool_release(mempool_t *pool, const int64_t ve_adr);
 void       nlcpy_mempool_free(mempool_t *pool);
+bool       nlcpy_mempool_is_available(const mempool_t *pool, const size_t size);
 
 // Driver functions
 mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, uint64_t lib, struct veo_thr_ctxt *ctx, const uint64_t base, const uint64_t offset, const size_t default_poolsize, const size_t tot_memsize);
@@ -161,6 +164,11 @@ int nlcpy__mempool_append_to_hash(const uint64_t ve_adr, const uint64_t gid, has
 int nlcpy__mempool_remove_from_hash(const uint64_t ve_adr, mempool_t *mng, uint64_t *gid);
 int nlcpy__mempool_split_dead_blocks(const uint64_t id, const uint64_t new_id, link_t *ll);
 int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng);
+// Auxiliary
+bool nlcpy__mempool_is_available(mempool_mng_t *mng, const size_t size);
+#if defined(DEBUG)
+size_t nlcpy__mempool_get_capasity(const mempool_mng_t *mng);
+#endif
 
 #else /* __ve__ */
 

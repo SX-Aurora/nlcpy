@@ -1,0 +1,123 @@
+%define __os_install_post %{nil}
+%define debug_package     %{nil}
+
+%define nlcpy_topdir    /opt/nec/ve/nlcpy
+%define nlcpy_libdir    %{nlcpy_topdir}/%{nlcpy_version}/lib/%{python_version}
+%define nlcpy_docdir    %{nlcpy_topdir}/%{nlcpy_version}/doc
+
+Name:       %{product}
+Version:    %{rpm_version}
+Release:    %{rpm_release}.%{nlcpy_platform}
+Summary:    NumPy-like API accelerated with SX-Aurora TSUBASA
+Group:      Development/Libraries
+Vendor:     NEC Corporation
+License:    BSD-3-Clause
+URL:        https://github.com/SX-Aurora/nlcpy
+BuildArch:  %{nlcpy_arch}
+#
+Source0:    %{product}-%{rpm_version}-%{rpm_release}.tar.gz
+#
+BuildRoot:  %(mktemp -ud %{_tmppath}/%{product}-XXXXXX)
+
+Requires:   %{requires_numpy}, nec-asl-ve-2.2.0 >= 2.2, nec-blas-ve-2.2.0 >= 2.3, nec-lapack-ve-2.2.0 >= 2.1
+AutoReqProv: no
+
+%description
+NLCPy is a package for accelerating performance of Python scripts using NumPy on SX-Aurora TSUBASA.
+
+
+##################################################
+##
+%prep
+##
+##################################################
+# install Libraries
+%__rm -rf $RPM_BUILD_ROOT
+
+%setup -q -n %{product}-%{rpm_version}-%{rpm_release}
+
+##################################################
+##
+%build
+##
+##################################################
+
+##################################################
+##
+%install
+##
+##################################################
+# create install directories
+install -d --mode=755 %{buildroot}%{nlcpy_libdir}
+install -d --mode=755 %{buildroot}%{nlcpy_docdir}
+cp -r nlcpy %{buildroot}%{nlcpy_libdir}/
+find %{buildroot}%{nlcpy_libdir} -name "*.so" -type f | xargs chmod 755
+find %{buildroot}%{nlcpy_libdir} ! -name "*.so" -type f | xargs chmod 644
+cp -r doc/* %{buildroot}%{nlcpy_docdir}/
+find %{buildroot}%{nlcpy_docdir} -type f | xargs chmod 644
+find %{buildroot}%{nlcpy_docdir} -type d | xargs chmod 755
+
+##############################################
+##
+%clean
+##
+##############################################
+%__rm -rf %{buildroot}
+
+##############################################
+##
+%files
+##
+##############################################
+%defattr(-,root,root,-)
+%doc
+
+%{nlcpy_libdir}
+%{nlcpy_docdir}
+
+##############################################
+##
+%post
+##
+##############################################
+if [ ! -d /usr/lib64/%{python_version}/site-packages ]; then
+  install -m 755 -d /usr/lib64/%{python_version}/site-packages
+fi
+cd /usr/lib64/%{python_version}/site-packages/
+if [ ! -e nlcpy.pth ]; then
+  touch nlcpy.pth
+  chmod 644 nlcpy.pth
+fi
+nlcpy_path=`ls -d /opt/nec/ve/nlcpy/*.*.*/lib/%{python_version} | sort -rV | head -1`
+echo ${nlcpy_path} > nlcpy.pth
+
+##############################################
+##
+%postun
+##
+##############################################
+if [ $1 == 0 ]; then
+  rm -rf %{nlcpy_libdir}/nlcpy
+  rmdir --ignore-fail-on-non-empty %{nlcpy_libdir} > /dev/null 2>&1
+  rmdir --ignore-fail-on-non-empty %{nlcpy_topdir}/%{nlcpy_version}/lib > /dev/null 2>&1
+  rmdir --ignore-fail-on-non-empty %{nlcpy_topdir}/%{nlcpy_version} > /dev/null 2>&1
+  rmdir --ignore-fail-on-non-empty %{nlcpy_topdir} > /dev/null 2>&1
+  rm -rf %{nlcpy_docdir}
+  rmdir --ignore-fail-on-non-empty %{nlcpy_docdir} > /dev/null 2>&1
+  if ls -d /opt/nec/ve/nlcpy/*.*.*/lib/%{python_version}/nlcpy > /dev/null 2>&1; then
+    nlcpy_path=`ls -d /opt/nec/ve/nlcpy/*.*.*/lib/%{python_version} | sort -rV | head -1`
+    echo ${nlcpy_path} > /usr/lib64/%{python_version}/site-packages/nlcpy.pth
+  else
+    rm -f  /usr/lib64/%{python_version}/site-packages/nlcpy.pth
+    rmdir --ignore-fail-on-non-empty /usr/lib64/%{python_version}/site-packages > /dev/null 2>&1
+    rmdir --ignore-fail-on-non-empty /usr/lib64/%{python_version} > /dev/null 2>&1
+  fi
+fi
+
+##############################################
+##
+%changelog
+##
+##############################################
+* Wed Mar 31 2021 NEC Corporation
+- First version of this spec file.

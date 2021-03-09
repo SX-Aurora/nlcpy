@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,9 @@ from nlcpy.random import generator
 def rand(*size):
     """This function has the same `nlcpy.random.RandomState.rand`
 
-    See Also:
-        `nlcpy.random.RandomState.rand` : Random values in a given shape.
+    See Also
+    --------
+    nlcpy.random.RandomState.rand : Random values in a given shape.
 
     """
     rs = generator._get_rand()
@@ -96,9 +97,10 @@ def rand(*size):
 def randn(*size):
     """This function has the same `nlcpy.random.RandomState.randn`
 
-    See Also:
-        `nlcpy.random.RandomState.randn` : Returns a sample (or samples) from the
-            "standard normal" distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.randn : Returns a sample (or samples) from the "standard
+        normal" distribution.
 
     """
     rs = generator._get_rand()
@@ -108,9 +110,10 @@ def randn(*size):
 def randint(low, high=None, size=None, dtype=int):
     """This function has the same `nlcpy.random.RandomState.randint`
 
-    See Also:
-        `nlcpy.random.RandomState.randint` : Returns random integers from low (inclusive)
-            to high (exclusive).
+    See Also
+    --------
+    nlcpy.random.RandomState.randint : Returns random integers from low (inclusive) to
+        high (exclusive).
 
     """
     rs = generator._get_rand()
@@ -120,8 +123,9 @@ def randint(low, high=None, size=None, dtype=int):
 def ranf(*size):
     """This function has the same `nlcpy.random.RandomState.ranf`
 
-    See Also:
-        `nlcpy.random.RandomState.ranf` : This is an alias of random_sample.
+    See Also
+    --------
+    nlcpy.random.RandomState.ranf : This is an alias of random_sample.
 
     """
     rs = generator._get_rand()
@@ -131,8 +135,9 @@ def ranf(*size):
 def sample(*size):
     """This function has the same `nlcpy.random.RandomState.sample`
 
-    See Also:
-        `nlcpy.random.RandomState.sample` : This is an alias of random_sample.
+    See Also
+    --------
+    nlcpy.random.RandomState.sample : This is an alias of random_sample.
 
     """
     rs = generator._get_rand()
@@ -142,9 +147,10 @@ def sample(*size):
 def random(size=None):
     """This function has the same `nlcpy.random.RandomState.random`
 
-    See Also:
-        `nlcpy.random.RandomState.random` : Returns random floats in the half-open
-            interval [0.0, 1.0).
+    See Also
+    --------
+    nlcpy.random.RandomState.random : Returns random floats in the half-open interval
+        [0.0, 1.0).
 
     """
     rs = generator._get_rand()
@@ -154,9 +160,10 @@ def random(size=None):
 def random_integers(low, high=None, size=None):
     """This function has the same `nlcpy.random.randint` interval [0.0, 1.0]
 
-    See Also:
-        `nlcpy.random.randint` : Returns random integers from low (inclusive) to high
-            (exclusive).
+    See Also
+    --------
+    nlcpy.random.randint : Returns random integers from low (inclusive) to high
+        (exclusive).
 
     """
     if high is None:
@@ -166,11 +173,12 @@ def random_integers(low, high=None, size=None):
 
 
 def random_sample(size=None):
-    """This function has the same `nlcpy.random.RandomState.random_sample
+    """This function has the same `nlcpy.random.RandomState.random_sample`
 
-    See Also:
-        `nlcpy.random.RandomState.random_sample` : Returns random floats in the half-open
-            interval [0.0, 1.0).
+    See Also
+    --------
+    nlcpy.random.RandomState.random_sample : Returns random floats in the half-open
+        interval [0.0, 1.0).
 
     """
     rs = generator._get_rand()
@@ -180,8 +188,9 @@ def random_sample(size=None):
 def bytes(length):
     """This function has the same `nlcpy.random.RandomState.bytes`
 
-    See Also:
-        `nlcpy.random.RandomState.bytes` : Returns random bytes.
+    See Also
+    --------
+    nlcpy.random.RandomState.bytes : Returns random bytes.
 
     """
     rs = generator._get_rand()

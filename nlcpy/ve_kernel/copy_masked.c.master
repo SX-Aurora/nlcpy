@@ -1,0 +1,1301 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020-2021 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+@#include "nlcpy.h"
+
+
+#define_switch (x->dtype)
+
+/****************************
+ *
+ *       @OPERATOR_NAME@
+ *
+ * **************************/
+
+#if defined(DTYPE_OUT_i32)
+
+uint64_t FILENAME_i32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    int32_t *py = (int32_t *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,i32)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],i32)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i32)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i32)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_i64)
+
+uint64_t FILENAME_i64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    int64_t *py = (int64_t *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,i64)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],i64)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],i64)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i64)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_u32)
+
+uint64_t FILENAME_u32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    uint32_t *py = (uint32_t *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,u32)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],u32)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u32)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u32)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_u64)
+
+uint64_t FILENAME_u64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    uint64_t *py = (uint64_t *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,u64)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],u64)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],u64)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u64)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_f32)
+
+uint64_t FILENAME_f32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    float *py = (float *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,f32)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],f32)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f32)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f32)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_f64)
+
+uint64_t FILENAME_f64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    double *py = (double *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,f64)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],f64)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],f64)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f64)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_c64)
+
+uint64_t FILENAME_c64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    float _Complex *py = (float _Complex *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,c64)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],c64)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c64)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c64)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_c128)
+
+uint64_t FILENAME_c128(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    double _Complex *py = (double _Complex *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,c128)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],c128)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],c128)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c128)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+#if defined(DTYPE_OUT_bool)
+
+uint64_t FILENAME_bool(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
+{
+    Bint *pwhere = (Bint *)nlcpy__get_ptr(where);
+#begin_switch
+    int32_t *py = (int32_t *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+
+/////////
+// 0-d //
+/////////
+    if (y->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pwhere){
+            @UNARY_OPERATOR@(*px,*py,bool)
+        }
+} /* omp single */ 
+
+/////////
+// 1-d //
+/////////
+    } else if (y->ndim == 1) {
+        int64_t i;
+        const int64_t n_inner = y->ndim - 1;
+        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner] / where->itemsize;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px_s,py[i*iy0],bool)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i*iw0]){
+                    @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],bool)
+                }
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
+        int64_t i, j, k;
+        int64_t n_inner = y->ndim - 1;
+        int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        nlcpy__reset_coords(cnt_y, y->ndim);
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iw = 0;
+        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const int64_t len = y->shape[n_outer2];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            ix = cnt * x->strides[n_outer2] / x->itemsize;
+            iy = cnt * y->strides[n_outer2] / y->itemsize;
+            iw = cnt * where->strides[n_outer2] / where->itemsize;
+            for (;;) {
+                // most inner loop for vectorize
+                if (x->size == 1){
+                    @TYPE1@ px_s = px[0];
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],bool)
+                        }
+                    }
+                } else {
+                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                        if (pwhere[i*iw0+iw]){
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                        }
+                    }
+                }
+                // set next index
+                for (k = n_inner-1; k >= 1; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt_y[kk] < y->shape[kk]) {
+                        ix += x->strides[kk] / x->itemsize;
+                        iy += y->strides[kk] / y->itemsize;
+                        iw += where->strides[kk] / where->itemsize;
+                        break;
+                    }
+                    cnt_y[kk] = 0;
+                    ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
+                    iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
+                    iw -= (where->strides[kk] / where->itemsize) * (where->shape[kk] - 1);
+                }
+                if (k < 1) break;
+            }
+        }
+    } else {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+#end_switch
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+
+
+#endif
+
+
+uint64_t FILENAME(ve_arguments *args, int32_t *psw)
+{
+    ve_array *x = &(args->copy_masked.x);
+    ve_array *y = &(args->copy_masked.y);
+    ve_array *where = &(args->copy_masked.where);
+    if (x->size == 0 || y->size == 0) return (uint64_t)NLCPY_ERROR_OK;
+    uint64_t err = NLCPY_ERROR_OK;
+    switch (y->dtype) {
+#if defined(DTYPE_OUT_i32)
+    case ve_i32:  err = FILENAME_i32 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_i64)
+    case ve_i64:  err = FILENAME_i64 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_u32)
+    case ve_u32:  err = FILENAME_u32 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_u64)
+    case ve_u64:  err = FILENAME_u64 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_f32)
+    case ve_f32:  err = FILENAME_f32 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_f64)
+    case ve_f64:  err = FILENAME_f64 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_c64)
+    case ve_c64:  err = FILENAME_c64 (x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_c128)
+    case ve_c128: err = FILENAME_c128(x, y, where, psw); break;
+#endif
+#if defined(DTYPE_OUT_bool)
+    case ve_bool: err = FILENAME_bool(x, y, where, psw); break;
+#endif
+    default: err = NLCPY_ERROR_DTYPE;
+    }
+
+    return (uint64_t)err;
+}

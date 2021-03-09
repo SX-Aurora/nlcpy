@@ -1,0 +1,184 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-28 10:02+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/usage/execution.rst:4
+msgid "Execution"
+msgstr "実行"
+
+#: ../../source/usage/execution.rst:11
+msgid "Parallel Execution"
+msgstr "並列実行"
+
+#: ../../source/usage/execution.rst:13
+msgid ""
+"Python scripts using NLCPy can gain performance when it is executed in "
+"parallel by multithreading on a Vector Engine(VE). The default number of "
+"parallel threads can be specified by the environment variable "
+"``VE_OMP_NUM_THREADS`` at the time of execution. If the "
+"``VE_OMP_NUM_THREADS`` is undefined or has an invalid value, the maximum "
+"number of the available CPU cores on the system is set."
+msgstr ""
+"NLCPyを使用するPythonスクリプトは、Vector "
+"Engine（VE）でマルチスレッド化することにより、性能を発揮します。並列スレッドのデフォルト数は、実行時に環境変数 "
+"``VE_OMP_NUM_THREADS`` で指定できます。 ``VE_OMP_NUM_THREADS`` "
+"が未定義であるか、値が無効な場合、システムで使用可能なCPUコアの最大数が設定されます。"
+
+#: ../../source/usage/execution.rst:17
+msgid "Examples are shown below."
+msgstr "例を以下に示します。"
+
+#: ../../source/usage/execution.rst:19 ../../source/usage/execution.rst:39
+#: ../../source/usage/execution.rst:99
+msgid "Interactive mode:"
+msgstr "対話モード:"
+
+#: ../../source/usage/execution.rst:26
+msgid "Subsequent computations will be performed by 4 parallel threads on a VE."
+msgstr "後続の計算は、VE上の4つの並列スレッドによって実行されます。"
+
+#: ../../source/usage/execution.rst:28 ../../source/usage/execution.rst:48
+#: ../../source/usage/execution.rst:106
+msgid "Non-interactive mode:"
+msgstr "非対話モード:"
+
+#: ../../source/usage/execution.rst:34
+msgid ""
+"Computations in example.py will be performed by 4 parallel threads on a "
+"VE."
+msgstr "example.pyの計算は、VE上の4つの並列スレッドによって実行されます。"
+
+#: ../../source/usage/execution.rst:37
+msgid ""
+"When you want to specify VE Node number, you should use the environment "
+"variable ``VE_NODE_NUMBER`` as follows."
+msgstr "VEのノード番号を指定する場合は、次のように環境変数 ``VE_NODE_NUMBER`` を使用する必要があります。"
+
+#: ../../source/usage/execution.rst:46
+msgid ""
+"Subsequent computations will be performed by 4 parallel threads on VE "
+"Node #1."
+msgstr "後続の計算は、VEノード＃1の4つの並列スレッドによって実行されます。"
+
+#: ../../source/usage/execution.rst:54
+msgid ""
+"Computations in example.py will be performed by 4 parallel threads on VE "
+"Node #1."
+msgstr "example.pyの計算は、VEノード＃1の4つの並列スレッドによって実行されます。"
+
+#: ../../source/usage/execution.rst:57
+msgid ""
+"If you execute two or more NLCPy programs on a VE, context switching "
+"occurs. In such a case, the performance becomes significantly slower."
+msgstr "1つのVEに対して2つ以上のNLCPyプログラムを実行すると、コンテキストスイッチが発生します。 このような場合、パフォーマンスは大幅に低下します。"
+
+#: ../../source/usage/execution.rst:62
+msgid "Optimization for Mathematical Functions"
+msgstr "数学関数の最適化"
+
+#: ../../source/usage/execution.rst:64
+msgid ""
+"When the environment variable ``VE_NLCPY_FAST_MATH`` is set to ``yes`` or"
+" ``YES``, NLCPy uses shared objects ``nlcpy_ve_kernel_fast_math.so`` for "
+"VE. By default, ``VE_NLCPY_FAST_MATH`` is not set. The shared objects ( "
+"``nlcpy_ve_kernel_fast_math.so`` ) have been compiled with the following "
+"optimization options in NEC C/C++ compiler."
+msgstr ""
+"環境変数 ``VE_NLCPY_FAST_MATH`` が ``yes`` または ``YES`` "
+"に設定すると、NLCPyはVE用に最適化した共有オブジェクト ``nlcpy_ve_kernel_fast_math.so`` "
+"を使用します。デフォルトでは、``VE_NLCPY_FAST_MATH`` は未設定です。共有オブジェクト "
+"``nlcpy_ve_kernel_fast_math.so`` は、NEC "
+"C/C++コンパイラの以下の最適化オプションを指定してコンパイルされています。"
+
+#: ../../source/usage/execution.rst:69
+msgid "*-ffast-math*"
+msgstr ""
+
+#: ../../source/usage/execution.rst:71
+msgid ""
+"Uses fast scalar version mathematical functions outside of vectorized "
+"loops."
+msgstr "ベクトル化ループ外でスカラ高速バージョンの数学関数を使用します。"
+
+#: ../../source/usage/execution.rst:73
+msgid "*-mno-vector-intrinsic-check*"
+msgstr ""
+
+#: ../../source/usage/execution.rst
+msgid ""
+"Disable vectorized mathematical functions to check the value ranges of "
+"arguments."
+msgstr "ベクトル化された部分から呼び出された数学関数の引数の値の範囲を実行時に検査しません。"
+
+#: ../../source/usage/execution.rst
+msgid "The target mathematical functions of this option are as follows:"
+msgstr "このオプションの対象となる数学関数は次のとおりです。"
+
+#: ../../source/usage/execution.rst
+msgid ""
+"``acos``, ``acosh``, ``asin``, ``atan``, ``atan2``, ``atanh``, ``cos``, "
+"``cosh``, ``cotan``, ``exp``, ``exp10``, ``exp2``, ``expm1``, ``log10``, "
+"``log2``, ``log``, ``pow``, ``sin``, ``sinh``, ``sqrt``, ``tan``, "
+"``tanh``"
+msgstr ""
+
+#: ../../source/usage/execution.rst:79
+msgid "*-freciprocal-math*"
+msgstr ""
+
+#: ../../source/usage/execution.rst:81
+msgid "Allows change an expression ``x/y`` to ``x * (1/y)``."
+msgstr "式 ``x/y`` を ``x * (1/y)`` に変更します。"
+
+#: ../../source/usage/execution.rst:83
+msgid "*-mvector-power-to-explog*"
+msgstr ""
+
+#: ../../source/usage/execution.rst:85
+msgid ""
+"Allows to replace ``pow(R1,R2)`` in a vectorized loop with "
+"``exp(R2*log(R1))``. ``powf()`` is replaced, too. By the replacement, the"
+" execution time would be shortened, but numerical error occurs rarely in "
+"the calculation."
+msgstr ""
+"ベクトル化されたループ中の ``pow(R1,R2)`` の呼び出しを ``exp(R2*log(R1))`` "
+"の呼び出しに置き換えることを許可します。 ``powf()`` に対しても同様の最適化が適用されます。``pow`` 、 ``powf`` "
+"で計算した場合に比べて実行時間は短縮されますが、計算結果が誤差レベルで変わることがあります。"
+
+#: ../../source/usage/execution.rst:89
+msgid "*-mvector-low-precise-divide-function*"
+msgstr ""
+
+#: ../../source/usage/execution.rst:91
+msgid ""
+"Allows to use low precise version for vector floating divide operation. "
+"It is faster than the normal precise version but the result may include "
+"at most one bit numerical error in mantissa."
+msgstr "低精度のベクトル浮動小数点数除算を使用します。通常精度版と比較して高速に処理されますが、除算結果の仮数部に最大1ビットの誤差が含まれることがあります。"
+
+#: ../../source/usage/execution.rst:94
+msgid ""
+"These optimizations cause side-effects. For example, ``nan`` or ``inf`` "
+"might not be obtained correctly."
+msgstr ""
+"これらの最適化は副作用を引き起こします。 たとえば、 ``nan`` または ``inf`` "
+"が正しく取得されない場合があります。"
+
+#: ../../source/usage/execution.rst:97
+msgid "You can set ``VE_NLCPY_FAST_MATH`` as follows:"
+msgstr "``VE_NLCPY_FAST_MATH`` は次のように設定できます。"
+

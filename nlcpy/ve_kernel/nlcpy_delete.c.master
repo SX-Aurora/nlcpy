@@ -1,0 +1,191 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020-2021 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+@#include "nlcpy.h"
+#define_switch (in->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+uint64_t nlcpy_delete(ve_arguments *args, int32_t *psw)
+{
+    int64_t i, j, k, ii, jj;
+    ve_array *in = &(args->delete_nlcpy.input);
+    ve_array *del = &(args->delete_nlcpy.del_obj);
+    ve_array *idx = &(args->delete_nlcpy.idx);
+    ve_array *out = &(args->delete_nlcpy.output);
+    int64_t axis = (args->delete_nlcpy.axis);
+    ve_array *obj_count = &(args->delete_nlcpy.obj_count);
+    int64_t *pcnt = (int64_t *)obj_count->ve_adr;
+
+    int64_t n_inner = in->ndim-1;
+    int64_t n_outer = 0;
+
+    int64_t *pidx = (int64_t *)idx->ve_adr;
+    int64_t *pdel = (int64_t *)del->ve_adr;
+
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+    int64_t N = (int64_t)in->shape[axis];
+@#pragma _NEC ivdep
+    for (i = 0; i < (int64_t)del->size; i++) {
+        int64_t tmp = pdel[i];
+        if (tmp < -N || tmp >= N) {
+            pcnt[1] = 1;
+        } else if (tmp < 0) {
+            pcnt[2] = 1;
+        } else {
+            pidx[tmp] = 0;
+        }
+    }
+    for (i = 0; i < idx->size; i++) {
+        if (pidx[i] == 0) {
+            pcnt[0]++;
+        }
+    }
+} /* omp single */
+#begin_switch
+    @TYPE1@ *pin = (@TYPE1@ *)in->ve_adr;
+    @TYPE1@ *pout = (@TYPE1@ *)out->ve_adr;
+
+/////////
+// 1-d //
+/////////
+    if (in->ndim == 1) {   
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        ii = 0;
+        for (i = 0; i < in->shape[0]; i++) {
+            if (pidx[i]) {
+                pout[ii] = pin[i];
+                ii++;
+            }
+        }
+} /* omp single */
+
+/////////
+// N-d //
+/////////
+    } else if (in->ndim > 1 && in->ndim <= NLCPY_MAXNDIM) {
+
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif
+
+        int64_t *axis_tbl = (int64_t*)alloca(sizeof(int64_t) * in->ndim);
+        nlcpy__rearrange_axis(in, axis_tbl);
+
+        const int64_t n_inner2 = axis_tbl[n_inner];
+        const int64_t n_outer2 = axis_tbl[n_outer];
+        const int64_t cntm_s = in->shape[n_outer2] * it / nt;
+        const int64_t cntm_e = in->shape[n_outer2] * (it + 1) / nt;
+    
+        int64_t *instep = (int64_t*)alloca(sizeof(int64_t) * in->ndim);
+        int64_t *outstep = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        for (i = 0; i < in->ndim; i++) instep[i] = in->strides[i] / in->itemsize;
+        for (i = 0; i < out->ndim; i++) outstep[i] = out->strides[i] / out->itemsize;
+
+        int64_t *idx_sum = (int64_t*)alloca(sizeof(int64_t) * idx->size);
+
+        ii = 0;
+        for (i = 0; i < idx->size; i++) {
+            if (pidx[i] == 1) {
+                idx_sum[i] = ii;
+                ii++;
+            } else {
+                idx_sum[i] = ii;
+            }
+        }
+
+        ii = 0;
+        jj = 0;
+        int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * in->ndim);
+        for (int64_t cntm = cntm_s; cntm < cntm_e; cntm++) {
+            nlcpy__reset_coords(cnt, in->ndim);
+            int64_t iin = cntm * instep[n_outer2];
+            int64_t iout = (n_outer2 == axis) ? idx_sum[cntm] * outstep[n_outer2] : cntm * outstep[n_outer2];
+            if (n_outer2 == axis) {
+                cnt[axis] = cntm;
+            }
+            do {
+                if (n_inner2 == axis) {
+                    for (i = 0; i < in->shape[n_inner2]; i++) {
+                        if (pidx[i] == 1) {
+                            pout[ii * outstep[n_inner2] + iout] = pin[i * instep[n_inner2] + iin];
+                            ii++;
+                        }
+                    }
+                    ii = 0;
+                } else {
+                    if(pidx[cnt[axis]] == 1) {
+                        for (i = 0; i < in->shape[n_inner2]; i++) {
+                            pout[i * outstep[n_inner2] + iout] = pin[i * instep[n_inner2] + iin];
+                        }
+                    }
+                }
+                for (k = n_inner - 1; k >= 1; k--) {
+                    int64_t kk = axis_tbl[k];
+                    if (kk == axis) {
+                        if (pidx[cnt[kk]] == 1) {
+                            iout += outstep[kk];
+                            jj++;
+                        }
+                        if (++cnt[kk] < in->shape[kk]) {
+                            iin += instep[kk];
+                            break;
+                        }
+                        iout -= outstep[kk] * jj;
+                        iin  -= instep[kk] * (in->shape[kk] - 1);
+                        jj = 0;
+                    } else {
+                        if (++cnt[kk] < in->shape[kk]) {
+                            iin += instep[kk];
+                            iout += outstep[kk];
+                            break;
+                        }
+                        iout -= outstep[kk] * (out->shape[kk] - 1);
+                        iin  -= instep[kk] * (in->shape[kk] - 1);
+                    }
+                    cnt[kk] = 0;
+                }
+            } while (k >= 1);
+        }
+    }
+#end_switch
+    return 0;
+}

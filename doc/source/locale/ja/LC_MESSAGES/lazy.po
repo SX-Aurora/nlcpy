@@ -1,0 +1,161 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-16 16:30+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/lazy.rst:4
+msgid "Lazy Evaluation"
+msgstr "遅延評価"
+
+#: ../../source/lazy.rst:9
+msgid "Overview"
+msgstr "概要"
+
+#: ../../source/lazy.rst:11
+msgid ""
+"SX-Aurora TSUBASA consists of an x86 Node (VH) and Vector Engines (VE), "
+"which are directly connected with PCI Express. When data transfer between"
+" VH and VE frequently appears in Python scripts, its performance becomes "
+"significantly lower. In other words, the overhead between VH and VE is "
+"quite an important issue to make Python scripts performed faster. As a "
+"solution for it, NLCPy evaluates Python scripts lazy to collectively "
+"transfer computational requests to VE. It can reduce the number of times "
+"that the requests are offloaded to VE."
+msgstr ""
+"SX-Aurora TSUBASAは、PCI Expressに直接接続されているx86ノード（VH）とVector "
+"Engine（VE）で構成されています。VHとVE間のデータ転送がPythonスクリプトに頻繁に現れると、そのパフォーマンスは大幅に低下します。言い換えると、VHとVEの間のオーバーヘッドは、Pythonスクリプトの実行を高速化するための非常に重要な問題です。その解決策として、NLCPyはPythonスクリプトを遅延評価して、VEへの計算のリクエストをまとめて転送します。これにより、リクエストをオフロードする回数を減らすことができます。"
+
+#: ../../source/lazy.rst:21
+msgid "Evaluation sequence is as follows:"
+msgstr "評価順序は以下のとおりです。"
+
+#: ../../source/lazy.rst:23
+msgid "Stack requests on VH."
+msgstr "VHでリクエストをスタックします。"
+
+#: ../../source/lazy.rst:24
+msgid "Flush the requests to VE when a trigger appears in Python scripts."
+msgstr "Pythonスクリプトにトリガーが表示されたら、リクエストをVEに掃き出します。"
+
+#: ../../source/lazy.rst:25
+msgid ""
+"Start computations on VE based on the requests and wait until "
+"computations will be completed."
+msgstr "リクエストに基づいてVEで計算を開始し、計算が完了するまで待機します。"
+
+#: ../../source/lazy.rst:29
+msgid "Request Management"
+msgstr "リクエスト管理"
+
+#: ../../source/lazy.rst:31
+msgid ""
+"In NLCPy functions, the requests shown above are automatically flushed to"
+" VE and are executed on VE. The triggers that cause to flush the requets "
+"are as follows:"
+msgstr "上述のリクエストは、NLCPyの関数の中で自動的にVEにフラッシュされ(掃き出され）、VE上で実行されます。フラッシュを引き起こすトリガーは以下の通りです。"
+
+#: ../../source/lazy.rst
+msgid "When array data on VE are needed on VH."
+msgstr "VE上の配列データがVH上で必要とされた場合"
+
+#: ../../source/lazy.rst:36
+msgid ""
+"e.g.) print :class:`nlcpy.ndarray`, call :class:`nlcpy.ndarray.get()`, "
+"and use :class:`nlcpy.ndarray` in an ``if``/``elif`` conditional "
+"statement."
+msgstr ""
+"（例） :class:`nlcpy.ndarray` を表示(print)、 :class:`nlcpy.ndarray.get()` "
+"の呼び出し、 ``if``/``elif`` の条件文中に :class:`nlcpy.ndarray` を使用"
+
+#: ../../source/lazy.rst
+msgid "When the number of stacked requests on VH exceeds 100."
+msgstr "VHにスタックされたリクエストの数が100を超えた場合"
+
+#: ../../source/lazy.rst
+msgid ""
+"When a Python script calls a function in which the lazy evaluation is not"
+" supported."
+msgstr "Pythonスクリプトが遅延評価に対応していない関数を呼び出した場合"
+
+#: ../../source/lazy.rst:42
+msgid "e.g.) :func:`nlcpy.fft.fft()`, :func:`nlcpy.linalg.solve()`, and so on."
+msgstr "（例） :func:`nlcpy.fft.fft()` や :func:`nlcpy.linalg.solve()` 等"
+
+#: ../../source/lazy.rst:44
+msgid ""
+":func:`nlcpy.request.flush()` can intentionally flush the requests. In "
+"addition, if your script calls "
+":func:`nlcpy.request.set_offload_timing_onthefly()`, subsequent requests "
+"are executed on the fly. For details how to manage the requests, please "
+"see :mod:`nlcpy.request`."
+msgstr ""
+":func:`nlcpy.request.flush()` "
+"は、リクエストを意図的にフラッシュすることができます。また、:func:`nlcpy.request.set_offload_timing_onthefly()`"
+" を呼び出すと、後続のリクエストは一関数ごとに実行されます。リクエストを管理する方法の詳細は、:mod:`nlcpy.request` "
+"をご参照ください。"
+
+#: ../../source/lazy.rst:51
+msgid "Debugging Tips"
+msgstr "デバッグのヒント"
+
+#: ../../source/lazy.rst:53
+msgid ""
+"When using lazy evaluation, the position of warnings where your Python "
+"script raised may not be accurate. So if you want to know the exact "
+"position of warnings, we recommend using "
+":func:`nlcpy.request.set_offload_timing_onthefly()`."
+msgstr ""
+"遅延評価を使用する場合、Pythonスクリプトが発生する警告の位置が正確でない可能性があります。したがって、警告の正確な位置を知りたい場合は、 "
+":func:`nlcpy.request.set_offload_timing_onthefly()` を使用してください。"
+
+#: ../../source/lazy.rst:56
+msgid "**Warning example with \"lazy\"**"
+msgstr "**遅延評価の警告例**"
+
+#: ../../source/lazy.rst:73
+msgid "**Warning example with \"on-the-fly\"**"
+msgstr "**逐次評価の警告例**"
+
+#: ../../source/lazy.rst:93
+msgid "Performance Comparison between \"on-the-fly\" and \"lazy\""
+msgstr "逐次評価と遅延評価の性能比較"
+
+#: ../../source/lazy.rst:95
+msgid ""
+"Here, we show a simple performance comparison between \"on-the-fly\" "
+"(``set_offload_timing_onthefly``) and \"lazy\" "
+"(``set_offload_timing_lazy``)."
+msgstr ""
+"ここでは、逐次評価( ``set_offload_timing_onthefly`` )と遅延評価 ( "
+"``set_offload_timing_lazy`` )の簡単な性能比較を示します。"
+
+#: ../../source/lazy.rst:98
+msgid ""
+"In this sample program, the use of \"lazy\" improves performance about 2 "
+"times."
+msgstr "この場合、 遅延評価を使用すると、性能は約2倍向上します。"
+
+#: ../../source/lazy.rst:100
+msgid "**Sample Program**"
+msgstr "**サンプルプログラム**"
+
+#: ../../source/lazy.rst:128
+msgid "**Execution Result**"
+msgstr "**実行結果**"
+
+#~ msgid "etc."
+#~ msgstr "等"
+

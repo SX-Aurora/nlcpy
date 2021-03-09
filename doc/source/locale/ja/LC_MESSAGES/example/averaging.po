@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-21 17:37+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/example/averaging.rst:4
+msgid "Example: Averaging Filter"
+msgstr "サンプル: 平均化フィルタ"
+
+#: ../../source/example/averaging.rst:10
+msgid "Objective"
+msgstr "目的"
+
+#: ../../source/example/averaging.rst:12
+msgid ""
+"We will blur a given image using an Averaging filter. The filter size is "
+"19 :math:`\\times` 19, and its coefficients are uniformly "
+":math:`\\frac{1}{19 \\times 19}`."
+msgstr ""
+"平均化フィルタを使用して特定の画像をぼかします。 フィルタサイズは19 :math:`\\times` 19であり、その係数は一様に"
+" :math:`\\frac{1}{19 \\times 19}` です。"
+
+#: ../../source/example/averaging.rst:17
+msgid "Program"
+msgstr "プログラム"
+
+#: ../../source/example/averaging.rst:116
+msgid "Result"
+msgstr "結果"
+

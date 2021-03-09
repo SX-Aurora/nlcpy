@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -1130,9 +1130,9 @@ class TestRandomDist(object):
     def test_geometric(self):
         random = Generator(MT19937(self.seed))
         actual = random.geometric(.123456789, size=(3, 2))
-        desired = np.array([[27, 1],
-                            [10, 11],
-                            [7, 0]]).get()
+        desired = np.array([[28, 2],
+                            [11, 12],
+                            [8, 1]]).get()
         assert_array_equal(actual.get(), desired)
 
     def __exclude_test_geometric_exceptions(self):

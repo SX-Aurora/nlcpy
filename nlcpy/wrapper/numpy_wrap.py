@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,11 @@
 
 import numpy
 import nlcpy
+import functools
 
 
 def numpy_wrap(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         is_out = False
         try:
@@ -51,29 +53,38 @@ def numpy_wrap(func):
                 if k == 'out':
                     is_out = True
                     in_out = v
-                else:
-                    is_out = False
 
             # call NumPy function
             ret = f(*largs, **kwargs)
             # transfer the return values to VE
-            if isinstance(ret, numpy.ndarray) or numpy.isscalar(ret):
+            if isinstance(ret, numpy.ndarray) or \
+                    numpy.isscalar(ret) and numpy.dtype(type(ret)).char in '?iIlLfFdD':
                 vp_ret = nlcpy.asarray(ret)
                 if is_out:
                     in_out[...] = vp_ret
                 return vp_ret
-            elif hasattr(ret, "__iter__"):
-                lret = list(ret)
-                for i, _l in enumerate(lret):
-                    if isinstance(_l, numpy.ndarray) or numpy.isscalar(_l):
-                        lret[i] = nlcpy.asarray(_l)
+            elif isinstance(ret, numpy.lib.npyio.NpzFile):
+                return nlcpy.NpzFile(ret)
+            elif isinstance(ret, dict):
+                for key, val in ret.items():
+                    ret[key] = nlcpy.asarray(val)
+                return ret
+            elif isinstance(ret, (list, tuple)):
+                vpp = []
+                for x in ret:
+                    if isinstance(x, numpy.ndarray) is False:
+                        if numpy.any(isinstance(x, numpy.ndarray)) is True:
+                            b_ret = [nlcpy.asarray(i) for i in x]
+                        else:
+                            b_ret = x
                     else:
-                        lret[i] = _l
-                vp_ret = tuple(lret)
-                if is_out:
-                    raise NotImplementedError
+                        b_ret = nlcpy.asarray(x)
+                    vpp.append(b_ret)
+                vp_ret = vpp
+                if isinstance(ret, tuple):
+                    vp_ret = tuple(vp_ret)
                 return vp_ret
             else:
-                raise NotImplementedError
+                return ret
 
     return wrap_func

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -51,5 +51,6 @@ def pytest_runtest_setup(item):
             pytest.skip(
                 "need --test=full option to run this test")
     else:
-        pytest.skip(
-            "need --test=full or --test=small option to run this test")
+        if 'full' in item.keywords or 'small' in item.keywords:
+            pytest.skip(
+                "need --test=full or --test=small option to run this test")

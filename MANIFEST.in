@@ -1,5 +1,1 @@
-global-exclude *.o *.c *.cpp
-
-
-
-
+global-exclude *.o *.c *.h *.cpp *.pyx *.pxd *.pxi *.m4 *.master *.master2

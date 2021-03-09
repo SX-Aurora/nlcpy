@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ shapes = [((4, ), (4, )),
           ((4, 2, 3), (4, 2, 3))]
 
 orders = ['C', 'F']
+order_op = ['C', 'F', 'A', 'K', None]
 
 ops = [
     'add',
@@ -119,14 +120,15 @@ class TestBinaryCast(unittest.TestCase):
     # dtype is False
     ################################
     @pytest.mark.full
+    @testing.for_orders(order_op, name='order_op')
     @testing.numpy_nlcpy_check_for_binary_ufunc(
         ops, shapes,
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=False, is_where=False, is_dtype=False,
+        is_out=False, is_where=False, is_dtype=False, seed=0
     )
-    def test_binary_cast_array_array(self, xp, op, in1, in2):
+    def test_binary_cast_array_array(self, xp, op, in1, in2, order_op):
         in1 = xp.array(in1)
         in2 = xp.array(in2)
 
@@ -134,7 +136,7 @@ class TestBinaryCast(unittest.TestCase):
             with testing.NlcpyError(
                     divide='ignore', over='ignore', invalid='ignore'):
                 func = getattr(xp, op)
-                y = func(in1, in2)
+                y = func(in1, in2, order=order_op)
                 if xp is nlcpy:
                     nlcpy.request.flush()
         return y
@@ -152,7 +154,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=False, is_where=False, is_dtype=False,
+        is_out=False, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_array_scalar(self, xp, op, in1, in2):
         in1 = xp.array(in1)
@@ -179,7 +181,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=False, is_where=False, is_dtype=False,
+        is_out=False, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_scalar_scalar(self, xp, op, in1, in2):
         with testing.NumpyError(divide='ignore'):
@@ -204,7 +206,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=False, is_where=False, is_dtype=True,
+        is_out=False, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_array_array_with_dtype(self, xp, op, in1, in2, dtype):
         in1 = xp.array(in1)
@@ -232,7 +234,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=False, is_where=False, is_dtype=True,
+        is_out=False, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_array_scalar_with_dtype(
             self, xp, op, in1, in2, dtype):
@@ -260,7 +262,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=False, is_where=False, is_dtype=True,
+        is_out=False, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_scalar_scalar_with_dtype(
             self, xp, op, in1, in2, dtype):
@@ -286,7 +288,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=False, is_dtype=False,
+        is_out=True, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_array_array_with_out(self, xp, op, in1, in2, out):
         in1 = xp.array(in1)
@@ -320,7 +322,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=True, is_where=False, is_dtype=False,
+        is_out=True, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_array_scalar_with_out(self, xp, op, in1, in2, out):
         in1 = xp.array(in1)
@@ -353,7 +355,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=True, is_where=False, is_dtype=False,
+        is_out=True, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_scalar_scalar_with_out(self, xp, op, in1, in2, out):
         out = xp.array(out)
@@ -386,6 +388,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=float_types, dtype_y=float_types, dtype_out=float_types,
         minval=minval, maxval=maxval, mode='array_array',
         is_out=True, is_where=False, is_dtype=False, is_broadcast=True,
+        seed=0
     )
     def test_binary_cast_array_array_with_out_broadcast(
             self, xp, op, in1, in2, out):
@@ -421,7 +424,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=False, is_dtype=True,
+        is_out=True, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_array_array_with_out_with_dtype(
             self, xp, op, in1, in2, out, dtype):
@@ -452,7 +455,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=True, is_where=False, is_dtype=True,
+        is_out=True, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_array_scalar_with_out_with_dtype(
             self, xp, op, in1, in2, out, dtype):
@@ -482,7 +485,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=True, is_where=False, is_dtype=True,
+        is_out=True, is_where=False, is_dtype=True, seed=0
     )
     def test_binary_cast_scalar_scalar_with_out_with_dtype(
             self, xp, op, in1, in2, out, dtype):
@@ -510,7 +513,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders, order_where=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=True, is_dtype=False,
+        is_out=True, is_where=True, is_dtype=False, seed=0
     )
     def test_binary_cast_array_array_with_out_with_where(
             self, xp, op, in1, in2, out, where):
@@ -549,7 +552,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders, order_where=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=True, is_where=True, is_dtype=False,
+        is_out=True, is_where=True, is_dtype=False, seed=0
     )
     def test_binary_cast_array_scalar_with_out_with_where(
             self, xp, op, in1, in2, out, where):
@@ -587,7 +590,7 @@ class TestBinaryCast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders, order_where=orders,
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=True, is_where=True, is_dtype=False,
+        is_out=True, is_where=True, is_dtype=False, seed=0
     )
     def test_binary_cast_scalar_scalar_with_out_with_where(
             self, xp, op, in1, in2, out, where):
@@ -625,6 +628,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=float_types, dtype_y=float_types, dtype_out=float_types,
         minval=minval, maxval=maxval, mode='array_array',
         is_out=True, is_where=True, is_dtype=False, is_broadcast=True,
+        seed=0
     )
     def test_binary_cast_array_array_with_out_with_where_broadcast(
             self, xp, op, in1, in2, out, where):
@@ -664,7 +668,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=True, is_dtype=True,
+        is_out=True, is_where=True, is_dtype=True, seed=0
     )
     def test_binary_cast_array_array_with_out_with_where_with_dtype(
             self, xp, op, in1, in2, out, where, dtype):
@@ -699,7 +703,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=True, is_where=True, is_dtype=True,
+        is_out=True, is_where=True, is_dtype=True, seed=0
     )
     def test_binary_cast_array_scalar_with_out_with_where_with_dtype(
             self, xp, op, in1, in2, out, where, dtype):
@@ -733,7 +737,7 @@ class TestBinaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_y=all_types, dtype_out=all_types,
         dtype_arg=all_types,
         minval=minval, maxval=maxval, mode='scalar_scalar',
-        is_out=True, is_where=True, is_dtype=True,
+        is_out=True, is_where=True, is_dtype=True, seed=0
     )
     def test_binary_cast_scalar_scalar_with_out_with_where_with_dtype(
             self, xp, op, in1, in2, out, where, dtype):
@@ -780,7 +784,7 @@ class TestBinaryBroadcast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=f64_type,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=False, is_where=False, is_dtype=False,
+        is_out=False, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_broadcast_array_array(self, xp, op, in1, in2):
         in1 = xp.array(in1)
@@ -808,7 +812,7 @@ class TestBinaryBroadcast(unittest.TestCase):
         order_x=orders, order_y=orders,
         dtype_x=all_types, dtype_y=f64_type,
         minval=minval, maxval=maxval, mode='array_scalar',
-        is_out=False, is_where=False, is_dtype=False,
+        is_out=False, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_broadcast_array_scalar(self, xp, op, in1, in2):
         in1 = xp.array(in1)
@@ -835,7 +839,7 @@ class TestBinaryBroadcast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders,
         dtype_x=all_types, dtype_y=f64_type, dtype_out=f64_type,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=False, is_dtype=False,
+        is_out=True, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_broadcast_array_array_with_out(
             self, xp, op, in1, in2, out):
@@ -870,7 +874,7 @@ class TestBinaryBroadcast(unittest.TestCase):
         order_x=orders, order_y=orders, order_out=orders, order_where=orders,
         dtype_x=all_types, dtype_y=f64_type, dtype_out=f64_type,
         minval=minval, maxval=maxval, mode='array_array',
-        is_out=True, is_where=True, is_dtype=False,
+        is_out=True, is_where=True, is_dtype=False, seed=0
     )
     def test_binary_broadcast_array_array_with_where(
             self, xp, op, in1, in2, out, where):

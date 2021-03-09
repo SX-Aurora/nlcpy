@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,6 @@
 import unittest
 
 import numpy
-import six
 
 import nlcpy
 from nlcpy import testing
@@ -209,14 +208,14 @@ class TestCumsum(unittest.TestCase):
     @testing.numpy_nlcpy_allclose(contiguous_check=False)
     def test_cumsum_axis(self, xp, dtype):
         n = len(axes)
-        a = testing.shaped_arange(tuple(six.moves.range(4, 4 + n)), xp, dtype)
+        a = testing.shaped_arange(tuple(range(4, 4 + n)), xp, dtype)
         return xp.cumsum(a, axis=self.axis)
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_allclose(accept_error=nlcpy.core.error._AxisError)
     def test_cumsum_axis_empty(self, xp, dtype):
         n = len(axes)
-        a = testing.shaped_arange(tuple(six.moves.range(0, n)), xp, dtype)
+        a = testing.shaped_arange(tuple(range(0, n)), xp, dtype)
         return xp.cumsum(a, axis=self.axis)
 
     @testing.for_all_dtypes()

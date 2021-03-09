@@ -1,0 +1,82 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-16 19:00+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/example/clustering.rst:4
+msgid "Example: Clustering"
+msgstr "サンプル: クラスタリング"
+
+#: ../../source/example/clustering.rst:10
+msgid "Objective"
+msgstr "目的"
+
+#: ../../source/example/clustering.rst:12
+msgid ""
+"We will classify 1,000,000 datasets into 9 clusters by using k-means "
+"algorithm. The number of iteration steps for k-means is 50. After 50 "
+"iteration steps are computed, the GIF animation is saved as "
+"'clustering.gif'."
+msgstr "k-meansアルゴリズムを使用して、1,000,000個のデータセットを9個のクラスタに分類します。k-meansの反復回数は50回です。50回の反復計算後、GIFアニメーションが'clustering.gif'に保存されます。"
+
+#: ../../source/example/clustering.rst:17
+msgid "Program"
+msgstr "プログラム"
+
+#: ../../source/example/clustering.rst:87
+msgid "Result"
+msgstr "結果"
+
+#: ../../source/example/clustering.rst:89
+msgid "This is the GIF animiation (clustering.gif)."
+msgstr "GIFアニメーション (clustering.gif)"
+
+#: ../../source/example/clustering.rst:95
+msgid "Copyrights"
+msgstr "著作権"
+
+#: ../../source/example/clustering.rst:98
+msgid "This example is based on the following code:"
+msgstr "このサンプルは以下のコードをベースにしています。"
+
+#: ../../source/example/clustering.rst:98
+msgid "https://github.com/cupy/cupy/blob/master/examples/kmeans/kmeans.py"
+msgstr ""
+
+#: ../../source/example/clustering.rst:101
+msgid ":ref:`CuPy License <copyrights>`"
+msgstr ":ref:`CuPy License <copyrights>`"
+
+#~ msgid ""
+#~ "We will classify 1,000,000 datasets into"
+#~ " 10 clusters by using k-means "
+#~ "algorighm."
+#~ msgstr "k-meansアルゴリズムを使用して、1,000,000個のデータセットを10個のクラスタに分類します。"
+
+#~ msgid "CuPy License"
+#~ msgstr "CuPyライセンス"
+
+#~ msgid ""
+#~ "We will classify 1,000,000 datasets into"
+#~ " 9 clusters by using k-means "
+#~ "algorithm. The algorithm will be "
+#~ "iterated 50 steps, and the gif "
+#~ "animation shows the result of clustering"
+#~ " for each iteration steps."
+#~ msgstr ""
+#~ "k-meansアルゴリズムを使用して、1,000,000個のデータセットを9個のクラスタに分類します。シミュレーションはk-"
+#~ "meansアルゴリズムを50ステップ反復します。gifアニメーションは各ステップごとのクラスタリングの結果を示しています。"
+

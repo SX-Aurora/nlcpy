@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.7.0\n"
+
+#: ../../source/reference/logic.rst:2
+msgid "Logic Functions"
+msgstr ""
+
+#: ../../source/reference/logic.rst:4
+msgid "The following tables show logical functions provided by NLCPy."
+msgstr ""
+
+#: ../../source/reference/logic.rst:7
+msgid "Truth Value Testing"
+msgstr ""
+
+#: ../../source/reference/logic.rst:15:<autosummary>:1
+msgid ":obj:`nlcpy.all <nlcpy.all>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:15:<autosummary>:1
+msgid "Tests whether all array elements along a given axis evaluate to True."
+msgstr ""
+
+#: ../../source/reference/logic.rst:15:<autosummary>:1
+msgid ":obj:`nlcpy.any <nlcpy.any>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:15:<autosummary>:1
+msgid "Tests whether any array elements along a given axis evaluate to True."
+msgstr ""
+
+#: ../../source/reference/logic.rst:17
+msgid "Array Contents"
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid ":obj:`nlcpy.isfinite <nlcpy.isfinite>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid "Tests whether input elements are neither inf nor nan, or not."
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid ":obj:`nlcpy.isinf <nlcpy.isinf>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid "Tests whether input elements are inf, or not."
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid ":obj:`nlcpy.isnan <nlcpy.isnan>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:26:<autosummary>:1
+msgid "Tests whether input elements are nan, or not."
+msgstr ""
+
+#: ../../source/reference/logic.rst:28
+msgid "Logical Operations"
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.logical_and <nlcpy.logical_and>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid "Computes the logical AND of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.logical_or <nlcpy.logical_or>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid "Computes the logical OR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.logical_not <nlcpy.logical_not>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid "Computes the logical NOT of the input array element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid ":obj:`nlcpy.logical_xor <nlcpy.logical_xor>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:38:<autosummary>:1
+msgid "Computes the logical XOR of two arrays element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:40
+msgid "Comparison"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.greater <nlcpy.greater>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* > *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.greater_equal <nlcpy.greater_equal>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* >= *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.less <nlcpy.less>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* < *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.less_equal <nlcpy.less_equal>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* <= *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.equal <nlcpy.equal>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* == *x2*), element-wise."
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.not_equal <nlcpy.not_equal>`"
+msgstr ""
+
+#: ../../source/reference/logic.rst:51:<autosummary>:1
+msgid "Returns (*x1* != *x2*), element-wise."
+msgstr ""
+

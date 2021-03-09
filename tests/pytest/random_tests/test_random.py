@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,14 @@ class TestSeed(object):
         assert_equal(s.randint(1000), np.array(694))
         s = np.random.RandomState([4294967295])
         assert_equal(s.randint(1000), np.array(318))
+
+    def test_BitGenerator(self):
+        from nlcpy.random import MT19937, SeedSequence
+        rs = np.random.RandomState(MT19937(SeedSequence(123456789)))
+        actual = rs.random()
+        rs2 = np.random.RandomState(123456789)
+        desired = rs2.random()
+        assert_equal(actual, desired)
 
     def test_invalid_scalar(self):
         # seed must be an unsigned 32 bit integer
@@ -956,9 +964,9 @@ class TestRandomDist(object):
     def test_geometric(self):
         np.random.seed(1234567890)
         actual = np.random.geometric(.123456789, size=(3, 2))
-        desired = np.array([[27, 1],
-                            [10, 11],
-                            [7, 0]])
+        desired = np.array([[28, 2],
+                            [11, 12],
+                            [8, 1]])
         assert_array_equal(actual.get().tolist(), desired.get().tolist())
 
     def test_gumbel(self):

@@ -3,8 +3,12 @@
 *.log
 *_log\.*
 *.npy
+*.npz
 *.egg-info
 /build/
 /dist/
 /obj/
+/.tox/
+/doc/build/
+generated
 __pycache__

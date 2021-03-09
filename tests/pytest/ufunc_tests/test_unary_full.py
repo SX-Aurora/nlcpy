@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,7 @@ maxval = 100
 shapes = [(4, 2), ]
 
 orders = ['C', 'F']
+order_op = ['C', 'F', 'A', 'K', None]
 
 ops = [
     'negative',
@@ -129,20 +130,22 @@ class TestUnaryCast(unittest.TestCase):
     # dtype is False
     ################################
     @pytest.mark.full
+    @testing.for_orders(order_op, name='order_op')
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes,
         order_x=orders,
         dtype_x=all_types,
         minval=minval, maxval=maxval,
         mode='array', is_out=False, is_where=False, is_dtype=False,
+        seed=0
     )
-    def test_unary_cast_array(self, xp, op, in1):
+    def test_unary_cast_array(self, xp, op, in1, order_op):
         in1 = xp.array(in1)
 
         with testing.NumpyError(divide='ignore'):
             with testing.NlcpyError(divide='ignore', over='ignore', invalid='ignore'):
                 func = getattr(xp, op)
-                y = func(in1)
+                y = func(in1, order=order_op)
                 if xp is nlcpy:
                     nlcpy.request.flush()
         return y
@@ -161,6 +164,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=False, is_where=False, is_dtype=False,
+        seed=0
     )
     def test_unary_cast_scalar(self, xp, op, in1):
         with testing.NumpyError(divide='ignore'):
@@ -186,6 +190,7 @@ class TestUnaryCast(unittest.TestCase):
         minval=minval,
         maxval=maxval,
         mode='array', is_out=False, is_where=False, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_array_with_dtype(self, xp, op, in1, dtype):
         in1 = xp.array(in1)
@@ -212,6 +217,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=False, is_where=False, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_scalar_with_dtype(self, xp, op, in1, dtype):
         with testing.NumpyError(divide='ignore'):
@@ -236,6 +242,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval,
         mode='array', is_out=True, is_where=False, is_dtype=False,
+        seed=0
     )
     def test_unary_cast_array_with_out(self, xp, op, in1, out):
         in1 = xp.array(in1)
@@ -267,6 +274,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=True, is_where=False, is_dtype=False,
+        seed=0
     )
     def test_unary_cast_scalar_with_out(self, xp, op, in1, out):
         out = xp.array(out)
@@ -297,6 +305,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array',
         is_out=True, is_where=False, is_dtype=False, is_broadcast=True,
+        seed=0
     )
     def test_unary_cast_array_with_out_broadcast(self, xp, op, in1, out):
         in1 = xp.array(in1)
@@ -328,6 +337,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval,
         mode='array', is_out=True, is_where=False, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_array_with_out_with_dtype(self, xp, op, in1, out, dtype):
         in1 = xp.array(in1)
@@ -355,6 +365,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=True, is_where=False, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_scalar_with_out_with_dtype(self, xp, op, in1, out, dtype):
         out = xp.array(out)
@@ -381,6 +392,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval,
         mode='array', is_out=True, is_where=True, is_dtype=False,
+        seed=0
     )
     def test_unary_cast_array_with_out_with_where(self, xp, op, in1, out, where):
         in1 = xp.array(in1)
@@ -415,6 +427,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=True, is_where=True, is_dtype=False,
+        seed=0
     )
     def test_unary_cast_scalar_with_out_with_where(self, xp, op, in1, out, where):
         out = xp.array(out)
@@ -448,6 +461,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types,
         minval=minval, maxval=maxval, mode='array',
         is_out=True, is_where=True, is_dtype=False, is_broadcast=True,
+        seed=0
     )
     def test_unary_cast_array_with_out_with_where_broadcast(
             self, xp, op, in1, out, where):
@@ -483,6 +497,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval,
         mode='array', is_out=True, is_where=True, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_array_with_out_with_where_with_dtype(
             self, xp, op, in1, out, where, dtype):
@@ -514,6 +529,7 @@ class TestUnaryCast(unittest.TestCase):
         dtype_x=all_types, dtype_out=all_types, dtype_arg=all_types,
         minval=minval, maxval=maxval,
         mode='scalar', is_out=True, is_where=True, is_dtype=True,
+        seed=0
     )
     def test_unary_cast_scalar_with_out_with_where_with_dtype_broadcast(
             self, xp, op, in1, out, where, dtype):

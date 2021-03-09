@@ -1,0 +1,3308 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0b1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-12 11:33+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/functions.rst:2
+msgid "Functions Provided by NLCPy"
+msgstr "NLCPyが提供する関数"
+
+#: ../../source/functions.rst:4
+msgid ""
+"NLCPy provides a subset of NumPy's API. Comparison tables between NLCPy and"
+" NumPy functions are as shown below. Functions that are represented ``-``"
+" in the column \"NLCPy\" are not provided yet. If your scripts need to "
+"use unsuported functions in NLCPy, please see :ref:`Interoperability "
+"between NumPy and NLCPy <interoperability>`."
+msgstr ""
+"NLCPyは、NumPyのAPIのサブセットを提供します。 NLCPyの関数とNumPyの関数の比較表は次のとおりです。\"NLCPy\"列に "
+"``-`` と表示されている関数はまだ提供されていません。スクリプトでNLCPyでサポートされていない関数を使用する必要がある場合は、 "
+":ref:`NumPyとNLCPyの相互運用性<interoperability>` を参照してください。"
+
+#: ../../source/comparison_table.rst.inc:2
+msgid "NumPy / NLCPy APIs"
+msgstr "NumPy / NLCPyのAPI"
+
+#: ../../source/comparison_table.rst.inc:5
+msgid "Module-Level"
+msgstr "モジュールレベル"
+
+#: ../../source/comparison_table.rst.inc:1
+msgid "NumPy"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid "NLCPy"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.absolute`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.absolute`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.add`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.add`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.all`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.all`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.allclose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid "\\-"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.amax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.amax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.amin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.amin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.angle`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.angle`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.any`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.any`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.append`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.append`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.apply_along_axis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.apply_over_axes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arange`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arange`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arccos`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arccos`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arccosh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arccosh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arcsin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arcsin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arcsinh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arcsinh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arctan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arctan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arctan2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arctan2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.arctanh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.arctanh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.argmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.argmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.argmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.argmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.argpartition`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.argsort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.argsort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.argwhere`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.argwhere`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.around`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.array`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array2string`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array_equiv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array_repr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array_split`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.array_str`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asanyarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.asanyarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.asarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asarray_chkfinite`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ascontiguousarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asfarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asfortranarray`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asmatrix`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.asscalar`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.atleast_1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.atleast_2d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.atleast_3d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.average`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.average`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bartlett`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.base_repr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.binary_repr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bincount`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.bincount`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bitwise_and`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.bitwise_and`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bitwise_or`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.bitwise_or`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bitwise_xor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.bitwise_xor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.blackman`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.block`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.bmat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.broadcast_arrays`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.broadcast_to`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.broadcast_to`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.busday_count`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.busday_offset`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.byte_bounds`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.can_cast`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cbrt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.cbrt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ceil`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ceil`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.choose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.clip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.column_stack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.common_type`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.compress`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.concatenate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.concatenate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.conj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.conj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.conjugate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.conjugate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.convolve`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.copy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.copy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.copysign`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.copysign`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.copyto`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.copyto`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.corrcoef`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.corrcoef`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.correlate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.correlate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cos`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.cos`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cosh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.cosh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.count_nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cov`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.cov`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cross`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cumprod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.cumsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.cumsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.datetime_as_string`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.datetime_data`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.deg2rad`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.deg2rad`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.degrees`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.degrees`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.delete`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.delete`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.deprecate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.deprecate_with_doc`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diag`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.diag`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diag_indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diag_indices_from`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diagflat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.diff`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.diff`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.digitize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.digitize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.disp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.divmod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.dot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.dot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.dsplit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.dstack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ediff1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.einsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.einsum_path`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.empty`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.empty`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.empty_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.empty_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.exp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.exp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.exp2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.exp2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.expand_dims`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.expand_dims`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.expm1`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.expm1`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.extract`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.eye`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.eye`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fabs`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fabs`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fill_diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.find_common_type`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fix`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.flatnonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.flip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.flip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fliplr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fliplr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.flipud`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.flipud`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.float_power`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.floor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.floor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.floor_divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.floor_divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fmod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fmod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.format_float_positional`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.format_float_scientific`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.frexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.frombuffer`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fromfile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fromfile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fromfunction`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fromiter`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.frompyfunc`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fromregex`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fromstring`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.full`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.full`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.full_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.full_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.gcd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.genfromtxt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.geomspace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.get_include`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.get_printoptions`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.get_printoptions` (*alias of* :obj:`numpy.get_printoptions`)"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.getbufsize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.geterr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.geterr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.geterrcall`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.geterrobj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.gradient`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.greater`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.greater`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.greater_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.greater_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.hamming`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.hanning`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.heaviside`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.heaviside`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.histogram`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.histogram`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.histogram2d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.histogram2d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.histogram_bin_edges`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.histogram_bin_edges`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.histogramdd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.histogramdd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.hsplit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.hstack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.hstack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.hypot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.hypot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.i0`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.identity`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.identity`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.imag`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.imag`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.in1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.info`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.inner`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.inner`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.insert`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.insert`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.interp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.intersect1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.invert`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.invert`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.is_busday`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isclose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.iscomplex`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.iscomplexobj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isfinite`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.isfinite`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isfortran`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isinf`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.isinf`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isnan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.isnan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isnat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isneginf`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isposinf`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isreal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isrealobj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.isscalar`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.issctype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.issubclass_`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.issubdtype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.issubsctype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ix_`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.kaiser`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.kron`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.lcm`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ldexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ldexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.left_shift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.left_shift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.less`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.less`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.less_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.less_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.lexsort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linspace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linspace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.load`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.load`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.loadtxt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.loadtxt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.log`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.log`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.log10`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.log10`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.log1p`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.log1p`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.log2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.log2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logaddexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logaddexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logaddexp2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logaddexp2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logical_and`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logical_and`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logical_not`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logical_not`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logical_or`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logical_or`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logical_xor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logical_xor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.logspace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.logspace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.lookfor`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.mask_indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.mat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.matmul`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.matmul`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.maximum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.maximum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.maximum_sctype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.may_share_memory`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.may_share_memory`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.mean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.mean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.median`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.median`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.meshgrid`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.meshgrid`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.min_scalar_type`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.minimum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.minimum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.mintypecode`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.mod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.mod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.modf`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.moveaxis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.moveaxis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.msort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.multiply`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.multiply`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nan_to_num`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanargmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanargmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nancumprod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nancumsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanmean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanmean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanmedian`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanmedian`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanpercentile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanpercentile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanprod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanquantile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanquantile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanstd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanstd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nansum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nanvar`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanvar`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.negative`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.negative`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nested_iters`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nextafter`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nextafter`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.not_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.not_equal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.obj2sctype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ones`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ones`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ones_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ones_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.outer`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.outer`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.packbits`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.pad`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.partition`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.percentile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.percentile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.piecewise`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.place`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.poly`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polyadd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polyder`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polydiv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polyfit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polyint`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polymul`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polysub`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.polyval`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.positive`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.positive`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.power`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.power`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.printoptions`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.prod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.prod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.promote_types`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ptp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ptp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.put`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.put_along_axis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.putmask`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.quantile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.quantile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.rad2deg`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.rad2deg`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.radians`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.radians`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ravel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.ravel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.ravel_multi_index`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.real`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.real`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.real_if_close`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.reciprocal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.reciprocal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.remainder`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.remainder`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.repeat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.repeat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.require`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.reshape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.reshape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.resize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.resize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.result_type`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.right_shift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.right_shift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.rint`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.rint`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.roll`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.rollaxis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.rollaxis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.roots`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.rot90`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.round_`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.save`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.savetxt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.savez`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.savez_compressed`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sctype2char`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.searchsorted`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.select`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.set_printoptions`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.set_printoptions` (*alias of* :obj:`numpy.set_printoptions`)"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.set_string_function`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.setbufsize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.setdiff1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.seterr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.seterr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.seterrcall`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.seterrobj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.setxor1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.shape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.shape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.shares_memory`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.show_config`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sign`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sign`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.signbit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.signbit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sinc`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sinh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sinh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sort_complex`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.source`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.spacing`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.spacing`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.split`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sqrt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sqrt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.square`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.square`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.squeeze`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.squeeze`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.stack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.stack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.std`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.std`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.subtract`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.subtract`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.sum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.sum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.swapaxes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.take`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.take`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.take_along_axis`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.tan`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tanh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.tanh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tensordot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.tile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.trace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.transpose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.transpose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.trapz`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tri`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tril`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tril_indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.tril_indices_from`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.trim_zeros`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.triu`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.triu_indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.triu_indices_from`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.true_divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.true_divide`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.trunc`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.trunc`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.typename`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.union1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.unique`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.unpackbits`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.unravel_index`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.unwrap`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.vander`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.var`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.var`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.vdot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.vsplit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.vstack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.vstack`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.where`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.where`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.who`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.zeros`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.zeros`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.zeros_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.zeros_like`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:392
+msgid "Multi-Dimensional Array"
+msgstr "多次元配列"
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.all`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.all`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.any`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.any`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.argmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.argmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.argmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.argmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.argpartition`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.argsort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.argsort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.astype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.astype`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.byteswap`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.choose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.clip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.compress`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.conj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.conj`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.conjugate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.conjugate`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.copy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.copy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.cumprod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.cumsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.cumsum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.dot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.dot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.dump`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.dumps`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.fill`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.fill`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.flatten`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.flatten`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.getfield`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.item`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.itemset`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.mean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.mean`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.newbyteorder`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.partition`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.prod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.prod`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.ptp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.ptp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.put`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.ravel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.ravel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.repeat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.repeat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.reshape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.reshape`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.resize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.resize`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.searchsorted`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.setfield`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.setflags`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.sort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.sort`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.squeeze`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.squeeze`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.std`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.std`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.sum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.sum`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.swapaxes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.take`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.take`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.tobytes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.tobytes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.tofile`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.tolist`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.tolist`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.tostring`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.trace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.transpose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.transpose`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.var`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.var`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.ndarray.view`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.view`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:458
+msgid "Linear Algebra"
+msgstr "線形代数"
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.cholesky`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.cholesky`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.cond`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.det`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.eig`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.eig`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.eigh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.eigh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.eigvals`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.eigvals`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.eigvalsh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.eigvalsh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.inv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.inv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.lstsq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.lstsq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.matrix_power`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.matrix_rank`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.multi_dot`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.norm`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.norm`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.pinv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.qr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.qr`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.slogdet`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.solve`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.solve`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.svd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.linalg.svd`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.tensorinv`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.linalg.tensorsolve`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:490
+msgid "Discrete Fourier Transform"
+msgstr "離散フーリエ変換"
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.fft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.fft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.fft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.fft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.fftfreq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.fftfreq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.fftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.fftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.fftshift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.fftshift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.hfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.hfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.ifft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.ifft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.ifft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.ifft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.ifftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.ifftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.ifftshift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.ifftshift`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.ihfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.ihfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.irfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.irfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.irfft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.irfft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.irfftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.irfftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.rfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.rfft`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.rfft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.rfft2`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.rfftfreq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.rfftfreq`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.fft.rfftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fft.rfftn`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:520
+msgid "Random Sampling"
+msgstr "乱数生成"
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.beta`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.binomial`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.binomial`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.bytes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.bytes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.chisquare`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.choice`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.dirichlet`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.exponential`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.exponential`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.f`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.gamma`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.gamma`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.geometric`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.geometric`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.gumbel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.gumbel`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.hypergeometric`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.integers`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.integers`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.laplace`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.logistic`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.logistic`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.lognormal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.lognormal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.logseries`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.multinomial`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.multivariate_normal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.negative_binomial`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.noncentral_chisquare`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.noncentral_f`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.normal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.normal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.pareto`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.permutation`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.permutation`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.poisson`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.poisson`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.power`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.random`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.random`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.rayleigh`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.shuffle`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.shuffle`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.standard_cauchy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.standard_cauchy`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.standard_exponential`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.standard_exponential`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.standard_gamma`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.standard_gamma`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.standard_normal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.standard_normal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.standard_t`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.triangular`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.uniform`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.uniform`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.vonmises`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.wald`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.weibull`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.random.Generator.weibull`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.zipf`"
+msgstr ""
+
+#~ msgid ":obj:`nlcpy.divmod`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.frexp`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.gcd`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.geterrcall`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.isnat`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.lcm`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.modf`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.seterrcall`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.swapaxes`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.trim_zeros`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.unique`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.abs`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.add_docstring`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.add_newdoc`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.add_newdoc_ufunc`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.alen`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.alltrue`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.bitwise_not`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.compare_chararrays`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.cumproduct`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.fastCopyAndTranspose`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.fv`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.get_array_wrap`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.int_asbuffer`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.ipmt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.irr`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.iterable`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.loads`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.mafromtxt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.max`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.min`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.mirr`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.ndfromtxt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.ndim`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.nper`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.npv`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.pmt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.ppmt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.product`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.pv`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.rank`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.rate`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.recfromcsv`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.recfromtxt`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.round`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.row_stack`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.safe_eval`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.set_numeric_ops`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.size`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.sometrue`"
+#~ msgstr ""
+
+#~ msgid ":meth:`numpy.ndarray.max`"
+#~ msgstr ""
+
+#~ msgid ":meth:`nlcpy.ndarray.max`"
+#~ msgstr ""
+
+#~ msgid ":meth:`numpy.ndarray.min`"
+#~ msgstr ""
+
+#~ msgid ":meth:`nlcpy.ndarray.min`"
+#~ msgstr ""
+
+#~ msgid ":meth:`numpy.ndarray.round`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.fft.register_func`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.fft.restore_all`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.fft.restore_func`"
+#~ msgstr ""
+

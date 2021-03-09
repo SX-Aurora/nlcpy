@@ -17,6 +17,7 @@ from nlcpy.core.searching import argmax  # NOQA
 from nlcpy.core.searching import argmin  # NOQA
 from nlcpy.core.searching import nonzero  # NOQA
 
+from nlcpy.statistics.order import ptp # NOQA
 from nlcpy.statistics.average import mean # NOQA
 from nlcpy.statistics.average import var # NOQA
 from nlcpy.statistics.average import std # NOQA

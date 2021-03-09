@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,9 @@ from nlcpy.random import generator
 def binomial(n, p, size=None):
     """This function has the same `nlcpy.random.RandomState.binomial`
 
-    See Also:
-        `nlcpy.random.RandomState.binomial` : Draws samples from a binomial distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.binomial : Draws samples from a binomial distribution.
 
     """
     rs = generator._get_rand()
@@ -96,9 +97,10 @@ def binomial(n, p, size=None):
 def exponential(scale, size=None):
     """This function has the same `nlcpy.random.RandomState.exponential`
 
-    See Also:
-        `nlcpy.random.RandomState.exponential` : Draws samples from an exponential
-            distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.exponential : Draws samples from an exponential
+        distribution.
 
     """
     rs = generator._get_rand()
@@ -108,8 +110,9 @@ def exponential(scale, size=None):
 def gamma(shape, scale=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.gamma`
 
-    See Also:
-        `nlcpy.random.RandomState.gamma` : Draws samples from a Gamma distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.gamma : Draws samples from a Gamma distribution.
 
     """
     rs = generator._get_rand()
@@ -119,9 +122,9 @@ def gamma(shape, scale=1.0, size=None):
 def geometric(p, size=None):
     """This function has the same `nlcpy.random.RandomState.geometric`
 
-    See Also:
-        `nlcpy.random.RandomState.geometric` : Draws samples from a geometric
-            distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.geometric : Draws samples from a geometric distribution.
 
     """
     rs = generator._get_rand()
@@ -131,8 +134,9 @@ def geometric(p, size=None):
 def gumbel(loc=0.0, scale=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.gumbel`
 
-    See Also:
-        `nlcpy.random.RandomState.gumbel` : Draws samples from a Gumbel distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.gumbel : Draws samples from a Gumbel distribution.
 
     """
     rs = generator._get_rand()
@@ -142,8 +146,9 @@ def gumbel(loc=0.0, scale=1.0, size=None):
 def logistic(loc=0.0, scale=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.logistic`
 
-    See Also:
-        `nlcpy.random.RandomState.logistic` : Draws samples from a logistic distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.logistic : Draws samples from a logistic distribution.
 
     """
     rs = generator._get_rand()
@@ -153,9 +158,9 @@ def logistic(loc=0.0, scale=1.0, size=None):
 def lognormal(mean=0.0, sigma=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.lognormal`
 
-    See Also:
-        `nlcpy.random.RandomState.lognormal` : Draws samples from a log-normal
-            distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.lognormal : Draws samples from a log-normal distribution.
 
     """
     rs = generator._get_rand()
@@ -165,9 +170,10 @@ def lognormal(mean=0.0, sigma=1.0, size=None):
 def normal(loc=0.0, scale=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.normal`
 
-    See Also:
-        generator.RandomState.normal : Draws random samples from a normal (Gaussian)
-            distribution.
+    See Also
+    --------
+    generator.RandomState.normal : Draws random samples from a normal (Gaussian)
+        distribution.
 
     """
     rs = generator._get_rand()
@@ -177,8 +183,9 @@ def normal(loc=0.0, scale=1.0, size=None):
 def poisson(lam=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.poisson`
 
-    See Also:
-        `nlcpy.random.RandomState.poisson` : Draws samples from a Poisson distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.poisson : Draws samples from a Poisson distribution.
 
     """
     rs = generator._get_rand()
@@ -188,9 +195,10 @@ def poisson(lam=1.0, size=None):
 def standard_cauchy(size=None):
     """This function has the same `nlcpy.random.RandomState.standard_cauchy`
 
-    See Also:
-        `nlcpy.random.RandomState.standard_cauchy` : Draws samples from a standard Cauchy
-            distribution with mode = 0.
+    See Also
+    --------
+    nlcpy.random.RandomState.standard_cauchy : Draws samples from a standard Cauchy
+        distribution with mode = 0.
 
     """
     rs = generator._get_rand()
@@ -200,9 +208,10 @@ def standard_cauchy(size=None):
 def standard_exponential(size=None):
     """This function has the same `nlcpy.random.RandomState.standard_exponential`
 
-    See Also:
-        `nlcpy.random.RandomState.standard_exponential` : Draws samples from a standard
-            exponential distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.standard_exponential : Draws samples from a standard
+        exponential distribution.
 
     """
     rs = generator._get_rand()
@@ -212,9 +221,10 @@ def standard_exponential(size=None):
 def standard_gamma(shape, size=None):
     """This function has the same `nlcpy.random.RandomState.standard_gamma`
 
-    See Also:
-        `nlcpy.random.RandomState.standard_gamma` : Draws samples from a standard Gamma
-            distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.standard_gamma : Draws samples from a standard Gamma
+        distribution.
 
     """
     rs = generator._get_rand()
@@ -224,9 +234,10 @@ def standard_gamma(shape, size=None):
 def standard_normal(size=None):
     """This function has the same `nlcpy.random.RandomState.standard_normal`
 
-    See Also:
-        `nlcpy.random.RandomState.standard_normal` : Draws samples from a standard Normal
-            distribution (mean=0, stdev=1).
+    See Also
+    --------
+    nlcpy.random.RandomState.standard_normal : Draws samples from a standard Normal
+        distribution (mean=0, stdev=1).
 
     """
     rs = generator._get_rand()
@@ -236,8 +247,9 @@ def standard_normal(size=None):
 def uniform(low=0.0, high=1.0, size=None):
     """This function has the same `nlcpy.random.RandomState.uniform`
 
-    See Also:
-        `nlcpy.random.RandomState.uniform` : Draws samples from a uniform distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.uniform : Draws samples from a uniform distribution.
 
     """
     rs = generator._get_rand()
@@ -247,8 +259,9 @@ def uniform(low=0.0, high=1.0, size=None):
 def weibull(a, size=None):
     """This function has the same `nlcpy.random.RandomState.weibull`
 
-    See Also:
-        `nlcpy.random.RandomState.weibull` : Draws samples from a Weibull distribution.
+    See Also
+    --------
+    nlcpy.random.RandomState.weibull : Draws samples from a Weibull distribution.
 
     """
     rs = generator._get_rand()

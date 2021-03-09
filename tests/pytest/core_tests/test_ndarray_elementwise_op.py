@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -167,9 +167,10 @@ class TestArrayElementwiseOp(unittest.TestCase):
     def test_ne_scalar(self):
         self.check_array_scalar_op(operator.ne)
 
+    @testing.for_orders('CF', name='order_in')
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
     @testing.numpy_nlcpy_allclose(accept_error=TypeError)
-    def check_array_array_op(self, op, xp, x_type, y_type,
+    def check_array_array_op(self, op, xp, x_type, y_type, order_in,
                              no_bool=False, no_complex=False):
         x_dtype = numpy.dtype(x_type)
         y_dtype = numpy.dtype(y_type)
@@ -177,8 +178,8 @@ class TestArrayElementwiseOp(unittest.TestCase):
             return xp.array(True)
         if no_complex and (x_dtype.kind == 'c' or y_dtype.kind == 'c'):
             return xp.array(True)
-        a = xp.array([[1, 2, 3], [4, 5, 6]], x_type)
-        b = xp.array([[6, 5, 4], [3, 2, 1]], y_type)
+        a = xp.array([[1, 2, 3], [4, 5, 6]], x_type, order=order_in)
+        b = xp.array([[6, 5, 4], [3, 2, 1]], y_type, order=order_in)
         return op(a, b)
 
     def test_add_array(self):
@@ -215,7 +216,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         with testing.NumpyError(divide='ignore'):
             self.check_array_array_op(operator.floordiv, no_complex=True)
 
-    @testing.with_requires('numpy>=1.10')
+    @testing.with_requires('numpy>=1.10', 'numpy<1.18')
     def test_ifloordiv_array(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")
@@ -302,7 +303,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         with testing.NumpyError(divide='ignore'):
             self.check_array_broadcasted_op(operator.floordiv, no_complex=True)
 
-    @testing.with_requires('numpy>=1.10')
+    @testing.with_requires('numpy>=1.10', 'numpy<1.18')
     def test_broadcasted_ifloordiv(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,20 @@ import itertools
 from nlcpy.testing import ufunc
 
 
-def _recreate_array_or_scalar(op, in1):
+float16_op = (
+    'divide',
+    'true_divide',
+    'logaddexp',
+    'logaddexp2',
+    'arctan2',
+    'hypot',
+    'copysign',
+    'heaviside',
+    'nextafter',
+)
+
+
+def _recreate_array_or_scalar(op, in1, ufunc_name=""):
     if op == 'reciprocal':
         if isinstance(in1, numpy.ndarray):
             in1[in1 == 0] = 1
@@ -73,14 +86,114 @@ def _recreate_array_or_scalar(op, in1):
             elif isinstance(in1, complex):
                 in1 = complex(0.9, in1.imag) if abs(in1.real) >= 0 else in1
 
+    if ufunc_name in ('reduce', 'reduceat', 'accumulate'):
+        if op in ('power', 'multiply', 'left_shift', 'right_shift'):
+            if op == 'power':
+                maxval = 2
+            elif op == 'multiply':
+                maxval = 10
+            else:
+                maxval = 16
+            if isinstance(in1, numpy.ndarray):
+                if in1.dtype.kind == 'c':
+                    in1 = numpy.where(
+                        abs(in1.real) > maxval, maxval + in1.imag * 1.0j, in1)
+                    in1 = numpy.where(
+                        abs(in1.imag) > maxval, in1.real + maxval * 1.0j, in1)
+                else:
+                    in1[in1 > maxval] = maxval
+            else:
+                if isinstance(in1, complex):
+                    if abs(in1.real) > maxval:
+                        in1 = complex(maxval, in1.real)
+                    if abs(in1.imag) > maxval:
+                        in1 = complex(in1.real, maxval)
+                else:
+                    in1 = maxval
+        if op in ('power', 'divide', 'true_divide', 'floor_divide',
+                  'mod', 'fmod', 'remainder', 'nextafter'):
+            if isinstance(in1, numpy.ndarray):
+                if in1.dtype.kind == 'c':
+                    in1 = numpy.where(abs(in1.real) < 1, 1 + in1.imag * 1.0j, in1)
+                    in1 = numpy.where(abs(in1.imag) < 1, in1.real + 1.0j, in1)
+                else:
+                    in1[in1 < 1] = 1
+            else:
+                if isinstance(in1, complex):
+                    if abs(in1.real) < 1:
+                        in1 = complex(1, in1.real)
+                    if abs(in1.imag) < 1:
+                        in1 = complex(in1.real, 1)
+                else:
+                    in1 = 1
     return in1
 
 
+def _create_out_array(shape, order, dtype, ufunc_name, mode, axis=None, indices=None,
+                      keepdims=False, is_broadcast=False):
+    if ufunc_name in ('reduce', 'reduceat'):
+        _shape = (shape,) if numpy.isscalar(shape) else shape
+        if axis is None:
+            _axis = range(len(shape))
+        else:
+            _axis = [axis, ] if numpy.isscalar(axis) else list(axis)
+            for i in range(len(_axis)):
+                if _axis[i] < 0:
+                    _axis[i] += len(shape)
+        out_shape = []
+        for i in range(len(shape)):
+            if i in _axis:
+                if keepdims:
+                    out_shape.append(1)
+                elif ufunc_name == 'reduceat':
+                    out_shape.append(len(indices))
+            else:
+                out_shape.append(_shape[i])
+    else:
+        out_shape = shape
+
+    if is_broadcast:
+        if ufunc_name in ('reduceat', 'accumulate'):
+            out_shape = tuple(out_shape) + (2,)
+        else:
+            out_shape = (2,) + out_shape
+
+    return numpy.zeros(shape=out_shape, order=order, dtype=dtype)
+
+
+def _count_number_of_calculation(ufunc_name, shape, axis, indices=None):
+    if ufunc_name == 'accumulate':
+        _axis = axis + len(shape) if axis < 0 else axis
+        return shape[axis] - 1
+
+    if ufunc_name == 'reduce':
+        if numpy.isscalar(axis):
+            _axis = axis + len(shape) if axis < 0 else axis
+            return shape[_axis]
+
+        n_calc = 1
+        if axis is None:
+            axis = range(len(shape))
+        for i in range(len(axis)):
+            _axis = axis[i] + len(shape) if axis[i] < 0 else axis[i]
+            n_calc *= shape[_axis]
+        return n_calc
+
+    if ufunc_name == 'reduceat':
+        _axis = axis + len(shape) if axis < 0 else axis
+        n_calc = shape[axis] - indices[-1] - 1
+        for i in range(1, len(indices)):
+            n_calc = max(n_calc, indices[i] - indices[i - 1] - 1)
+        return n_calc
+
+    return 1
+
+
 def _check_unary_no_out_no_where_no_dtype(
-        self, args, kw, impl, name_xp, name_in1, op, minval, maxval,
-        shape, order_x, dtype_x, mode):
+        self, args, kw, impl, name_xp, name_in1, name_axis, name_indices, op,
+        minval, maxval, shape, order_x, dtype_x, mode, ufunc_name, axes, indices):
     if mode == 'array':
-        param = itertools.product(shape, order_x, dtype_x)
+        param = itertools.product(shape, order_x, dtype_x, axes, indices)
     elif mode == 'scalar':
         param = itertools.product(dtype_x)
     else:
@@ -88,12 +201,21 @@ def _check_unary_no_out_no_where_no_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
             worst_dtype = in1.dtype
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[3], p[4])
+            if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
+                kw[name_axis] = p[3]
+                if ufunc_name == 'reduceat':
+                    kw[name_indices] = p[4]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[0], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
             worst_dtype = numpy.dtype(p[0])
+            n_calc = 1
+
+        if p[0] == numpy.bool and op in float16_op:
+            worst_dtype = ufunc._guess_worst_dtype((worst_dtype, numpy.dtype('f4')))
 
         kw[name_in1] = in1
 
@@ -103,14 +225,16 @@ def _check_unary_no_out_no_where_no_dtype(
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
-                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1)
+                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1,
+                    ufunc_name=ufunc_name, n_calc=n_calc)
 
 
 def _check_unary_no_out_no_where_with_dtype(
-        self, args, kw, impl, name_xp, name_in1, name_dtype, op,
-        minval, maxval, shape, order_x, dtype_x, dtype_arg, mode):
+        self, args, kw, impl, name_xp, name_in1, name_axis, name_indices,
+        name_dtype, op, minval, maxval, shape, order_x, dtype_x, dtype_arg,
+        mode, ufunc_name, axes, indices):
     if mode == 'array':
-        param = itertools.product(shape, order_x, dtype_x, dtype_arg)
+        param = itertools.product(shape, order_x, dtype_x, dtype_arg, axes, indices)
     elif mode == 'scalar':
         param = itertools.product(dtype_x, dtype_arg)
     else:
@@ -118,14 +242,26 @@ def _check_unary_no_out_no_where_with_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
             dtype = numpy.dtype(p[3])
-            worst_dtype = ufunc._guess_worst_dtype((in1.dtype, dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype((in1.dtype, dtype))
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[4], p[5])
+            if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
+                kw[name_axis] = p[4]
+                if ufunc_name == 'reduceat':
+                    kw[name_indices] = p[5]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[0], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
             dtype = numpy.dtype(p[1])
-            worst_dtype = ufunc._guess_worst_dtype((numpy.dtype(p[0]), dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype((numpy.dtype(p[0]), dtype))
+            n_calc = 1
 
         kw[name_in1] = in1
         kw[name_dtype] = dtype
@@ -136,15 +272,17 @@ def _check_unary_no_out_no_where_with_dtype(
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
-                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1, dtype=dtype)
+                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1, dtype=dtype,
+                    ufunc_name=ufunc_name, n_calc=n_calc)
 
 
 def _check_unary_with_out_no_where_no_dtype(
-        self, args, kw, impl, name_xp, name_in1, name_out, op,
-        minval, maxval, shape, order_x, order_out, dtype_x, dtype_out,
-        mode, is_broadcast):
+        self, args, kw, impl, name_xp, name_in1, name_axis, name_indices,
+        name_out, op, minval, maxval, shape, order_x, order_out, dtype_x,
+        dtype_out, mode, is_broadcast, ufunc_name, axes, indices, keepdims):
     if mode == 'array':
-        param = itertools.product(shape, order_x, order_out, dtype_x, dtype_out)
+        param = itertools.product(
+            shape, order_x, order_out, dtype_x, dtype_out, axes, indices)
     elif mode == 'scalar':
         param = itertools.product(shape, order_out, dtype_x, dtype_out)
     else:
@@ -152,19 +290,24 @@ def _check_unary_with_out_no_where_no_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[2], dtype=p[4])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[2], p[4], ufunc_name, mode,
+                axis=p[5], indices=p[6], keepdims=keepdims, is_broadcast=is_broadcast)
             worst_dtype = ufunc._guess_worst_dtype((in1.dtype, out.dtype))
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[5], p[6])
+            if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
+                kw[name_axis] = p[5]
+                if ufunc_name == 'reduceat':
+                    kw[name_indices] = p[6]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[1], dtype=p[3])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[1], p[3], ufunc_name, mode, is_broadcast=is_broadcast)
             worst_dtype = ufunc._guess_worst_dtype(
                 (numpy.dtype(p[2]), out.dtype))
-
-        # expand shape for broadcast
-        if is_broadcast:
-            out = numpy.resize(out, ((2,) + out.shape))
+            n_calc = 1
 
         kw[name_in1] = in1
         kw[name_out] = out
@@ -175,15 +318,17 @@ def _check_unary_with_out_no_where_no_dtype(
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
-                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1, out=out)
+                    op, worst_dtype, nlcpy_r, numpy_r, in1=in1, out=out,
+                    ufunc_name=ufunc_name, n_calc=n_calc)
 
 
 def _check_unary_with_out_no_where_with_dtype(
-        self, args, kw, impl, name_xp, name_in1, name_out, name_dtype, op,
-        minval, maxval, shape, order_x, order_out, dtype_x, dtype_out, dtype_arg, mode):
+        self, args, kw, impl, name_xp, name_in1, name_axis, name_indices, name_out,
+        name_dtype, op, minval, maxval, shape, order_x, order_out, dtype_x, dtype_out,
+        dtype_arg, mode, ufunc_name, axes, indices, keepdims):
     if mode == 'array':
         param = itertools.product(
-            shape, order_x, order_out, dtype_x, dtype_out, dtype_arg)
+            shape, order_x, order_out, dtype_x, dtype_out, dtype_arg, axes, indices)
     elif mode == 'scalar':
         param = itertools.product(shape, order_out, dtype_x, dtype_out, dtype_arg)
     else:
@@ -191,18 +336,34 @@ def _check_unary_with_out_no_where_with_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[2], dtype=p[4])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[2], p[4], ufunc_name, mode,
+                axis=p[6], indices=p[7], keepdims=keepdims)
             dtype = numpy.dtype(p[5])
-            worst_dtype = ufunc._guess_worst_dtype(
-                (in1.dtype, out.dtype, dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (in1.dtype, out.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (in1.dtype, out.dtype, dtype))
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[6], p[7])
+            if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
+                kw[name_axis] = p[6]
+                if ufunc_name == 'reduceat':
+                    kw[name_indices] = p[7]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[1], dtype=p[3])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(p[0], p[1], p[3], ufunc_name, mode)
             dtype = numpy.dtype(p[4])
-            worst_dtype = ufunc._guess_worst_dtype(
-                (numpy.dtype(p[2]), out.dtype, dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (numpy.dtype(p[2]), out.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (numpy.dtype(p[2]), out.dtype, dtype))
+            n_calc = 1
 
         kw[name_in1] = in1
         kw[name_out] = out
@@ -220,7 +381,10 @@ def _check_unary_with_out_no_where_with_dtype(
                     numpy_r,
                     in1=in1,
                     out=out,
-                    dtype=dtype)
+                    dtype=dtype,
+                    ufunc_name=ufunc_name,
+                    n_calc=n_calc
+                )
 
 
 def _check_unary_with_out_with_where_no_dtype(
@@ -230,6 +394,7 @@ def _check_unary_with_out_with_where_no_dtype(
         impl,
         name_xp,
         name_in1,
+        name_axis,
         name_out,
         name_where,
         op,
@@ -242,10 +407,13 @@ def _check_unary_with_out_with_where_no_dtype(
         dtype_x,
         dtype_out,
         mode,
-        is_broadcast):
+        is_broadcast,
+        ufunc_name,
+        axes,
+        keepdims):
     if mode == 'array':
         param = itertools.product(
-            shape, order_x, order_out, order_where, dtype_x, dtype_out)
+            shape, order_x, order_out, order_where, dtype_x, dtype_out, axes)
     elif mode == 'scalar':
         param = itertools.product(shape, order_out, order_where, dtype_x, dtype_out)
     else:
@@ -253,23 +421,29 @@ def _check_unary_with_out_with_where_no_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[4], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[2], dtype=p[5])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[2], p[5], ufunc_name, mode,
+                axis=p[6], keepdims=keepdims, is_broadcast=is_broadcast)
             where = ufunc._create_random_array(
                 p[0], p[3], ufunc.DT_BOOL, minval, maxval)
             worst_dtype = ufunc._guess_worst_dtype((in1.dtype, out.dtype))
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[6])
+            if ufunc_name == 'reduce':
+                kw[name_axis] = p[6]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[1], dtype=p[4])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[1], p[4], ufunc_name, mode, is_broadcast=is_broadcast)
             where = ufunc._create_random_array(
                 p[0], p[2], ufunc.DT_BOOL, minval, maxval)
             worst_dtype = ufunc._guess_worst_dtype(
                 (numpy.dtype(p[3]), out.dtype))
+            n_calc = 1
 
         # expand shape for broadcast
         if is_broadcast:
-            out = numpy.resize(out, ((2,) + out.shape))
             where = numpy.resize(where, ((2,) + where.shape))
 
         kw[name_in1] = in1
@@ -288,13 +462,16 @@ def _check_unary_with_out_with_where_no_dtype(
                     numpy_r,
                     in1=in1,
                     out=out,
-                    where=where)
+                    where=where,
+                    ufunc_name=ufunc_name,
+                    n_calc=n_calc
+                )
 
 
 def _check_unary_with_out_with_where_with_dtype(
-        self, args, kw, impl, name_xp, name_in1, name_out, name_where,
+        self, args, kw, impl, name_xp, name_in1, name_axis, name_out, name_where,
         name_dtype, op, minval, maxval, shape, order_x, order_out, order_where,
-        dtype_x, dtype_out, dtype_arg, mode):
+        dtype_x, dtype_out, dtype_arg, mode, ufunc_name, axes, keepdims):
     if mode == 'array':
         param = itertools.product(
             shape,
@@ -303,7 +480,9 @@ def _check_unary_with_out_with_where_with_dtype(
             order_where,
             dtype_x,
             dtype_out,
-            dtype_arg)
+            dtype_arg,
+            axes,
+        )
     elif mode == 'scalar':
         param = itertools.product(
             shape, order_out, order_where, dtype_x, dtype_out, dtype_arg)
@@ -312,22 +491,35 @@ def _check_unary_with_out_with_where_with_dtype(
     for p in param:
         if mode == 'array':
             in1 = ufunc._create_random_array(p[0], p[1], p[4], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[2], dtype=p[5])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(
+                p[0], p[2], p[5], ufunc_name, mode, axis=p[7], keepdims=keepdims)
             where = ufunc._create_random_array(
                 p[0], p[3], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[6])
-            worst_dtype = ufunc._guess_worst_dtype(
-                (in1.dtype, out.dtype, dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (in1.dtype, out.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (in1.dtype, out.dtype, dtype))
+            n_calc = _count_number_of_calculation(ufunc_name, p[0], p[7])
+            if ufunc_name == 'reduce':
+                kw[name_axis] = p[7]
         elif mode == 'scalar':
             in1 = ufunc._create_random_scalar(p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1)
-            out = numpy.zeros(shape=p[0], order=p[1], dtype=p[4])
+            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            out = _create_out_array(p[0], p[1], p[4], ufunc_name, mode)
             where = ufunc._create_random_array(
                 p[0], p[2], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[5])
-            worst_dtype = ufunc._guess_worst_dtype(
-                (numpy.dtype(p[3]), out.dtype, dtype))
+            if dtype == numpy.bool and op in float16_op:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (in1.dtype, out.dtype, numpy.dtype('f4')))
+            else:
+                worst_dtype = ufunc._guess_worst_dtype(
+                    (numpy.dtype(p[3]), out.dtype, dtype))
+            n_calc = 1
 
         kw[name_in1] = in1
         kw[name_out] = out
@@ -347,4 +539,7 @@ def _check_unary_with_out_with_where_with_dtype(
                     in1=in1,
                     out=out,
                     where=where,
-                    dtype=dtype)
+                    dtype=dtype,
+                    ufunc_name=ufunc_name,
+                    n_calc=n_calc
+                )

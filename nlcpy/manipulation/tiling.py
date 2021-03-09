@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import numpy
+import nlcpy
 from nlcpy.core import core
 from nlcpy.core.core import ndarray, array
 from nlcpy.request import request
@@ -40,58 +41,68 @@ import operator
 def tile(A, reps):
     """Constructs an array by repeating A the number of times given by reps.
 
-    If reps has length d, the result will have dimension of max(d, A.ndim).
-    If A.ndim , A is promoted to be d-dimensional by prepending new axes. So a shape (3,)
-    array is promoted to (1, 3) for 2-D replication, or shape (1, 1, 3) for 3-D
-    replication. If this is not the desired behavior, promote A to d-dimensions manually
-    before calling this function.
-    If A.ndim > d, reps is promoted to A.ndim by pre-pending 1's to it. Thus for an A of
-    shape (2, 3, 4, 5), a reps of (2, 2) is treated as (1, 1, 2, 2).
+    If *reps* has length ``d``, the result will have dimension of ``max(d, A.ndim)``.
 
-    Args:
-        A : array_like
-            The input array.
-        reps : array_like
-            The number of repetitions of A along each axis.
+    If ``A.ndim < d`` , *A* is promoted to be d-dimensional by prepending new axes.
+    So a shape (3,) array is promoted to (1, 3) for 2-D replication, or shape
+    (1, 1, 3) for 3-D replication.
+    If this is not the desired behavior, promote *A* to d-dimensions
+    manually before calling this function.
 
-    Returns:
-        c : `ndarray`
-            The tiled output array.
+    If ``A.ndim > d``, *reps* is promoted to *A.ndim* by pre-pending 1's to it.
+    Thus for an *A* of shape (2, 3, 4, 5), a *reps* of (2, 2) is treated as
+    (1, 1, 2, 2).
 
-    Note:
-        Although tile may be used for broadcasting, it is strongly recommended to use
-        nlcpy's broadcasting operations and functions.
+    Parameters
+    ----------
+    A : array_like
+        The input array.
+    reps : array_like
+        The number of repetitions of *A* along each axis.
 
-    See Also:
-        dims.broadcast_to : Broadcasts an array to a new shape.
+    Returns
+    -------
+    c : ndarray
+        The tiled output array.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([0, 1, 2])
-        >>> vp.tile(a, 2)
-        array([0, 1, 2, 0, 1, 2])
-        >>> vp.tile(a, (2, 2))
-        array([[0, 1, 2, 0, 1, 2],
-               [0, 1, 2, 0, 1, 2]])
-        >>> vp.tile(a, (2, 1, 2))
-        array([[[0, 1, 2, 0, 1, 2]],
-               [[0, 1, 2, 0, 1, 2]]])
-        >>> b = vp.array([[1, 2], [3, 4]])
-        >>> vp.tile(b, 2)
-        array([[1, 2, 1, 2],
-               [3, 4, 3, 4]])
-        >>> vp.tile(b, (2, 1))
-        array([[1, 2],
-               [3, 4],
-               [1, 2],
-               [3, 4]])
-        >>> c = vp.array([1,2,3,4])
-        >>> vp.tile(c,(4,1))
-        array([[1, 2, 3, 4],
-               [1, 2, 3, 4],
-               [1, 2, 3, 4],
-               [1, 2, 3, 4]])
+    Note
+    ----
 
+    Although tile may be used for broadcasting, it is strongly recommended to use nlcpy's
+    broadcasting operations and functions.
+
+    See Also
+    --------
+    broadcast_to : Broadcasts an array to a new shape.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([0, 1, 2])
+    >>> vp.tile(a, 2)
+    array([0, 1, 2, 0, 1, 2])
+    >>> vp.tile(a, (2, 2))
+    array([[0, 1, 2, 0, 1, 2],
+           [0, 1, 2, 0, 1, 2]])
+    >>> vp.tile(a, (2, 1, 2))
+    array([[[0, 1, 2, 0, 1, 2]],
+    <BLANKLINE>
+           [[0, 1, 2, 0, 1, 2]]])
+    >>> b = vp.array([[1, 2], [3, 4]])
+    >>> vp.tile(b, 2)
+    array([[1, 2, 1, 2],
+           [3, 4, 3, 4]])
+    >>> vp.tile(b, (2, 1))
+    array([[1, 2],
+           [3, 4],
+           [1, 2],
+           [3, 4]])
+    >>> c = vp.array([1,2,3,4])
+    >>> vp.tile(c,(4,1))
+    array([[1, 2, 3, 4],
+           [1, 2, 3, 4],
+           [1, 2, 3, 4],
+           [1, 2, 3, 4]])
     """
 
     if not isinstance(A, ndarray):
@@ -200,3 +211,47 @@ def tile(A, reps):
             (A, ret)
         )
     return ret
+
+
+def repeat(a, repeats, axis=None):
+    """Repeats elements of an array.
+
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+    repeats : int or sequence of ints
+        The number of repetitions for each element. *repeats* is broadcasted to fit the
+        shape of the given axis.
+    axis : int, optional
+        The axis along which to repeat values. By default, use the flattened input
+        array, and return a flat output array.
+
+    Returns
+    -------
+    c : ndarray
+        Output array which has the same shape as a, except along the given axis.
+
+    See Also
+    --------
+    tile : Constructs an array by repeating A the number of times given by reps.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.repeat(3, 4)
+    array([3, 3, 3, 3])
+    >>> x = vp.array([[1, 2], [3, 4]])
+    >>> vp.repeat(x, 2)
+    array([1, 1, 2, 2, 3, 3, 4, 4])
+    >>> vp.repeat(x, 3, axis=1)
+    array([[1, 1, 1, 2, 2, 2],
+           [3, 3, 3, 4, 4, 4]])
+    >>> vp.repeat(x, [1, 2], axis=0)
+    array([[1, 2],
+           [3, 4],
+           [3, 4]])
+
+    """
+    a = nlcpy.asanyarray(a)
+    return a.repeat(repeats, axis)

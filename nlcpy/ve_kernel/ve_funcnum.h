@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -137,9 +137,12 @@ enum ve_funcnum {
     VE_FUNC_COPY             = 0x04001,
     VE_FUNC_EYE              = 0x04002,
     VE_FUNC_LINSPACE         = 0x04003,
+    VE_FUNC_COPY_MASKED      = 0x04004,
     /* manipulation functions */
     VE_FUNC_TILE             = 0x05000,
-
+    VE_FUNC_DELETE           = 0x05001,
+    VE_FUNC_INSERT           = 0x05002,
+    VE_FUNC_REPEAT           = 0x05003,
     /* cblas wrapper functions */
     VE_FUNC_CBLAS_SDOT       = 0x06000,
     VE_FUNC_CBLAS_DDOT       = 0x06001,

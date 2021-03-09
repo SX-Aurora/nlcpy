@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,9 @@ static inline void retrieve_fpe_flags(int32_t *psw)
 {
     __asm__ __volatile__
             ("sfr %%s63\n"
-             "lea %%s62,0x0000003e\n"
-             "and %%0, %%s63, %%s62\n"
+             "and %%0, 0x3e, %%s63\n"
             : "=r" (*psw)
             :
-            : "%s63", "%s62");
+            : "%s63");
 }
 #endif /* FPE_FLAGS_H_INCLUDED */

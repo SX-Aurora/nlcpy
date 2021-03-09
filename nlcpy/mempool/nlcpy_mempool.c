@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 # 
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #     
 #     Redistribution and use in source and binary forms, with or without
@@ -91,14 +91,14 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct
     }
     large = pool->large;
 
-    // create a dictionary (hash table) to get a blocks id from VE address
+    // create a dictionary (hash table) to get a block id from VE address
     const uint64_t maxid = (small->maxid > large->maxid) ? small->maxid : large->maxid;
     pool->hash = nlcpy__mempool_create_hash(EXPAND_RATIO*maxid);
     if (pool->hash == NULL) {
         nlcpy_mempool_free(pool);
         return NULL;
     }
-    //
+
     return pool;
 }
 
@@ -126,17 +126,18 @@ int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
 #endif
     if (iret!=NLCPY_RESULT_OK && iret!=NLCPY_POOL_NOT_USED) return iret;
 
-    if (lid<MAXID) {
+    if (iret==NLCPY_RESULT_OK) {
         // register ve_adr and gid to the hash table.
-        return nlcpy__mempool_append_to_hash(*ve_adr, gid, pool->hash);
+        iret = nlcpy__mempool_append_to_hash(*ve_adr, gid, pool->hash);
     } else {
         // overflow
         iret = veo_alloc_mem(pool->hnd, ve_adr, size);
         if (iret == -1) return NLCPY_OUT_OF_MEMORY;
         if (iret == -2) return NLCPY_INTERNAL_ERROR;
-        return NLCPY_POOL_NOT_USED;
+        iret = NLCPY_POOL_NOT_USED;
     }
 
+    return iret;
 }
 
 
@@ -171,7 +172,7 @@ void nlcpy_mempool_free(mempool_t *pool)
 #if defined(DEBUG)
     fprintf(stderr,"mempool_free\n");
 #endif
-    // The memory pool is allocated in a sort area.
+    // The memory pool is allocated in heap area.
     // So, nothing to do on VE side.
 /*
     if (pool->base != 0) {
@@ -197,6 +198,22 @@ void nlcpy_mempool_free(mempool_t *pool)
 }
 
 
+bool nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
+{
+    mempool_mng_t *mng;
+    if (size<=POOL_THREASHOLD) {
+        mng = pool->small;
+    } else {
+        mng = pool->large;
+    }
+#if defined(DEBUG)
+    bool iret = nlcpy__mempool_is_available(mng, size);
+    size_t capa = nlcpy__mempool_get_capasity(mng);
+//    printf("capa = %llu\n",capa);
+    return iret;
+#endif
+    return nlcpy__mempool_is_available(mng, size);
+}
 // *************************************************************************
 //  Driver Functions
 // *************************************************************************
@@ -230,16 +247,25 @@ mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, uint64_t li
     }
 
     //
+#if ! defined(POOL_EXTENTON)
+    mng->buff        = (uint64_t *)malloc(sizeof(uint64_t)*mng->maxid*4);
+#else
     mng->buff        = (uint64_t *)malloc(sizeof(uint64_t)*mng->maxid*5);
+#endif
     if (mng->buff == NULL) {
         nlcpy__mempool_free_mng(mng);
         return NULL;
     }
     mng->ptrs        = mng->buff;
     mng->bytes       = mng->buff + mng->maxid;
+#if ! defined(POOL_EXTENTON)
+    ll->next         = mng->buff + mng->maxid * 2;
+    ll->prev         = mng->buff + mng->maxid * 3;
+#else
     mng->esegs       = mng->buff + mng->maxid * 2;
     ll->next         = mng->buff + mng->maxid * 3;
     ll->prev         = mng->buff + mng->maxid * 4;
+#endif
     ll->head         = END;
     ll->tail         = END;
     //
@@ -287,8 +313,10 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
         // save pointer and size of id-th
         mng->ptrs[new_id]  = mng->p;
         mng->bytes[new_id] = asize;
+#if defined(POOL_EXTENTON)
         mng->esegs[new_id] = mng->maxp;
-        mng->dora[new_id]  = true; // the id-th blocks is newly assigned.
+#endif
+        mng->dora[new_id]  = true; // the id-th block is newly assigned.
 
         *id     = new_id;
         *ve_adr = (uint64_t)mng->p;
@@ -297,14 +325,16 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
         mng->p = new_p;
     
     } else {
+#if 0
         //
-        // We have to look for a sort blocks whose size is enough.
-        // First, integrages dead blocks
+        // We have to look for a block whose size is enough.
+        // First, merge dead blocks
         if (!mng->merged) {
             iret = nlcpy__mempool_merge_dead_blocks(mng);
             if (iret) return iret;
             mng->merged = true; // merged sort blocks
         }
+#endif
 
         // Next, check the size of sort blocks
         if (sort->num>0 && sort->bytes[0] >= asize) {
@@ -313,7 +343,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
             *id        = sort->ids[0];
             uint64_t s = sort->bytes[0];
             if (mng->dora[*id]) {
-                fprintf(stderr,"NLCPy internal error: the %ld-th blocks has already been reserved.\n",*id);
+                fprintf(stderr,"NLCPy internal error: the %ld-th block has already been reserved.\n",*id);
                 return NLCPY_INTERNAL_ERROR;
             }
             iret = nlcpy__mempool_extract_from_sort(sort);    if (iret) return iret;
@@ -334,7 +364,9 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
                 // register as a new block
                 mng->ptrs[new_id]  = mng->ptrs[*id] + asize;
                 mng->dora[new_id]  = false;
+#if defined(POOL_EXTENTON)
                 mng->esegs[new_id] = mng->esegs[*id];
+#endif
                 mng->bytes[new_id] = s - asize;
                 iret = nlcpy__mempool_register_to_sort(new_id, mng->bytes[new_id], mng->sort); if (iret) return iret;
             }
@@ -342,18 +374,27 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
             mng->dora[*id] = true; // revive the id-th blocks
 
         } else {
-            // Unfortunately, we could not find a room, have to extend the pool.
             new_p = mng->p + asize;
-            while (new_p > mng->maxp) {
+            if (new_p > mng->maxp) {
+#if ! defined(POOL_EXTENTON)
+                // fprintf(stderr,"NLCPy internal error: the memory pool size is not enogh.\n");
+                // return NLCPY_INTERNAL_ERROR;
+                return NLCPY_POOL_NOT_USED;
+#else
+                // Unfortunately, we could not find a room, have to extend the pool.
                 // extend memory because mng size is overflow
-                size_t size_new = ( asize > mng->capa ) ?  asize*EXPAND_RATIO : mng->capa;
-                       size_new = ( mng->capa > mng->tot_memsize * 0.4) ? asize : size_new;
-                iret = nlcpy__mempool_extend_pool(size_new, mng);
+                size_t extended_size = ( asize > mng->capa ) ?  asize*EXPAND_RATIO : mng->capa;
+                       // Is the extened size bigger than total_memsize * THREASH_RATIO?
+                       // If so, heap is extended just by asize.
+                       extended_size = ( mng->capa > mng->tot_memsize * THREASH_RATIO) ? asize : extended_size;
+                       //extended_size = ( extended_size > 1*1024*1024*1024 ) ? asize : extended_size;
+                iret = nlcpy__mempool_extend_pool(extended_size, mng);
                 if (iret) return iret;
                 new_p = mng->p + asize;
+#endif
             }
 
-            // new blocks is assigned.
+            // a new block is assigned.
             uint64_t new_id = mng->id++;
             if (new_id >= mng->maxid) {
                 // extend memory because the number of id is overflow
@@ -368,8 +409,10 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
             // save pointer and size of id-th
             mng->ptrs[new_id]  = mng->p;
             mng->bytes[new_id] = asize;
+#if defined(POOL_EXTENTON)
             mng->esegs[new_id] = mng->maxp;
-            mng->dora[new_id]  = true; // the id-th blocks is newly assigned.
+#endif
+            mng->dora[new_id]  = true; // the id-th block is newly assigned.
 
             *id     = new_id;
             *ve_adr = mng->p;
@@ -386,22 +429,34 @@ int nlcpy__mempool_release(mempool_mng_t *mng, const uint64_t id)
 {
     uint64_t size = mng->bytes[id];
 
-    if (!mng->dora[id]) {
-        fprintf(stderr,"NLCPy internal error: the %ld-th blocks is not reserved.\n",id);
+    if ( id==END ) {
+        fprintf(stderr,"NLCPy internal error: Invalid ID is detected. ( ID = %ld )\n",id);
+        return NLCPY_INTERNAL_ERROR;
+    }
+    if ( !mng->dora[id] ) {
+        fprintf(stderr,"NLCPy internal error: the %ld-th block is not reserved.\n",id);
         return NLCPY_INTERNAL_ERROR;
     }
 
-    if ( id!=END ){
-        const uint64_t *next = mng->blocks->next;
-        const uint64_t *prev = mng->blocks->prev;
-        if ( next[id]!=END && mng->dora[next[id]] ) mng->merged = false; // it is possible to merge dead blocks.
-        if ( prev[id]!=END && mng->dora[prev[id]] ) mng->merged = false; // it is possible to merge dead blocks.
-    } 
+    int iret = nlcpy__mempool_register_to_sort(id, size, mng->sort);
+    if (iret) return iret;
 
-    int iret;
-    iret = nlcpy__mempool_register_to_sort(id, size, mng->sort);
+    mng->dora[id] = false; // the id-th block is died.
 
-    mng->dora[id] = false; // the id-th blocks is sort.
+    const uint64_t *next = mng->blocks->next;
+    const uint64_t *prev = mng->blocks->prev;
+#if 1
+    if ( next[id]!=END && !mng->dora[next[id]] ) mng->merged = false; // it is possible to merge dead blocks.
+    if ( prev[id]!=END && !mng->dora[prev[id]] ) mng->merged = false; // it is possible to merge dead blocks.
+
+#else
+    // Merge dead blocks
+    if (!mng->merged) {
+        iret = nlcpy__mempool_merge_dead_blocks(mng);
+        if (iret) return iret;
+        mng->merged = true; // sort blocks are merged
+    }
+#endif
     return iret;
 }
 
@@ -474,6 +529,7 @@ hash_t *nlcpy__mempool_create_hash(const size_t n)
 // *************************************************************************
 //  Update Functions (work routine)
 // *************************************************************************
+#if defined(POOL_EXTENTON)
 int nlcpy__mempool_extend_pool(const size_t n, mempool_mng_t *mng)
 {
     int iret;
@@ -513,13 +569,18 @@ int nlcpy__mempool_extend_pool(const size_t n, mempool_mng_t *mng)
 
     return NLCPY_RESULT_OK;
 }
+#endif
 
 
 int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
 {
     assert(n > mng->maxid);
 
+#if ! defined(POOL_EXTENTON)
+    uint64_t *buff = (uint64_t *)malloc(sizeof(uint64_t)*n*4);
+#else
     uint64_t *buff = (uint64_t *)malloc(sizeof(uint64_t)*n*5);
+#endif
     if (buff == NULL) {
         return NLCPY_OUT_OF_MEMORY;
     }
@@ -530,14 +591,21 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
 
     uint64_t *ptrs  = buff; 
     uint64_t *bytes = buff + n; 
+#if ! defined(POOL_EXTENTON)
+    uint64_t *next  = buff + n * 2; 
+    uint64_t *prev  = buff + n * 3; 
+#else
     uint64_t *esegs = buff + n * 2; 
     uint64_t *next  = buff + n * 3; 
     uint64_t *prev  = buff + n * 4; 
+#endif
 
     link_t *ll = mng->blocks;
     memcpy(ptrs,  mng->ptrs,  sizeof(uint64_t)*(size_t)mng->maxid);
     memcpy(bytes, mng->bytes, sizeof(uint64_t)*(size_t)mng->maxid);
+#if defined(POOL_EXTENTON)
     memcpy(esegs, mng->esegs, sizeof(uint64_t)*(size_t)mng->maxid);
+#endif
     memcpy(next,  ll->next,   sizeof(uint64_t)*(size_t)mng->maxid);
     memcpy(prev,  ll->prev,   sizeof(uint64_t)*(size_t)mng->maxid);
     memcpy(dora, mng->dora, sizeof(bool)*(size_t)mng->maxid);
@@ -548,7 +616,9 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
     mng->buff  = buff;
     mng->ptrs  = ptrs;
     mng->bytes = bytes;
+#if defined(POOL_EXTENTON)
     mng->esegs = esegs;
+#endif
     ll->next   = next;
     ll->prev   = prev;
 
@@ -854,6 +924,8 @@ int nlcpy__mempool_remove_from_hash(const uint64_t ve_adr, mempool_t *pool, uint
 
 int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
 {
+    if ( mng->sort->num < 2 ) return NLCPY_RESULT_OK;
+    if ( mng->blocks->head < END ) return NLCPY_RESULT_OK;
     // clear sort blocks
     mng->sort->num = 0;
 
@@ -863,13 +935,17 @@ int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
         if ( !mng->dora[id] ) {
             // found sort blocks
             const uint64_t id0 = id;  // head of the sort blocks
+#if defined(POOL_EXTENTON)
             const uint64_t p0  = mng->ptrs[id0];
             const uint64_t e0  = mng->esegs[id0];
+#endif
             uint64_t size = mng->bytes[id];
             id = blocks->next[id];
-            while ( id != blocks->tail && !mng->dora[id] ) {
+            while ( id != END && !mng->dora[id] ) {
                 const uint64_t s = size+mng->bytes[id]; 
+#if defined(POOL_EXTENTON)
                 if ( p0+s > e0 ) break;
+#endif
                 size = s;
                 mng->bytes[id] = 0; 
                 const uint64_t k = id;
@@ -888,3 +964,57 @@ int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
 #endif
     return NLCPY_RESULT_OK;
 }
+
+
+bool nlcpy__mempool_is_available(mempool_mng_t *mng, const size_t size)
+{
+    // Check the size of unused area
+    size_t unused = mng->maxp - mng->p;
+    if ( unused >= size ) return true;
+
+    // Check the size of dead area
+    if ( mng->sort->num > 0 ) {
+        if ( mng->sort->bytes[0] >= size ) {
+            return true; 
+        } else if ( !mng->merged ) {
+            // Merge dead blocks
+            int iret = nlcpy__mempool_merge_dead_blocks(mng);
+            if (iret) return false;
+            mng->merged = true; // sort blocks are merged
+
+            return ( mng->sort->bytes[0] >= size );
+        }
+    }
+    return false;
+}
+
+
+#if defined(DEBUG)
+size_t nlcpy__mempool_get_capasity(const mempool_mng_t *mng)
+{
+    size_t ucapa = mng->maxp - mng->p;
+    size_t dcapa=0;
+    uint64_t i;
+    for ( i = 0; i < mng->sort->num; i++ ) dcapa +=  mng->sort->bytes[i];
+#if 0
+    if ( mng->sort->num > 0 ) {
+        dcapa = ucapa;
+        if ( ucapa < mng->sort->bytes[0] ) {
+            ucapa = mng->sort->bytes[0];
+        }
+    }
+#else
+    uint64_t id = mng->blocks->head;
+    size_t acapa=0;
+    while ( id != END ) {
+        if ( mng->dora[id] ) {
+            acapa+=mng->bytes[id];
+        }
+        id = mng->blocks->next[id];  // go to next blocks
+    }
+#endif
+    size_t tcapa = ucapa + dcapa + acapa;
+    printf("unused = %llu, dead = %llu, alive = %llu, total=%llu, num=%llu\n",ucapa, dcapa, acapa, tcapa, mng->sort->num);
+    return (ucapa>dcapa) ? ucapa : dcapa;
+}
+#endif

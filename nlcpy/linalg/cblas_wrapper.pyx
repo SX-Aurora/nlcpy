@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
             (x, y, out),
         )
     elif dtype_out not in (
-        numpy.bool, numpy.int8, numpy.int16,
+        numpy.bool_, numpy.int8, numpy.int16,
         numpy.uint8, numpy.uint16, numpy.float16
     ):
         request._push_request(

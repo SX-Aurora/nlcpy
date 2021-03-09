@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020 NEC Corporation
+#     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -80,66 +80,71 @@ cimport cpython
 cpdef average(a, axis=None, weights=None, returned=False):
     """Computes the weighted average along the specified axis.
 
-    Args:
-        a : array_like
-            Array containing data to be averaged. If a is not an array, a conversion is
-            attempted.
-        axis : None or int, optional
-            Axis along which to average a. The default, axis=None, will average over all
-            of the elements of the input array. If axis is negative it counts from the
-            last to the first axis.  tuple of axis not supported.
-        weights : array_like, optional
-            An array of weights associated with the values in a. Each value in a
-            contributes to the average according to its associated weight. The weights
-            array can either be 1-D (in which case its length must be the size of a along
-            the given axis) or of the same shape as a. If weights=None, then all data in
-            a are assumed to have a weight equal to one.
-        returned : bool, optional
-            Default is False. If True, the tuple `average`, sum_of_weights is returned,
-            otherwise only the average is returned. If weights=None, sum_of_weights is
-            equivalent to the number of elements over which the average is taken.
+    Parameters
+    ----------
+    a : array_like
+        Array containing data to be averaged. If *a* is not an array, a conversion is
+        attempted.
+    axis : None or int, optional
+        Axis along which to average *a*. The default, axis=None, will average over all of
+        the elements of the input array. If axis is negative it counts from the last to
+        the first axis.  tuple of axis not supported.
+    weights : array_like, optional
+        An array of weights associated with the values in *a*. Each value in *a*
+        contributes to the average according to its associated weight. The weights array
+        can either be 1-D (in which case its length must be the size of *a* along the
+        given axis) or of the same shape as *a*. If *weights=None*, then all data in
+        *a* are assumed to have a weight equal to one.
+    returned : bool, optional
+        Default is False. If True, the tuple average, *sum_of_weights* is returned,
+        otherwise only the average is returned. If *weights=None*, *sum_of_weights* is
+        equivalent to the number of elements over which the average is taken.
 
-    Returns:
-        retval, [sum_of_weights] : `ndarray`
-            Return the average along the specified axis. When returned is True, return a
-            tuple with the average as the first element and the sum of the weights as the
-            second element.
-            sum_of_weights is of the same type as retval. The result dtype follows a
-            general pattern.
-            If weights is None, the result dtype will be that of a , or float64 if a is
-            integral.
-            Otherwise, if weights is not None and a is non-integral, the result type will
-            be the type of lowest precision capable of representing values of both a and
-            weights. If a happens to be integral, the previous rules still applies but
-            the result dtype will at least be float64.
+    Returns
+    -------
+    retval, [sum_of_weights] : ndarray
+        Return the average along the specified axis. When *returned* is True, return a
+        tuple with the average as the first element and the sum of the weights as the
+        second element.
+        *sum_of_weights* is of the same type as *retval*. The result dtype follows a
+        general pattern.
+        If *weights* is None, the result dtype will be that of *a* , or ``float64``
+        if *a* is integral.
+        Otherwise, if *weights* is not None and *a* is non-integral, the result type
+        will be the type of lowest precision capable of representing values of both
+        *a* and *weights*. If *a* happens to be integral, the previous rules still
+        applies but the result dtype will at least be ``float64``.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers : *NotImplementedError* occurs.
 
-    See Also:
-        mean : Computes the arithmetic mean along the specified axis.
+    See Also
+    --------
+    mean : Computes the arithmetic mean along the specified axis.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> data = list(range(1,5))
-        >>> data
-        [1, 2, 3, 4]
-        >>> vp.average(data)
-        array(2.5)
-        >>> vp.average(range(1,11), weights=range(10,0,-1))
-        array(4.)
-        >>> data = vp.arange(6).reshape((3,2))
-        >>> data
-        array([[0, 1],
-              [2, 3],
-              [4, 5]])
-        >>> vp.average(data, axis=1, weights=[1./4, 3./4])
-        array([0.75, 2.75, 4.75])
-        >>> vp.average(data, weights=[1./4, 3./4])
-        Traceback (most recent call last):
-            ...
-        TypeError: Axis must be specified when shapes of a and weights differ.
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> data = list(range(1,5))
+    >>> data
+    [1, 2, 3, 4]
+    >>> vp.average(data)
+    array(2.5)
+    >>> vp.average(range(1,11), weights=range(10,0,-1))
+    array(4.)
+    >>> data = vp.arange(6).reshape((3,2))
+    >>> data
+    array([[0, 1],
+           [2, 3],
+           [4, 5]])
+    >>> vp.average(data, axis=1, weights=[1./4, 3./4])
+    array([0.75, 2.75, 4.75])
+    >>> vp.average(data, weights=[1./4, 3./4])
+    Traceback (most recent call last):
+        ...
+    TypeError: Axis must be specified when shapes of a and weights differ.
 
     """
     if a is None:
@@ -200,78 +205,88 @@ cpdef average(a, axis=None, weights=None, returned=False):
     else:
         return avg
 
+
 cpdef mean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     """Computes the arithmetic mean along the specified axis.
 
     Returns the average of the array elements. The average is taken over the flattened
-    array by default, otherwise over the specified axis. float64 intermediate and return
-    values are used for integer inputs.
+    array by default, otherwise over the specified axis. **float64** intermediate and
+    return values are used for integer inputs.
 
-    Args:
-        a : array_like
-            Array containing numbers whose mean is desired. If a is not an array, a
-            conversion is attempted.
-        axis : None or int , optional
-            Axis along which the means are computed. The default is to compute the mean
-            of the flattened array.
-        dtype : data-type, optional
-            Type to use in computing the mean. For integer inputs, the default is
-            float64; for floating point inputs, it is the same as the input dtype.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. The default is None; if
-            provided, it must have the same shape as the expected output, but the type
-            will be cast if necessary. See `ufuncs` for details.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the input array.
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose mean is desired. If *a* is not an array, a
+        conversion is attempted.
+    axis : None or int , optional
+        Axis along which the means are computed. The default is to compute the mean of
+        the flattened array.
+    dtype : data-type, optional
+        Type to use in computing the mean. For integer inputs, the default is
+        **float64**; for floating point inputs, it is the same as the input dtype.
+    out : ndarray, optional
+        Alternate output array in which to place the result. The default is ``None``;
+        if provided, it must have the same shape as the expected output, but the type
+        will be cast if necessary. See :ref:`ufuncs <ufuncs>` for details.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the input array.
 
-    Returns:
-        m : `ndarray`, see dtype parameter above
-            If out=None, returns a new array containing the mean values, otherwise a
-            reference to the output array is returned.
+    Returns
+    -------
+    m : ndarray, see dtype parameter above
+        If *out=None*, returns a new array containing the mean values, otherwise a
+        reference to the output array is returned.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers, *NotImplementedError* occurs.
 
-    Note:
-        The arithmetic mean is the sum of the elements along the axis divided by the
-        number of elements. Note that for floating-point input, the mean is computed
-        using the same precision the input has. Depending on the input data, this can
-        cause the results to be inaccurate, especially for float32 (see example below).
-        Specifying a higher-precision accumulator using the dtype keyword can alleviate
-        this issue.
+    Note
+    ----
+    The arithmetic mean is the sum of the elements along the axis divided by the number
+    of elements.
 
-    See Also:
-        average : Weighted average
-        std : Computes the standard deviation along the specified axis.
-        var : Computes the variance along the specified axis.
-        nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
-        nanstd : Computes the standard deviation along the specified axis, while ignoring
-            NaNs.
-        nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+    Note that for floating-point input, the mean is computed using the same
+    precision the input has. Depending on the input data, this can cause the results to
+    be inaccurate, especially for **float32** (see example below). Specifying a
+    higher-precision accumulator using the dtype keyword can alleviate this issue.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, 2], [3, 4]])
-        >>> vp.mean(a)
-        array(2.5)
-        >>> vp.mean(a, axis=0)
-        array([2., 3.])
-        >>> vp.mean(a, axis=1)
-        array([1.5, 3.5])
-        In single precision, `mean` can be inaccurate:
-        >>>
-        >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
-        >>> a[0, :] = 1.0
-        >>> a[1, :] = 0.1
-        >>> vp.mean(a)
-        array(0.5499878, dtype=float32)
-        Computing the mean in float64 is more accurate:
-        >>>
-        >>> vp.mean(a, dtype=vp.float64)
-        array(0.55 )# may vary
+    See Also
+    --------
+    average : Weighted average
+    std : Computes the standard deviation along the specified axis.
+    var : Computes the variance along the specified axis.
+    nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
+    nanstd : Computes the standard deviation along the specified axis, while ignoring
+        NaNs.
+    nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, 2], [3, 4]])
+    >>> vp.mean(a)
+    array(2.5)
+    >>> vp.mean(a, axis=0)
+    array([2., 3.])
+    >>> vp.mean(a, axis=1)
+    array([1.5, 3.5])
+
+    In single precision, mean can be inaccurate:
+
+    >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
+    >>> a[0, :] = 1.0
+    >>> a[1, :] = 0.1
+    >>> vp.mean(a)
+    array(0.5499878, dtype=float32)
+
+    Computing the mean in float64 is more accurate:
+
+    >>> vp.mean(a, dtype=vp.float64) # doctest: +SKIP
+    array(0.55)
 
     """
     if a is None:
@@ -364,73 +379,79 @@ cpdef median(a, axis=None, out=None, overwrite_input=False, keepdims=False):
 
     Returns the median of the array elements.
 
-    Args:
-        a : array_like
-            Input array or scalar that can be converted to an array.
-        axis : int, None, optional
-            Axis along which the medians are computed. The default is to compute the
-            median along a flattened version of the array.
-        out : `ndarray`, optional
-            Alternative output array in which to place the result. It must have the same
-            shape and buffer length as the expected output, but the type (of the output)
-            will be cast if necessary.
-        overwrite_input : bool, optional
-            If True, then allow use of memory of input array a for calculations. The
-            input array will be modified by the call to `median`. This will save memory
-            when you do not need to preserve the contents of the input array. Treat the
-            input as undefined, but it will probably be fully or partially sorted.
-            Default is False. If overwrite_input is True and a is not already a
-            `ndarray`, an error will be raised.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the original array.
+    Parameters
+    ----------
+    a : array_like
+        Input array or scalar that can be converted to an array.
+    axis : int, None, optional
+        Axis along which the medians are computed. The default is to compute the median
+        along a flattened version of the array.
+    out : ndarray, optional
+        Alternative output array in which to place the result. It must have the same
+        shape and buffer length as the expected output, but the type (of the output) will
+        be cast if necessary.
+    overwrite_input : bool, optional
+        If True, then allow use of memory of input array *a* for calculations. The input
+        array will be modified by the call to median. This will save memory when you do
+        not need to preserve the contents of the input array. Treat the input as
+        undefined, but it will probably be fully or partially sorted. Default is False.
+        If overwrite_input is True and *a* is not already a :obj:`ndarray`, an error will
+        be raised.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the original array.
 
-    Returns:
-        median : `ndarray`
-            A new array holding the result. If the input contains integers or floats
-            smaller than float64, then the output data-type is nlcpy.float64. Otherwise,
-            the data-type of the output is the same as that of the input. If out is
-            specified, that array is returned instead.
+    Returns
+    -------
+    median : ndarray
+        A new array holding the result. If the input contains integers or floats smaller
+        than ``float64``, then the output data-type is ``nlcpy.float64``. Otherwise, the
+        data-type of the output is the same as that of the input. If *out* is specified,
+        that array is returned instead.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers, *NotImplementedError* occurs.
 
-    Note:
-        Given a vector V of length N, the median of V is the middle value of a sorted
-        copy of V, V_sorted - i.e., V_sorted[(N-1)/2], when N is odd, and the average of
-        the two middle values of V_sorted when N is even.
+    Note
+    ----
+    Given a vector ``V`` of length ``N``, the median of V is the middle value of a sorted
+    copy of ``V, V_sorted`` - i.e., ``V_sorted[(N-1)/2]``, when ``N`` is odd, and the
+    average of the two middle values of ``V_sorted`` when ``N`` is even.
 
-    See Also:
-        mean : Computes the arithmetic mean along the specified axis.
+    See Also
+    --------
+    mean : Computes the arithmetic mean along the specified axis.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[10, 7, 4], [3, 2, 1]])
-        >>> a
-        array([[10,  7,  4],
-              [ 3,  2,  1]])
-        >>> vp.median(a)
-        array(3.5)
-        >>> vp.median(a, axis=0)
-        array([6.5, 4.5, 2.5])
-        >>> vp.median(a, axis=1)
-        array([7.,  2.])
-        >>> m = vp.median(a, axis=0)
-        >>> out = vp.zeros_like(m)
-        >>> vp.median(a, axis=0, out=m)
-        array([6.5,  4.5,  2.5])
-        >>> m
-        array([6.5,  4.5,  2.5])
-        >>> b = a.copy()
-        >>> vp.median(b, axis=1, overwrite_input=True)
-        array([7.,  2.])
-        >>> assert not vp.all(a==b)
-        >>> b = a.copy()
-        >>> vp.median(b, axis=None, overwrite_input=True)
-        array(3.5)
-        >>> assert not vp.all(a==b)
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[10, 7, 4], [3, 2, 1]])
+    >>> a
+    array([[10,  7,  4],
+           [ 3,  2,  1]])
+    >>> vp.median(a)
+    array(3.5)
+    >>> vp.median(a, axis=0)
+    array([6.5, 4.5, 2.5])
+    >>> vp.median(a, axis=1)
+    array([7., 2.])
+    >>> m = vp.median(a, axis=0)
+    >>> out = vp.zeros_like(m)
+    >>> vp.median(a, axis=0, out=m)
+    array([6.5, 4.5, 2.5])
+    >>> m
+    array([6.5, 4.5, 2.5])
+    >>> b = a.copy()
+    >>> vp.median(b, axis=1, overwrite_input=True)
+    array([7., 2.])
+    >>> assert not vp.all(a==b)
+    >>> b = a.copy()
+    >>> vp.median(b, axis=None, overwrite_input=True)
+    array(3.5)
+    >>> assert not vp.all(a==b)
 
     """
     if a is None:
@@ -523,57 +544,68 @@ cpdef nanmean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     """Computes the arithmetic mean along the specified axis, ignoring NaNs.
 
     Returns the average of the array elements. The average is taken over the flattened
-    array by default, otherwise over the specified axis. float64 intermediate and return
-    values are used for integer inputs. For all-NaN slices, NaN is returned and a
-    RuntimeWarning is raised.
+    array by default, otherwise over the specified axis. **float64** intermediate and
+    return values are used for integer inputs. For all-NaN slices, NaN is returned and a
+    *RuntimeWarning* is raised.
 
-    Args:
-        a : array_like
-            Array containing numbers whose mean is desired. If a is not an array, a
-            conversion is attempted.
-        axis : int, None, optional
-            Axis along which the means are computed. The default is to compute the mean
-            of the flattened array.
-        dtype : data-type, optional
-            Type to use in computing the mean. For integer inputs, the default is
-            float64; for inexact inputs, it is the same as the input dtype.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. The default is None; if
-            provided, it must have the same shape as the expected output, but the type
-            will be cast if necessary. See `ufuncs` for details.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the original a. If out=None, returns a new array containing
-            the mean values, otherwise a reference to the output array is returned. Nan
-            is returned for slices that contain only NaNs.
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose mean is desired. If *a* is not an array, a
+        conversion is attempted.
+    axis : int, None, optional
+        Axis along which the means are computed. The default is to compute the mean of
+        the flattened array.
+    dtype : data-type, optional
+        Type to use in computing the mean. For integer inputs, the default is
+        **float64**; for inexact inputs, it is the same as the input dtype.
+    out : ndarray, optional
+        Alternate output array in which to place the result. The default is ``None``; if
+        provided, it must have the same shape as the expected output, but the type will
+        be cast if necessary. See :ref:`ufuncs <ufuncs>` for details.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the original *a*.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Returns
+    -------
+    m : ndarray
+        If *out=None*, returns a new array containing the mean values, otherwise a
+        reference to the output array is returned.
+        Nan is returned for slices that contain only NaNs.
 
-    Note:
-        The arithmetic mean is the sum of the non-NaN elements along the axis divided by
-        the number of non-NaN elements. Note that for floating-point input, the mean is
-        computed using the same precision the input has. Depending on the input data,
-        this can cause the results to be inaccurate, especially for float32. Specifying a
-        higher-precision accumulator using the dtype keyword can alleviate this issue.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers, *NotImplementedError* occurs.
 
-    See Also:
-        average : Weighted average
-        mean : Arithmetic mean taken while not ignoring NaNs
-        var : Computes the variance along the specified axis.
-        nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+    Note
+    ----
+    The arithmetic mean is the sum of the non-NaN elements along the axis divided by the
+    number of non-NaN elements. Note that for floating-point input, the mean is computed
+    using the same precision the input has. Depending on the input data, this can cause
+    the results to be inaccurate, especially for **float32**. Specifying a
+    higher-precision accumulator using the dtype keyword can alleviate this issue.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, vp.nan], [3, 4]])
-        >>> vp.nanmean(a)
-        array(2.66666667)
-        >>> vp.nanmean(a, axis=0)
-        array([2.,  4.])
-        >>> vp.nanmean(a, axis=1)
-        array([1.,  3.5]) # may vary
+    See Also
+    --------
+    average : Weighted average
+    mean : Arithmetic mean taken while not ignoring NaNs
+    var : Computes the variance along the specified axis.
+    nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, vp.nan], [3, 4]])
+    >>> vp.nanmean(a)   # doctest: +SKIP
+    array(2.66666667)
+    >>> vp.nanmean(a, axis=0)  # doctest: +SKIP
+    array([2., 4.])
+    >>> vp.nanmean(a, axis=1)  # doctest: +SKIP
+    array([1. , 3.5])
+
 
     """
     if a is None:
@@ -703,78 +735,168 @@ cpdef nanmean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     return ans
 
 
+@numpy_wrap
+def nanmedian(a, axis=None, out=None, overwrite_input=False, keepdims=nlcpy._NoValue):
+    """Computes the median along the specified axis, while ignoring NaNs.
+
+    Returns the median of the array elements.
+
+    Parameters
+    ----------
+    a : array_like
+        Input array or object that can be converted to an array.
+    axis : {int, sequenceof int, None}, optional
+        Axis or axes along which the medians are computed. The default is to compute the
+        median along a flattened version of the array.
+    out : ndarray, optional
+        Alternative output array in which to place the result. It must have the same
+        shape as the expected output but the type (of the calculated values) will be cast
+        if necessary.
+    overwrite_input : bool, optional
+        If True, then allow use of memory of input array *a* for calculations. The input
+        array will be modified by the call to median. This will save memory when you do
+        not need to preserve the contents of the input array. Treat the input as
+        undefined, but it will probably be fully or partially sorted. Default is False.
+        If *overwrite_input* is True and *a* is not already an ndarray, an error will be
+        raised.
+    keepdims : bool, optional
+        If this is set to True, the axes which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the original array.
+
+    Returns
+    -------
+    median : ndarray
+        A new array holding the result. If the input contains integers or floats smaller
+        than ``float64``, then the output data-type is ``nlcpy.float64``. Otherwise, the
+        data-type of the output is the same as that of the input. If out is specified,
+        that array is returned instead.
+
+    Restriction
+    -----------
+    This function is the wrapper function to utilize :func:`numpy.nanmedian`.
+    Calculations during this function perform on only Vector Host(Linux/x86).
+
+    Note
+    ----
+    Given a vector ``V`` of length ``N``, the median of ``V`` is the middle value of a
+    sorted copy of ``V, V_sorted`` - i.e., ``V_sorted[(N-1)/2]``, when ``N`` is odd,
+    and the average of the two middle values of ``V_sorted`` when ``N`` is even.
+
+    See Also
+    --------
+    mean : Computes the arithmetic mean along the specified axis.
+    median : Compute the median along the specified axis.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a  = vp.array([[10.0, 7, 4], [3, 2, 1]])
+    >>> a[0, 1] = vp.nan
+    >>> a
+    array([[10., nan,  4.],
+           [ 3.,  2.,  1.]])
+    >>> vp.median(a)
+    array(nan)
+    >>> vp.nanmedian(a)
+    array(3.)
+    >>> vp.nanmedian(a, axis=0)
+    array([6.5, 2. , 2.5])
+    >>> vp.median(a, axis=1)
+    array([nan,  2.])
+    >>> b = a.copy()
+    >>> vp.nanmedian(b, axis=1, overwrite_input=True)
+    array([7., 2.])
+    >>> assert not vp.all(a==b)  # doctest: +SKIP
+    >>> b = a.copy()
+    >>> vp.nanmedian(b, axis=None, overwrite_input=True)
+    array(3.)
+    >>> assert not vp.all(a==b)  # doctest: +SKIP
+
+    """
+    raise NotImplementedError
+
+
 cpdef nanstd(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     """Computes the standard deviation along the specified axis, while ignoring NaNs.
 
     Returns the standard deviation, a measure of the spread of a distribution, of the
     non-NaN array elements. The standard deviation is computed for the flattened array by
     default, otherwise over the specified axis. For all-NaN slices or slices with zero
-    degrees of freedom, NaN is returned and a RuntimeWarning is raised.
+    degrees of freedom, NaN is returned and a *RuntimeWarning* is raised.
 
-    Args:
-        a : array_like
-            Calculate the standard deviation of the non-NaN values.
-        axis : int,  None, optional
-            Axis along which the standard deviation is computed. The default is to
-            compute the standard deviation of the flattened array.
-        dtype : dtype, optional
-            Type to use in computing the standard deviation. For arrays of integer type
-            the default is float64, for arrays of float types it is the same as the array
-            type.a
-        out : `ndarray`, optional
-            Alternative output array in which to place the result. It must have the same
-            shape as the expected output but the type (of the calculated values) will be
-            cast if necessary.
-        ddof : int, optional
-            Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof,
-            where N represents the number of non-NaN elements. By default, ddof is zero.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the original a.
+    Parameters
+    ----------
+    a : array_like
+        Calculate the standard deviation of the non-NaN values.
+    axis : int,  None, optional
+        Axis along which the standard deviation is computed. The default is to compute
+        the standard deviation of the flattened array.
+    dtype : dtype, optional
+        Type to use in computing the standard deviation. For arrays of integer type the
+        default is float64, for arrays of float types it is the same as the array type.
+    out : ndarray, optional
+        Alternative output array in which to place the result. It must have the same
+        shape as the expected output but the type (of the calculated values) will be cast
+        if necessary.
+    ddof : int, optional
+        Means Delta Degrees of Freedom. The divisor used in calculations is ``N - ddof``,
+        where ``N`` represents the number of non-NaN elements. By default, *ddof* is
+        zero.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the original *a*.
 
-    Returns:
-        standard_deviation : `ndarray`, see dtype parameter above.
-            If out is None, return a new array containing the standard deviation,
-            otherwise return a reference to the output array. If ddof is >= the number of
-            non-NaN elements in a slice or the slice contains only NaNs, then the result
-            for that slice is NaN.
+    Returns
+    -------
+    standard_deviation : ndarray, see dtype parameter above.
+        If out is None, return a new array containing the standard deviation, otherwise
+        return a reference to the output array. If ddof is >= the number of non-NaN
+        elements in a slice or the slice contains only NaNs, then the result for that
+        slice is NaN.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers : *NotImplementedError* occurs.
 
-    Note:
-        The standard deviation is the square root of the average of the squared
-        deviations from the mean: std = sqrt(mean(abs(x - x.mean())**2)). The average
-        squared deviation is normally calculated as x.sum() / N, where N = len(x). If,
-        however, ddof is specified, the divisor N - ddof is used instead. In standard
-        statistical practice, ddof=1 provides an unbiased estimator of the variance of
-        the infinite population. ddof=0 provides a maximum likelihood estimate of the
-        variance for normally distributed variables. The standard deviation computed in
-        this function is the square root of the estimated variance, so even with ddof=1,
-        it will not be an unbiased estimate of the standard deviation per se. For
-        floating-point input, the std is computed using the same precision the input has.
-        Depending on the input data, this can cause the results to be inaccurate,
-        especially for float32 (see example below). Specifying a higher-accuracy
-        accumulator using the dtype keyword can alleviate this issue.
+    Note
+    ----
+    The standard deviation is the square root of the average of the squared deviations
+    from the mean: ``std = sqrt(mean(abs(x - x.mean())**2))``.
 
-    See Also:
-        var : Computes the variance along the specified axis.
-        mean : Computes the arithmetic mean along the specified axis.
-        std : Computes the standard deviation along the specified axis.
-        nanvar : Computes the variance along the specified axis, while ignoring NaNs.
-        nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
+    The average squared deviation is normally calculated as ``x.sum() / N``, where
+    ``N = len(x)``. If, however, ddof is specified, the divisor ``N - ddof`` is used
+    instead. In standard statistical practice, ``ddof=1`` provides an unbiased estimator
+    of the variance of the infinite population. ``ddof=0`` provides a maximum likelihood
+    estimate of the variance for normally distributed variables. The standard deviation
+    computed in this function is the square root of the estimated variance, so even with
+    ``ddof=1``, it will not be an unbiased estimate of the standard deviation per se.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, vp.nan], [3, 4]])
-        >>> vp.nanstd(a)
-        array(1.24721913)
-        >>> vp.nanstd(a, axis=0)
-        array([1., 0.])
-        >>> vp.nanstd(a, axis=1)
-        array([0.,  0.5]) # may vary
+    For floating-point input, the std is computed using the same precision the input has.
+    Depending on the input data, this can cause the results to be inaccurate, especially
+    for float32 (see example below). Specifying a higher-accuracy accumulator using the
+    dtype keyword can alleviate this issue.
+
+    See Also
+    --------
+    var : Computes the variance along the specified axis.
+    mean : Computes the arithmetic mean along the specified axis.
+    std : Computes the standard deviation along the specified axis.
+    nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+    nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, vp.nan], [3, 4]])
+    >>> vp.nanstd(a)    # doctest: +SKIP
+    array(1.24721913)
+    >>> vp.nanstd(a, axis=0)
+    array([1., 0.])
+    >>> vp.nanstd(a, axis=1)
+    array([0. , 0.5])
 
     """
     if a is None:
@@ -910,69 +1032,79 @@ cpdef nanvar(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue
     Returns the variance of the array elements, a measure of the spread of a
     distribution. The variance is computed for the flattened array by default, otherwise
     over the specified axis. For all-NaN slices or slices with zero degrees of freedom,
-    NaN is returned and a RuntimeWarning is raised.
+    NaN is returned and a *RuntimeWarning* is raised.
 
-    Args:
-        a : array_like
-            Array containing numbers whose variance is desired. If a is not an array, a
-            conversion is attempted.
-        axis : int, None, optional
-            Axis along which the variance is computed. The default is to compute the
-            variance of the flattened array.
-        dtype : data-type, optional
-            Type to use in computing the variance. For arrays of integer type the default
-            is float32; for arrays of float types it is the same as the array type.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. It must have the same
-            shape as the expected output, but the type is cast if necessary.
-        ddof : int, optional
-            "Delta Degrees of Freedom": the divisor used in the calculation is N - ddof,
-            where N represents the number of non-NaN elements. By default, ddof is zero.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the original a.
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose variance is desired. If *a* is not an array, a
+        conversion is attempted.
+    axis : int, None, optional
+        Axis along which the variance is computed. The default is to compute the variance
+        of the flattened array.
+    dtype : data-type, optional
+        Type to use in computing the variance. For arrays of integer type the default is
+        float32; for arrays of float types it is the same as the array type.
+    out : ndarray, optional
+        Alternate output array in which to place the result. It must have the same shape
+        as the expected output, but the type is cast if necessary.
+    ddof : int, optional
+        "Delta Degrees of Freedom": the divisor used in the calculation is ``N - ddof``,
+        where ``N`` represents the number of non-NaN elements. By default, *ddof* is
+        zero.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the original *a*.
 
-    Returns:
-        variance : `ndarray`, see dtype parameter above
-            If out is None, return a new array containing the variance, otherwise return
-            a reference to the output array. If ddof is >= the number of non-NaN elements
-            in a slice or the slice contains only NaNs, then the result for that slice is
-            NaN.
+    Returns
+    -------
+    variance : ndarray, see dtype parameter above
+        If *out* is None, return a new array containing the variance, otherwise return a
+        reference to the output array. If ddof is >= the number of non-NaN elements in a
+        slice or the slice contains only NaNs, then the result for that slice is NaN.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers, *NotImplementedError* occurs.
 
-    Note:
-        The variance is the average of the squared deviations from the mean, i.e., var =
-        mean(abs(x - x.mean())**2). The mean is normally calculated as x.sum() / N, where
-        N = len(x). If, however, ddof is specified, the divisor N - ddof is used instead.
-        In standard statistical practice, ddof=1 provides an unbiased estimator of the
-        variance of a hypothetical infinite population. ddof=0 provides a maximum
-        likelihood estimate of the variance for normally distributed variables. For
-        floating-point input, the variance is computed using the same precision the input
-        has. Depending on the input data, this can cause the results to be inaccurate,
-        especially for float32 (see example below). Specifying a higher-accuracy
-        accumulator using the dtype keyword can alleviate this issue.
+    Note
+    ----
+    The variance is the average of the squared deviations from the mean, i.e.,
+    ``var = mean(abs(x - x.mean())**2)``.
 
-    See Also:
-        std : Standard deviation
-        mean : Average
-        var : Variance while not ignoring NaNs
-        nanstd : Computes the standard deviation along the specified axis, while ignoring
-            NaNs.
-        nanmean : Computes  the arithmetic mean along the specified axis, ignoring NaNs.
+    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``. If,
+    however, *ddof* is specified, the divisor ``N - ddof`` is used instead. In standard
+    statistical practice, ``ddof=1`` provides an unbiased estimator of the variance of
+    a hypothetical infinite population.
+    ``ddof=0`` provides a maximum likelihood estimate of the variance for normally
+    distributed variables.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, vp.nan], [3, 4]])
-        >>> vp.nanvar(a)
-        array(1.55555556)
-        >>> vp.nanvar(a, axis=0)
-        array([1.,  0.])
-        >>> vp.nanvar(a, axis=1)
-        array([0.,  0.25])
+    For floating-point input, the variance is computed using the same precision the input
+    has. Depending on the input data, this can cause the results to be inaccurate,
+    especially for float32 (see example below). Specifying a higher-accuracy accumulator
+    using the ``dtype`` keyword can alleviate this issue.
+
+    See Also
+    --------
+    std : Standard deviation
+    mean : Average
+    var : Variance while not ignoring NaNs
+    nanstd : Computes the standard deviation along the specified axis, while ignoring
+        NaNs.
+    nanmean : Computes  the arithmetic mean along the specified axis, ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, vp.nan], [3, 4]])
+    >>> vp.nanvar(a)    # doctest: +SKIP
+    array(1.55555556)
+    >>> vp.nanvar(a, axis=0)
+    array([1., 0.])
+    >>> vp.nanvar(a, axis=1)
+    array([0.  , 0.25])
 
     """
     if a is None:
@@ -1139,77 +1271,88 @@ cpdef std(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     array elements. The standard deviation is computed for the flattened array by
     default, otherwise over the specified axis.
 
-    Args:
-        a : array_like
-            Calculate the standard deviation of these values.
-        axis : None or int, optional
-            Axis along which the standard deviation is computed. The default is to
-            compute the standard deviation of the flattened array.
-        dtype : dtype, optional
-            Type to use in computing the standard deviation. For arrays of integer type
-            the default is float64, for arrays of float types it is the same as the array
-            type.
-        out : `ndarray`, optional
-            Alternative output array in which to place the result. It must have the same
-            shape as the expected output but the type (of the calculated values) will be
-            cast if necessary.
-        ddof : int, optional
-            Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof,
-            where N represents the number of elements. By default, ddof is zero.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the input array.
+    Parameters
+    ----------
+    a : array_like
+        Calculate the standard deviation of these values.
+    axis : None or int, optional
+        Axis along which the standard deviation is computed. The default is to compute
+        the standard deviation of the flattened array.
+    dtype : dtype, optional
+        Type to use in computing the standard deviation. For arrays of integer type the
+        default is float64, for arrays of float types it is the same as the array type.
+    out : ndarray, optional
+        Alternative output array in which to place the result. It must have the same
+        shape as the expected output but the type (of the calculated values) will be cast
+        if necessary.
+    ddof : int, optional
+        Means Delta Degrees of Freedom. The divisor used in calculations is ``N - ddof``,
+        where ``N`` represents the number of elements. By default, *ddof* is zero.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the input array.
 
-    Returns:
-        standard_deviation : `ndarray`, see dtype parameter above.
-            If out is None, return a new array containing the standard deviation,
-            otherwise return a reference to the output array.
+    Returns
+    -------
+    standard_deviation : ndarray, see dtype parameter above.
+        If *out* is None, return a new array containing the standard deviation, otherwise
+        return a reference to the output array.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers : *NotImplementedError* occurs.
 
-    Note:
-        The standard deviation is the square root of the average of the squared
-        deviations from the mean, i.e., std = sqrt(mean(abs(x - x.mean())**2)).
-        The average squared deviation is normally calculated as x.sum() / N, where N =
-        len(x). If, however, ddof=1 provides an unbiased estimator of the variance of the
-        infinite population. ddof=0 provides a maximum likelihood estimate of the
-        variance for normally distributed variables. The standard deviation computed in
-        this function is the square root of the estimated variance, so even with ddof=1,
-        it will not be an unbiased estimate of the standard deviation per se.
-        For floating-point input, the std is computed using the same precision the input
-        has. Depending on the input data, this can cause the results to be inaccurate,
-        especially for float32 (see example below). Specifying a higher-accuracy
-        accumulator using the dtype keyword can alleviate this issue.
+    Note
+    ----
+    The standard deviation is the square root of the average of the squared deviations
+    from the mean, i.e., ``std = sqrt(mean(abs(x - x.mean())**2))``.
 
-    See Also:
-        var : Computes the variance along the specified axis.
-        mean : Computes the arithmetic mean along the specified axis.
-        nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
-        nanstd : Computes the standard deviation along the specified axis, while ignoring
-            NaNs.
-        nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+    The average squared deviation is normally calculated as ``x.sum() / N``, where
+    ``N = len(x)``. If, however, ``ddof=1`` provides an unbiased estimator of the
+    variance of the infinite population. ``ddof=0`` provides a maximum likelihood
+    estimate of the variance for normally distributed variables. The standard deviation
+    computed in this function is the square root of the estimated variance, so even with
+    ``ddof=1``, it will not be an unbiased estimate of the standard deviation per se.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, 2], [3, 4]])
-        >>> vp.std(a)
-        array(1.11803399) # may vary
-        >>> vp.std(a, axis=0)
-        array([1.,  1.])
-        >>> vp.std(a, axis=1)
-        array([0.5,  0.5])
-        In single precision, std() can be inaccurate:
-        >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
-        >>> a[0, :] = 1.0
-        >>> a[1, :] = 0.1
-        >>> vp.std(a)
-        array(0.45002034, dtype=float32)
-        Computing the standard deviation in float64 is more accurate:
-        >>> vp.std(a, dtype=vp.float64)
-        array(0.45) # may vary
+    For floating-point input, the std is computed using the same precision the input has.
+    Depending on the input data, this can cause the results to be inaccurate, especially
+    for float32 (see example below). Specifying a higher-accuracy accumulator using the
+    dtype keyword can alleviate this issue.
+
+    See Also
+    --------
+    var : Computes the variance along the specified axis.
+    mean : Computes the arithmetic mean along the specified axis.
+    nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
+    nanstd : Computes the standard deviation along the specified axis, while ignoring
+        NaNs.
+    nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, 2], [3, 4]])
+    >>> vp.std(a)    # doctest: +SKIP
+    array(1.11803399)
+    >>> vp.std(a, axis=0)  # doctest: +SKIP
+    array([1., 1.])
+    >>> vp.std(a, axis=1)  # doctest: +SKIP
+    array([0.5, 0.5])
+
+    In single precision, std() can be inaccurate:
+
+    >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
+    >>> a[0, :] = 1.0
+    >>> a[1, :] = 0.1
+    >>> vp.std(a)      # doctest: +SKIP
+    array(0.45002034, dtype=float32)
+
+    Computing the standard deviation in float64 is more accurate:
+
+    >>> vp.std(a, dtype=vp.float64)  # doctest: +SKIP
+    array(0.45)
 
     """
     if a is None:
@@ -1299,77 +1442,90 @@ cpdef var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     distribution. The variance is computed for the flattened array by default, otherwise
     over the specified axis.
 
-    Args:
-        a : array_like
-            Array containing numbers whose variance is desired. If a is not an array, a
-            conversion is attempted.
-        axis : None or int, optional
-            Axis  along which the variance is computed. The default is to compute the
-            variance of the flattened array.
-        dtype : data-type, optional
-            Type to use in computing the variance. For arrays of integer type the default
-            is float32; for arrays of float types it is the same as the array type.
-        out : `ndarray`, optional
-            Alternate output array in which to place the result. It must have the same
-            shape as the expected output, but the type is cast if necessary.
-        ddof : int, optional
-            "Delta Degrees of Freedom": the divisor used in the calculation is N - ddof,
-            where N represents the number of elements. By default, ddof is zero. The
-            array or list to be shuffled.
-        keepdims : bool, optional
-            If this is set to True, the axis which are reduced are left in the result as
-            dimensions with size one. With this option, the result will broadcast
-            correctly against the input array.
+    Parameters
+    ----------
+    a : array_like
+        Array containing numbers whose variance is desired. If *a* is not an array, a
+        conversion is attempted.
+    axis : None or int, optional
+        Axis  along which the variance is computed. The default is to compute the
+        variance of the flattened array.
+    dtype : data-type, optional
+        Type to use in computing the variance. For arrays of integer type the default is
+        float32; for arrays of float types it is the same as the array type.
+    out : ndarray, optional
+        Alternate output array in which to place the result. It must have the same shape
+        as the expected output, but the type is cast if necessary.
+    ddof : int, optional
+        "Delta Degrees of Freedom": the divisor used in the calculation is ``N - ddof``,
+        where ``N`` represents the number of elements. By default, *ddof* is zero. The
+        array or list to be shuffled.
+    keepdims : bool, optional
+        If this is set to True, the axis which are reduced are left in the result as
+        dimensions with size one. With this option, the result will broadcast correctly
+        against the input array.
 
-    Returns:
-        variance : `ndarray`, see dtype parameter above
-            If out=None, returns a new array containing the variance; otherwise, a
-            reference to the output array is returned.
+    Returns
+    -------
+    variance : ndarray, see dtype parameter above
+        If ``out=None``, returns a new array containing the variance; otherwise, a
+        reference to the output array is returned.
 
-    Raises:
-        axis is neither a scalar nor None : NotImplementedError occurs.
-        For complex numbers, NotImplementedError occurs.
+    Restriction
+    -----------
+    * If *axis* is neither a scalar nor None : *NotImplementedError* occurs.
+    * For complex numbers, *NotImplementedError* occurs.
 
-    Note:
-        The variance is the average of the squared deviations from the mean, i.e., var =
-        mean(abs(x - x.mean())**2) . The mean is normally calculated as x.sum() / N,
-        where N = len(x). If, however, ddof is specified, the divisor N - ddof is used
-        instead. In standard statistical practice, ddof=1 provides an unbiased estimator
-        of the variance of a hypothetical infinite population. ddof=0 provides a maximum
-        likelihood estimate of the variance for normally distributed variables. For
-        floating-point input, the variance is computed using the same precision the input
-        has. Depending on the input data, this can cause the results to be inaccurate,
-        especially for float32 (see example below). Specifying a higher-accuracy
-        accumulator using the dtype keyword can alleviate this issue.
+    Note
+    ----
+    The variance is the average of the squared deviations from the mean, i.e.,
+    ``var = mean(abs(x - x.mean())**2)``.
 
-    See Also:
-        std : Computes the standard deviation along the specified axis.
-        mean : Computes the arithmetic mean along the specified axis.
-        nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
-        nanstd : Computes the standard deviation along the specified axis, while ignoring
-            NaNs.
-        nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+    The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``. If,
+    however, *ddof* is specified, the divisor ``N - ddof`` is used instead. In standard
+    statistical practice, ``ddof=1`` provides an unbiased estimator of the variance of a
+    hypothetical infinite population. ``ddof=0`` provides a maximum likelihood estimate
+    of the variance for normally distributed variables.
 
-    Examples:
-        >>> import nlcpy as vp
-        >>> a = vp.array([[1, 2], [3, 4]])
-        >>> vp.var(a)
-        array(1.25)
-        >>> vp.var(a, axis=0)
-        array([1.,  1.])
-        >>> vp.var(a, axis=1)
-        array([0.25,  0.25])
-        In single precision, var() can be inaccurate:
-        >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
-        >>> a[0, :] = 1.0
-        >>> a[1, :] = 0.1
-        >>> vp.var(a)
-        array(0.20251831, dtype=float32)
-        Computing the variance in float64 is more accurate:
-        >>> vp.var(a, dtype=vp.float64)
-        array(0.2025) # may vary
-        >>> ((1-0.55)**2 + (0.1-0.55)**2)/2
-        0.2025
+    For floating-point input, the variance is computed using the same precision the input
+    has. Depending on the input data, this can cause the results to be inaccurate,
+    especially for float32 (see example below). Specifying a higher-accuracy accumulator
+    using the ``dtype`` keyword can alleviate this issue.
+
+    See Also
+    --------
+    std : Computes the standard deviation along the specified axis.
+    mean : Computes the arithmetic mean along the specified axis.
+    nanmean : Computes the arithmetic mean along the specified axis, ignoring NaNs.
+    nanstd : Computes the standard deviation along the specified axis, while ignoring
+        NaNs.
+    nanvar : Computes the variance along the specified axis, while ignoring NaNs.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.array([[1, 2], [3, 4]])
+    >>> vp.var(a)
+    array(1.25)
+    >>> vp.var(a, axis=0)
+    array([1., 1.])
+    >>> vp.var(a, axis=1)
+    array([0.25, 0.25])
+
+    In single precision, var() can be inaccurate:
+
+    >>> a = vp.zeros((2, 512*512), dtype=vp.float32)
+    >>> a[0, :] = 1.0
+    >>> a[1, :] = 0.1
+    >>> vp.var(a)
+    array(0.20251831, dtype=float32)
+
+    Computing the variance in float64 is more accurate:
+
+    >>> vp.var(a, dtype=vp.float64)   # doctest: +SKIP
+    array(0.2025) # may vary
+    >>> ((1-0.55)**2 + (0.1-0.55)**2)/2
+    0.2025
 
     """
     if a is None:

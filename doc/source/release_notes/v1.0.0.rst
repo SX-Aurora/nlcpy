@@ -1,0 +1,118 @@
+============================================
+What's new in Version 1.0.0 (March 31, 2021)
+============================================
+
+
+New Features
+------------
+
+Newly added the following functions and methods.
+
+
+Descrete Fourier Transform
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* :func:`nlcpy.fft.fft`
+* :func:`nlcpy.fft.ifft`
+* :func:`nlcpy.fft.fft2`
+* :func:`nlcpy.fft.ifft2`
+* :func:`nlcpy.fft.fftn`
+* :func:`nlcpy.fft.ifftn`
+* :func:`nlcpy.fft.rfft`
+* :func:`nlcpy.fft.irfft`
+* :func:`nlcpy.fft.rfft2`
+* :func:`nlcpy.fft.irfft2`
+* :func:`nlcpy.fft.rfftn`
+* :func:`nlcpy.fft.irfftn`
+* :func:`nlcpy.fft.hfft`
+* :func:`nlcpy.fft.ihfft`
+* :func:`nlcpy.fft.fftfreq`
+* :func:`nlcpy.fft.rfftfreq`
+* :func:`nlcpy.fft.fftshift`
+* :func:`nlcpy.fft.ifftshift`
+
+
+Linear Algebra
+^^^^^^^^^^^^^^
+
+* :func:`nlcpy.inner`
+* :func:`nlcpy.outer`
+* :func:`nlcpy.linalg.svd`
+* :func:`nlcpy.linalg.cholesky`
+* :func:`nlcpy.linalg.qr`
+* :func:`nlcpy.linalg.eig`
+* :func:`nlcpy.linalg.eigh`
+* :func:`nlcpy.linalg.eigvals`
+* :func:`nlcpy.linalg.eigvalsh`
+* :func:`nlcpy.linalg.norm`
+* :func:`nlcpy.linalg.solve`
+* :func:`nlcpy.linalg.lstsq`
+* :func:`nlcpy.linalg.inv`
+* :func:`nlcpy.linalg.LinAlgError`
+
+
+Array Creation Routines
+^^^^^^^^^^^^^^^^^^^^^^^
+
+* :func:`nlcpy.meshgrid`
+* :func:`nlcpy.logspace`
+
+
+Array Manipulation Routines
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* :func:`nlcpy.copyto`
+* :func:`nlcpy.hstack`
+* :func:`nlcpy.stack`
+* :func:`nlcpy.vstack`
+* :func:`nlcpy.append`
+* :func:`nlcpy.delete`
+* :func:`nlcpy.insert`
+* :func:`nlcpy.fromfile`
+* :func:`nlcpy.loadtxt`
+* :func:`nlcpy.load`
+* :func:`nlcpy.flip`
+* :func:`nlcpy.fliplr`
+* :func:`nlcpy.flipud`
+* :func:`nlcpy.repeat`
+
+
+Statistics Routines
+^^^^^^^^^^^^^^^^^^^
+
+* :func:`nlcpy.ptp`
+* :func:`nlcpy.percentile`
+* :func:`nlcpy.nanpercentile`
+* :func:`nlcpy.quantile`
+* :func:`nlcpy.nanquantile`
+* :func:`nlcpy.nanmedian`
+* :func:`nlcpy.correlate`
+* :func:`nlcpy.histogram`
+* :func:`nlcpy.histogram2d`
+* :func:`nlcpy.histogramdd`
+* :func:`nlcpy.histogram_bin_edges`
+* :func:`nlcpy.bincount`
+* :func:`nlcpy.digitize`
+
+Mathematical Functons
+^^^^^^^^^^^^^^^^^^^^^
+
+* :func:`nlcpy.prod`
+
+Ndarray Methods
+^^^^^^^^^^^^^^^
+
+* :meth:`nlcpy.ndarray.ptp`
+* :meth:`nlcpy.ndarray.mean`
+* :meth:`nlcpy.ndarray.var`
+* :meth:`nlcpy.ndarray.std`
+* :meth:`nlcpy.ndarray.conj`
+* :meth:`nlcpy.ndarray.conjugate`
+* :meth:`nlcpy.ndarray.cumsum`
+* :meth:`nlcpy.ndarray.dot`
+* :meth:`nlcpy.ndarray.prod`
+
+Problem Fixes
+-------------
+
+* Fixed abnormal termination that could occur when a large amount of memory were allocated.

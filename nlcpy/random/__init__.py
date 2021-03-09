@@ -41,6 +41,7 @@ from nlcpy.random.generator import seed # NOQA
 from nlcpy.random.generator import RandomState # NOQA
 
 from nlcpy.random._generator import Generator # NOQA
+from nlcpy.random._generator import BitGenerator # NOQA
 from nlcpy.random._generator import MT19937 # NOQA
 from nlcpy.random._generator import SeedSequence # NOQA
 from nlcpy.random._generator import default_rng # NOQA

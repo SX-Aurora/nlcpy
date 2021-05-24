@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"POT-Creation-Date: 2021-05-19 15:45+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,7 +192,7 @@ msgid ":obj:`nlcpy.correlate <nlcpy.correlate>`"
 msgstr ""
 
 #: ../../source/reference/statistics.rst:50:<autosummary>:1
-msgid "Cross-correlation of two 1-dimensional sequences.."
+msgid "Cross-correlation of two 1-dimensional sequences."
 msgstr ""
 
 #: ../../source/reference/statistics.rst:50:<autosummary>:1
@@ -252,7 +252,9 @@ msgid ":obj:`nlcpy.histogram_bin_edges <nlcpy.histogram_bin_edges>`"
 msgstr ""
 
 #: ../../source/reference/statistics.rst:63:<autosummary>:1
-msgid "Function to calculate only the edges of the bins used by the"
+msgid ""
+"Function to calculate only the edges of the bins used by "
+":func:`histogram` function."
 msgstr ""
 
 #: ../../source/reference/statistics.rst:63:<autosummary>:1
@@ -264,4 +266,10 @@ msgid ""
 "Return is the indices of the bins to which each value in input array "
 "belongs."
 msgstr ""
+
+#~ msgid "Cross-correlation of two 1-dimensional sequences.."
+#~ msgstr ""
+
+#~ msgid "Function to calculate only the edges of the bins used by the"
+#~ msgstr ""
 

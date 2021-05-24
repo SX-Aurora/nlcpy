@@ -518,7 +518,9 @@ cdef class VeoProc(object):
         cdef uint64_t addr
         if size > pool_threashold:
             if veo_alloc_mem(self.proc_handle, &addr, size):
-                raise MemoryError("Out of memory on VE")
+                nlcpy.request.flush()
+                if veo_alloc_mem(self.proc_handle, &addr, size):
+                    raise MemoryError("Out of memory on VE")
         else:
             v = VeoAlloc()
             addr = v.pool.reserve(<size_t>size)
@@ -648,9 +650,7 @@ _here = _path._here
 class VeoAlloc(metaclass=Singleton):
     def __init__(self):
         set_proc_init_hook(register._register_ve_kernel)
-        node_num = os.environ.get('VE_NODE_NUMBER', '0')
-        node_num = int(node_num)
-        self.proc = VeoProc(node_num)
+        self.proc = VeoProc(-1)
         self.lib = None
 
         fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')

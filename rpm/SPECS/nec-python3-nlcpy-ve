@@ -19,7 +19,7 @@ Source0:    %{product}-%{rpm_version}-%{rpm_release}.tar.gz
 #
 BuildRoot:  %(mktemp -ud %{_tmppath}/%{product}-XXXXXX)
 
-Requires:   %{requires_numpy}, nec-asl-ve-2.2.0 >= 2.2, nec-blas-ve-2.2.0 >= 2.3, nec-lapack-ve-2.2.0 >= 2.1
+Requires:   %{requires_numpy}
 AutoReqProv: no
 
 %description

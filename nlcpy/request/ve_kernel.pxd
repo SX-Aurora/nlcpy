@@ -294,7 +294,7 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         VE_FUNC_SHUFFLE
 
 
-cpdef dict funcNumList
+cdef dict funcNumList
 
 
 cdef extern from "../ve_kernel/ve_functype.h":
@@ -316,7 +316,7 @@ cdef extern from "../ve_kernel/ve_functype.h":
         MATH_OP
         RANDOM_OP
 
-cpdef dict funcTypeList
+cdef dict funcTypeList
 
 
 cdef extern from "../ve_kernel/ve_array.h":

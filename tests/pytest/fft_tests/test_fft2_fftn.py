@@ -3,10 +3,13 @@ import unittest
 import pytest      # NOQA
 
 import numpy as np
-
+from numpy.testing import assert_allclose
 import nlcpy       # NOQA
 from nlcpy import testing
 
+signed_int_types = [np.int32, np.int64]
+unsigned_int_types = [np.uint32, np.uint64]
+int_types = signed_int_types + unsigned_int_types
 global enable_nd_planning
 enable_nd_planning = True
 
@@ -50,6 +53,12 @@ def nd_planning_states(states=[True, False], name='enable_nd'):
     return decorator
 
 
+def _numpy_fftn_correct_dtype(xp, a):
+    if xp == np and a.dtype in int_types + [np.bool]:
+        a = xp.asarray(a, dtype=np.float64)
+    return a
+
+
 def _size_last_transform_axis(shape, s, axes):
     if s is not None:
         if s[-1] is not None:
@@ -72,8 +81,6 @@ def _size_last_transform_axis(shape, s, axes):
     {'shape': (2, 3, 4), 's': None, 'axes': (-1, -2, -3), 'norm': None},
     {'shape': (2, 3, 4), 's': None, 'axes': (0, 1), 'norm': None},
     {'shape': (2, 3, 4), 's': None, 'axes': None, 'norm': 'ortho'},
-    {'shape': (2, 3, 4), 's': (2, 3), 'axes': (0, 1, 2), 'norm': 'ortho'},
-    {'shape': (2, 3, 4), 's': (2, 3), 'axes': None, 'norm': 'ortho'},
     {'shape': (2, 3, 4, 5), 's': None, 'axes': None, 'norm': None},
 )
 @testing.with_requires('numpy>=1.10.0')
@@ -89,6 +96,7 @@ class TestFft2(unittest.TestCase):
         assert enable_nd_planning == enable_nd
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
         out = xp.fft.fft2(a, s=self.s, norm=self.norm)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
@@ -106,6 +114,7 @@ class TestFft2(unittest.TestCase):
         assert enable_nd_planning == enable_nd
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
         out = xp.fft.ifft2(a, s=self.s, norm=self.norm)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
@@ -115,22 +124,44 @@ class TestFft2(unittest.TestCase):
 
 class TestFft2DInvalidParam(object):
     @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             ["aaa"], [[1, 2], [3, "4"]], [],
-                             ("aaa",), ((1, 2), (3, "4")), (),
-                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
-                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+                             ["aaa"], [],
+                             ("aaa",), (),
+                             ))
     def test_fft2_param_array(self, a):
         with pytest.raises(ValueError):
             nlcpy.fft.fft2(a)
 
-    @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             [[1, 2], [3, "4"]], [],
-                             ((1, 2), (3, "4")), (),
+    @pytest.mark.parametrize('a', (
+                             [[1, 2], [3, "4"]],
+                             ((1, 2), (3, "4")),
                              ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
                              [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+    def test_fft2_param_array_U21(self, a):
+        if np.__version__ < np.lib.NumpyVersion('1.19.0'):
+            with pytest.raises(ValueError):
+                nlcpy.fft.fft2(a)
+        else:
+            assert_allclose(nlcpy.fft.fft2(a), np.fft.fft2(a))
+
+    @pytest.mark.parametrize('a', (1, 1 + 2j,
+                             ["aaa"], [],
+                             ("aaa",), (),
+                             ))
     def test_ifft2_param_array(self, a):
         with pytest.raises(ValueError):
             nlcpy.fft.ifft2(a)
+
+    @pytest.mark.parametrize('a', (
+                             [[1, 2], [3, "4"]],
+                             ((1, 2), (3, "4")),
+                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
+                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+    def test_ifft2_param_array_U21(self, a):
+        if np.__version__ < np.lib.NumpyVersion('1.19.0'):
+            with pytest.raises(ValueError):
+                nlcpy.fft.ifft2(a)
+        else:
+            assert_allclose(nlcpy.fft.ifft2(a), np.fft.ifft2(a))
 
     @pytest.mark.parametrize('param', (
                              ([[1, 2, 3], [4, 5, 6]], (-1, -3)),
@@ -172,6 +203,28 @@ class TestFft2DInvalidParam(object):
         with pytest.raises(ValueError):
             nlcpy.fft.ifft2([[1, 2, 3], [4, 5, 6]], s=s)
 
+    @pytest.mark.parametrize('norm', (None, 'ortho'))
+    @pytest.mark.parametrize('param', (
+                             ((2, 3), (0, 1, 2)),
+                             ((2,), (0, 1, 2)),
+                             ((2,), (0, 1))
+                             ))
+    def test_fft2_invalid_axes_s(self, param, norm):
+        a = nlcpy.arange(24).reshape(2, 3, 4)
+        with pytest.raises(ValueError):
+            nlcpy.fft.fft2(a, s=param[0], axes=param[1], norm=norm)
+
+    @pytest.mark.parametrize('norm', (None, 'ortho'))
+    @pytest.mark.parametrize('param', (
+                             ((2, 3), (0, 1, 2)),
+                             ((2,), (0, 1, 2)),
+                             ((2,), (0, 1))
+                             ))
+    def test_ifft2_invalid_axes_s(self, param, norm):
+        a = nlcpy.arange(24).reshape(2, 3, 4)
+        with pytest.raises(ValueError):
+            nlcpy.fft.ifft2(a, s=param[0], axes=param[1], norm=norm)
+
 
 @testing.parameterize(
     {'shape': (3, 4), 's': None, 'axes': None, 'norm': None},
@@ -198,8 +251,6 @@ class TestFft2DInvalidParam(object):
     {'shape': (2, 3, 4), 's': None, 'axes': (-1, -3, -2), 'norm': 'ortho'},
     {'shape': (2, 3, 4), 's': None, 'axes': (0, 1), 'norm': None},
     {'shape': (2, 3, 4), 's': None, 'axes': (0, 1), 'norm': 'ortho'},
-    {'shape': (2, 3, 4), 's': (2, 3), 'axes': (0, 1, 2), 'norm': None},
-    {'shape': (2, 3, 4), 's': (2, 3), 'axes': (0, 1, 2), 'norm': 'ortho'},
     {'shape': (2, 3, 4, 5), 's': None, 'axes': None, 'norm': None},
     {'shape': (2, 3, 4, 5, 6), 's': None, 'axes': (0, 1, 2, 3), 'norm': None},
     {'shape': (2, 3, 4, 5, 6), 's': None, 'axes': (3, 2, 1, 0), 'norm': None},
@@ -221,6 +272,7 @@ class TestFftn(unittest.TestCase):
         assert enable_nd_planning == enable_nd
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
         out = xp.fft.fftn(a, s=self.s, axes=self.axes, norm=self.norm)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
@@ -238,6 +290,7 @@ class TestFftn(unittest.TestCase):
         assert enable_nd_planning == enable_nd
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
         out = xp.fft.ifftn(a, s=self.s, axes=self.axes, norm=self.norm)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:

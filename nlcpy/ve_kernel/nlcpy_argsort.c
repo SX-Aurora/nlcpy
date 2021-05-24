@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,7 @@
 */
 
 #include "nlcpy.h"
+
 
 
 /****************************
@@ -59,8 +60,8 @@ uint64_t nlcpy_argsort_bool(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -137,7 +138,7 @@ uint64_t nlcpy_argsort_bool(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -159,12 +160,30 @@ uint64_t nlcpy_argsort_bool(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -188,8 +207,8 @@ uint64_t nlcpy_argsort_i32(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -266,7 +285,7 @@ uint64_t nlcpy_argsort_i32(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -288,12 +307,30 @@ uint64_t nlcpy_argsort_i32(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -317,8 +354,8 @@ uint64_t nlcpy_argsort_i64(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -395,7 +432,7 @@ uint64_t nlcpy_argsort_i64(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -417,12 +454,30 @@ uint64_t nlcpy_argsort_i64(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -446,8 +501,8 @@ uint64_t nlcpy_argsort_u32(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -524,7 +579,7 @@ uint64_t nlcpy_argsort_u32(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -546,12 +601,30 @@ uint64_t nlcpy_argsort_u32(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -575,8 +648,8 @@ uint64_t nlcpy_argsort_u64(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -653,7 +726,7 @@ uint64_t nlcpy_argsort_u64(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -675,12 +748,30 @@ uint64_t nlcpy_argsort_u64(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -704,8 +795,8 @@ uint64_t nlcpy_argsort_f32(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -782,7 +873,7 @@ uint64_t nlcpy_argsort_f32(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -804,12 +895,30 @@ uint64_t nlcpy_argsort_f32(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -833,8 +942,8 @@ uint64_t nlcpy_argsort_f64(ve_array *val, ve_array *idx, int32_t *psw)
 #endif /* _OPENMP */
 {
     pval[0] = 0;
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -911,7 +1020,7 @@ uint64_t nlcpy_argsort_f64(ve_array *val, ve_array *idx, int32_t *psw)
         /* set strides */
         asl_err = asl_sort_set_input_key_long_stride(sort, ival0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ival = cnt * val->strides[n_outer] / val->itemsize;
             iidx = cnt * idx->strides[n_outer] / idx->itemsize;
@@ -933,12 +1042,30 @@ uint64_t nlcpy_argsort_f64(ve_array *val, ve_array *idx, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
+
+#ifdef _OPENMP
+    const int nt = omp_get_max_threads();
+#else
+    const int nt = 1;
+#endif /* _OPENMP */
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -950,7 +1077,7 @@ uint64_t nlcpy_argsort(ve_arguments *args, int32_t *psw)
     ve_array *val = &(args->unary.x);
     ve_array *idx = &(args->unary.z);
     uint64_t err = NLCPY_ERROR_OK;
-    
+
     switch (val->dtype) {
     case ve_bool: err = nlcpy_argsort_bool (val, idx, psw); break;
     case ve_i32:  err = nlcpy_argsort_i32 (val, idx, psw); break;

@@ -32,7 +32,7 @@
 from nlcpy.request.ve_kernel cimport *
 
 
-cpdef dict funcNumList = {
+cdef dict funcNumList = {
     # binary functionss
     "nlcpy_add": ve_funcnum.VE_FUNC_ADD,
     "nlcpy_subtract": ve_funcnum.VE_FUNC_SUBTRACT,
@@ -292,7 +292,7 @@ cpdef dict funcNumList = {
 }
 
 
-cpdef dict funcTypeList = {
+cdef dict funcTypeList = {
     "binary_op": ve_functype.BINARY_OP,
     "unary_op": ve_functype.UNARY_OP,
     "indexing_op": ve_functype.INDEXING_OP,

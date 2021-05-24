@@ -1,0 +1,17 @@
+============================================
+What's new in Version 1.0.1 (May 31, 2021)
+============================================
+
+.. currentmodule:: nlcpy
+
+Problem Fixes
+-------------
+
+* Fixed abnormal termination that could occur when a Python script using NLCPy is executed by a batch scheduler.
+* Fixed a problem that stalls when a multi-dimensional :class:`ndarray` is specified as a parameter to :func:`sort` .
+
+
+Function Enhancements
+---------------------
+
+* Improved a part of the memory allocation logic during the lazy evaluation.

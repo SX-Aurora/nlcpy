@@ -14,8 +14,8 @@
 Before the installation, the following components are required to be installed on your x86 Node of SX-Aurora TSUBASA.
 
 - [NEC SDK](https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf)
-	- required NEC C/C++ compiler version: >= 3.1.1
-	- required NLC version: >= 2.2.0
+	- required NEC C/C++ compiler version: >= 3.2.1
+	- required NLC version: >= 2.3.0
 
 - [Alternative VE Offloading (AVEO)](https://www.hpc.nec/documents/veos/en/aveo/index.html)
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-12 11:33+0900\n"
+"POT-Creation-Date: 2021-05-19 15:45+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,12 +84,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/installation.rst:42
-msgid "required NEC C/C++ compiler version: >= 3.1.1"
-msgstr "必要なNEC C/C++ コンパイラバージョン: >= 3.1.1"
+msgid "required NEC C/C++ compiler version: >= 3.2.1"
+msgstr "必要なNEC C/C++ コンパイラバージョン: >= 3.2.1"
 
 #: ../../source/installation.rst:43
-msgid "required NLC version: >= 2.2.0"
-msgstr "必要なNLCバージョン: >= 2.2.0"
+msgid "required NLC version: >= 2.3.0"
+msgstr "必要なNLCバージョン: >= 2.3.0"
 
 #: ../../source/installation.rst
 msgid ""
@@ -99,11 +99,11 @@ msgstr ""
 "`Alternative VE Offloading (AVEO) "
 "<https://www.hpc.nec/documents/veos/en/aveo/index.html>`_"
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:49
 msgid ""
-"The following installation of AVEO is not necessary if VEOS 2.5.1 or later is installed on your machine."
-msgstr ""
-"VEOS 2.5.1以降がマシンにインストールされていれば、以下のAVEOパッケージのインストールは不要です。"
+"The following installation of AVEO is not necessary if VEOS 2.5.1 or "
+"later is installed on your machine."
+msgstr "VEOS 2.5.1以降がマシンにインストールされていれば、以下のAVEOパッケージのインストールは不要です。"
 
 #: ../../source/installation.rst
 msgid ""
@@ -169,17 +169,17 @@ msgstr "`GitHub <https://github.com/SX-Aurora/nlcpy/>`_ からwheelパッケー�
 msgid "Put the wheel package to your any directory."
 msgstr "wheelパッケージを任意のディレクトリに配置"
 
-#: ../../source/installation.rst:89
+#: ../../source/installation.rst:90
 msgid "Install the local wheel package via pip command."
 msgstr "pipコマンドを使用してローカルのwheelパッケージをインストール"
 
 #: ../../source/installation.rst:96
 msgid ""
 "The shared objects for Vector Engine, which are included in the wheel "
-"package, are compiled and tested by using NEC C/C++ Version 3.1.1 and "
+"package, are compiled and tested by using NEC C/C++ Version 3.2.1 and "
 "NumPy v1.17.4."
 msgstr ""
-"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ バージョン3.1.1とNumPy "
+"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ バージョン3.2.1とNumPy "
 "v1.17.4を使用してコンパイルおよびテストしています。"
 
 #: ../../source/installation.rst:100

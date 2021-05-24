@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"POT-Creation-Date: 2021-05-19 15:45+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -208,7 +208,7 @@ msgid ":obj:`nlcpy.prod <nlcpy.prod>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
-msgid "Return the product of array elements over a given axis."
+msgid "Returns the product of array elements over a given axis."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
@@ -554,4 +554,7 @@ msgstr ""
 #: ../../source/reference/mathematical.rst:129:<autosummary>:1
 msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
 msgstr ""
+
+#~ msgid "Return the product of array elements over a given axis."
+#~ msgstr ""
 

@@ -30,6 +30,7 @@
 #
 
 import time
+import functools
 
 # profiling status
 NOT_PROFILING = 0
@@ -170,10 +171,13 @@ def stop_profiling():
 
 
 def profile_alloc_mem(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)
         pre_wait_result = _prof.t_wait_result
+        pre_write_mem = _prof.t_write_mem
+        pre_free_mem = _prof.t_free_mem
         s = time.time()
         res = func(*args, **kwargs)
         e = time.time()
@@ -181,11 +185,16 @@ def profile_alloc_mem(func):
         _prof.t_alloc_mem += (e - s)
         if pre_wait_result != _prof.t_wait_result:
             _prof.t_alloc_mem -= (_prof.t_wait_result - pre_wait_result)
+        if pre_write_mem != _prof.t_write_mem:
+            _prof.t_alloc_mem -= (_prof.t_write_mem - pre_write_mem)
+        if pre_free_mem != _prof.t_free_mem:
+            _prof.t_free_mem -= (_prof.t_free_mem - pre_free_mem)
         return res
     return wrap_func
 
 
 def profile_free_mem(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)
@@ -199,6 +208,7 @@ def profile_free_mem(func):
 
 
 def profile_write_mem(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)
@@ -212,6 +222,7 @@ def profile_write_mem(func):
 
 
 def profile_read_mem(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)
@@ -225,6 +236,7 @@ def profile_read_mem(func):
 
 
 def profile_wait_result(func):
+    @functools.wraps(func)
     def wrap_func(*args, **kwargs):
         if _prof.status != UNDER_PROFILING:
             return func(*args, **kwargs)

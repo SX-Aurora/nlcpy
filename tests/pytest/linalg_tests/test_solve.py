@@ -279,11 +279,10 @@ class TestLstsqFailure(unittest.TestCase):
         return xp.linalg.lstsq(a, b)
 
     def test_lstsq_not_converge(self):
-        try:
-            nlcpy.linalg.lstsq(nlcpy.ones([200, 200]), nlcpy.zeros([200, 1]))
-            raise ValueError
-        except nlcpy.linalg.LinAlgError:
-            pass
+        a = nlcpy.ones([200, 200])
+        a[0, 0] = nlcpy.nan
+        with self.assertRaises(nlcpy.linalg.LinAlgError):
+            nlcpy.linalg.lstsq(a, nlcpy.zeros([200, 1]))
 
 
 @testing.parameterize(*(

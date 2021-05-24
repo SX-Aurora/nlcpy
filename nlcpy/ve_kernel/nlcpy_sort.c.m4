@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -58,8 +58,8 @@ uint64_t nlcpy_sort_$1(ve_array *x, int32_t *psw)
 #endif /* _OPENMP */
 {
         /* noting to do */
-} /* omp single */ 
-   
+} /* omp single */
+
 /////////
 // 1-d //
 /////////
@@ -137,7 +137,7 @@ uint64_t nlcpy_sort_$1(ve_array *x, int32_t *psw)
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
         asl_err = asl_sort_set_output_key_long_stride(sort, ix0);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
- 
+
         for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
             ix = cnt * x->strides[n_outer] / x->itemsize;
             for (;;) {
@@ -156,6 +156,9 @@ uint64_t nlcpy_sort_$1(ve_array *x, int32_t *psw)
                 if (k < 1) break;
             }
         }
+#ifdef _OPENMP
+#pragma omp barrier
+#endif /* _OPENMP */
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -163,17 +166,24 @@ uint64_t nlcpy_sort_$1(ve_array *x, int32_t *psw)
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
-    /* restore thread count */
 #ifdef _OPENMP
     const int nt = omp_get_max_threads();
 #else
     const int nt = 1;
 #endif /* _OPENMP */
-    asl_library_set_thread_count(nt);
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+    /* restore thread count */
+    asl_err = asl_library_set_thread_count(nt);
+    if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
+}
 
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
+
 
 @-->)dnl
 macro_asl_sort(bool,int32_t,i32)dnl
@@ -189,7 +199,7 @@ uint64_t nlcpy_sort(ve_arguments *args, int32_t *psw)
 {
     ve_array *x = &(args->single.x);
     uint64_t err = NLCPY_ERROR_OK;
-    
+
     switch (x->dtype) {
     case ve_bool: err = nlcpy_sort_bool (x, psw); break;
     case ve_i32:  err = nlcpy_sort_i32 (x, psw); break;

@@ -69,9 +69,11 @@ def _lange(x, norm, axis):
     if x.size == 0:
         shape = [x.shape[i] for i in set(range(x.ndim)) - set(axis)]
         return nlcpy.zeros(shape, dtype=dtype)
-    if norm in (None, 'fro'):
-        norm = 'F'
-    elif norm == nlcpy.inf:
+    if norm in (None, 'fro', 'f'):
+        if x.dtype.kind == 'c':
+            x = abs(x)
+        return nlcpy.sqrt(nlcpy.sum(x * x, axis=axis))
+    if norm == nlcpy.inf:
         norm = 'I'
     else:
         norm = '1'

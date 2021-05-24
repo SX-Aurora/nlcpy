@@ -107,7 +107,7 @@ cpdef inline bint get_c_contiguity(
         vector[Py_ssize_t]& strides,
         Py_ssize_t itemsize):
     cdef vector[Py_ssize_t] r_shape, r_strides
-    cpdef Py_ssize_t ndim
+    cdef Py_ssize_t ndim
     ndim = strides.size()
     if ndim == 0 or (ndim == 1 and strides[0] == itemsize):
         return True
@@ -216,8 +216,8 @@ cpdef inline Py_ssize_t _extract_slice_element(x) except? 0:
 
 
 cpdef slice complete_slice(slice slc, Py_ssize_t dim):
-    cpdef Py_ssize_t start=0, stop=0, step=0
-    cpdef bint start_none, stop_none
+    cdef Py_ssize_t start=0, stop=0, step=0
+    cdef bint start_none, stop_none
     if slc.step is None:
         step = 1
     else:

@@ -1,0 +1,47 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-05-19 16:06+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/release_notes/v1.0.1.rst:3
+msgid "What's new in Version 1.0.1 (May 31, 2021)"
+msgstr "バージョン1.0.1の更新事項（2021年5月31日）"
+
+#: ../../source/release_notes/v1.0.1.rst:8
+msgid "Problem Fixes"
+msgstr "不具合修正"
+
+#: ../../source/release_notes/v1.0.1.rst:10
+msgid ""
+"Fixed abnormal termination that could occur when a Python script using "
+"NLCPy is executed by a batch scheduler."
+msgstr "バッチ環境で実行に失敗する不具合を修正"
+
+#: ../../source/release_notes/v1.0.1.rst:11
+msgid ""
+"Fixed a problem that stalls when a multi-dimensional :class:`ndarray` is "
+"specified as a parameter to :func:`sort` ."
+msgstr ":func:`sort` に多次元の :class:`ndarray` が指定された時にストールする不具合を修正"
+
+#: ../../source/release_notes/v1.0.1.rst:15
+msgid "Function Enhancements"
+msgstr "機能強化"
+
+#: ../../source/release_notes/v1.0.1.rst:17
+msgid "Improved a part of the memory allocation logic during the lazy evaluation."
+msgstr "遅延評価時のメモリ確保のロジックの一部を改善"
+

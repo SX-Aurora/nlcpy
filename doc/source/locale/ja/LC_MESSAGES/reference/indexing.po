@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"POT-Creation-Date: 2021-06-17 17:08+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/reference/indexing.rst:2
 msgid "Indexing Routines"
@@ -29,47 +29,77 @@ msgstr ""
 msgid "Generating Index Arrays"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:15:<autosummary>:1
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
+msgid ":obj:`nlcpy.diag_indices <nlcpy.diag_indices>`"
+msgstr ""
+
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
+msgid "Returns the indices to access the main diagonal of an array."
+msgstr ""
+
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
 msgid ":obj:`nlcpy.nonzero <nlcpy.nonzero>`"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:15:<autosummary>:1
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
 msgid "Returns the indices of the elements that are non-zero."
 msgstr ""
 
-#: ../../source/reference/indexing.rst:15:<autosummary>:1
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
 msgid ":obj:`nlcpy.where <nlcpy.where>`"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:15:<autosummary>:1
+#: ../../source/reference/indexing.rst:16:<autosummary>:1
 msgid "Returns elements chosen from *x* or *y* depending on *condition*."
 msgstr ""
 
-#: ../../source/reference/indexing.rst:17
+#: ../../source/reference/indexing.rst:18
 msgid "Indexing-like Operations"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid ":obj:`nlcpy.diag <nlcpy.diag>`"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid "Extracts a diagonal or constructs a diagonal array."
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid ":obj:`nlcpy.diagonal <nlcpy.diagonal>`"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid "Returns specified diagonals."
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
+msgid ":obj:`nlcpy.select <nlcpy.select>`"
+msgstr ""
+
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
+msgid ""
+"Returns an array drawn from elements in choicelist, depending on "
+"conditions."
+msgstr ""
+
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid ":obj:`nlcpy.take <nlcpy.take>`"
 msgstr ""
 
-#: ../../source/reference/indexing.rst:25:<autosummary>:1
+#: ../../source/reference/indexing.rst:28:<autosummary>:1
 msgid "Takes elements from an array along an axis."
+msgstr ""
+
+#: ../../source/reference/indexing.rst:30
+msgid "Inserting data into arrays"
+msgstr ""
+
+#: ../../source/reference/indexing.rst:36:<autosummary>:1
+msgid ":obj:`nlcpy.fill_diagonal <nlcpy.fill_diagonal>`"
+msgstr ""
+
+#: ../../source/reference/indexing.rst:36:<autosummary>:1
+msgid "Fills the main diagonal of the given array of any dimensionality."
 msgstr ""
 

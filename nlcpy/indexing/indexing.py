@@ -30,6 +30,7 @@
 #
 
 import nlcpy
+import numpy
 
 
 def take(a, indices, axis=None, out=None, mode='raise'):
@@ -175,3 +176,78 @@ def diagonal(a, offset=0, axis1=0, axis2=1):
     """
     a = nlcpy.asarray(a)
     return a.diagonal(offset, axis1, axis2)
+
+
+def select(condlist, choicelist, default=0):
+    """Returns an array drawn from elements in choicelist, depending on conditions.
+
+    Parameters
+    ----------
+    condlist : list of bool ndarrays
+        The list of conditions which determine from which array in *choicelist* the
+        output elements are taken. When multiple conditions are satisfied, the first
+        one encountered in *condlist* is used.
+    choicelist : list of ndarrays
+        The list of arrays from which the output elements are taken.
+        It has to be of the same length as *condlist*.
+    default : scalar, optional
+        The element inserted in *output* when all conditions evaluate to False.
+
+    Returns
+    -------
+    output : ndarray
+        The output at position m is the m-th element of the array in *choicelist* where
+        the m-th element of the corresponding array in *condlist* is True.
+
+    See Also
+    --------
+    where : Returns elements chosen from *x* or *y* depending on *condition*.
+    take : Takes elements from an array along an axis.
+    diag : Extracts a diagonal or construct a diagonal array.
+    diagonal : Returns specified diagonals.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(10)
+    >>> condlist = [x<3, x>5]
+    >>> choicelist = [x, x**2]
+    >>> vp.select(condlist, choicelist)
+    array([ 0,  1,  2,  0,  0,  0, 36, 49, 64, 81])
+    """
+    if len(condlist) != len(choicelist):
+        raise ValueError(
+            'list of cases must be same length as list of conditions')
+
+    if len(condlist) == 0:
+        raise ValueError("select with an empty condition list is not possible")
+
+    choicelist = list(choicelist)
+    if numpy.isscalar(default):
+        default = numpy.asarray(default)
+    else:
+        default = nlcpy.asarray(default)
+    choicelist.append(default)
+    dtype = numpy.result_type(*choicelist)
+
+    condlist = nlcpy.broadcast_arrays(*condlist)
+    choicelist = nlcpy.broadcast_arrays(*choicelist)
+
+    for i in range(len(condlist)):
+        cond = condlist[i]
+        if cond.dtype.type is not nlcpy.bool_:
+            raise TypeError(
+                'invalid entry {} in condlist: should be boolean ndarray'.format(i))
+
+    if choicelist[0].ndim == 0:
+        result_shape = condlist[0].shape
+    else:
+        result_shape = nlcpy.broadcast_arrays(condlist[0], choicelist[0])[0].shape
+
+    result = nlcpy.full(result_shape, choicelist[-1], dtype=dtype)
+
+    choicelist = choicelist[-2::-1]
+    condlist = condlist[::-1]
+    for choice, cond in zip(choicelist, condlist):
+        nlcpy.copyto(result, choice, where=cond)
+    return result

@@ -81,6 +81,7 @@ cdef extern from "<ve_offload.h>":
     veo_thr_ctxt *veo_context_open(veo_proc_handle *)
     int veo_context_close(veo_thr_ctxt *)
     int veo_get_context_state(veo_thr_ctxt *)
+    void veo_context_sync(veo_thr_ctxt *ctx)
     veo_args *veo_args_alloc()
     int veo_args_set_u64(veo_args *, int, uint64_t)
     int veo_args_set_i64(veo_args *, int, int64_t)

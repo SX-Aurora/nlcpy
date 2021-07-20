@@ -564,6 +564,8 @@ def full(shape, fill_value, dtype=None, order='C'):
 
     if dtype is None:
         dtype = numpy.result_type(fill_value)
+    else:
+        dtype = nlcpy.dtype(dtype)
 
     if numpy.isscalar(fill_value):
         if numpy.iscomplex(fill_value):
@@ -581,8 +583,9 @@ def full(shape, fill_value, dtype=None, order='C'):
         raise NotImplementedError('fill_value in nlcpy.full is None')
 
     else:
-        fill_value = nlcpy.array(fill_value)
-        out = nlcpy.broadcast_to(fill_value, shape=shape)
+        fill_value = nlcpy.asarray(fill_value)
+        out = nlcpy.array(
+            nlcpy.broadcast_to(fill_value, shape=shape), dtype=dtype, order=order)
 
     return out
 
@@ -649,6 +652,8 @@ def full_like(a, fill_value, dtype=None, order='K', subok=False, shape=None):
         shape = a.shape
     if dtype is None:
         dtype = a.dtype
+    else:
+        dtype = nlcpy.dtype(dtype)
 
     if numpy.dtype(dtype).kind == 'V':
         raise NotImplementedError('void dtype in full_like is not implemented yet.')
@@ -675,7 +680,8 @@ def full_like(a, fill_value, dtype=None, order='K', subok=False, shape=None):
         raise NotImplementedError('fill_value in nlcpy.full_like is None')
 
     else:
-        fill_value = nlcpy.array(fill_value)
-        out = nlcpy.broadcast_to(fill_value, shape=shape)
+        fill_value = nlcpy.asarray(fill_value)
+        out = nlcpy.array(
+            nlcpy.broadcast_to(fill_value, shape=shape), dtype=dtype, order=order)
 
     return out

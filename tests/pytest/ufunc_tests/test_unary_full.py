@@ -73,7 +73,11 @@ float16_op_set = [
 minval = -100
 maxval = 100
 
-shapes = [(4, 2), ]
+shapes = [(4, ),
+          (4, 2),
+          (4, 2, 3),
+          (4, 2, 3, 5), ]
+
 
 orders = ['C', 'F']
 order_op = ['C', 'F', 'A', 'K', None]

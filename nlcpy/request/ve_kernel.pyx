@@ -133,6 +133,7 @@ cdef dict funcNumList = {
     "nlcpy_prepare_indexing": ve_funcnum.VE_FUNC_PREPARE_INDEXING,
     "nlcpy_scatter_update": ve_funcnum.VE_FUNC_SCATTER_UPDATE,
     "nlcpy_where": ve_funcnum.VE_FUNC_WHERE,
+    "nlcpy_fill_diagonal": ve_funcnum.VE_FUNC_FILL_DIAGONAL,
 
     #  creation functions
     "nlcpy_arange": ve_funcnum.VE_FUNC_ARANGE,
@@ -140,12 +141,15 @@ cdef dict funcNumList = {
     "nlcpy_eye": ve_funcnum.VE_FUNC_EYE,
     "nlcpy_linspace": ve_funcnum.VE_FUNC_LINSPACE,
     "nlcpy_copy_masked": ve_funcnum.VE_FUNC_COPY_MASKED,
+    "nlcpy_tri": ve_funcnum.VE_FUNC_TRI,
 
     #  manipulation functions
+    "nlcpy_block": ve_funcnum.VE_FUNC_BLOCK,
     "nlcpy_delete": ve_funcnum.VE_FUNC_DELETE,
     "nlcpy_tile": ve_funcnum.VE_FUNC_TILE,
     "nlcpy_repeat": ve_funcnum.VE_FUNC_REPEAT,
     "nlcpy_insert": ve_funcnum.VE_FUNC_INSERT,
+    "nlcpy_roll": ve_funcnum.VE_FUNC_ROLL,
 
     #  cblas wrapper functions
     "wrapper_cblas_sdot": ve_funcnum.VE_FUNC_CBLAS_SDOT,
@@ -284,11 +288,14 @@ cdef dict funcNumList = {
     #  sorting functions
     "nlcpy_sort": ve_funcnum.VE_FUNC_SORT,
     "nlcpy_argsort": ve_funcnum.VE_FUNC_ARGSORT,
+    "nlcpy_sort_multi": ve_funcnum.VE_FUNC_SORT_MULTI,
     #  math functions
     "nlcpy_diff": ve_funcnum.VE_FUNC_DIFF,
+    "nlcpy_clip": ve_funcnum.VE_FUNC_CLIP,
     #  random functions
     "nlcpy_random_shuffle": ve_funcnum.VE_FUNC_SHUFFLE,
-
+    #  sca functions
+    "nlcpy_sca_code_execute": ve_funcnum.VE_FUNC_SCA_EXECUTE,
 }
 
 
@@ -309,6 +316,7 @@ cdef dict funcTypeList = {
     "sorting_op": ve_functype.SORTING_OP,
     "math_op": ve_functype.MATH_OP,
     "random_op": ve_functype.RANDOM_OP,
+    "sca_op": ve_functype.SCA_OP,
 }
 
 
@@ -329,5 +337,7 @@ cpdef check_error(uint64_t err):
         raise RuntimeError('invalid index was detected in VE kernel.')
     elif err & NLCPY_ERROR_ASL:
         raise RuntimeError('ASL error was detected in VE kernel.')
+    elif err & NLCPY_ERROR_SCA:
+        raise RuntimeError('SCA error was detected in VE kernel.')
     else:
         raise RuntimeError('unknown error was detected in VE kernel.')

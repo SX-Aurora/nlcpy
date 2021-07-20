@@ -57,3 +57,5 @@ cdef ndarray _ndarray_real_setter(ndarray self, value)
 
 cdef ndarray _ndarray_imag_getter(ndarray self)
 cdef ndarray _ndarray_imag_setter(ndarray self, value)
+cpdef ndarray _ndarray_clip(
+    ndarray self, a_min, a_max, out, dtype, order, where, casting)

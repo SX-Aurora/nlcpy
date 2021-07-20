@@ -63,10 +63,9 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
 
     dtype_out = numpy.result_type(x.dtype, y.dtype)
 
-    v = veo.VeoAlloc()
-
     if out is None:
         out = nlcpy.ndarray(shape=(), dtype=dtype_out)
+    out.fill(0)
 
     if x.dtype == numpy.float32 and y.dtype == numpy.float32:
         request._push_request(
@@ -93,7 +92,7 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
             (x, y, out),
         )
     elif dtype_out not in (
-        numpy.bool_, numpy.int8, numpy.int16,
+        numpy.int8, numpy.int16,
         numpy.uint8, numpy.uint16, numpy.float16
     ):
         request._push_request(
@@ -283,12 +282,6 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
                     alpha, a, k1, b, n,
                     beta, c, m
                 )
-        """
-        request.flush()
-        v = veo.VeoAlloc()
-        req = v.lib.func[<char*>"cblas_dgemm"](v.ctx, *args)
-        req.wait_result()
-        """
         request._push_request(
             "wrapper_cblas_dgemm",
             "cblas_op",
@@ -380,12 +373,6 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
                     alpha, a, k1, b, n,
                     beta, c, m
                 )
-        """
-        request.flush()
-        v = veo.VeoAlloc()
-        req = v.lib.func[<char*>"cblas_sgemm"](v.ctx, *args)
-        req.wait_result()
-        """
         request._push_request(
             "wrapper_cblas_sgemm",
             "cblas_op",
@@ -477,12 +464,6 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
                     alpha, a, k1, b, n,
                     beta, c, m
                 )
-        """
-        request.flush()
-        v = veo.VeoAlloc()
-        req = v.lib.func[<char*>"cblas_zgemm"](v.ctx, *args)
-        req.wait_result()
-        """
         request._push_request(
             "wrapper_cblas_zgemm",
             "cblas_op",
@@ -574,12 +555,6 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
                     alpha, a, k1, b, n,
                     beta, c, m
                 )
-        """
-        request.flush()
-        v = veo.VeoAlloc()
-        req = v.lib.func[<char*>"cblas_cgemm"](v.ctx, *args)
-        req.wait_result()
-        """
         request._push_request(
             "wrapper_cblas_cgemm",
             "cblas_op",

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -42,7 +42,7 @@ include(macros.m4)dnl
  * **************************/
 
 define(<--@macro_unary_operator@-->,<--@
-uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -54,7 +54,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, 
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -63,7 +63,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, 
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -79,8 +79,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, 
                 @UNARY_OPERATOR@(*px,*py,$1)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],$1)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],$1)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -120,7 +144,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, 
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -196,30 +220,30 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t where_flag, 
 
 
 @-->)dnl
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 macro_unary_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 macro_unary_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 macro_unary_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 macro_unary_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 macro_unary_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 macro_unary_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 macro_unary_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 macro_unary_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 macro_unary_operator(bool,int32_t)dnl
 #endif

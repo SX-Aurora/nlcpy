@@ -11,7 +11,7 @@ NLCPy is a library for accelerating performance of Python scripts using NumPy on
     :width: 320px
     :align: center
 
-NLCPy enables Python scripts to compute on a Vector Engine (VE) of SX-Aurora TSUBASA by VE offloading. To gain the performance on VE, NLCPy uses the functions of NEC Numeric Library Collection (NLC), which are highly optimized on it.
+NLCPy enables Python scripts to compute on a Vector Engine (VE) of SX-Aurora TSUBASA by VE offloading. To gain the performance on VE, NLCPy uses the functions of NEC Numeric Library Collection (NLC), which are highly optimized for VE.
 
 .. toctree::
     :maxdepth: 1

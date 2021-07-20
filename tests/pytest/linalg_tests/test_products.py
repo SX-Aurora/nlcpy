@@ -52,7 +52,6 @@
 import unittest
 
 import numpy
-import nlcpy
 from nlcpy import testing
 
 
@@ -117,16 +116,6 @@ class TestInner_broadcast(unittest.TestCase):
         a = xp.asarray(testing.shaped_random((1000,), xp), order=order)
         b = testing.shaped_random((1,), xp)[0]
         return xp.inner(a, b)
-
-
-class TestInnerFailure(unittest.TestCase):
-    def test_inner_1d_bool(self):
-        with self.assertRaises(TypeError):
-            nlcpy.inner([True], [False])
-
-    def test_inner_2d(self):
-        with self.assertRaises(NotImplementedError):
-            nlcpy.inner(nlcpy.empty([2, 2]), nlcpy.empty([2, 2]))
 
 
 @testing.parameterize(*(
@@ -220,3 +209,208 @@ class TestOuterFailure(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_outer_incompatible_out(self, xp):
         return xp.outer(1, 2, xp.empty(1))
+
+
+@testing.parameterize(*(
+    testing.product({
+        'shape': [
+            ((2, 3, 4), (3, 4, 2)),
+            ((1, 1), (1, 1)),
+            ((1, 1), (1, 2)),
+            ((1, 2), (2, 1)),
+            ((2, 1), (1, 1)),
+            ((1, 2), (2, 3)),
+            ((2, 1), (1, 3)),
+            ((2, 3), (3, 1)),
+            ((2, 3), (3, 4)),
+            ((0, 3), (3, 4)),
+            ((2, 3), (3, 0)),
+            ((0, 3), (3, 0)),
+            ((3, 0), (0, 4)),
+            ((2, 3, 0), (3, 0, 2)),
+            ((0, 0), (0, 0)),
+            ((3,), (3,)),
+            ((2,), (2, 4)),
+            ((4, 2), (2,)),
+            ((), ()),
+            ((), (2, 4)),
+            ((4, 2), ()),
+        ],
+    })
+))
+class TestDot(unittest.TestCase):
+
+    @testing.for_dtypes('?fF', name='dt_a')
+    @testing.for_dtypes('?fF', name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5, contiguous_check=False)
+    def test_dot_single(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        if numpy.result_type(dt_a, dt_b).char not in 'fF':
+            return 0
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        return xp.dot(a, b)
+
+    @testing.for_all_dtypes(name='dt_a')
+    @testing.for_all_dtypes(name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_allclose(atol=1e-12, rtol=1e-12, contiguous_check=False)
+    def test_dot_double(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        if numpy.result_type(dt_a, dt_b).char not in 'dD':
+            return 0
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        return xp.dot(a, b)
+
+    @testing.for_dtypes('?ilIL', name='dt_a')
+    @testing.for_dtypes('?ilIL', name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_array_equal()
+    def test_dot_int(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        return xp.dot(a, b)
+
+    @testing.for_dtypes('?fF', name='dt_a')
+    @testing.for_dtypes('?fF', name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5, contiguous_check=False)
+    def test_dot_single_with_out(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        dt_out = numpy.result_type(dt_a, dt_b)
+        if dt_out.char not in 'fF':
+            return 0
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        if a.ndim == 0:
+            shape_out = b.shape
+        elif b.ndim == 0:
+            shape_out = a.shape
+        elif a.ndim == 1 and b.ndim == 1:
+            shape_out = ()
+        elif b.ndim == 1:
+            shape_out = shape_a[:-1]
+        elif a.ndim == 1:
+            shape_out = shape_b[:-2] + shape_b[-1:]
+        else:
+            shape_out = shape_a[:-1] + shape_b[:-2] + shape_b[-1:]
+        out = xp.empty(shape_out, dt_out)
+        return xp.dot(a, b, out)
+
+    @testing.for_all_dtypes(name='dt_a')
+    @testing.for_all_dtypes(name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_allclose(atol=1e-12, rtol=1e-12, contiguous_check=False)
+    def test_dot_double_with_out(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        dt_out = numpy.result_type(dt_a, dt_b)
+        if dt_out.char not in ('dD'):
+            return 0
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        if a.ndim == 0:
+            shape_out = b.shape
+        elif b.ndim == 0:
+            shape_out = a.shape
+        elif a.ndim == 1 and b.ndim == 1:
+            shape_out = ()
+        elif b.ndim == 1:
+            shape_out = shape_a[:-1]
+        elif a.ndim == 1:
+            shape_out = shape_b[:-2] + shape_b[-1:]
+        else:
+            shape_out = shape_a[:-1] + shape_b[:-2] + shape_b[-1:]
+        out = xp.empty(shape_out, dt_out)
+        return xp.dot(a, b, out)
+
+    @testing.for_dtypes('?ilIL', name='dt_a')
+    @testing.for_dtypes('?ilIL', name='dt_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_array_equal()
+    def test_dot_int_with_out(self, xp, dt_a, dt_b, order_a, order_b):
+        dt_a = xp.dtype(dt_a)
+        dt_b = xp.dtype(dt_b)
+        dt_out = numpy.result_type(dt_a, dt_b)
+        shape_a, shape_b = self.shape
+        a = xp.asarray(
+            xp.arange(xp.prod(shape_a)).reshape(shape_a), dtype=dt_a, order=order_a)
+        b = xp.asarray(
+            xp.arange(xp.prod(shape_b)).reshape(shape_b), dtype=dt_b, order=order_b)
+        if a.ndim == 0:
+            shape_out = b.shape
+        elif b.ndim == 0:
+            shape_out = a.shape
+        elif a.ndim == 1 and b.ndim == 1:
+            shape_out = ()
+        elif b.ndim == 1:
+            shape_out = shape_a[:-1]
+        elif a.ndim == 1:
+            shape_out = shape_b[:-2] + shape_b[-1:]
+        else:
+            shape_out = shape_a[:-1] + shape_b[:-2] + shape_b[-1:]
+        out = xp.empty(shape_out, dt_out)
+        return xp.dot(a, b, out=out)
+
+
+class TestDotFailure(unittest.TestCase):
+
+    @testing.numpy_nlcpy_raises()
+    def test_dot_with_out_f_contiguous(self, xp):
+        a = xp.ones([2, 3, 4])
+        b = xp.ones([3, 4, 2])
+        out = xp.empty([2, 3, 3, 2], order='F')
+        xp.dot(a, b, out)
+
+    @testing.for_all_dtypes(name='dt_a')
+    @testing.for_all_dtypes(name='dt_b')
+    @testing.for_all_dtypes(name='dt_out')
+    @testing.numpy_nlcpy_raises()
+    def test_dot_incompatible_out_dtype(self, xp, dt_a, dt_b, dt_out):
+        if dt_out == numpy.result_type(dt_a, dt_b):
+            raise Exception
+        a = xp.ones([2, 3, 4], dtype=dt_a)
+        b = xp.ones([3, 4, 2], dtype=dt_b)
+        out = xp.empty([2, 3, 3, 2], dtype=dt_out)
+        xp.dot(a, b, out=out)
+
+    @testing.numpy_nlcpy_raises()
+    def test_dot_incompatible_out_shape(self, xp):
+        a = xp.ones([2, 3, 4])
+        b = xp.ones([3, 4, 2])
+        out = xp.empty([2, 2, 3, 3])
+        xp.dot(a, b, out=out)
+
+    @testing.numpy_nlcpy_raises()
+    def test_dot_incompatible_input_shape(self, xp):
+        a = xp.ones([2, 3, 4])
+        b = xp.ones([2, 3, 4])
+        xp.dot(a, b)

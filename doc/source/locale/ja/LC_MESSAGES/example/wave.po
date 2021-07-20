@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-02 17:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../source/example/wave.rst:4
+msgid "Example: Wave Simulation"
+msgstr "サンプル: 波動シミュレーション"
+
+#: ../../source/example/wave.rst:9
+msgid "Objective"
+msgstr "目的"
+
+#: ../../source/example/wave.rst:10
+msgid ""
+"We will simulate the wave propagation on a 3 m :math:`\\times` 3 m two-"
+"dimensional plane."
+msgstr "3 m :math:`\\times` 3 m の2次元平面で波の伝播をシミュレートします。"
+
+#: ../../source/example/wave.rst:13
+msgid "Physics"
+msgstr "物理"
+
+#: ../../source/example/wave.rst:16
+msgid "Governing Equation"
+msgstr "支配方程式"
+
+#: ../../source/example/wave.rst:18
+msgid ""
+"\\frac{\\partial^2}{\\partial t^2} "
+"u=c^2\\left(\\frac{\\partial^2}{\\partial "
+"x^2}+\\frac{\\partial^2}{\\partial y^2}\\right)u"
+msgstr ""
+
+#: ../../source/example/wave.rst:23
+msgid "Variable"
+msgstr "変数"
+
+#: ../../source/example/wave.rst:23 ../../source/example/wave.rst:32
+msgid "Description"
+msgstr "説明"
+
+#: ../../source/example/wave.rst:25
+msgid ":math:`u`"
+msgstr ""
+
+#: ../../source/example/wave.rst:25
+msgid "Amplitude"
+msgstr "振幅"
+
+#: ../../source/example/wave.rst:26
+msgid ":math:`t`"
+msgstr ""
+
+#: ../../source/example/wave.rst:26
+msgid "Time [s]"
+msgstr "時間 [s]"
+
+#: ../../source/example/wave.rst:27
+msgid ":math:`x`"
+msgstr ""
+
+#: ../../source/example/wave.rst:27
+msgid "x coordinate [m]"
+msgstr "x座標 [m]"
+
+#: ../../source/example/wave.rst:28
+msgid ":math:`y`"
+msgstr ""
+
+#: ../../source/example/wave.rst:28
+msgid "y coordinate [m]"
+msgstr "y座標 [m]"
+
+#: ../../source/example/wave.rst:32
+msgid "Constant"
+msgstr "定数"
+
+#: ../../source/example/wave.rst:32
+msgid "Value"
+msgstr "値"
+
+#: ../../source/example/wave.rst:34
+msgid ":math:`c`"
+msgstr ""
+
+#: ../../source/example/wave.rst:34
+msgid "Propagation Speed"
+msgstr "伝播速度"
+
+#: ../../source/example/wave.rst:34
+msgid "1.0 [m/sec]"
+msgstr ""
+
+#: ../../source/example/wave.rst:39
+msgid "Boundary Conditions"
+msgstr "境界条件"
+
+#: ../../source/example/wave.rst:41
+msgid "The amplitude at all boundaries is constantly 0."
+msgstr "すべての境界における振幅は常に0です。"
+
+#: ../../source/example/wave.rst:45
+msgid "Program"
+msgstr "プログラム"
+
+#: ../../source/example/wave.rst:168
+msgid "Simulation Result"
+msgstr "シミュレーション結果"
+

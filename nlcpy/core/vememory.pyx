@@ -32,11 +32,12 @@
 # distutils: language = c++
 
 from libc.stdint cimport *
-from nlcpy.veo import *
+from nlcpy import veo
 from nlcpy.core.core cimport ndarray
 from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.request.ve_kernel cimport *
+from nlcpy.request import request
 
 from libcpp.vector cimport vector
 
@@ -45,18 +46,30 @@ cimport numpy as cnp
 
 
 cdef _write_array(a_cpu, ndarray a_ve):
-    v = VeoAlloc()
-    # v.ctx.async_write_mem(ptr, a_cpu.data, a_cpu.nbytes)
-    v.proc.write_mem(
-        VEMemPtr(v.proc, a_ve.ve_adr, a_ve.nbytes),
-        a_cpu.data,
-        a_cpu.nbytes
-    )
+    # TODO: check asynchronous request timing
+    proc = veo._get_veo_proc()
+    ctx = veo._get_veo_ctx()
+    rm = request._get_request_manager()
+    # rm._flush(sync=False)
+    if rm.timing == 'on-the-fly':
+        proc.write_mem(
+            veo.VEMemPtr(proc, a_ve.ve_adr, a_ve.nbytes),
+            a_cpu.data,
+            a_cpu.nbytes
+        )
+    else:
+        req = ctx.async_write_mem(
+            veo.VEMemPtr(proc, a_ve.ve_adr, a_ve.nbytes),
+            a_cpu.data,
+            a_cpu.nbytes
+        )
+        vr = request._get_veo_requests()
+        vr._push_req(req, callback='nothing')
 
 cdef _destroy_array(uint64_t ve_adr, uint64_t nbytes):
-    v = VeoAlloc()
-    v.proc.free_mem(VEMemPtr(v.proc, ve_adr, nbytes))
+    proc = veo._get_veo_proc()
+    proc.free_mem(veo.VEMemPtr(proc, ve_adr, nbytes))
 
 cdef _alloc_array(ndarray a):
-    v = VeoAlloc()
-    a.ve_adr = v.proc.alloc_mem(a.nbytes).addr
+    proc = veo._get_veo_proc()
+    a.ve_adr = proc.alloc_mem(a.nbytes).addr

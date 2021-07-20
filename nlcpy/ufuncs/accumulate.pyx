@@ -50,6 +50,8 @@ cimport numpy as cnp
 
 cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
 
+    if dtype is not None:
+        dtype = nlcpy.dtype(dtype)
     if name in ('nlcpy_invert_accumulate', 'nlcpy_logical_not_accumualte'):
         raise ValueError("accumulate only supported for binary functions")
 
@@ -241,13 +243,12 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
             raise TypeError('cannot perform accumulate with flexible type')
 
     if dtype is None:
+        dt = input_arr.dtype if out is None else out.dtype
         if name in ('nlcpy_add_accumulate', 'nlcpy_multiply_accumulate'):
             if input_arr.dtype.name in ('bool', 'int32'):
                 dt = 'int64'
             elif input_arr.dtype.name in ('uint32'):
                 dt = 'uint64'
-            else:
-                dt = input_arr.dtype
 
         elif name in ('nlcpy_greater_accumulate',
                       'nlcpy_less_accumulate',
@@ -272,16 +273,13 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_copysign_accumulate',
                       'nlcpy_nextafter_accumulate',
                       ):
-            if input_arr.dtype.name in ('bool'):
+            if dt.name == 'bool':
                 if out is None:
                     raise TypeError("not support for float16.")
                 else:
                     dt = 'float32'
 
-            elif input_arr.dtype.name in ('float32', 'float64',
-                                          'complex64', 'complex128'):
-                dt = input_arr.dtype
-            else:
+            elif dt.name not in ('float32', 'float64', 'complex64', 'complex128'):
                 dt = 'float64'
 
         elif name in ('nlcpy_floor_divide_accumulate',
@@ -291,30 +289,16 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_fmod_accumulate',
                       'nlcpy_left_shift_accumulate',
                       'nlcpy_right_shift_accumulate',
+                      'nlcpy_subtract_accumulate',
                       ):
-            if input_arr.dtype.name in ('bool'):
+            if dt.name == 'bool':
                 # dt = 'int8' nlcpy can't use
                 if out is None:
                     raise TypeError("not support for int8.")
                 else:
                     dt = 'int32'
-            else:
-                dt = input_arr.dtype
-        else:
-            dt = input_arr.dtype
-
-        if out is not None:
-            dt = out.dtype
 
     else:
-        if type(dtype) == type:
-            if dtype.__name__ in ('int', 'float'):
-                dtype = dtype.__name__ + '64'
-            elif dtype.__name__ in ('complex'):
-                dtype = dtype.__name__ + '128'
-            else:
-                dtype = dtype.__name__
-
         # argument dtype = int8/int16/float16 -> not supported error
         if dtype in ('int8', 'int16', 'float16'):
             raise TypeError("not support for %s." % (dtype))
@@ -401,13 +385,15 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_fmod_accumulate',
                       'nlcpy_left_shift_accumulate',
                       'nlcpy_right_shift_accumulate',
+                      'nlcpy_subtract_accumulate',
                       ):
+            if dtype == 'bool' and out is None:
+                # dt = 'int8' nlcpy can't use
+                raise TypeError("not support for int8.")
             if dtype == 'bool':
-                if out is None:
-                    # dt = 'int8' nlcpy can't use
-                    raise TypeError("not support for int8.")
-                else:
-                    dt = 'int32'
+                dt = 'int32'
+            elif input_arr.dtype == 'bool' and name == 'nlcpy_subtract_accumulate':
+                dt = 'int32'
             else:
                 dt = dtype
         else:

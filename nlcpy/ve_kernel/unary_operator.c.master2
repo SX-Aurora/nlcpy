@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,15 +34,16 @@
 @#include "nlcpy.h"
 
 
+
 /****************************
  *
  *       @OPERATOR_NAME@
  *
  * **************************/
 
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -54,7 +55,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -63,7 +64,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -79,8 +80,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,i32)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],i32)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],i32)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -120,7 +145,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -196,9 +221,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -210,7 +235,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -219,7 +244,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -235,8 +260,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,i64)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],i64)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],i64)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -276,7 +325,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -352,9 +401,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -366,7 +415,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -375,7 +424,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -391,8 +440,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,u32)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],u32)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],u32)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -432,7 +505,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -508,9 +581,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -522,7 +595,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -531,7 +604,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -547,8 +620,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,u64)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],u64)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],u64)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -588,7 +685,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -664,9 +761,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -678,7 +775,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -687,7 +784,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -703,8 +800,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,f32)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],f32)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],f32)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -744,7 +865,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -820,9 +941,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -834,7 +955,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -843,7 +964,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -859,8 +980,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,f64)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],f64)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],f64)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -900,7 +1045,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -976,9 +1121,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -990,7 +1135,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag,
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -999,7 +1144,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag,
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -1015,8 +1160,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag,
                 @UNARY_OPERATOR@(*px,*py,c64)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],c64)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],c64)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -1056,7 +1225,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag,
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -1132,9 +1301,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t where_flag,
 
 
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -1146,7 +1315,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -1155,7 +1324,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -1171,8 +1340,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag
                 @UNARY_OPERATOR@(*px,*py,c128)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],c128)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],c128)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -1212,7 +1405,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -1288,9 +1481,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t where_flag
 
 
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 
-uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
@@ -1302,7 +1495,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t where_flag
         w = where;
         pw = (Bint *)w->ve_adr;
     }
- 
+
 @#ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -1311,7 +1504,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t where_flag
     const int it = 0;
 @#endif /* _OPENMP */
 
-   
+
 /////////
 // 0-d //
 /////////
@@ -1327,8 +1520,32 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t where_flag
                 @UNARY_OPERATOR@(*px,*py,bool)
             }
         }
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i;
+        const int64_t len = y->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],bool)
+            }
+        } else {
+@#pragma _NEC ivdep
+            for (i = cnt_s; i < cnt_e; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],bool)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -1368,7 +1585,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t where_flag
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;

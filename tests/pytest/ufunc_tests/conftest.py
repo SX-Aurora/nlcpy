@@ -35,7 +35,7 @@ import pytest
 def pytest_addoption(parser):
     try:
         parser.addoption(
-            "--test", default='small')
+            "--test", default='no_ufunc')
     except ValueError:
         pass
 

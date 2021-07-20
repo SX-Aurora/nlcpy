@@ -34,13 +34,18 @@ from nlcpy.core.core cimport ndarray
 from libcpp.vector cimport vector
 cimport numpy as cnp
 
-cpdef _push_request(name, typ, args)
+cpdef _get_request_manager()
+cpdef _get_veo_requests()
+cpdef _get_fpe_flag()
+cpdef _push_request(str name, str typ, args)
+cpdef _push_and_flush_request(str name, tuple args, callback=*, sync=*)
 cpdef _clear_requests()
 cpdef _print_requests()
 cpdef _clear_requests()
 cpdef flush()
+cpdef set_max_request(int num)
 
-cdef cnp.ndarray _create_ve_array_buffer(ndarray a)
+cpdef vector[uint64_t] _create_ve_array_buffer(ndarray a)
 
 cpdef set_offload_timing_onthefly()
 cpdef set_offload_timing_lazy()

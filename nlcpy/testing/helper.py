@@ -669,6 +669,7 @@ def numpy_nlcpy_raises(name='xp', sp_name=None, scipy_name=None,
             numpy_msg = None
             try:
                 impl(self, *args, **kw)
+                nlcpy.request.flush()
                 nlcpy_error = None
                 nlcpy_tb = None
             except Exception as e:

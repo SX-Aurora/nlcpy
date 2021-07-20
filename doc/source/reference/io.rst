@@ -11,6 +11,9 @@ NumPy binary files(NPY, NPZ)
     :nosignatures:
 
     nlcpy.load
+    nlcpy.save
+    nlcpy.savez
+    nlcpy.savez_compressed
 
 
 Text files
@@ -21,6 +24,7 @@ Text files
     :nosignatures:
 
     nlcpy.loadtxt
+    nlcpy.savetxt
 
 
 Raw binary files

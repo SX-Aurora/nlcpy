@@ -39,6 +39,17 @@ static inline void reset_fpe_flags(int32_t *psw)
             ("sfr %%s63": : :"%s63");
     *psw = 0;
 }
+
+static inline void set_fpe_flags(int32_t psw)
+{
+    const int64_t psw64 = psw;
+    __asm__ __volatile__
+            ("lfr %%0\n"
+            :
+            : "r" (psw64)
+            : );
+}
+
 static inline void retrieve_fpe_flags(int32_t *psw)
 {
     __asm__ __volatile__

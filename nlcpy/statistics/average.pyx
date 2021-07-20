@@ -281,7 +281,7 @@ cpdef mean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     >>> a[0, :] = 1.0
     >>> a[1, :] = 0.1
     >>> vp.mean(a)
-    array(0.5499878, dtype=float32)
+    array(0.5500002, dtype=float32)
 
     Computing the mean in float64 is more accurate:
 
@@ -1518,7 +1518,7 @@ cpdef var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     >>> a[0, :] = 1.0
     >>> a[1, :] = 0.1
     >>> vp.var(a)
-    array(0.20251831, dtype=float32)
+    array(0.2024999, dtype=float32)
 
     Computing the variance in float64 is more accurate:
 

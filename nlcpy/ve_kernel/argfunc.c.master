@@ -98,7 +98,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
         const uint64_t ix = x->strides[0]/x->itemsize;
 #pragma _NEC ivdep
         for (uint64_t i0 = 0; i0 < x->shape[0]; i0++) {
-            @BINARY_OPERATOR_WITH_DTYPES@(px[i0*ix],@TYPE1_DTAG@,*py,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+            @BINARY_OPERATOR_WITH_DTYPES@(px[i0*ix],@DTAG1@,*py,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
             if (tmp) {
                 *py = px[i0*ix];
                 *pz = i0;
@@ -124,7 +124,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
                     @TYPE1@ *px1 = px0 + i1*i1x;
                     @TYPE1@ *py1 = py0 + i1*i1y;
                     @TYPE2@ *pz1 = pz0 + i1*i1y;
-                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@TYPE1_DTAG@,*py1,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@DTAG1@,*py1,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                     if(tmp) {
                         *py1 = *px1;
                         if (axis == 0) {
@@ -139,7 +139,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 #pragma _NEC ivdep
                 for (uint64_t i1 = 0; i1 < x->shape[1]; i1++) { 
                     @TYPE1@ *px1 = px0 + i1*i1x;
-                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@TYPE1_DTAG@,*py1,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                    @BINARY_OPERATOR_WITH_DTYPES@(*px1,@DTAG1@,*py1,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                     if (tmp) {
                         *py1 = *px1;
                         if (axis < 0) {
@@ -179,7 +179,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
                         @TYPE1@ *px2 = px1 + i2*i2x;
                         @TYPE1@ *py2 = py1 + i2*i2y;
                         @TYPE2@ *pz2 = pz1 + i2*i2y;
-                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@TYPE1_DTAG@,*py2,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@DTAG1@,*py2,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                         if (tmp) {
                             *py2 = *px2;
                             if (axis == 0) {
@@ -196,7 +196,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 #pragma _NEC ivdep
                     for (uint64_t i2 = 0; i2 < x->shape[2]; i2++) { 
                         @TYPE1@ *px2 = px1 + i2*i2x;
-                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@TYPE1_DTAG@,*py2,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                        @BINARY_OPERATOR_WITH_DTYPES@(*px2,@DTAG1@,*py2,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                         if (tmp) {
                             *py2 = *px2;
                             if (axis < 0) {
@@ -245,7 +245,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
                             @TYPE1@ *py3 = py2 + i3*i3y;
                             @TYPE2@ *pz3 = pz2 + i3*i3y;
 
-                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@TYPE1_DTAG@,*py3,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@DTAG1@,*py3,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                             if (tmp) {
                                 *py3 = *px3;
                                 if (axis == 0) {
@@ -264,7 +264,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 #pragma _NEC ivdep
                         for (uint64_t i3 = 0; i3 < x->shape[3]; i3++) { 
                             @TYPE1@ *px3 = px2 + i3*i3x;
-                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@TYPE1_DTAG@,*py3,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                            @BINARY_OPERATOR_WITH_DTYPES@(*px3,@DTAG1@,*py3,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                             if (tmp) {
                                 *py3 = *px3;
                                 if (axis < 0) {
@@ -303,7 +303,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
                 @TYPE1@ *pyi = (@TYPE1@ *)adr_y;
                 @TYPE2@ *pzi = (@TYPE2@ *)adr_z;
 
-                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@TYPE1_DTAG@,*pyi,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@DTAG1@,*pyi,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                 if (tmp) {
                     *pyi = *pxi;
                     if (axis < 0) {
@@ -324,7 +324,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
                 @TYPE1@ *pyi = (@TYPE1@ *)adr_y;
                 @TYPE2@ *pzi = (@TYPE2@ *)adr_z;
 
-                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@TYPE1_DTAG@,*pyi,@TYPE1_DTAG@,tmp,@TYPE1_DTAG@,@TYPE1_DTAG@)
+                @BINARY_OPERATOR_WITH_DTYPES@(*pxi,@DTAG1@,*pyi,@DTAG1@,tmp,@DTAG1@,@DTAG1@)
                 if (tmp) {
                     *pyi = *pxi;
                     if (axis < 0) {

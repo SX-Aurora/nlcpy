@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -50,7 +50,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
     if (py == NULL) return NLCPY_ERROR_MEMORY;
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
-    
+
 /////////
 // 0-d //
 /////////
@@ -60,8 +60,35 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
 @#endif /* _OPENMP */
 {
         @UNARY_OPERATOR@(*px,*py,$1)
-} /* omp single */ 
-   
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if ((x->is_c_contiguous & y->is_c_contiguous) ||
+               (x->is_f_contiguous & y->is_f_contiguous) )
+    {
+        int64_t i;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                @UNARY_OPERATOR@(px_s,py[i],$1)
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                @UNARY_OPERATOR@(px[i],py[i],$1)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -110,7 +137,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_y, y->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
@@ -159,31 +186,31 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
 
 
 @-->)dnl
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
 macro_unary_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
 macro_unary_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
 macro_unary_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
 macro_unary_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
 macro_unary_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
 macro_unary_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
 macro_unary_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
 macro_unary_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
 macro_unary_operator(bool,int32_t)dnl
 #endif
 
@@ -196,31 +223,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     if (x->size == 0 || y->size == 0) return (uint64_t)NLCPY_ERROR_OK;
     uint64_t err = NLCPY_ERROR_OK;
     switch (y->dtype) {
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
     case ve_i32:  err = FILENAME_i32 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
     case ve_i64:  err = FILENAME_i64 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
     case ve_u32:  err = FILENAME_u32 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
     case ve_u64:  err = FILENAME_u64 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
     case ve_f32:  err = FILENAME_f32 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
     case ve_f64:  err = FILENAME_f64 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
     case ve_c64:  err = FILENAME_c64 (x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
     case ve_c128: err = FILENAME_c128(x, y, psw); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
     case ve_bool: err = FILENAME_bool(x, y, psw); break;
 #endif
     default: err = NLCPY_ERROR_DTYPE;

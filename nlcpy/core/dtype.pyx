@@ -121,6 +121,16 @@ cdef _init_dtype_dict():
 
 _init_dtype_dict()
 
+cdef DT_BOOL = numpy.dtype('bool')
+cdef DT_I32 = numpy.dtype('i4')
+cdef DT_I64 = numpy.dtype('i8')
+cdef DT_U32 = numpy.dtype('u4')
+cdef DT_U64 = numpy.dtype('u8')
+cdef DT_F32 = numpy.dtype('f4')
+cdef DT_F64 = numpy.dtype('f8')
+cdef DT_C64 = numpy.dtype('c8')
+cdef DT_C128 = numpy.dtype('c16')
+
 
 @cython.profile(False)
 cpdef get_dtype(t):

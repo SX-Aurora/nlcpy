@@ -1,0 +1,60 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/sca_chapter_1.rst:4
+msgid "Concept of Stencil Computation"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_1.rst:6
+msgid ""
+"Before using the SCA interface, it is necessary to understand some "
+"fundamental concepts of the stencil computation."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_1.rst:8
+msgid ""
+"A stencil consists of stencil elements. Each stencil element has a "
+"relative location from the stencil center, a coefficient, and a reference"
+" to an input array. The mathematical expression of the stencil is shown "
+"below."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_1.rst:11
+msgid ""
+"Stencil(i_{\\rm x},i_{\\rm y},i_{\\rm z},i_{\\rm w}) = \\sum_{k} c^{(k)} "
+"d^{(k)}[i_{\\rm x}+l_{\\rm x}^{(k)},i_{\\rm y}+l_{\\rm y}^{(k)},i_{\\rm "
+"z}+l_{\\rm z}^{(k)},i_{\\rm w}+l_{\\rm w}^{(k)}]\n"
+"\n"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_1.rst:15
+msgid ""
+"Here, :math:`(l_{\\rm x}^{(k)},l_{\\rm y}^{(k)},l_{\\rm z}^{(k)},l_{\\rm "
+"w}^{(k)})` denotes the relative location of the kth stencil element, "
+":math:`c^{(k)}` denotes the coefficient of the kth stencil element, and "
+":math:`d^{(k)}` denotes the input array which the kth stencil element "
+"refers to."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_1.rst:17
+msgid ""
+"In the SCA interface, you can specify either a scalar or an array as the "
+"coefficients :math:`c^{(k)}`."
+msgstr ""
+

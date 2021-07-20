@@ -423,7 +423,6 @@ cdef class ufunc:
         if self.name is 'nlcpy_matmul':
             return cblas_wrapper.cblas_gemm(args[0], args[1], out=out_args,
                                             order=order, dtype=dtype_out)
-        order = guess_out_order(order, args)
 
         order = guess_out_order(order, args)
 

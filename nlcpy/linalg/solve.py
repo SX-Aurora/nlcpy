@@ -33,7 +33,6 @@ import nlcpy
 import numpy
 from nlcpy import veo
 from nlcpy.request import request
-from nlcpy.request.ve_kernel import check_error
 from . import util
 
 
@@ -159,26 +158,33 @@ def solve(a, b):
     b = nlcpy.array(nlcpy.moveaxis(b, (-1, -2), (1, 0)), dtype=dtype, order='F')
 
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         b._ve_array,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_solve'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
-    util._assertNotSingular(info)
+
+    request._push_and_flush_request(
+        'nlcpy_solve',
+        args,
+        callback=util._assertNotSingular(info)
+    )
+
     if c_order:
         x = nlcpy.moveaxis(b, (1, 0), (-1, -2)).reshape(x_shape)
         return nlcpy.asarray(x, x_dtype, 'C')
     else:
         x = nlcpy.asarray(b, x_dtype)
         return nlcpy.moveaxis(x, (1, 0), (-1, -2)).reshape(x_shape)
+
+
+def _lstsq_errchk(info):
+    def _info_check(*args):
+        if info == 1:
+            raise util.LinAlgError('a singular value did not converge')
+    return _info_check
 
 
 def lstsq(a, b, rcond='warn'):
@@ -365,7 +371,7 @@ def lstsq(a, b, rcond='warn'):
     iwork = nlcpy.empty(liwork, dtype='i')
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         b._ve_array,
@@ -378,14 +384,13 @@ def lstsq(a, b, rcond='warn'):
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_lstsq'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    if info == 1:
-        raise util.LinAlgError('a singular value did not converge')
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_lstsq',
+        args,
+        callback=_lstsq_errchk(info),
+        sync=True
+    )
 
     if rank < n or m <= n:
         residuals = nlcpy.array([], dtype=f_dtype)
@@ -471,7 +476,7 @@ def inv(a):
     ipiv = nlcpy.empty(a.shape[-1])
     work = nlcpy.empty(a.shape[-1] * 256)
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         ipiv._ve_array,
@@ -479,13 +484,13 @@ def inv(a):
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_inv'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
-    util._assertNotSingular(info)
+
+    request._push_and_flush_request(
+        'nlcpy_inv',
+        args,
+        callback=util._assertNotSingular(info)
+    )
+
     if c_order:
         a = nlcpy.moveaxis(a, (1, 0), (-1, -2))
         return nlcpy.asarray(a, dtype=ainv_dtype, order='C')

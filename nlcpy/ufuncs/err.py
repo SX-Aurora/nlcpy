@@ -199,6 +199,12 @@ def _binary_check_case4(*args):
         if out.dtype.kind in ('b') or in_args[0].dtype.kind in ('f', 'c') or \
                 in_args[1].dtype.kind in ('f', 'c'):
             _casting_check_out(dt, out.dtype, name, casting)
+        if in_args[1].dtype.char == 'L' and out.dtype.kind == 'i' and \
+           in_args[0].size != 1 and in_args[1].size != 1:
+            raise TypeError("ufunc '{}' output (typecode '{}') could not be "
+                            "coerced to provided output parameter (typecode '{}') "
+                            "according to the casting rule ''{}''".format(
+                                name, in_args[1].dtype.char, out.dtype.char, casting))
 
     if valid is False or dt.kind in ('b'):
         _raise_no_loop_matching(name)

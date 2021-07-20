@@ -62,6 +62,27 @@ Notices
 
 5. NumPy functions run on an x86 Node (VH). On the other hand, most of NLCPy functions offload automatically input ndarrays to a Vector Engine (VE), and then run on the VE. So, as computational cost becomes smaller than the offloading cost, NLCPy performance decreases. In this case, please use NumPy.
 
+6. Some functions return a view on the input array such as :func:`nlcpy.broadcast_arrays()`, :func:`nlcpy.broadcast_to()`, and :func:`nlcpy.moveaxis()`. However, if a numpy.ndarray object is specified as an input array for them, updates of the object does not affect the return values because the numpy.ndarray object is conveted to an nlcpy.ndarray object once then the function returns the view on the nlcpy.ndarray object.
+
+    .. doctest::
+
+        >>> import numpy, nlcpy
+        >>> nx = numpy.array([[1, 2, 3]])
+        >>> ny = numpy.array([[4], [5]])
+        >>> vz = nlcpy.broadcast_arrays(nx, ny)
+        >>> vz
+        [array([[1, 2, 3],
+               [1, 2, 3]]), array([[4, 4, 4],
+               [5, 5, 5]])]
+        >>> nx[0, 2] = 999  # Updates nx
+        >>> nx
+        array([[  1,   2, 999]])
+        >>> vz
+        [array([[1, 2, 3],
+               [1, 2, 3]]), array([[4, 4, 4],
+               [5, 5, 5]])]
+
+
 Restrictions
 ------------
 

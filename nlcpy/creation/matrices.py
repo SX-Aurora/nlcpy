@@ -53,6 +53,7 @@
 #
 import nlcpy
 import numpy
+from nlcpy.request import request
 
 
 # ----------------------------------------------------------------------------
@@ -76,6 +77,11 @@ def diag(v, k=0):
     -------
     out : ndarray
         The extracted diagonal or constructed diagonal array.
+
+    See Also
+    --------
+    diagonal : Returns specified diagonals.
+    diagflat : Creates a two-dimensional array with the flattened input as a diagonal.
 
     Examples
     --------
@@ -116,3 +122,157 @@ def diag(v, k=0):
         return v.diagonal(k).copy()
     else:
         raise ValueError('Input must be 1- or 2-d.')
+
+
+def diagflat(v, k=0):
+    """Creates a two-dimensional array with the flattened input as a diagonal.
+
+    Parameters
+    ----------
+    v : array_like
+        Input data, which is flattened and set as the *k*-th diagonal of the output.
+    k : int, optional
+        Diagonal to set; 0, the default, corresponds to the "main" diagonal, a positive
+        (negative) *k* giving the number of the diagonal above (below) the main.
+
+    Returns
+    -------
+    out : ndarray
+        The 2-D output array.
+
+    See Also
+    --------
+    diag : Extracts a diagonal or construct a diagonal array.
+    diagonal : Returns specified diagonals.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.diagflat([[1,2], [3,4]])
+    array([[1, 0, 0, 0],
+           [0, 2, 0, 0],
+           [0, 0, 3, 0],
+           [0, 0, 0, 4]])
+
+    >>> vp.diagflat([1,2], 1)
+    array([[0, 1, 0],
+           [0, 0, 2],
+           [0, 0, 0]])
+    """
+    v = nlcpy.asanyarray(v).ravel()
+    return diag(v, k)
+
+
+def tri(N, M=None, k=0, dtype=float):
+    """An array with ones at and below the given diagonal and zeros elsewhere.
+
+    Parameters
+    ----------
+    N : int
+        Number of rows in the array.
+    M : int, optional
+        Number of columns in the array. By default, *M* is taken equal to *N*.
+    k : int, optional
+        The sub-diagonal at and below which the array is filled. *k* = 0 is the main
+        diagonal, while *k* < 0 is below it, and *k* > 0 is above. The default is 0.
+    dtype : dtype, optional
+        Data type of the returned array. The default is float.
+
+    Returns
+    -------
+    tri : ndarray
+        Array with its lower triangle filled with ones and zero elsewhere; in other
+        words ``T[i,j] == 1`` for ``i <= j + k``, 0 otherwise.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.tri(3, 5, 2, dtype=int)
+    array([[1, 1, 1, 0, 0],
+           [1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1]])
+
+    >>> vp.tri(3, 5, -1)
+    array([[0., 0., 0., 0., 0.],
+           [1., 0., 0., 0., 0.],
+           [1., 1., 0., 0., 0.]])
+    """
+    if N < 0:
+        N = 0
+    else:
+        N = int(N)
+    if M is None:
+        M = N
+    elif M < 0:
+        M = 0
+    else:
+        M = int(M)
+    k = int(k)
+    out = nlcpy.empty([N, M], dtype=dtype)
+    if out.size:
+        request._push_request(
+            'nlcpy_tri',
+            'creation_op',
+            (out, k)
+        )
+    return out
+
+
+def tril(m, k=0):
+    """Lower triangle of an array.
+
+    Returns a copy of an array with elements above the *k*-th diagonal zeroed.
+
+    Parameters
+    ----------
+    m : array_like
+        Input array.
+    k : int, optional
+        Diagonal above which to zero elements. *k* = 0 (the default) is the main
+        diagonal, *k* < 0 is below it and *k* > 0 is above.
+
+    Returns
+    -------
+    tri : ndarray
+        Lower triangle of *m*, of same shape and data-type as *m*.
+
+    See Also
+    --------
+    triu : Upper triangle of an array.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.tril([[1,2,3],[4,5,6],[7,8,9],[10,11,12]], -1)
+    array([[ 0,  0,  0],
+           [ 4,  0,  0],
+           [ 7,  8,  0],
+           [10, 11, 12]])
+    """
+    m = nlcpy.asanyarray(m)
+    mask = nlcpy.tri(*m.shape[-2:], k=k, dtype=bool)
+    return nlcpy.where(mask, m, numpy.dtype(m.dtype).type(0))
+
+
+def triu(m, k=0):
+    """Upper triangle of an array.
+
+    Returns a copy of a matrix with the elements below the *k*-th diagonal zeroed.
+    Please refer to the documentation for tril for further details.
+
+    See Also
+    --------
+    tril : Lower triangle of an array.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.triu([[1,2,3],[4,5,6],[7,8,9],[10,11,12]], -1)
+    array([[ 1,  2,  3],
+           [ 4,  5,  6],
+           [ 0,  8,  9],
+           [ 0,  0, 12]])
+    """
+    m = nlcpy.asanyarray(m)
+    mask = nlcpy.tri(*m.shape[-2:], k=k - 1, dtype=bool)
+    return nlcpy.where(mask, numpy.dtype(m.dtype).type(0), m)

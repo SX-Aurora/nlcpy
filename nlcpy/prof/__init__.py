@@ -33,3 +33,6 @@ from nlcpy.prof.prof import start_profiling  # NOQA
 from nlcpy.prof.prof import stop_profiling  # NOQA
 from nlcpy.prof.prof import print_run_stats  # NOQA
 from nlcpy.prof.prof import get_run_stats  # NOQA
+from nlcpy.prof.prof import ftrace_region_begin  # NOQA
+from nlcpy.prof.prof import ftrace_region_end  # NOQA
+from nlcpy.prof.prof import ftrace_region  # NOQA

@@ -55,6 +55,7 @@ from libcpp.vector cimport vector
 from libc.stdint cimport *
 
 import numpy
+from numpy.core._exceptions import UFuncTypeError
 
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
@@ -149,3 +150,123 @@ cdef ndarray _ndarray_imag_setter(ndarray self, value):
         "creation_op",
         (src, dst),
     )
+
+
+cpdef ndarray _ndarray_clip(ndarray self, a_min, a_max,
+                            out, dtype, order, where, casting):
+    if a_min is None and a_max is None:
+        raise ValueError('array_clip: must set either max or min')
+    if order is None or order in 'kK':
+        order = 'C'
+    elif order in 'aA':
+        if self._f_contiguous:
+            order='F'
+        else:
+            order='C'
+
+    if a_min is None:
+        _a_min = None
+    elif type(a_min) is nlcpy.ndarray:
+        if a_min.ndim == 0:
+            _a_min = a_min.get()
+        else:
+            _a_min = a_min
+    elif type(a_min) in (list, tuple):
+        _a_min = numpy.array(a_min)
+    else:
+        _a_min = a_min
+
+    if a_max is None:
+        _a_max = None
+    elif type(a_max) is nlcpy.ndarray:
+        if a_max.ndim == 0:
+            _a_max = a_max.get()
+        else:
+            _a_max = a_max
+    elif type(a_max) in (list, tuple):
+        _a_max = numpy.array(a_max)
+    else:
+        _a_max = a_max
+
+    if dtype is None:
+        dtype = self.dtype
+        if a_max is not None and a_min is not None:
+            dtype = numpy.result_type(self, _a_max, _a_min)
+        elif a_max is not None:
+            dtype = numpy.result_type(self, _a_max)
+        elif a_min is not None:
+            dtype = numpy.result_type(self, _a_min)
+        else:
+            dtype = self.dtype
+    else:
+        dtype = nlcpy.dtype(dtype)
+
+    dtypes = (dtype,) if out is None else (out.dtype, dtype)
+    for _dtype in dtypes:
+        msg1 = None
+        if not numpy.can_cast(self, _dtype, casting):
+            msg1 = 0
+            msg2 = self.dtype
+        if _a_min is not None:
+            if not numpy.can_cast(_a_min, _dtype, casting):
+                msg1 = 1
+                msg2 = _a_min.dtype
+        if _a_max is not None:
+            if not numpy.can_cast(_a_max, _dtype, casting):
+                msg1 = 2
+                msg2 = _a_max.dtype
+        if msg1 is not None:
+            raise UFuncTypeError(
+                "Cannot cast ufunc 'clip' input {} from dtype('{}') to dtype('{}')"
+                " with casting rule '{}'".format(msg1, msg2, _dtype, casting))
+    if out is not None and not numpy.can_cast(dtype, out.dtype, casting):
+        raise UFuncTypeError(
+            "Cannot cast ufunc 'clip' output from dtype('{}') to dtype('{}')"
+            " with casting rule '{}'".format(dtype, out.dtype, casting))
+
+    self = nlcpy.asanyarray(self, dtype=dtype)
+    if a_min is not None:
+        a_min = nlcpy.asanyarray(a_min, dtype=dtype)
+    if a_max is not None:
+        a_max = nlcpy.asanyarray(a_max, dtype=dtype)
+
+    if where is True:
+        where = nlcpy.array(())
+        if a_min is None:
+            self, a_max = nlcpy.broadcast_arrays(self, a_max)
+            a_min = nlcpy.array((), dtype=dtype)
+        elif a_max is None:
+            self, a_min = nlcpy.broadcast_arrays(self, a_min)
+            a_max = nlcpy.array((), dtype=dtype)
+        else:
+            self, a_min, a_max = nlcpy.broadcast_arrays(self, a_min, a_max)
+    else:
+        if a_min is None:
+            self, a_max, where = nlcpy.broadcast_arrays(self, a_max, where)
+            a_min = nlcpy.array((), dtype=dtype)
+        elif a_max is None:
+            self, a_min, where = nlcpy.broadcast_arrays(self, a_min, where)
+            a_max = nlcpy.array((), dtype=dtype)
+        else:
+            self, a_min, a_max, where = nlcpy.broadcast_arrays(self, a_min, a_max, where)
+
+    if out is not None and self.shape != out.shape:
+        raise ValueError(
+            "non-broadcastable output operand with shape {} doesn't match "
+            "the broadcast shape {}".format(out.shape, self.shape))
+
+    self = nlcpy.asanyarray(self)
+    a_min = nlcpy.asanyarray(a_min)
+    a_max = nlcpy.asanyarray(a_max)
+    where = nlcpy.asanyarray(where)
+    work = nlcpy.zeros(self.shape, dtype=dtype, order=order)
+    if out is None:
+        out = work
+
+    if self.size > 0:
+        request._push_request(
+            "nlcpy_clip",
+            "math_op",
+            (self, out, work, a_min, a_max, where),
+        )
+    return out

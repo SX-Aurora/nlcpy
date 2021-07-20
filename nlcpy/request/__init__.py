@@ -34,3 +34,4 @@ from nlcpy.request.request import flush  # NOQA
 from nlcpy.request.request import set_offload_timing_onthefly  # NOQA
 from nlcpy.request.request import set_offload_timing_lazy  # NOQA
 from nlcpy.request.request import get_offload_timing  # NOQA
+from nlcpy.request.request import set_max_request  # NOQA

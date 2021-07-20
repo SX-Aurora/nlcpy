@@ -42,7 +42,7 @@ include(macros.m4)dnl
  * *************************/
 
 define(<--@macro_accumulate_operator@-->,<--@
-uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t *psw)
 {
     $2 *py = ($2 *)y->ve_adr;
 
@@ -139,7 +139,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t axis, int32_
         int64_t iy0 = 1;
         $2 tmp;
         if ( x->shape[axis]>0 ) {
-            tmp = @CAST_OPERATOR@(*px, @TYPE1_DTAG@, $1);
+            tmp = @CAST_OPERATOR@(*px, @DTAG1@, $1);
             *py = tmp;
         }
         for (i = 1; i < x->shape[axis]; i++) {
@@ -182,7 +182,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t axis, int32_
             for (uint64_t i1 = is; i1 < ie; i1++) {
                 @TYPE1@ *px1 = px + i1*ix1;
                 $2      *py1 = py + i1*iy1;
-                tmp[i1] = @CAST_OPERATOR@(*px1, @TYPE1_DTAG@, $1);
+                tmp[i1] = @CAST_OPERATOR@(*px1, @DTAG1@, $1);
                 *py1 = tmp[i1];
             }
         }
@@ -250,7 +250,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t axis, int32_
                     }
                 } else {
                     for (i = 0; i < x->shape[n_inner2]; i++) {
-                        tmp[i] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, $1);
+                        tmp[i] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, $1);
                         py[i*iy0+iy] = tmp[i];
                     }
                 }
@@ -279,30 +279,30 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *y, int32_t axis, int32_
 
 
 @-->)dnl
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 macro_accumulate_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 macro_accumulate_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 macro_accumulate_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 macro_accumulate_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 macro_accumulate_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 macro_accumulate_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 macro_accumulate_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 macro_accumulate_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 macro_accumulate_operator(bool,int32_t)dnl
 #endif

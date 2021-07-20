@@ -133,6 +133,7 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         VE_FUNC_PREPARE_INDEXING
         VE_FUNC_SCATTER_UPDATE
         VE_FUNC_WHERE
+        VE_FUNC_FILL_DIAGONAL
 
         # creation functions
         VE_FUNC_ARANGE
@@ -140,12 +141,15 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         VE_FUNC_EYE
         VE_FUNC_LINSPACE
         VE_FUNC_COPY_MASKED
+        VE_FUNC_TRI
 
         # manipulation functions
         VE_FUNC_DELETE
         VE_FUNC_TILE
         VE_FUNC_REPEAT
         VE_FUNC_INSERT
+        VE_FUNC_ROLL
+        VE_FUNC_BLOCK
 
         # cblas wrapper functions
         VE_FUNC_CBLAS_SDOT
@@ -286,12 +290,17 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         # sorting functions
         VE_FUNC_SORT
         VE_FUNC_ARGSORT
+        VE_FUNC_SORT_MULTI
 
         # math functions
         VE_FUNC_DIFF
+        VE_FUNC_CLIP
 
         # random functions
         VE_FUNC_SHUFFLE
+
+        # sca functions
+        VE_FUNC_SCA_EXECUTE
 
 
 cdef dict funcNumList
@@ -315,6 +324,8 @@ cdef extern from "../ve_kernel/ve_functype.h":
         SORTING_OP
         MATH_OP
         RANDOM_OP
+        SCA_OP
+
 
 cdef dict funcTypeList
 
@@ -347,5 +358,6 @@ cdef extern from "../ve_kernel/ve_error.h":
     cdef uint64_t NLCPY_ERROR_FUNCTYPE
     cdef uint64_t NLCPY_ERROR_INDEX
     cdef uint64_t NLCPY_ERROR_ASL
+    cdef uint64_t NLCPY_ERROR_SCA
 
 cpdef check_error(uint64_t err)

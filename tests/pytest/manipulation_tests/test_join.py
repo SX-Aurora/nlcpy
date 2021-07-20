@@ -386,3 +386,115 @@ class TestJoin(unittest.TestCase):
         a = testing.shaped_random((2, 2), xp)
         b = testing.shaped_random((3, 2), xp)
         xp.hstack((a, b))
+
+
+class TestBlock(unittest.TestCase):
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_scalar(self, xp):
+        return xp.block([i for i in range(3)])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_scalar_large(self, xp):
+        return xp.block([i for i in range(20)])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_list(self, xp):
+        return xp.block([[i, i + 1, i + 2] for i in range(0, 3 * 3, 3)])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_list_large(self, xp):
+        return xp.block([[i, i + 1, i + 2] for i in range(0, 3 * 20, 3)])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_scalar_and_array(self, xp):
+        return xp.block([*[i for i in range(3)], xp.arange(2)])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_scalar_and_array_large(self, xp):
+        return xp.block([*[i for i in range(20)], xp.arange(2)])
+
+    @testing.for_all_dtypes(name='dtype_a')
+    @testing.for_all_dtypes(name='dtype_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_array(self, xp, dtype_a, dtype_b, order_a, order_b):
+        a = xp.arange(16).reshape(4, 4)
+        b = xp.arange(12).reshape(4, 3)
+        a = xp.asarray(a, dtype=dtype_a, order=order_a)
+        b = xp.asarray(b, dtype=dtype_b, order=order_b)
+        return xp.block([a, b])
+
+    @testing.for_all_dtypes(name='dtype_a')
+    @testing.for_all_dtypes(name='dtype_b')
+    @testing.for_orders('CF', name='order_a')
+    @testing.for_orders('CF', name='order_b')
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_array_large(self, xp, dtype_a, dtype_b, order_a, order_b):
+        a = xp.arange(16).reshape(4, 4)
+        b = xp.arange(12).reshape(4, 3)
+        a = xp.asarray(a, dtype=dtype_a, order=order_a)
+        b = xp.asarray(b, dtype=dtype_b, order=order_b)
+        return xp.block([a, b] * 10)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_array_in_list(self, xp):
+        a = [[xp.array([i, i + 1, i + 2])] for i in range(0, 2 * 2, 2)]
+        return xp.block([*a, [-1, -2, -3]])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_array_in_list_large(self, xp):
+        a = [[xp.array([i, i + 1, i + 2])] for i in range(0, 2 * 20, 2)]
+        return xp.block([*a, [-1, -2, -3]])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_deep(self, xp):
+        return xp.block(xp.arange(8).reshape(2, 1, 2, 1, 2, 1).tolist())
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_deep_large(self, xp):
+        return xp.block(xp.arange(720).reshape(1, 2, 3, 4, 5, 6).tolist())
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_deep2(self, xp):
+        a = xp.arange(9).reshape(3, 3)
+        b = xp.arange(6).reshape(3, 2)
+        c = xp.arange(6).reshape(2, 3)
+        d = xp.arange(4).reshape(2, 2)
+        return xp.block([[a, b], [c, d]])
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_block_deep2_large(self, xp):
+        a = xp.arange(9).reshape(3, 3)
+        b = xp.arange(6).reshape(3, 2)
+        c = xp.arange(6).reshape(2, 3)
+        d = xp.arange(4).reshape(2, 2)
+        return xp.block([[a, b], [c, d]] * 10)
+
+
+class TestBlockFailure(unittest.TestCase):
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_shape_mismatch(self, xp):
+        xp.block([xp.ones([2, 2]), 1])
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_tuple_input(self, xp):
+        xp.block((xp.zeros([1, 2]), xp.ones([1, 2]), xp.arange(2)))
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_list_depth_mismatch(self, xp):
+        xp.block([xp.ones([2, 3, 4]).tolist(), xp.ones([3, 4]).tolist()])
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_list_bottom_index_none(self, xp):
+        xp.block([xp.ones([2, 3, 0]).tolist(), xp.ones([2, 3, 0]).tolist()])
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_array_shape_mismatch(self, xp):
+        xp.block([xp.ones([3, 4]).tolist(), xp.ones([2, 3]).tolist()])
+
+    @testing.numpy_nlcpy_raises()
+    def test_block_with_empty_list(self, xp):
+        return xp.block([[i for i in range(3)], []])

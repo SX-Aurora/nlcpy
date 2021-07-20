@@ -41,9 +41,9 @@
  *
  * **************************/
 
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_i32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -105,7 +105,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, i32);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, i32);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -131,7 +131,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, i32);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, i32);
                     }
                 }
             }
@@ -166,9 +166,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_i64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -230,7 +230,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, i64);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, i64);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -256,7 +256,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, i64);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, i64);
                     }
                 }
             }
@@ -291,9 +291,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_u32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -355,7 +355,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, u32);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, u32);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -381,7 +381,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, u32);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, u32);
                     }
                 }
             }
@@ -416,9 +416,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_u64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -480,7 +480,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, u64);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, u64);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -506,7 +506,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, u64);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, u64);
                     }
                 }
             }
@@ -541,9 +541,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_f32(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -605,7 +605,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, f32);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, f32);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -631,7 +631,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, f32);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, f32);
                     }
                 }
             }
@@ -666,9 +666,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_f64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -730,7 +730,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, f64);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, f64);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -756,7 +756,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, f64);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, f64);
                     }
                 }
             }
@@ -791,9 +791,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_c64(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -855,7 +855,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *indices, ve_array *y, 
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, c64);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, c64);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -881,7 +881,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *indices, ve_array *y, 
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, c64);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, c64);
                     }
                 }
             }
@@ -916,9 +916,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *indices, ve_array *y, 
 
 
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_c128(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -980,7 +980,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *indices, ve_array *y,
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, c128);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, c128);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -1006,7 +1006,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *indices, ve_array *y,
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, c128);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, c128);
                     }
                 }
             }
@@ -1041,9 +1041,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *indices, ve_array *y,
 
 
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 
-uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_bool(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -1105,7 +1105,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *indices, ve_array *y,
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, bool);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, bool);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -1131,7 +1131,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *indices, ve_array *y,
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, bool);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, bool);
                     }
                 }
             }

@@ -115,6 +115,7 @@ Miscellaneous
     :toctree: generated/
     :nosignatures:
 
+    nlcpy.clip
     nlcpy.sqrt
     nlcpy.cbrt
     nlcpy.square

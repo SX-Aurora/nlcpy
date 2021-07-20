@@ -79,10 +79,7 @@ class TestFft1DRaise(unittest.TestCase):
 class TestFft1DInvalidParam(object):
 
     @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             ["aaa"], [[1, 2], [3, "4"]], [],
-                             ("aaa",), ((1, 2), (3, "4")), (),
-                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
-                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+                             ["aaa"], [], ("aaa",), (),))
     def test_fft_param_array(self, a):
         with pytest.raises(ValueError):
             # ,match='Dimension n should be a positive integer not larger '
@@ -90,10 +87,7 @@ class TestFft1DInvalidParam(object):
             nlcpy.fft.fft(a)
 
     @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             ["aaa"], [[1, 2], [3, "4"]], [],
-                             ("aaa",), ((1, 2), (3, "4")), (),
-                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
-                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+                             ["aaa"], [], ("aaa",), (),))
     def test_ifft_param_array(self, a):
         with pytest.raises(ValueError):
             # ,match='First argument must be a complex or real sequence of single '

@@ -51,47 +51,47 @@ cimport numpy as cnp
 
 cdef get_minus_infinity(dtype, op_name, is_identity=False):
     if dtype == 'int32':
-        return nlcpy.array(-2147483648, dtype=dtype)
+        return numpy.array(-2147483648, dtype=dtype)
     elif dtype == 'int64':
-        return nlcpy.array(-9223372036854775808, dtype=dtype)
+        return numpy.array(-9223372036854775808, dtype=dtype)
     elif dtype == 'uint32':
-        return nlcpy.array(0, dtype=dtype)
+        return numpy.array(0, dtype=dtype)
     elif dtype == 'uint64':
-        if is_identity:
-            return nlcpy.array(0, dtype=dtype)
+        if is_identity and op_name != 'logaddexp2':
+            return numpy.array(0, dtype=dtype)
         else:
-            return nlcpy.array(9223372036854775808, dtype=dtype)
+            return numpy.array(9223372036854775808, dtype=dtype)
     elif dtype == 'bool':
         if op_name in ('maximum', 'fmax'):
-            return nlcpy.array(False, dtype=dtype)
+            return numpy.array(False, dtype=dtype)
         else:
-            return nlcpy.array(True, dtype=dtype)
-    return nlcpy.array(-nlcpy.inf, dtype=dtype)
+            return numpy.array(True, dtype=dtype)
+    return numpy.array(-nlcpy.inf, dtype=dtype)
 
 cdef get_plus_infinity(dtype, op_name, is_identity=False):
     if dtype == 'int32':
         if is_identity:
-            return nlcpy.array(2147483647, dtype=dtype)
+            return numpy.array(2147483647, dtype=dtype)
         else:
-            return nlcpy.array(-2147483648, dtype=dtype)
+            return numpy.array(-2147483648, dtype=dtype)
     elif dtype == 'int64':
         if is_identity:
-            return nlcpy.array(9223372036854775807, dtype=dtype)
+            return numpy.array(9223372036854775807, dtype=dtype)
         else:
-            return nlcpy.array(-9223372036854775808, dtype=dtype)
+            return numpy.array(-9223372036854775808, dtype=dtype)
     elif dtype == 'uint32':
         if is_identity:
-            return nlcpy.array(4294967295, dtype=dtype)
+            return numpy.array(4294967295, dtype=dtype)
         else:
-            return nlcpy.array(0, dtype=dtype)
+            return numpy.array(0, dtype=dtype)
     elif dtype == 'uint64':
         if is_identity:
-            return nlcpy.array(18446744073709551615, dtype=dtype)
+            return numpy.array(18446744073709551615, dtype=dtype)
         else:
-            return nlcpy.array(0, dtype=dtype)
+            return numpy.array(0, dtype=dtype)
     elif dtype in ('bool',):
-        return nlcpy.array(True, dtype=dtype)
-    return nlcpy.array(nlcpy.inf, dtype=dtype)
+        return numpy.array(True, dtype=dtype)
+    return numpy.array(nlcpy.inf, dtype=dtype)
 
 cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                   initial=nlcpy._NoValue, where=True):
@@ -127,7 +127,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                       'bitwise_and': -1, 'bitwise_or': 0, 'bitwise_xor': 0,
                       'maximum': -nlcpy.inf, 'fmax': -nlcpy.inf,
                       'minimum': nlcpy.inf, 'fmin': nlcpy.inf,
-                      'hypot': 0, 'logaddexp': -nlcpy.inf}
+                      'hypot': 0, 'logaddexp': -nlcpy.inf, 'logaddexp2': -nlcpy.inf}
 
     if dtype is not None:
         if len(nlcpy.dtype(dtype)) > 0:
@@ -157,22 +157,27 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                    'logical_or', 'logical_xor'):
         op_is_boolean = True
 
-    if axis_save is not None:
-        axis = list(axis)
-        for i in range(len(axis)):
-            if axis[i] < 0:
-                axis[i] = a.ndim + axis[i]
-    else:
-        axis = []
-        if a.ndim > 0:
-            for i in range(a.ndim):
-                axis.append(i)
-        else:
-            axis = [0]
     if axis is None or len(axis) > 1:
         if not op_is_reordable:
             raise ValueError("reduction operation '{}' is not reorderable,"
                              " so at most one axis may be specified".format(op_name))
+
+    if type(where) is tuple:
+        where = where[0]
+    if axis_save is not None and len(axis) < a.ndim:
+        axis = [ax + a.ndim if ax < 0 else ax for ax in axis]
+        raveled = False
+    else:
+        axis = (0,)
+        if hasattr(where, '__iter__'):
+            where = nlcpy.asanyarray(where, dtype=bool)
+            if a.shape != where.shape:
+                raise NotImplementedError(
+                    "broadcast of 'where' is not implemented yet.")
+            where = where.ravel()
+        shape_out = (1,) * a.ndim if keepdims else ()
+        a = a.ravel()
+        raveled = True
 
     if where is not True and (initial is None or
                               not op_has_identity and initial is nlcpy._NoValue):
@@ -201,33 +206,32 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         keepdims = False
     else:
         keepdims = True
-    if keepdims:
-        if axis_save is None:
-            if out is not None:
-                raise ValueError("output parameter for reduction operation "
-                                 + op_name + " has too many dimensions")
-            lst = list(a.shape)
-            for i in range(a.ndim):
-                lst[i] = 1
+    if not raveled:
+        if keepdims:
+            if axis_save is None:
+                if out is not None:
+                    raise ValueError("output parameter for reduction operation "
+                                     + op_name + " has too many dimensions")
+                lst = [1] * a.ndim
+            else:
+                lst = list(a.shape)
+                if a.ndim > 0:
+                    for axis_i in axis:
+                        lst[axis_i] = 1
         else:
-            lst = list(a.shape)
-            if a.ndim > 0:
-                for axis_i in axis:
-                    lst[axis_i] = 1
-    else:
-        if axis_save is None:
-            if out is not None and out.ndim > 0:
-                raise ValueError("output parameter for reduction operation "
-                                 + op_name + " has too many dimensions")
-            lst=[]
-        else:
-            lst = list(a.shape)
-            if a.ndim > 0:
-                axis_desc = sorted(axis, reverse=True)
-                for i in axis_desc:
-                    lst.pop(i)
+            if axis_save is None:
+                if out is not None and out.ndim > 0:
+                    raise ValueError("output parameter for reduction operation "
+                                     + op_name + " has too many dimensions")
+                lst=[]
+            else:
+                lst = list(a.shape)
+                if a.ndim > 0:
+                    axis_desc = sorted(axis, reverse=True)
+                    for i in axis_desc:
+                        lst.pop(i)
 
-    shape_out = tuple(lst)
+        shape_out = tuple(lst)
     if out is not None and shape_out != out.shape:
         raise NotImplementedError(
             "out.shape must equal to " + str(shape_out) +
@@ -257,9 +261,9 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                     _dtype not in ('bool', 'complex64', 'complex128'):
                 initial = initial.real
             if initial == nlcpy.inf:
-                initial = get_plus_infinity(_dtype, op_name, is_identity).get()
+                initial = get_plus_infinity(_dtype, op_name, is_identity)
             elif initial == -nlcpy.inf:
-                initial = get_minus_infinity(_dtype, op_name, is_identity).get()
+                initial = get_minus_infinity(_dtype, op_name, is_identity)
             if out is not None:
                 out.fill(initial)
                 return out
@@ -293,12 +297,10 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                 raise ValueError(
                     "Integers to negative integer powers are not allowed.")
 
-    if type(where) is tuple:
-        where = where[0]
     flag_init_after = False
     where_for_init = True
     if where is True or numpy.isscalar(where) and where != 0:
-        where = nlcpy.asanyarray([0])
+        where = nlcpy.empty(1)
         flag_where = 0
         where_is_false = False
     elif where is False or where is None or \
@@ -361,10 +363,10 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         elif initial == -nlcpy.inf:
             initial = get_minus_infinity(_dtype, op_name, True)
         else:
-            initial = nlcpy.array(initial, dtype=_dtype)
+            initial = numpy.array(initial, dtype=_dtype)
         flag_init = 1
     elif initial in (None, nlcpy._NoValue):
-        initial = nlcpy.zeros(1, dtype=odt)
+        initial = numpy.array(0, dtype=odt)
         flag_init = 0
     elif numpy.isscalar(initial):
         if initial == nlcpy.inf:
@@ -374,9 +376,9 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         else:
             if type(initial) == complex and \
                     odt not in ('bool', 'complex64', 'complex128'):
-                initial = nlcpy.array(initial.real, dtype=odt)
+                initial = numpy.array(initial.real, dtype=odt)
             else:
-                initial = nlcpy.array(initial, dtype=odt)
+                initial = numpy.array(initial, dtype=odt)
         flag_init = 1
     else:
         raise ValueError("Input object 'initial=%s' is not a scalar" % initial)
@@ -386,25 +388,28 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
     else:
         order_out = 'C'
 
-    x = nlcpy.array(a)
-    if initial_save is None or \
-            initial_save is nlcpy._NoValue and not op_has_identity:
-        for i in range(len(axis)):
-            if x.ndim > axis[i] and x.shape[axis[i]] > 1:
-                sl = [slice(0, None) if j != axis[i] else
-                      slice(0, 1) for j in range(x.ndim)]
-                x[sl] = nlcpy.array(x[sl], dtype=odt)
-
+    x = a
     dtype = dtype if dtype is not None else odt
-    if op_is_boolean:
-        dtype = bool
-        x = nlcpy.array(x, dtype=dtype)
-        initial = nlcpy.array(initial, dtype=dtype)
-    elif (len(axis) > 0 or flag_init):
-        x = nlcpy.array(x, dtype=dtype)
-        initial = nlcpy.array(initial, dtype=dtype)
+    if not op_is_boolean and not (len(axis) > 0 or flag_init):
+        x = nlcpy.asarray(x, dtype=odt)
     else:
-        x = nlcpy.array(x, dtype=odt)
+        if dtype != odt and (initial_save is None or
+                             initial_save is nlcpy._NoValue and
+                             not op_has_identity):
+            x = nlcpy.array(x)
+            for i in range(len(axis)):
+                if x.ndim > axis[i] and x.shape[axis[i]] > 1:
+                    sl = [slice(0, None) if j != axis[i] else
+                          slice(0, 1) for j in range(x.ndim)]
+                    x[sl] = x[sl].astype(odt)
+
+        if op_is_boolean:
+            dtype = bool
+            x = nlcpy.asarray(x, dtype=dtype)
+            initial = numpy.asarray(initial, dtype=dtype)
+        elif (len(axis) > 0 or flag_init):
+            x = nlcpy.asarray(x, dtype=dtype)
+            initial = numpy.asarray(initial, dtype=dtype)
 
     if where_is_false:
         op_name = 'add'
@@ -421,7 +426,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
             elif _identity == -nlcpy.inf:
                 initial = get_minus_infinity(initial.dtype, op_name, True)
             else:
-                initial = nlcpy.asanyarray(_identity, dtype=initial.dtype)
+                initial = numpy.asanyarray(_identity, dtype=initial.dtype)
 
     do_copyto = 0
     dst = nlcpy.empty(1) if out is None else out
@@ -461,8 +466,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         else:
             y = ndarray(shape=shape, dtype=dtype, order=order_out)
             w = y
-        if y.ve_adr == 0:
-            raise MemoryError()
 
         request._push_request(
             name,
@@ -470,7 +473,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
             (x, y, w, axis_i, flag_init,
              initial, flag_where, where, dst, do_copyto),
         )
-        if op_name == 'logaddexp':
+        if op_name in ('logaddexp', 'logaddexp2'):
             y = nlcpy.fmax(y, -nlcpy.inf)
         x = y
         flag_where = 0
@@ -520,7 +523,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
             x = x.reshape(y.shape)
             if isinstance(where_for_init, ndarray):
                 where_for_init = where_for_init.reshape(y.shape)
-            w = nlcpy.array(x, dtype=dtype)
+            w = ndarray(x.shape, dtype=dtype)
             flag_where = 1 if where_for_init is not True else 0
             request._push_request(
                 name,
@@ -533,11 +536,12 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                 y = out
                 z = z.reshape(y.shape)
             x = nlcpy.full_like(z, initial_after, dtype=initial_after.dtype)
-            w = nlcpy.array(z)
-            w2 = nlcpy.array(z, dtype=dtype)
+            w = z
+            w2 = nlcpy.ndarray(z.shape, dtype=dtype)
             request._push_request(
                 'nlcpy_'+op_name,
                 'binary_op',
                 (x, w, y, w2, 0, where)
             )
+
     return out if out is not None else y.reshape(shape_out)

@@ -941,21 +941,21 @@ class TestRandomDist(object):
             desired = conv([0, 1, 9, 6, 2, 4, 5, 8, 7, 3])
             assert_array_equal(actual, desired)
 
-    def __exclude_test_shuffle_custom_axis(self):
+    def test_shuffle_custom_axis(self):
         random = Generator(MT19937(self.seed))
         actual = np.arange(16).reshape((4, 4))
         random.shuffle(actual, axis=1)
-        desired = np.array([[0, 3, 1, 2],
-                            [4, 7, 5, 6],
-                            [8, 11, 9, 10],
-                            [12, 15, 13, 14]])
+        desired = np.array([[0, 1, 3, 2],
+                            [4, 5, 7, 6],
+                            [8, 9, 11, 10],
+                            [12, 13, 15, 14]])
         assert_array_equal(actual, desired)
         random = Generator(MT19937(self.seed))
         actual = np.arange(16).reshape((4, 4))
         random.shuffle(actual, axis=-1)
         assert_array_equal(actual, desired)
 
-    def __exclude_test_shuffle_axis_nonsquare(self):
+    def test_shuffle_axis_nonsquare(self):
         y1 = np.arange(20).reshape(2, 10)
         y2 = y1.copy()
         random = Generator(MT19937(self.seed))
@@ -1000,12 +1000,12 @@ class TestRandomDist(object):
         actual = random.permutation(integer_val)
         assert_array_equal(actual.get(), desired)
 
-    def __exclude_test_permutation_custom_axis(self):
+    def test_permutation_custom_axis(self):
         a = np.arange(16).reshape((4, 4))
-        desired = np.array([[0, 3, 1, 2],
-                            [4, 7, 5, 6],
-                            [8, 11, 9, 10],
-                            [12, 15, 13, 14]])
+        desired = np.array([[0, 1, 3, 2],
+                            [4, 5, 7, 6],
+                            [8, 9, 11, 10],
+                            [12, 13, 15, 14]])
         random = Generator(MT19937(self.seed))
         actual = random.permutation(a, axis=1)
         assert_array_equal(actual, desired)

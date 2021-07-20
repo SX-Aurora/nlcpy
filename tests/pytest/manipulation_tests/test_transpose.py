@@ -157,16 +157,6 @@ class TestTranspose(unittest.TestCase):
         with self.assertRaises(ValueError):
             nlcpy.rollaxis(a, 3)
 
-#    @testing.numpy_nlcpy_array_equal()
-#    def test_swapaxes(self, xp):
-#        a = testing.shaped_arange((2, 3, 4), xp)
-#        return xp.swapaxes(a, 2, 0)
-#
-#    def test_swapaxes_failure(self):
-#        a = testing.shaped_arange((2, 3, 4))
-#        with self.assertRaises(ValueError):
-#            nlcpy.swapaxes(a, 3, 0)
-#
     @testing.numpy_nlcpy_array_equal()
     def test_transpose(self, xp):
         a = testing.shaped_arange((2, 3, 4), xp)
@@ -191,3 +181,31 @@ class TestTranspose(unittest.TestCase):
     def test_external_transpose_all(self, xp):
         a = testing.shaped_arange((2, 3, 4), xp)
         return xp.transpose(a)
+
+
+@testing.parameterize(*(
+    testing.product({
+        'shapes': ((2, 3, 4), (3, 1, 2), (4, 2, 3, 5,)),
+        'axes': ((0, 2), (2, 0), (0, -1), (1, 1), (-3, 1), (2, -3)),
+    }))
+)
+class TestSwapAxes(unittest.TestCase):
+
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_array_equal()
+    def test_swapaxes(self, xp, order):
+        a = testing.shaped_arange(self.shapes, xp, order=order)
+        return xp.swapaxes(a, self.axes[0], self.axes[1])
+
+
+@testing.parameterize(*(
+    testing.product({
+        'axes': ((3, 0), (0, 3), (-4, 1), (1, -4)),
+    }))
+)
+class TestSwapAxesFailure(unittest.TestCase):
+
+    @testing.numpy_nlcpy_raises()
+    def test_swapaxes_failure(self, xp):
+        a = testing.shaped_arange((2, 3, 4), xp)
+        xp.swapaxes(a, self.axes[0], self.axes[1])

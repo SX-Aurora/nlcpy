@@ -105,67 +105,30 @@ class TestAppendFailure(unittest.TestCase):
         return xp.append(xp.zeros([2, 2]), xp.zeros([3, 3]), 0)
 
 
-class TestDelete_0D(unittest.TestCase):
-    @testing.with_requires('numpy<1.19')
-    @testing.for_all_dtypes()
-    @testing.numpy_nlcpy_array_equal()
-    def test_delete_0d(self, xp, dtype):
-        return xp.delete(100, 0, 0)
-
-
 @testing.parameterize(
     {'obj': 0},
     {'obj': 1},
     {'obj': 2},
     {'obj': -2},
-    {'obj': 2.0},
-    {'obj': 2.0 + 2.0j},
-    {'obj': True},
-    {'obj': False},
     {'obj': (0, 1)},
     {'obj': (-2, 3)},
     {'obj': ((1, ), (2, ))},
-    {'obj': (1, 10)},
-    {'obj': (0.0, 1.0)},
-    {'obj': (2.0, 3.0)},
-    {'obj': (-2.0, 3.0)},
-    {'obj': (1.0, 10.0)},
-    {'obj': (0.0 + 2.0j, 1.0 + 2.0j)},
-    {'obj': (2.0 + 2.0j, 3.0 + 2.0j)},
-    {'obj': (-2.0 + 2.0j, 3.0 + 2.0j)},
-    {'obj': (1.0 + 2.0j, 10.0 + 2.0j)},
-    {'obj': (True, False)},
     {'obj': [0, 1]},
     {'obj': [3, 2]},
     {'obj': [-2, 3]},
-    {'obj': [1, 10]},
-    {'obj': [0.0, 1.0]},
-    {'obj': [2.0, 3.0]},
-    {'obj': [-2.0, 3.0]},
-    {'obj': [1.0, 10.0]},
-    {'obj': [0.0 + 2.0j, 1.0 + 2.0j]},
-    {'obj': [2.0 + 2.0j, 3.0 + 2.0j]},
-    {'obj': [-2.0 + 2.0j, 3.0 + 2.0j]},
-    {'obj': [1.0 + 2.0j, 10.0 + 2.0j]},
-    {'obj': [True, False]},
     {'obj': slice(2, 5, 2)},
     {'obj': slice(-10, 10, 2)},
     {'obj': slice(0, 0)},
     {'obj': ()},
     {'obj': []},
-    {'obj': "A"},
-    {'obj': ["A", "B"]},
-    {'obj': ("A", "B")},
 )
 class TestDelete_OBJ(unittest.TestCase):
-    @testing.with_requires('numpy<1.19')
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_delete_1d(self, xp, dtype):
         a = testing.shaped_arange((5,), xp, dtype)
         return xp.delete(a, self.obj, 0)
 
-    @testing.with_requires('numpy<1.19')
     @testing.for_orders('CF')
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
@@ -174,7 +137,7 @@ class TestDelete_OBJ(unittest.TestCase):
         return xp.delete(a, self.obj, 0)
 
 
-class TestAxisNone(unittest.TestCase):
+class TestDeleteAxisNone(unittest.TestCase):
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_delete_axis_None(self, xp, dtype):
@@ -237,6 +200,27 @@ class TestDelete_Failure(unittest.TestCase):
         a = testing.shaped_arange((2, 3, 4), xp)
         xp.delete(a, -6, 0)
 
+    @testing.numpy_nlcpy_raises()
+    def test_delete_bool_obj_size_mismatch(self, xp):
+        a = testing.shaped_arange((2, 3, 4), xp)
+        xp.delete(a, True, 0)
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_raises()
+    def test_delete_non_int_obj(self, xp, dtype):
+        a = testing.shaped_arange((2, 3, 4), xp)
+        obj = xp.array(1, dtype=dtype)
+        xp.delete(a, obj, 0)
+
+    @testing.numpy_nlcpy_raises()
+    def test_delete_index_out_of_bound_with_tuple_obj(self, xp):
+        a = testing.shaped_arange((2, 3, 4), xp)
+        xp.delete(a, (1, 10), 0)
+
+    @testing.numpy_nlcpy_raises()
+    def test_delete_0d(self, xp, dtype):
+        return xp.delete(100, 0, 0)
+
 
 @testing.parameterize(*(
     testing.product({
@@ -274,24 +258,6 @@ class TestInsert(unittest.TestCase):
 @testing.parameterize(*(
     testing.product({
         'params': [
-            (0, [5], None),
-        ],
-    })
-))
-class TestInsertScalarArr(unittest.TestCase):
-    @testing.with_requires('numpy<1.19')
-    @testing.for_all_dtypes(name='dtype_a')
-    @testing.for_all_dtypes(name='dtype_v')
-    @testing.numpy_nlcpy_array_equal()
-    def test_insert_scalar_arr(self, xp, dtype_a, dtype_v):
-        arr = xp.array(0, dtype=dtype_a)
-        values = xp.array(1, dtype=dtype_v)
-        return xp.insert(arr=arr, obj=0, values=values, axis=0)
-
-
-@testing.parameterize(*(
-    testing.product({
-        'params': [
             ([6], slice(2, 4), [2], None),
             ([20], slice(2, 25, 3), [1], None),
             ([3, 2], 0, [1], None),
@@ -319,15 +285,6 @@ class TestInsertNonIntegerObj(unittest.TestCase):
     @testing.for_dtypes('il', name='dtype_o')
     @testing.numpy_nlcpy_array_equal()
     def test_insert_obj_is_uint(self, xp, dtype_o):
-        arr = testing.shaped_arange([3, 4, 5], xp)
-        obj = testing.shaped_arange([3], xp, dtype_o)
-        values = testing.shaped_arange([4, 5], xp)
-        return xp.insert(arr, obj, values, 0)
-
-    @testing.with_requires('numpy<1.19')
-    @testing.for_dtypes('fdFD', name='dtype_o')
-    @testing.numpy_nlcpy_array_equal()
-    def test_insert_obj_is_real(self, xp, dtype_o):
         arr = testing.shaped_arange([3, 4, 5], xp)
         obj = testing.shaped_arange([3], xp, dtype_o)
         values = testing.shaped_arange([4, 5], xp)
@@ -392,3 +349,83 @@ class TestInsertFailure(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_insert_shape_mismatch(self, xp):
         return xp.insert(xp.zeros([2, 2]), 0, xp.zeros([3, 3]), 1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_insert_scalar_arr(self, xp):
+        return xp.insert(arr=0, obj=0, values=1, axis=0)
+
+    @testing.for_dtypes('fdFD', name='dtype_o')
+    @testing.numpy_nlcpy_raises()
+    def test_insert_obj_is_real(self, xp, dtype_o):
+        arr = testing.shaped_arange([3, 4, 5], xp)
+        obj = testing.shaped_arange([3], xp, dtype_o)
+        values = testing.shaped_arange([4, 5], xp)
+        return xp.insert(arr, obj, values, 0)
+
+
+@testing.parameterize(*(
+    testing.product({
+        'shape': [(100,), (10, 10), (10, 6, 4), (4, 8, 6, 10)],
+        'axis': [None, 0, 1, -1],
+        'index': [False, True],
+        'inverse': [False, True],
+        'count': [False, True],
+    })
+))
+class TestUnique(unittest.TestCase):
+    @testing.for_dtypes('?ilILfd')
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_array_equal()
+    def test_unique(self, xp, dtype, order):
+        if len(self.shape) == 1 and self.axis == 1:
+            return 0
+        shape = list(self.shape)
+        idx = 0 if self.axis is None else self.axis
+        shape[idx] = int(shape[idx] / 2)
+        a = xp.asarray(testing.shaped_random(shape, xp, dtype), order=order)
+        a = xp.tile(a, 2)
+        return xp.unique(
+            a, axis=self.axis, return_index=self.index,
+            return_inverse=self.inverse, return_counts=self.count)
+
+
+@testing.parameterize(*(
+    testing.product({
+        'index': [False, True],
+        'inverse': [False, True],
+        'count': [False, True],
+    })
+))
+class TestUnique2(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_unique_empty(self, xp):
+        return xp.unique((), self.index, self.inverse, self.count, None)
+
+    @testing.for_dtypes('?ilILfd')
+    @testing.numpy_nlcpy_array_equal()
+    def test_unique_empty2(self, xp, dtype):
+        return xp.unique(
+            xp.array([], dtype=dtype), self.index, self.inverse, self.count, None)
+
+    @testing.for_dtypes('?ilILfd')
+    @testing.numpy_nlcpy_array_equal()
+    def test_unique_scalar(self, xp, dtype):
+        return xp.unique(
+            xp.array(1, dtype=dtype), self.index, self.inverse, self.count, None)
+
+
+class TestUnique3(unittest.TestCase):
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_unique_empty_array(self, xp, dtype):
+        return xp.unique(xp.empty([2, 0, 3], dtype=dtype), axis=0)
+
+
+class TestUniqueFailure(unittest.TestCase):
+    @testing.numpy_nlcpy_raises()
+    def test_unique_axis_error(self, xp):
+        xp.unique(xp.arange(3), axis=2)
+
+    @testing.numpy_nlcpy_raises()
+    def test_unique_axis_error2(self, xp):
+        xp.unique(xp.arange(3), axis=-2)

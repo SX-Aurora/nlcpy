@@ -9,6 +9,7 @@ rm -rf build/
 rm -rf dist/
 rm -rf *.egg-info/
 (cd nlcpy; rm -rf *.c *.so *.cpp *.o __pycache__)
+(cd nlcpy/include; rm -rf *.h __pycache__)
 (cd nlcpy/core; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/veo; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/kernel_register; rm -rf *.c *.so *.cpp *.o __pycache__)
@@ -25,6 +26,7 @@ rm -rf *.egg-info/
 (cd nlcpy/sorting; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/mempool; rm -rf mempoo*.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/random; rm -rf *.c *.so *.cpp *.o __pycache__)
+(cd nlcpy/sca; rm -rf *.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/mempool; rm -rf mempoo*.c *.so *.cpp *.o __pycache__)
 (cd nlcpy/prof; rm -rf __pycache__)
 (cd nlcpy/datatype; rm -rf __pycache__)

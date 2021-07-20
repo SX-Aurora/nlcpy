@@ -198,12 +198,6 @@ def delete(arr, obj, axis=None):
         ndim = input_arr.ndim
         axis = ndim - 1
 
-    if ndim == 0:
-        warnings.warn(
-            "in the future the special handling of scalars will be removed "
-            "from delete and raise an error", DeprecationWarning, stacklevel=3)
-        return input_arr.copy(order=order_out)
-
     if isinstance(axis, numpy.ndarray) or isinstance(axis, nlcpy.ndarray):
         axis = int(axis)
     elif not isinstance(axis, int):
@@ -230,9 +224,10 @@ def delete(arr, obj, axis=None):
             del_obj = del_obj.ravel()
 
         if del_obj.dtype == bool:
-            warnings.warn("in the future insert will treat boolean arrays and "
-                          "array-likes as boolean index instead of casting it "
-                          "to integer", FutureWarning, stacklevel=3)
+            if del_obj.ndim != 1 or del_obj.size != input_arr.shape[axis]:
+                raise ValueError(
+                    'boolean array argument obj to delete must be one dimensional and '
+                    'match the axis length of {}'.format(input_arr.shape[axis]))
             del_obj = del_obj.astype(nlcpy.intp)
 
         if isinstance(obj, (int, nlcpy.integer)):
@@ -242,12 +237,9 @@ def delete(arr, obj, axis=None):
                     "size %i" % (obj, axis, N))
             if (obj < 0):
                 del_obj += N
-        else:
-            if del_obj.dtype != int:
-                warnings.warn(
-                    "using a non-integer array as obj in delete will result in an "
-                    "error in the future", DeprecationWarning, stacklevel=3)
-                del_obj = del_obj.astype(nlcpy.intp)
+        elif del_obj.size > 0 and del_obj.dtype != int:
+            raise IndexError(
+                'arrays used as indices must be of integer (or boolean) type')
 
     if del_obj.size == 0:
         new = nlcpy.array(input_arr)
@@ -263,10 +255,8 @@ def delete(arr, obj, axis=None):
         )
         count = obj_count.get()
         if count[1] != 0:
-            warnings.warn(
-                "in the future out of bounds indices will raise an error "
-                "instead of being ignored by `numpy.delete`.",
-                DeprecationWarning, stacklevel=3)
+            raise IndexError(
+                "index out of bounds for axis {}".format(axis))
         if count[2] != 0:
             warnings.warn(
                 "in the future negative indices will not be ignored by "
@@ -357,13 +347,6 @@ def insert(arr, obj, values, axis=None):
         if a.ndim != 1:
             a = a.ravel()
         axis = 0
-    elif a.ndim == 0:
-        warnings.warn(
-            "in the future the special handling of scalars will be removed "
-            "from insert and raise an error", DeprecationWarning, stacklevel=3)
-        a = a.copy(order='F' if a.flags.f_contiguous else 'C')
-        a[...] = values
-        return a
     elif isinstance(axis, nlcpy.ndarray) or isinstance(axis, numpy.ndarray):
         axis = int(axis)
     elif not isinstance(axis, int):
@@ -392,10 +375,9 @@ def insert(arr, obj, values, axis=None):
                 raise TypeError(
                     "slice indices must be integers or "
                     "None or have an __index__ method")
-            else:
-                warnings.warn(
-                    "using a non-integer array as obj in insert will result in an "
-                    "error in the future", DeprecationWarning, stacklevel=3)
+            elif obj.size > 0:
+                raise IndexError(
+                    'arrays used as indices must be of integer (or boolean) type')
         elif obj.dtype.char in 'IL':
             if obj.size == 1:
                 objval = obj[()] if obj.ndim == 0 else obj[0]
@@ -518,3 +500,172 @@ def resize(a, new_shape):
         a = a[:-extra]
 
     return nlcpy.reshape(a, new_shape)
+
+
+def unique(ar, return_index=False, return_inverse=False, return_counts=False, axis=None):
+    """Finds the unique elements of an array.
+
+    Returns the sorted unique elements of an array.
+    There are three optional outputs in addition to the unique elements:
+
+    - the indices of the input array that give the unique values
+    - the indices of the unique array that reconstruct the input array
+    - the number of times each unique value comes up in the input array
+
+    Parameters
+    ----------
+    ar : array_like
+        Input array.
+        Unless *axis* is specified, this will be flattened if it is not already 1-D.
+
+    return_index : bool, optional
+        If True, also return the indices of *ar* (along the specified axis, if provided,
+        or in the flattened array) that result in the unique array.
+
+    return_inverse : bool, optional
+        If True, also return the indices of the unique array (for the specified axis,
+        if provided) that can be used to reconstruct *ar*.
+
+    return_counts : bool, optional
+        If True, also return the number of times each unique item appears in *ar*.
+
+    axis : int or None, optional
+        The axis to operate on. If None, *ar* will be flattened. If an integer, the
+        subarrays indexed by the given axis will be flattened and treated as the
+        elements of a 1-D array with the dimension of the given axis, see the notes
+        for more details. Object arrays or structured arrays that contain objects are
+        not supported if the *axis* kwarg is used. The default is None.
+
+    Returns
+    -------
+    unique : ndarray
+        The sorted unique values.
+
+    unique_indices : ndarray, optional
+        The indices of the first occurrences of the unique values in the original array.
+        Only provided if *return_index* is True.
+
+    unique_inverse : ndarray, optional
+        The indices to reconstruct the original array from the unique array.
+        Only provided if *return_inverse* is True.
+
+    unique_count : ndarray, optional
+        The number of times each of the unique values comes up in the original array.
+        Only provided if *return_counts* is True.
+
+    Restriction
+    -----------
+    *NotImplementedError*:
+
+      - If 'c' is contained in *ar.dtype.kind*.
+
+    Note
+    ----
+    When an axis is specified the subarrays indexed by the axis are sorted. This is done
+    by making the specified axis the first dimension of the array and then flattening
+    the subarrays in C order. The flattened subarrays are then viewed as a structured
+    type with each element given a label, with the effect that we end up with a 1-D
+    array of structured types that can be treated in the same way as any other 1-D
+    array. The result is that the flattened subarrays are sorted in lexicographic order
+    starting with the first element.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> vp.unique([1, 1, 2, 2, 3, 3])
+    array([1, 2, 3])
+    >>> a =vp.array([[1, 1], [2, 3]])
+    >>> vp.unique(a)
+    array([1, 2, 3])
+
+    Return the unique rows of a 2D array
+
+    >>> a = vp.array([[1, 0, 0], [1, 0, 0], [2, 3, 4]])
+    >>> vp.unique(a, axis=0)
+    array([[1, 0, 0],
+           [2, 3, 4]])
+
+    Return the indices of the original array that give the unique values:
+
+    >>> a = vp.array([1, 2, 2, 3, 1])
+    >>> u, indices = vp.unique(a, return_index=True)
+    >>> u
+    array([1, 2, 3])
+    >>> indices
+    array([0, 1, 3])
+    >>> a[indices]
+    array([1, 2, 3])
+
+    Reconstruct the input array from the unique values:
+
+    >>> a = vp.array([1, 2, 6, 4, 2, 3, 2])
+    >>> u, indices = vp.unique(a, return_inverse=True)
+    >>> u
+    array([1, 2, 3, 4, 6])
+    >>> indices
+    array([0, 1, 4, 3, 1, 2, 1])
+    >>> u[indices]
+    array([1, 2, 6, 4, 2, 3, 2])
+    """
+    ar = nlcpy.asanyarray(ar)
+    if axis is not None:
+        if axis < 0:
+            axis = axis + ar.ndim
+        if axis < 0 or axis >= ar.ndim:
+            raise AxisError('Axis out of range')
+    if ar.ndim > 1 and axis is not None:
+        if ar.size == 0:
+            if axis is None:
+                shape = ()
+            else:
+                shape = list(ar.shape)
+                shape[axis] = int(shape[axis] / 2)
+            return nlcpy.empty(shape, dtype=ar.dtype)
+        ar = nlcpy.moveaxis(ar, axis, 0)
+        orig_shape = ar.shape
+        ar = ar.reshape(orig_shape[0], -1)
+        aux = nlcpy.array(ar)
+        perm = nlcpy.empty(ar.shape[0], dtype='l')
+        request._push_request(
+            'nlcpy_sort_multi',
+            'sorting_op',
+            (ar, aux, perm, return_index)
+        )
+        mask = nlcpy.empty(aux.shape[0], dtype='?')
+        mask[0] = True
+        mask[1:] = nlcpy.any(aux[1:] != aux[:-1], axis=1)
+        ret = aux[mask]
+        ret = ret.reshape(-1, *orig_shape[1:])
+        ret = nlcpy.moveaxis(ret, 0, axis)
+    else:
+        ar = ar.flatten()
+        if return_index or return_inverse:
+            perm = ar.argsort(kind='stable' if return_index else None)
+            aux = ar[perm]
+        else:
+            ar.sort()
+            aux = ar
+        mask = nlcpy.empty(aux.shape[0], dtype='?')
+        if mask.size:
+            mask[0] = True
+            mask[1:] = aux[1:] != aux[:-1]
+        ret = aux[mask]
+
+    if not return_index and not return_inverse and not return_counts:
+        return ret
+
+    ret = (ret,)
+    if return_index:
+        ret += (perm[mask],)
+    if return_inverse:
+        imask = nlcpy.cumsum(mask) - 1
+        inv_idx = nlcpy.empty(mask.shape, dtype=nlcpy.intp)
+        inv_idx[perm] = imask
+        ret += (inv_idx,)
+    if return_counts:
+        nonzero = nlcpy.nonzero(mask)[0]
+        idx = nlcpy.empty((nonzero.size + 1,), nonzero.dtype)
+        idx[:-1] = nonzero
+        idx[-1] = mask.size
+        ret += (idx[1:] - idx[:-1],)
+    return ret

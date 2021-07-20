@@ -34,6 +34,7 @@ Transpose-like Operations
 
     nlcpy.moveaxis
     nlcpy.rollaxis
+    nlcpy.swapaxes
     nlcpy.transpose
 
 
@@ -44,6 +45,10 @@ Changing Number of Dimensions
     :toctree: generated/
     :nosignatures:
 
+    nlcpy.atleast_1d
+    nlcpy.atleast_2d
+    nlcpy.atleast_3d
+    nlcpy.broadcast_arrays
     nlcpy.broadcast_to
     nlcpy.expand_dims
     nlcpy.squeeze
@@ -60,6 +65,19 @@ Joining Arrays
     nlcpy.hstack
     nlcpy.stack
     nlcpy.vstack
+    nlcpy.block
+
+
+Splitting arrays
+----------------
+
+.. autosummary::
+    :toctree: generated/
+    :nosignatures:
+
+    nlcpy.split
+    nlcpy.hsplit
+    nlcpy.vsplit
 
 
 Tiling Arrays
@@ -84,6 +102,7 @@ Adding and Removing Elements
     nlcpy.delete
     nlcpy.insert
     nlcpy.resize
+    nlcpy.unique
 
 
 Rearranging Elements
@@ -96,3 +115,4 @@ Rearranging Elements
     nlcpy.flip
     nlcpy.fliplr
     nlcpy.flipud
+    nlcpy.roll

@@ -59,7 +59,7 @@ You can install NLCPy by executing either of following commands.
         $ pip install <path_to_wheel>
         ```
 
-The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Version 3.1.1 and NumPy v1.17.4.
+The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Version 3.2.1 and NumPy v1.19.2.
 
 ## Install from source (with building)
 

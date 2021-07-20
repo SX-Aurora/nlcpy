@@ -615,10 +615,12 @@ cpdef ndarray argwhere(a):
     """
     errcnt = 0
     if a is not None:
-        if type(a) is not ndarray:
+        if type(a) not in (ndarray, numpy.ndarray):
             # TODO: using isscalar. needs replacing when implemented.
             if numpy.isscalar(a) is True:
                 arr = core.array([a])
+                shape = (0 if a == 0 else 1, 0)
+                errcnt += 1
             elif isinstance(a, list) and len(a) >= 1:
                 arr = core.argument_conversion(a)
             elif isinstance(a, tuple) and len(a) >= 1:
@@ -626,21 +628,23 @@ cpdef ndarray argwhere(a):
             elif isinstance(a, numpy.ndarray):
                 arr = core.argument_conversion(a)
             else:
-                dim = 1
+                shape = (0, 1)
                 errcnt += 1
         else:
-            if a.ndim == 0:
+            if a.size == 1:
                 arr = core.array([a.get()])
-            elif a.size >= 1:
+                shape = (0 if a == 0 else 1, 0)
+                errcnt += 1
+            elif a.size > 1:
                 arr = core.argument_conversion(a)
             else:
-                dim = 1
+                shape = (0, a.ndim)
                 errcnt += 1
     else:
         errcnt += 1
 
     if errcnt != 0:
-        return core.array([], dtype=numpy.int64).reshape((0, dim))
+        return core.array([], dtype=numpy.int64).reshape(shape)
 
     ########################################################################
     # TODO: VE-VH collaboration

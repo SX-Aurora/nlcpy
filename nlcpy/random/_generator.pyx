@@ -339,16 +339,18 @@ class Generator:
         """
         return self._rand.bytes(length)
 
-    def shuffle(self, x):
+    def shuffle(self, x, axis=0):
         """Modifies a sequence in-place by shuffling its contents.
 
-        This function only shuffles the array along the first axis of a multi-dimensional
-        array. The order of sub-arrays is changed but their contents remains the same.
+        The order of sub-arrays is changed but their contents remains the same.
 
         Parameters
         ----------
         x : array_like
             The array or list to be shuffled.
+        axis : int, optional
+            The axis which `x` is shuffled along. Default is 0.
+            It is only supported on ndarray objects.
 
         Returns
         -------
@@ -363,27 +365,33 @@ class Generator:
         >>> arr   # doctest: +SKIP
         array([7, 1, 5, 6, 0, 8, 4, 2, 9, 3]) # random
 
-        Multi-dimensional arrays are only shuffled along the first axis:
-
         >>> arr = vp.arange(9).reshape((3, 3))
         >>> rng.shuffle(arr)
         >>> arr   # doctest: +SKIP
         array([[3, 4, 5], # random
                [6, 7, 8],
                [0, 1, 2]])
+
+        >>> arr = vp.arange(9).reshape((3, 3))
+        >>> rng.shuffle(arr, axis=1)
+        >>> arr           # doctest: +SKIP
+        array([[2, 0, 1], # random
+               [5, 3, 4],
+               [8, 6, 7]])
         """
-        return self._rand.shuffle(x)
+        x = nlcpy.asarray(x)
+        return self._rand._generate_random_shuffle(x, axis)
 
-    def permutation(self, x):
+    def permutation(self, x, axis=0):
         """Randomly permutes a sequence, or returns a permuted range.
-
-        If *x* is a multi-dimensional array, it is only shuffled along it first index.
 
         Parameters
         ----------
         x : int or array_like
             If *x* is an integer, randomly permute ``vp.arange(x)``. If *x* is an array,
             make a copy and shuffle the elements randomly.
+        axis : int, optional
+            The axis which x is shuffled along. Default is 0.
 
         Returns
         -------
@@ -403,8 +411,13 @@ class Generator:
         array([[6, 7, 8], # random
                [0, 1, 2],
                [3, 4, 5]])
+        >>> arr = vp.arange(9).reshape((3, 3))
+        >>> rng.permutation(arr, axis=1) # doctest: +SKIP
+        array([[0, 2, 1], # random
+               [3, 5, 4],
+               [6, 8, 7]])
         """
-        return self._rand.permutation(x)
+        return self._rand._generate_random_permutation(x, axis=axis)
 
     def binomial(self, n, p, size=None):
         """Draws samples from a binomial distribution.

@@ -1,0 +1,61 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/sca_chapter_4.rst:2
+msgid "Notice Regarding SCA Interface"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:4
+msgid ""
+"The SCA interface supports up to 4 dimension :class:`nlcpy.ndarray`. It "
+"can handle stencil computations of arbitrary shape (axial, planar, "
+"diagonal, and its combination)."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:5
+msgid ""
+"In terms of dtype (data type), the current version of the SCA interface "
+"supports only ``float32`` and ``float64``."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:7
+msgid ""
+"As for integer types (int, uint, etc.), convert dtype into ``float32`` or"
+" ``float64``."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:8
+msgid "As for complex types, see :ref:`label_sca_complex`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:10
+msgid ""
+":func:`nlcpy.sca.create_kernel` dynamically generates a instruction "
+"sequence required to perform stencil computations on VE. This generating "
+"cost is not small compared to :func:`nlcpy.sca.kernel.kernel.execute`, so"
+" the overall performance gets better as the number of kernel executions "
+"per kernel generation increase."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_4.rst:11
+msgid ""
+"An output :class:`nlcpy.ndarray` may not be shared with an input "
+":class:`nlcpy.ndarray`. Otherwise, unpredictable results occurs."
+msgstr ""
+

@@ -1,0 +1,302 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/sca_chapter_2.rst:4
+msgid "Basic Usage"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:6
+msgid "This section describes how to call the SCA interface in your program."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:9
+msgid "Overview"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:11
+msgid ""
+"The procedure using the SCA interface consists of the following five "
+"steps."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:13
+msgid ":ref:`label_sca_creation_desc`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:14
+msgid ":ref:`label_sca_definition_desc`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:15
+msgid ":ref:`label_sca_creation_kernel`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:16
+msgid ":ref:`label_sca_execution_kernel`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:17
+msgid ":ref:`label_sca_destruction_kernel`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:19
+msgid ""
+"Here is a simple example that adds adjacent elements of an one-"
+"dimensional array ``xin``, whose size is 10, and stores the result to "
+"``xout``."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:38
+msgid "Creation of Stencil Descriptor"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:40
+msgid ""
+"A stencil descriptor can be created from a :class:`nlcpy.ndarray` used in"
+" the stencil computation. The stencil descriptor is a Python object that "
+"can represent a stencil shape and is associated with the "
+":class:`nlcpy.ndarray`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:43
+msgid "In [1]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:56:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_descriptor <nlcpy.sca.create_descriptor>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:56:<autosummary>:1
+msgid "Returns one or more stencil descriptors."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:60
+msgid "Definition of Stencil Description"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:62
+msgid ""
+"Elements of stencil descriptor described above can concretely define a "
+"stencil description, which means \"stencil shape\". The stencil "
+"description can be denoted by relative indices of the stencil descriptor."
+" The following example defines that adds adjacent elements for each "
+"element of a one-dimensional array:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:66
+msgid "In [2]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:73
+msgid "Out[2]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:88
+msgid ""
+"For details of how to set coefficients for the input description, please "
+"see :ref:`label_sca_coef`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:90
+msgid ""
+"You can also define the output description if you need. The output "
+"description is useful when you specify an array offset for the output. "
+"For details of the array offset, please see :ref:`label_sca_offset`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:94
+msgid "In [3]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:101
+msgid "Out[3]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:117
+msgid "Creation of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:118
+msgid ""
+"After defining the stencil description, you can create a SCA kernel, "
+"which is an instruction sequence required for computations defined by the"
+" stencil description. :func:`nlcpy.sca.create_kernel()` dynamically "
+"generates the instruction sequence, stores it into the memory on VE, and "
+"returns the object of the SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:120
+msgid "In [4]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:131:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_kernel <nlcpy.sca.create_kernel>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:131:<autosummary>:1
+msgid "Creates a SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:135
+msgid "Execution of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:137
+msgid "After the creation of the SCA kernel, you can execute the SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:139
+msgid "In [5]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:145
+msgid "In [6]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:151
+msgid "Out[6]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:157
+msgid ""
+"If you specify desc_o as a keyword argument to "
+":func:`nlcpy.sca.create_kernel()`, the :class:`nlcpy.ndarray` returned by"
+" :func:`nlcpy.sca.kernel.kernel.execute()` is identical to the "
+":class:`nlcpy.ndarray` which is associated with ``desc_o``. The IDs of "
+"them are the same."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:160
+msgid "In [7]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:166
+msgid "Out[7]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:175
+msgid "Destruction of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:177
+msgid "The destruction of the SCA kernel can be done as follows:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:179
+msgid "In [8]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:185
+msgid ""
+"Even if you do not explicitly destroy the SCA kernel, it will be "
+"automatically destroyed by the garbage collector when there are no more "
+"references to the SCA kernel. However, for programs where the reference "
+"to the SCA kernel remains to the end, it may squeeze memory, so it is "
+"recommended to destroy the SCA kernel properly when it is no longer used."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:194:<autosummary>:1
+msgid ":obj:`nlcpy.sca.destroy_kernel <nlcpy.sca.destroy_kernel>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:194:<autosummary>:1
+msgid "Destroy a SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:196
+msgid "Speedup Method (TIPS)"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:199
+msgid "Stride Adjustment"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:201
+msgid ""
+"Please use :func:`nlcpy.sca.convert_optimized_array()` to gain maximal "
+"performance. This function converts ndarrays into optimized ndarrays, "
+"whose strides are adjusted to improve performance. It is highly "
+"recommended to use this function from a performance standpoint, although "
+"it is not necessary to use it. Note that "
+":func:`nlcpy.sca.convert_optimized_array()` returns a copy of the input "
+":class:`nlcpy.ndarray`, not a view. So, memory area of the returned "
+":class:`nlcpy.ndarray` is different from that of the input "
+":class:`nlcpy.ndarray`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:206
+msgid "In [9]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:215
+msgid "Out[9]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:221
+msgid "In [10]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:227
+msgid "Out[10]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:233
+msgid "In [11]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:239
+msgid "Out[11]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:252:<autosummary>:1
+msgid ""
+":obj:`nlcpy.sca.convert_optimized_array "
+"<nlcpy.sca.convert_optimized_array>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:252:<autosummary>:1
+msgid ""
+"Converts existing ndarrays into optimized ndarrays, whose strides are "
+"adjusted to improve perfomance, filled with zeros."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:252:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_optimized_array <nlcpy.sca.create_optimized_array>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:252:<autosummary>:1
+msgid ""
+"Creates an optimized ndarray, whose strides are adjusted to improve "
+"perfomance, filled with zeros."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:254
+msgid "Kernel Reuse"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_2.rst:256
+msgid ""
+"To gain maximal performance, it is strongly recommended to reuse the "
+"created SCA kernel if the stencil description or the coefficients of the "
+"stencil kernel is unchanged. If you repeat to create SCA kernels, your "
+"program will not be able to obtain sufficient performance because the "
+"cost of the creating a SCA kernel is not so small compared to executing "
+"the kernel."
+msgstr ""
+

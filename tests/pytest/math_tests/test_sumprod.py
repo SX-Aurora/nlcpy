@@ -80,7 +80,7 @@ class TestSumprod1(unittest.TestCase):
 class TestSumprod2(unittest.TestCase):
 
     @testing.for_all_dtypes()
-    @testing.numpy_nlcpy_allclose()
+    @testing.numpy_nlcpy_allclose(rtol=1e-6)
     def test_sum_all2(self, xp, dtype):
         a = testing.shaped_arange((20, 30, 40), xp, dtype)
         return xp.sum(a)

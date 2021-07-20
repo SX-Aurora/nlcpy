@@ -97,10 +97,8 @@ class TestRfft1DRaise(unittest.TestCase):
 class TestRfft1DInvalidParam(object):
 
     @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             ["aaa"], [[1, 2], [3, "4"]], [],
-                             ("aaa",), ((1, 2), (3, "4")), (),
-                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
-                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+                             ["aaa"], [],
+                             ("aaa",), (),))
     def _test_rfft_param_array(self, a):
         with pytest.raises(TypeError):
             nlcpy.fft.rfft(a)
@@ -111,10 +109,8 @@ class TestRfft1DInvalidParam(object):
             nlcpy.fft.rfft(a)
 
     @pytest.mark.parametrize('a', (1, 1 + 2j,
-                             ["aaa"], [[1, 2], [3, "4"]], [],
-                             ("aaa",), ((1, 2), (3, "4")), (),
-                             ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
-                             [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
+                             ["aaa"], [],
+                             ("aaa",), (),))
     def test_irfft_param_array(self, a):
         with pytest.raises(ValueError):
             nlcpy.fft.irfft(a)

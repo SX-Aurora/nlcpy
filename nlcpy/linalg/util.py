@@ -21,11 +21,17 @@ def _assertNdSquareness(*arrays):
             raise LinAlgError('Last 2 dimensions of the array must be square')
 
 
+# closure for callback
 def _assertNotSingular(info):
-    if info > 0:
-        raise LinAlgError('Singular matrix')
+    def _info_check(*args):
+        if info > 0:
+            raise LinAlgError('Singular matrix')
+    return _info_check
 
 
+# closure for callback
 def _assertPositiveDefinite(info):
-    if info > 0:
-        raise LinAlgError('Matrix is not positive definite')
+    def _info_check(*args):
+        if info > 0:
+            raise LinAlgError('Matrix is not positive definite')
+    return _info_check

@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-12 11:33+0900\n"
+"POT-Creation-Date: 2021-07-14 14:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/functions.rst:2
 msgid "Functions Provided by NLCPy"
@@ -22,10 +22,10 @@ msgstr "NLCPyが提供する関数"
 
 #: ../../source/functions.rst:4
 msgid ""
-"NLCPy provides a subset of NumPy's API. Comparison tables between NLCPy and"
-" NumPy functions are as shown below. Functions that are represented ``-``"
-" in the column \"NLCPy\" are not provided yet. If your scripts need to "
-"use unsuported functions in NLCPy, please see :ref:`Interoperability "
+"NLCPy provides a subset of NumPy's API. Comparison tables between NLCPy "
+"and NumPy functions are as shown below. Functions that are represented "
+"``-`` in the column \"NLCPy\" are not provided yet. If your scripts need "
+"to use unsuported functions in NLCPy, please see :ref:`Interoperability "
 "between NumPy and NLCPy <interoperability>`."
 msgstr ""
 "NLCPyは、NumPyのAPIのサブセットを提供します。 NLCPyの関数とNumPyの関数の比較表は次のとおりです。\"NLCPy\"列に "
@@ -309,11 +309,23 @@ msgid ":obj:`numpy.atleast_1d`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.atleast_1d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.atleast_2d`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.atleast_2d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.atleast_3d`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.atleast_3d`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -377,11 +389,19 @@ msgid ":obj:`numpy.block`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.block`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.bmat`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.broadcast_arrays`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.broadcast_arrays`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -430,6 +450,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.clip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.clip`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -533,6 +557,10 @@ msgid ":obj:`numpy.count_nonzero`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.count_nonzero`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.cov`"
 msgstr ""
 
@@ -609,11 +637,19 @@ msgid ":obj:`numpy.diag_indices`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.diag_indices`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.diag_indices_from`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.diagflat`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.diagflat`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -762,6 +798,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.fill_diagonal`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.fill_diagonal`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -921,6 +961,10 @@ msgid ":obj:`numpy.get_include`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.get_include`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.get_printoptions`"
 msgstr ""
 
@@ -1018,6 +1062,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.hsplit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.hsplit`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -1473,7 +1521,15 @@ msgid ":obj:`numpy.nanargmax`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanargmax`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.nanargmin`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.nanargmin`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -1853,6 +1909,10 @@ msgid ":obj:`numpy.roll`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.roll`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.rollaxis`"
 msgstr ""
 
@@ -1877,7 +1937,15 @@ msgid ":obj:`numpy.save`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.save`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.savetxt`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.savetxt`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -1885,7 +1953,15 @@ msgid ":obj:`numpy.savez`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.savez`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.savez_compressed`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.savez_compressed`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -1898,6 +1974,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.select`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.select`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2021,6 +2101,10 @@ msgid ":obj:`numpy.split`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.split`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.sqrt`"
 msgstr ""
 
@@ -2078,6 +2162,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.swapaxes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.swapaxes`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2141,7 +2229,15 @@ msgid ":obj:`numpy.tri`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.tri`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.tril`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.tril`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2158,6 +2254,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.triu`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.triu`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2197,6 +2297,10 @@ msgid ":obj:`numpy.unique`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.unique`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.unpackbits`"
 msgstr ""
 
@@ -2226,6 +2330,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.vsplit`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.vsplit`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2330,6 +2438,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`numpy.ndarray.clip`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.clip`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2546,6 +2658,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`numpy.ndarray.swapaxes`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`nlcpy.ndarray.swapaxes`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2994,6 +3110,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`numpy.random.Generator.multinomial`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.multivariate_hypergeometric`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1

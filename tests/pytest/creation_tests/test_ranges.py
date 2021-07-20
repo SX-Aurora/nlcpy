@@ -140,11 +140,10 @@ class TestRanges(unittest.TestCase):
         self.assertTrue(math.isnan(step))
         return x
 
-    @testing.with_requires('numpy>=1.10', 'numpy<1.18')
     @testing.for_all_dtypes(no_bool=True)
     @testing.numpy_nlcpy_array_equal()
-    def test_linspace_one_num_no_endopoint_with_retstep(self, xp, dtype):
-        x, step = xp.linspace(0, 10, 1, dtype=dtype, endpoint=False,
+    def test_linspace_zero_num_endopoint_with_retstep(self, xp, dtype):
+        x, step = xp.linspace(0, 10, 0, dtype=dtype, endpoint=True,
                               retstep=True)
         self.assertTrue(math.isnan(step))
         return x
@@ -334,11 +333,6 @@ class TestLogspace2(unittest.TestCase):
     def test_logspace_base_is_zero(self, xp):
         return xp.logspace(2, 5, 50, True, 0)
 
-    @testing.with_requires('numpy<1.18')
-    @testing.numpy_nlcpy_allclose()
-    def test_logspace_float_num(self, xp):
-        return xp.logspace(1, 10, 10.5)
-
     @testing.numpy_nlcpy_array_equal()
     def test_logspace_cast_to_bool(self, xp):
         return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=bool)
@@ -403,3 +397,7 @@ class TestLogspaceFailure(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_logspace_shape_mismatch(self, xp):
         return xp.logspace(xp.zeros([2, 3]), xp.ones([3, 3]))
+
+    @testing.numpy_nlcpy_raises()
+    def test_logspace_float_num(self, xp):
+        return xp.logspace(1, 10, 10.5)

@@ -1,0 +1,9 @@
+prune obj/
+prune dist/
+prune rpm/
+prune nlcpy.egg-info
+include Makefile
+include make.inc
+include MANIFEST.in.sdist
+recursive-include nlcpy *
+recursive-include scripts *

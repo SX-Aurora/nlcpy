@@ -7,14 +7,15 @@ include $(BASEDIR)/make.inc
 NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -rV |head -1)
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
-LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp
+LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp -lsca_openmp_i64
 
 LIB_COMMON=$(LIBDIR)/libnlcpy_ve_kernel_common.so
 ifeq ($(FAST_MATH),yes)
-LIB=$(LIBDIR)/nlcpy_ve_kernel_fast_math.so
+LIB=$(LIBDIR)/libnlcpy_ve_kernel_fast_math.so
 else
-LIB=$(LIBDIR)/nlcpy_ve_kernel_no_fast_math.so
+LIB=$(LIBDIR)/libnlcpy_ve_kernel_no_fast_math.so
 endif
+LIB_PROF=$(LIBDIR)/libnlcpy_profiling.so
 
 CC=ncc
 CFLAGS=-fpic -O2 -report-all -fopenmp
@@ -25,6 +26,7 @@ CFLAGS+=-ftrace
 LDFLAGS+=-ftrace
 LIB_NLC+=-lveftrace_p
 endif
+LDFLAGS_PROF=-shared -fpic -fopenmp -ftrace -lveftrace_p
 
 CPP = $(TOOLDIR)/cppnlcpy.pl
 ifeq ($(NO_OPERATOR),yes)
@@ -54,7 +56,8 @@ endif
 # Sorting
 VE_SORTING = \
 	nlcpy_sort.c\
-	nlcpy_argsort.c
+	nlcpy_argsort.c\
+	nlcpy_sort_multi.c
 
 # UNARY FUNCTION
 ifneq ($(NO_OPERATOR),yes)
@@ -138,7 +141,14 @@ VE_BINARY_FUNCTION_COMMON = \
   nlcpy_equal.c\
   nlcpy_not_equal.c\
   nlcpy_maximum.c\
-  nlcpy_minimum.c
+  nlcpy_minimum.c\
+  nlcpy_hypot.c\
+  nlcpy_heaviside.c\
+  nlcpy_ldexp.c\
+  nlcpy_copysign.c\
+  nlcpy_fmax.c\
+  nlcpy_fmin.c\
+  nlcpy_nextafter.c
 VE_BINARY_FUNCTION = \
   nlcpy_floor_divide.c\
   nlcpy_true_divide.c\
@@ -147,16 +157,9 @@ VE_BINARY_FUNCTION = \
   nlcpy_remainder.c\
   nlcpy_power.c\
   nlcpy_arctan2.c\
-  nlcpy_hypot.c\
   nlcpy_logaddexp.c\
   nlcpy_logaddexp2.c\
-  nlcpy_heaviside.c\
-  nlcpy_ldexp.c\
-  nlcpy_copysign.c\
-  nlcpy_fmax.c\
-  nlcpy_fmin.c\
-  nlcpy_fmod.c\
-  nlcpy_nextafter.c
+  nlcpy_fmod.c
 else ifneq ($(NO_OPERATOR),yes)
 VE_BINARY_FUNCTION = nlcpy_add.c
 endif
@@ -193,7 +196,13 @@ VE_REDUCE_COMMON = \
   nlcpy_equal_reduce.c\
   nlcpy_not_equal_reduce.c\
   nlcpy_maximum_reduce.c\
-  nlcpy_minimum_reduce.c
+  nlcpy_minimum_reduce.c\
+  nlcpy_hypot_reduce.c\
+  nlcpy_heaviside_reduce.c\
+  nlcpy_copysign_reduce.c\
+  nlcpy_fmax_reduce.c\
+  nlcpy_fmin_reduce.c\
+  nlcpy_nextafter_reduce.c
 VE_REDUCE = \
   nlcpy_floor_divide_reduce.c\
   nlcpy_true_divide_reduce.c\
@@ -202,15 +211,9 @@ VE_REDUCE = \
   nlcpy_remainder_reduce.c\
   nlcpy_power_reduce.c\
   nlcpy_arctan2_reduce.c\
-  nlcpy_hypot_reduce.c\
   nlcpy_logaddexp_reduce.c\
   nlcpy_logaddexp2_reduce.c\
-  nlcpy_heaviside_reduce.c\
-  nlcpy_copysign_reduce.c\
-  nlcpy_fmax_reduce.c\
-  nlcpy_fmin_reduce.c\
-  nlcpy_fmod_reduce.c\
-  nlcpy_nextafter_reduce.c
+  nlcpy_fmod_reduce.c
 else
 VE_REDUCE = nlcpy_add_reduce.c
 endif
@@ -238,7 +241,13 @@ VE_ACCUMULATE_COMMON = \
   nlcpy_logical_or_accumulate.c\
   nlcpy_logical_xor_accumulate.c\
   nlcpy_maximum_accumulate.c\
-  nlcpy_minimum_accumulate.c
+  nlcpy_minimum_accumulate.c\
+  nlcpy_hypot_accumulate.c\
+  nlcpy_heaviside_accumulate.c\
+  nlcpy_copysign_accumulate.c\
+  nlcpy_fmax_accumulate.c\
+  nlcpy_fmin_accumulate.c\
+  nlcpy_nextafter_accumulate.c
 VE_ACCUMULATE = \
   nlcpy_divide_accumulate.c\
   nlcpy_logaddexp_accumulate.c\
@@ -249,13 +258,7 @@ VE_ACCUMULATE = \
   nlcpy_remainder_accumulate.c\
   nlcpy_mod_accumulate.c\
   nlcpy_fmod_accumulate.c\
-  nlcpy_heaviside_accumulate.c\
-  nlcpy_fmax_accumulate.c\
-  nlcpy_fmin_accumulate.c\
-  nlcpy_arctan2_accumulate.c\
-  nlcpy_hypot_accumulate.c\
-  nlcpy_copysign_accumulate.c\
-  nlcpy_nextafter_accumulate.c
+  nlcpy_arctan2_accumulate.c
 else
 VE_ACCUMULATE = nlcpy_add_accumulate.c
 endif
@@ -283,7 +286,14 @@ VE_OUTER_COMMON = \
   nlcpy_equal_outer.c\
   nlcpy_not_equal_outer.c\
   nlcpy_maximum_outer.c\
-  nlcpy_minimum_outer.c
+  nlcpy_minimum_outer.c\
+  nlcpy_hypot_outer.c\
+  nlcpy_heaviside_outer.c\
+  nlcpy_ldexp_outer.c\
+  nlcpy_copysign_outer.c\
+  nlcpy_fmax_outer.c\
+  nlcpy_fmin_outer.c\
+  nlcpy_nextafter_outer.c
 VE_OUTER = \
   nlcpy_floor_divide_outer.c\
   nlcpy_true_divide_outer.c\
@@ -292,16 +302,9 @@ VE_OUTER = \
   nlcpy_mod_outer.c\
   nlcpy_remainder_outer.c\
   nlcpy_arctan2_outer.c\
-  nlcpy_hypot_outer.c\
   nlcpy_logaddexp_outer.c\
   nlcpy_logaddexp2_outer.c\
-  nlcpy_heaviside_outer.c\
-  nlcpy_ldexp_outer.c\
-  nlcpy_copysign_outer.c\
-  nlcpy_fmax_outer.c\
-  nlcpy_fmin_outer.c\
-  nlcpy_fmod_outer.c\
-  nlcpy_nextafter_outer.c
+  nlcpy_fmod_outer.c
 else
 VE_OUTER = nlcpy_add_outer.c
 endif
@@ -329,7 +332,13 @@ VE_REDUCEAT_COMMON = \
   nlcpy_equal_reduceat.c\
   nlcpy_not_equal_reduceat.c\
   nlcpy_maximum_reduceat.c\
-  nlcpy_minimum_reduceat.c
+  nlcpy_minimum_reduceat.c\
+  nlcpy_hypot_reduceat.c\
+  nlcpy_heaviside_reduceat.c\
+  nlcpy_copysign_reduceat.c\
+  nlcpy_fmax_reduceat.c\
+  nlcpy_fmin_reduceat.c\
+  nlcpy_nextafter_reduceat.c
 VE_REDUCEAT = \
   nlcpy_divide_reduceat.c\
   nlcpy_floor_divide_reduceat.c\
@@ -338,15 +347,9 @@ VE_REDUCEAT = \
   nlcpy_remainder_reduceat.c\
   nlcpy_power_reduceat.c\
   nlcpy_arctan2_reduceat.c\
-  nlcpy_hypot_reduceat.c\
   nlcpy_logaddexp_reduceat.c\
   nlcpy_logaddexp2_reduceat.c\
-  nlcpy_heaviside_reduceat.c\
-  nlcpy_copysign_reduceat.c\
-  nlcpy_fmax_reduceat.c\
-  nlcpy_fmin_reduceat.c\
-  nlcpy_fmod_reduceat.c\
-  nlcpy_nextafter_reduceat.c
+  nlcpy_fmod_reduceat.c
 else
 VE_REDUCEAT = nlcpy_add_reduceat.c
 endif
@@ -371,6 +374,7 @@ VE_LINALG = \
   nlcpy_cholesky.c\
   nlcpy_qr.c
 
+VE_MATH = nlcpy_clip.c
 
 VE_BASIC_MASTER =\
   nlcpy_arange.c.master\
@@ -380,6 +384,7 @@ VE_BASIC_MASTER =\
   nlcpy_scatter.c.master\
   nlcpy_eye.c.master\
   nlcpy_linspace.c.master\
+  nlcpy_tri.c.master\
   nlcpy_nonzero.c.master\
   nlcpy_where.c.master\
   nlcpy_argwhere.c.master\
@@ -387,7 +392,10 @@ VE_BASIC_MASTER =\
   nlcpy_repeat.c.master\
   nlcpy_diff.c.master\
   nlcpy_delete.c.master\
-  nlcpy_insert.c.master
+  nlcpy_insert.c.master\
+  nlcpy_roll.c.master\
+  nlcpy_fill_diagonal.c.master\
+  nlcpy_block.c.master
 
 
 VE_CONTROLLER =\
@@ -403,6 +411,9 @@ VE_RANDOM_KERNEL =\
 
 VE_FFT_KERNEL =\
   nlcpy_fft.c
+
+VE_SCA_KERNEL =\
+  nlcpy_sca.c
 
 VE_CBLAS_WRAPPER = cblas_wrapper.c
 
@@ -426,11 +437,13 @@ OBJS_COMMON = \
   $(VE_MATMUL_OPERATOR:.c=.o)\
   $(VE_RANDOM_KERNEL:.c=.o)\
   $(VE_FFT_KERNEL:.c=.o)\
+  $(VE_SCA_KERNEL:.c=.o)\
   $(VE_CBLAS_WRAPPER:.c=.o)\
   $(VE_SORTING:.c=.o)\
   $(VE_ARGFUNC:.c=.o)\
   $(VE_DOT:.c=.o)\
   $(VE_LINALG:.c=.o)\
+  $(VE_MATH:.c=.o)\
   $(VE_CAST:.c=.o)\
   $(VE_BASIC_KERNEL:.c=.o)\
   $(VE_CONTROLLER:.c=.o)\
@@ -444,19 +457,23 @@ OBJS_COMMON = \
 
 ifeq ($(FAST_MATH),yes)
 all: make.dep $(LIB)
+else ifeq ($(COMMON),yes)
+all: make.dep $(LIB_COMMON) $(LIB_PROF)
 else
-all: make.dep $(LIB_COMMON) $(LIB)
-#all: make.dep $(LIB)
+all: make.dep $(LIB)
 endif
 
 make.dep:
 	sh $(TOOLDIR)/make_dep.sh
 
-$(LIB): $(OBJS) $(LIB_COMMON)
+$(LIB): $(OBJS)
 	mkdir -p $(LIBDIR) && $(CC) -o $@ $(OBJS) ${LDFLAGS}
 
 $(LIB_COMMON): $(OBJS_COMMON)
 	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${LDFLAGS_COMMON}
+
+$(LIB_PROF): nlcpy_profiling.c
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${LDFLAGS_PROF}
 
 include make.dep
 
@@ -478,7 +495,8 @@ perl: \
 	$(VE_OUTER_COMMON)\
 	$(VE_ARGFUNC)\
 	$(VE_DOT)\
-	$(VE_LINALG)
+	$(VE_LINALG)\
+	$(VE_MATH)
 
 $(VE_UNARY_FUNCTION): unary_operator.c.master unary_operator.c.master2
 	rm -f $@
@@ -551,3 +569,4 @@ clean:
 	cd $(OBJDIR) && rm -rf $(VE_ARGFUNC)
 	cd $(OBJDIR) && rm -rf $(VE_LINALG)
 	cd $(OBJDIR) && rm -rf $(VE_DOT)
+	cd $(OBJDIR) && rm -rf $(VE_MATH)

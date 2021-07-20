@@ -195,6 +195,9 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
                       ):
             raise TypeError("not support for int8.")
 
+    if name == 'nlcpy_subtract_reduceat' and a.dtype == 'bool':
+        dtype = 'int32'
+
     if name in ('nlcpy_logical_or_reduceat',
                 'nlcpy_logical_and_reduceat',
                 'nlcpy_logical_xor_reduceat',
@@ -277,6 +280,7 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
                 'nlcpy_mod_reduceat',
                 'nlcpy_fmod_reduceat',
                 'nlcpy_remainder_reduceat',
+                'nlcpy_subtract_reduceat',
                 ):
         if dt == 'bool':
             dt = 'int32'
@@ -334,7 +338,7 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
     # call reduceat function on VE
     if y.size > 0:
         bad_index = numpy.empty(1, dtype=numpy.int32)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
+        fpe_flags = request._get_fpe_flag()
         args = (
             a._ve_array,
             indices._ve_array,
@@ -344,17 +348,21 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
             veo.OnStack(bad_index, inout=veo.INTENT_OUT),
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
-        v = veo.VeoAlloc()
-        request.flush()
-        req = v.lib.func[name.encode('utf-8')](v.ctx, *args)
-        err = req.wait_result()
 
+        request._push_and_flush_request(
+            name,
+            args,
+            callback=_reduceat_chkerr(
+                bad_index, indices, name, a, axis)
+        )
+
+    return y
+
+
+def _reduceat_chkerr(bad_index, indices, name, a, axis):
+    def _chkerr(*args):
         if bad_index[0] >= 0:
             raise IndexError('index '+str(indices.get()[bad_index[0]])
                              +' out-of-bounds in '+name+' [0, '
                              +str(a.shape[axis])+')')
-
-        check_error(err)
-        core.check_fpe_flags(fpe_flags[0])
-
-    return y
+    return _chkerr

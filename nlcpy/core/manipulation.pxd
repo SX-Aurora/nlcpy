@@ -74,13 +74,13 @@ cpdef ndarray _transpose(ndarray self, const vector[Py_ssize_t] &axes)
 
 cpdef ndarray _rollaxis(ndarray a, Py_ssize_t axis, Py_ssize_t start=*)
 
+cpdef ndarray _ndarray_swapaxes(ndarray a, Py_ssize_t axis1, Py_ssize_t axis2)
+
 cpdef ndarray _reduced_view(ndarray self)
 
 cdef _fill_kernel(ndarray a, value)
 
 cpdef ndarray _ndarray_concatenate(op, axis, ret)
-# cdef ndarray _concatenate_flattened_arrays(n, arrays, order, ret)
-# cdef ndarray _concatenate_arrays(n, arrays, int32_t axis, ret)
 
 cdef ndarray _ndarray_transpose(ndarray self, axes)
 cdef ndarray _ndarray_flatten(ndarray self, order)

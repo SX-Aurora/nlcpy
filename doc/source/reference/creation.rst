@@ -58,3 +58,7 @@ Building Matrices
     :nosignatures:
 
     nlcpy.diag
+    nlcpy.diagflat
+    nlcpy.tri
+    nlcpy.tril
+    nlcpy.triu

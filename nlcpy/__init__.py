@@ -69,6 +69,10 @@ from nlcpy.creation.ranges import linspace  # NOQA
 from nlcpy.creation.ranges import logspace  # NOQA
 from nlcpy.creation.ranges import meshgrid  # NOQA
 from nlcpy.creation.matrices import diag  # NOQA
+from nlcpy.creation.matrices import diagflat  # NOQA
+from nlcpy.creation.matrices import tri  # NOQA
+from nlcpy.creation.matrices import tril  # NOQA
+from nlcpy.creation.matrices import triu  # NOQA
 
 # --------------------------------------------------
 # Array Manipulation routines
@@ -78,24 +82,35 @@ from nlcpy.manipulation.shape import reshape  # NOQA
 from nlcpy.manipulation.shape import ravel  # NOQA
 from nlcpy.manipulation.trans import moveaxis  # NOQA
 from nlcpy.manipulation.trans import rollaxis  # NOQA
+from nlcpy.manipulation.trans import swapaxes  # NOQA
 from nlcpy.manipulation.trans import transpose  # NOQA
+from nlcpy.manipulation.dims import atleast_1d  # NOQA
+from nlcpy.manipulation.dims import atleast_2d  # NOQA
+from nlcpy.manipulation.dims import atleast_3d  # NOQA
+from nlcpy.manipulation.dims import broadcast_arrays  # NOQA
 from nlcpy.manipulation.dims import broadcast_to  # NOQA
 from nlcpy.manipulation.dims import expand_dims  # NOQA
 from nlcpy.manipulation.dims import squeeze  # NOQA
+from nlcpy.manipulation.join import block  # NOQA
 from nlcpy.manipulation.join import concatenate  # NOQA
 from nlcpy.manipulation.join import stack  # NOQA
 from nlcpy.manipulation.join import hstack  # NOQA
 from nlcpy.manipulation.join import vstack  # NOQA
+from nlcpy.manipulation.split import split  # NOQA
+from nlcpy.manipulation.split import hsplit  # NOQA
+from nlcpy.manipulation.split import vsplit  # NOQA
 from nlcpy.manipulation.add_remove import resize  # NOQA
 from nlcpy.manipulation.add_remove import append  # NOQA
 from nlcpy.manipulation.add_remove import insert  # NOQA
 from nlcpy.manipulation.add_remove import delete  # NOQA
+from nlcpy.manipulation.add_remove import unique  # NOQA
 from nlcpy.manipulation.tiling import tile  # NOQA
 from nlcpy.manipulation.tiling import repeat  # NOQA
 from nlcpy.manipulation.basic import copyto  # NOQA
 from nlcpy.manipulation.rearranging import flip  # NOQA
 from nlcpy.manipulation.rearranging import fliplr  # NOQA
 from nlcpy.manipulation.rearranging import flipud  # NOQA
+from nlcpy.manipulation.rearranging import roll  # NOQA
 
 # --------------------------------------------------
 # ufunc operations
@@ -154,9 +169,12 @@ from nlcpy.linalg.products import outer  # NOQA
 # --------------------------------------------------
 # Indexing functions
 # --------------------------------------------------
+from nlcpy.indexing.generate import diag_indices  # NOQA
 from nlcpy.indexing.generate import where  # NOQA
 from nlcpy.indexing.indexing import take  # NOQA
 from nlcpy.indexing.indexing import diagonal  # NOQA
+from nlcpy.indexing.indexing import select  # NOQA
+from nlcpy.indexing.inserting import fill_diagonal  # NOQA
 
 # --------------------------------------------------
 # searching
@@ -165,12 +183,19 @@ from nlcpy.core.searching import argmax  # NOQA
 from nlcpy.core.searching import argmin  # NOQA
 from nlcpy.core.searching import nonzero  # NOQA
 from nlcpy.core.searching import argwhere  # NOQA
+from nlcpy.sorting.search import nanargmax  # NOQA
+from nlcpy.sorting.search import nanargmin  # NOQA
 
 # --------------------------------------------------
 # sorting
 # --------------------------------------------------
 from nlcpy.sorting.sort import sort  # NOQA
 from nlcpy.sorting.sort import argsort  # NOQA
+
+# --------------------------------------------------
+# counting
+# --------------------------------------------------
+from nlcpy.sorting.count import count_nonzero  # NOQA
 
 # --------------------------------------------------
 # misc
@@ -182,6 +207,10 @@ from nlcpy.core.core import may_share_memory  # NOQA
 # --------------------------------------------------
 from nlcpy.io.npz import NpzFile  # NOQA
 from nlcpy.io.npz import load  # NOQA
+from nlcpy.io.npz import save  # NOQA
+from nlcpy.io.npz import savez  # NOQA
+from nlcpy.io.npz import savez_compressed  # NOQA
+from nlcpy.io.text import savetxt  # NOQA
 
 # =============================================================================
 # Data types (borrowed from NumPy)
@@ -310,19 +339,33 @@ from nlcpy.error_handler.error_handler import *  # NOQA
 # --------------------------------------------------
 # Call veo initialization when nlcpy is imported
 # --------------------------------------------------
-v = veo.VeoAlloc()  # initialize veo process
-args = ()
-try:
-    req = v.lib.func[b"asl_library_initialize"](v.ctx, None)
-    req.wait_result()
-except KeyError:
-    pass
+from nlcpy.request.request import _push_and_flush_request  # NOQA
+veo._initialize(-1)  # initialize veo process
+_push_and_flush_request(
+    'asl_library_initialize',
+    (),
+    callback=None,
+    sync=True
+)
+del _push_and_flush_request
 
+
+# -----------------------------------------------------------------------------
+# get include file path
+# -----------------------------------------------------------------------------
+def get_include():
+    return _here + '/include'
 
 # -----------------------------------------------------------------------------
 # random
 # -----------------------------------------------------------------------------
 from nlcpy import random  # NOQA
+
+
+# -----------------------------------------------------------------------------
+# SCA
+# -----------------------------------------------------------------------------
+from nlcpy import sca  # NOQA
 
 
 # -----------------------------------------------------------------------------

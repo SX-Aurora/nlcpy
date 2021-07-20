@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -73,14 +73,48 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *whe
 @#endif /* _OPENMP */
 {
         if (!where_flag) {
-            *py = @CAST_OPERATOR@(*px,@TYPE1_DTAG@,$1)
+            *py = @CAST_OPERATOR@(*px,@DTAG1@,$1)
         } else {
             if (*pw) {
-                *py = @CAST_OPERATOR@(*px,@TYPE1_DTAG@,$1)
+                *py = @CAST_OPERATOR@(*px,@DTAG1@,$1)
             }
         }
-} /* omp single */ 
-    
+} /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if (!where_flag &&
+               ( (x->is_c_contiguous & y->is_c_contiguous) ||
+                 (x->is_f_contiguous & y->is_f_contiguous) ))
+    {
+        int64_t i0;
+        const int64_t lenm = y->size;
+        const int64_t cntm_s = lenm * it / nt;
+        const int64_t cntm_e = lenm * (it + 1) / nt;
+        if (x->size == 1) {
+            @TYPE1@ px_s = px[0];
+ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
+// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
+#pragma _NEC novector
+@-->,<--@dnl
+#pragma _NEC ivdep
+@-->)
+            for (i0 = cntm_s; i0 < cntm_e; i0++) {
+                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,$1)
+            }
+        } else {
+ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
+// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
+#pragma _NEC novector
+@-->,<--@dnl
+#pragma _NEC ivdep
+@-->)
+            for (i0 = cntm_s; i0 < cntm_e; i0++) {
+                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,$1)
+            }
+        }
+
 /////////
 // 1-d //
 /////////
@@ -93,15 +127,27 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *whe
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
         if (!where_flag) {
+ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
+// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
+#pragma _NEC novector
+@-->,<--@dnl
+#pragma _NEC ivdep
+@-->)
             for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0*iy0] = @CAST_OPERATOR@(px[i0*ix0],@TYPE1_DTAG@,$1)
+                py[i0*iy0] = @CAST_OPERATOR@(px[i0*ix0],@DTAG1@,$1)
             }
         } else {
             Bint *pw = (Bint *)w->ve_adr;
             const uint64_t iw0 = w->strides[0]/w->itemsize;
+ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
+// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
+#pragma _NEC novector
+@-->,<--@dnl
+#pragma _NEC ivdep
+@-->)
             for (i0 = cntm_s; i0 < cntm_e; i0++) {
                 if (pw[i0*iw0]) {
-                    py[i0*iy0] = @CAST_OPERATOR@(px[i0*ix0],@TYPE1_DTAG@,$1)
+                    py[i0*iy0] = @CAST_OPERATOR@(px[i0*ix0],@DTAG1@,$1)
                 }
             }
         }
@@ -140,7 +186,7 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 #pragma _NEC ivdep
 @-->)
                     for (i = 0; i < x->shape[n_inner2]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,$1)
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,$1)
                     }
                     // set next index
                     for (k = n_inner-1; k >= 1; k--) {
@@ -166,10 +212,15 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
                 iw = cntm * w->strides[n_outer2] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
+ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
+// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
+#pragma _NEC novector
+@-->,<--@dnl
 #pragma _NEC ivdep
+@-->)
                     for (i = 0; i < x->shape[n_inner2]; i++) {
                         if (pw[i*iw0+iw]) {
-                            py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,$1)
+                            py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,$1)
                         }
                     }
                     // set next index
@@ -200,31 +251,31 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 
 
 @-->)dnl
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
 macro_cast_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
 macro_cast_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
 macro_cast_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
 macro_cast_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
 macro_cast_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
 macro_cast_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
 macro_cast_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
 macro_cast_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
 macro_cast_operator(bool,int32_t)dnl
 #endif
 
@@ -232,31 +283,31 @@ uint64_t FILENAME(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where,
 {
     uint64_t err = NLCPY_ERROR_OK;
     switch (y->dtype) {
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
     case ve_i32:  err = FILENAME_i32 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
     case ve_i64:  err = FILENAME_i64 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
     case ve_u32:  err = FILENAME_u32 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
     case ve_u64:  err = FILENAME_u64 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
     case ve_f32:  err = FILENAME_f32 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
     case ve_f64:  err = FILENAME_f64 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
     case ve_c64:  err = FILENAME_c64 (x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
     case ve_c128: err = FILENAME_c128(x, y, where_flag, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
     case ve_bool: err = FILENAME_bool(x, y, where_flag, where, psw); break;
 #endif
     default: err = NLCPY_ERROR_DTYPE;

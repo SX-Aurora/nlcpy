@@ -33,7 +33,6 @@ import nlcpy
 import numpy
 from nlcpy import veo
 from nlcpy.request import request
-from nlcpy.request.ve_kernel import check_error
 from . import util
 
 
@@ -83,7 +82,7 @@ def _geev(a, jobvr):
         65 * n if a_complex else 66 * n, dtype=dtype, order='F')
     rwork = nlcpy.empty(2 * n if a_complex else 1, dtype=f_dtype, order='F')
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         wr._ve_array,
@@ -96,12 +95,11 @@ def _geev(a, jobvr):
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_eig'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_eig',
+        args,
+    )
 
     if a_complex:
         w_complex = True
@@ -195,7 +193,7 @@ def _syevd(a, jobz, UPLO):
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
     iwork = nlcpy.empty(liwork, dtype='i')
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         w._ve_array,
@@ -207,12 +205,11 @@ def _syevd(a, jobz, UPLO):
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_eigh'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_eigh',
+        args,
+    )
 
     if c_order:
         w = nlcpy.asarray(nlcpy.moveaxis(w, 0, -1), order='C')

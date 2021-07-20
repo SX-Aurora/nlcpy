@@ -1,0 +1,48 @@
+============================================
+What's new in Version 2.0.0 (July 29, 2021)
+============================================
+
+
+New Features
+------------
+
+* Newly added :ref:`SCA Interface <label_sca_top>`, which enables Python scripts to call SCA functions of
+  `NEC Numeric Library Collection <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_.
+
+* Newly added the :ref:`profiling routines with FTRACE <label_profiling_ftrace>`.
+
+* Newly added the following functions.
+
+  - :func:`nlcpy.save`
+  - :func:`nlcpy.savetxt`
+  - :func:`nlcpy.savez`
+  - :func:`nlcpy.savez_compressed`
+  - :func:`nlcpy.roll`
+  - :func:`nlcpy.swapaxes`
+  - :func:`nlcpy.unique`
+  - :func:`nlcpy.count_nonzero`
+  - :func:`nlcpy.broadcast_arrays`
+  - :func:`nlcpy.diag_indices`
+  - :func:`nlcpy.diagflat`
+  - :func:`nlcpy.tri`
+  - :func:`nlcpy.tril`
+  - :func:`nlcpy.triu`
+  - :func:`nlcpy.fill_diagonal`
+  - :func:`nlcpy.hsplit`
+  - :func:`nlcpy.vsplit`
+  - :func:`nlcpy.split`
+  - :func:`nlcpy.atleast_1d`
+  - :func:`nlcpy.atleast_2d`
+  - :func:`nlcpy.atleast_3d`
+  - :func:`nlcpy.block`
+  - :func:`nlcpy.clip`
+  - :func:`nlcpy.select`
+  - :func:`nlcpy.nanargmax`
+  - :func:`nlcpy.nanargmin`
+
+
+Performance Enhancements
+------------------------
+
+* Improved the overall performance of NLCPy by applying asynchronous VE function calls.
+* Improved the performance of reduction operations such as :func:`nlcpy.sum`, :func:`nlcpy.amax`, and :func:`nlcpy.amin`.

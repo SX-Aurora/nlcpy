@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -132,17 +132,21 @@ enum ve_funcnum {
     VE_FUNC_PREPARE_INDEXING  = 0x02003,
     VE_FUNC_SCATTER_UPDATE    = 0x02004,
     VE_FUNC_WHERE             = 0x02005,
+    VE_FUNC_FILL_DIAGONAL     = 0x02006,
     /* creation functions */
     VE_FUNC_ARANGE           = 0x04000,
     VE_FUNC_COPY             = 0x04001,
     VE_FUNC_EYE              = 0x04002,
     VE_FUNC_LINSPACE         = 0x04003,
     VE_FUNC_COPY_MASKED      = 0x04004,
+    VE_FUNC_TRI              = 0x04005,
     /* manipulation functions */
     VE_FUNC_TILE             = 0x05000,
     VE_FUNC_DELETE           = 0x05001,
     VE_FUNC_INSERT           = 0x05002,
     VE_FUNC_REPEAT           = 0x05003,
+    VE_FUNC_ROLL             = 0x05004,
+    VE_FUNC_BLOCK            = 0x05005,
     /* cblas wrapper functions */
     VE_FUNC_CBLAS_SDOT       = 0x06000,
     VE_FUNC_CBLAS_DDOT       = 0x06001,
@@ -268,7 +272,7 @@ enum ve_funcnum {
     VE_FUNC_FMOD_OUTER            = 0x0b021,
     VE_FUNC_NEXTAFTER_OUTER       = 0x0b022,
     VE_FUNC_LDEXP_OUTER           = 0x0b023,
-                                    
+
     /* at functions */
     VE_FUNC_ADD_AT                = 0x0c000,
 
@@ -277,17 +281,21 @@ enum ve_funcnum {
     VE_FUNC_ARGMAX           = 0x0d001,
     VE_FUNC_ARGMIN           = 0x0d002,
     VE_FUNC_ARGWHERE         = 0x0d003,
-    
+
     /* sorting functions */
     VE_FUNC_SORT             = 0x0e000,
     VE_FUNC_ARGSORT          = 0x0e001,
+    VE_FUNC_SORT_MULTI       = 0x0e002,
 
     /* math functions */
     VE_FUNC_DIFF             = 0x0f000,
-    
+    VE_FUNC_CLIP             = 0x0f001,
+
     /* random functions */
     VE_FUNC_SHUFFLE          = 0x10000,
 
+    /* sca functions */
+    VE_FUNC_SCA_EXECUTE      = 0x20000,
 };
 
 

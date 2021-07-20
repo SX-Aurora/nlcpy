@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-21 16:22+0900\n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
-#: ../../source/notices.rst:3
+#: ../../source/notices.rst:4
 msgid "Notices and Restrictions"
 msgstr "注意事項および制限事項"
 
@@ -77,22 +77,31 @@ msgstr ""
 
 #: ../../source/notices.rst:63
 msgid ""
-"NumPy functions run on an x86 Node (VH). On the other hand, most of NLCPy "
-"functions offload automatically input ndarrays to a Vector Engine (VE), "
+"NumPy functions run on an x86 Node (VH). On the other hand, most of NLCPy"
+" functions offload automatically input ndarrays to a Vector Engine (VE), "
 "and then run on the VE. So, as computational cost becomes smaller than "
 "the offloading cost, NLCPy performance decreases. In this case, please "
 "use NumPy."
 msgstr ""
-"NumPyの関数はx86ノード（VH）で実行されます。 一方、ほとんどのNLCPyの関数は、"
-"自動的にndarrayをVector Engine（VE）にオフロードしてから、VEで実行します。"
-"したがって、計算コストがオフロードのコストと比べて小さくなるほど、"
-"NLCPyの性能は低下します。そのような場合は、NumPyを使用してください。"
+"NumPyの関数はx86ノード（VH）で実行されます。 一方、ほとんどのNLCPyの関数は、自動的にndarrayをVector "
+"Engine（VE）にオフロードしてから、VEで実行します。したがって、計算コストがオフロードのコストと比べて小さくなるほど、NLCPyの性能は低下します。そのような場合は、NumPyを使用してください。"
 
 #: ../../source/notices.rst:65
+msgid ""
+"Some functions return a view on the input array such as "
+":func:`nlcpy.broadcast_arrays()`, :func:`nlcpy.broadcast_to()`, and "
+":func:`nlcpy.moveaxis()`. However, if a numpy.ndarray object is specified"
+" as an input array for them, updates of the object does not affect the "
+"return values because the numpy.ndarray object is conveted to an "
+"nlcpy.ndarray object once then the function returns the view on the "
+"nlcpy.ndarray object."
+msgstr ""
+
+#: ../../source/notices.rst:87
 msgid "Restrictions"
 msgstr "制限事項"
 
-#: ../../source/notices.rst:67
+#: ../../source/notices.rst:89
 msgid ""
 "Here is a list of restrictions which are common to NLCPy functions. "
 "Besides these restrictions, there are some individual restrictions. "
@@ -100,136 +109,134 @@ msgid ""
 "of each function."
 msgstr "NLCPyの関数に共通する制限のリストを次に示します。これらの制限に加えて、いくつかの個別の制限があります。各機能の詳細説明の\"制限事項\"もご覧ください。"
 
-#: ../../source/notices.rst:71
+#: ../../source/notices.rst:93
 msgid ""
 "Data type, which is called \"dtype\", can be specified for NLCPy "
 "functions like NumPy ones. However, the current version of NLCPy supports"
 " only the following dtypes:"
-msgstr ""
-"\"dtype\"と呼ばれるデータ型は、NumPyの関数と同じようにNLCPyの関数にも指定できます。"
-"ただし、NLCPyの現在のバージョンは、次のdtypeのみをサポートします。"
+msgstr "\"dtype\"と呼ばれるデータ型は、NumPyの関数と同じようにNLCPyの関数にも指定できます。ただし、NLCPyの現在のバージョンは、次のdtypeのみをサポートします。"
 
-#: ../../source/notices.rst:75
+#: ../../source/notices.rst:96
 msgid "data-type"
 msgstr "データの種類"
 
-#: ../../source/notices.rst:75
+#: ../../source/notices.rst:96
 msgid "dtype"
 msgstr ""
 
-#: ../../source/notices.rst:75
+#: ../../source/notices.rst:96
 msgid "character code"
 msgstr "文字コード"
 
-#: ../../source/notices.rst:77
+#: ../../source/notices.rst:98
 msgid "bool"
 msgstr ""
 
-#: ../../source/notices.rst:77
+#: ../../source/notices.rst:98
 msgid "'bool'"
 msgstr ""
 
-#: ../../source/notices.rst:77
+#: ../../source/notices.rst:98
 msgid "'?'"
 msgstr ""
 
-#: ../../source/notices.rst:78
+#: ../../source/notices.rst:99
 msgid "32-bit signed integer"
 msgstr ""
 
-#: ../../source/notices.rst:78
+#: ../../source/notices.rst:99
 msgid "'int32', 'i4'"
 msgstr ""
 
-#: ../../source/notices.rst:78
+#: ../../source/notices.rst:99
 msgid "'i'"
 msgstr ""
 
-#: ../../source/notices.rst:79
+#: ../../source/notices.rst:100
 msgid "64-bit signed integer"
 msgstr ""
 
-#: ../../source/notices.rst:79
+#: ../../source/notices.rst:100
 msgid "'int64', 'i8', int"
 msgstr ""
 
-#: ../../source/notices.rst:79
+#: ../../source/notices.rst:100
 msgid "'l', 'q'"
 msgstr ""
 
-#: ../../source/notices.rst:80
+#: ../../source/notices.rst:101
 msgid "32-bit unsigned integer"
 msgstr ""
 
-#: ../../source/notices.rst:80
+#: ../../source/notices.rst:101
 msgid "'uint32', 'u4'"
 msgstr ""
 
-#: ../../source/notices.rst:80
+#: ../../source/notices.rst:101
 msgid "'I'"
 msgstr ""
 
-#: ../../source/notices.rst:81
+#: ../../source/notices.rst:102
 msgid "64-bit unsigned integer"
 msgstr ""
 
-#: ../../source/notices.rst:81
+#: ../../source/notices.rst:102
 msgid "'uint64', 'u8', uint"
 msgstr ""
 
-#: ../../source/notices.rst:81
+#: ../../source/notices.rst:102
 msgid "'L', 'Q'"
 msgstr ""
 
-#: ../../source/notices.rst:82
+#: ../../source/notices.rst:103
 msgid "32-bit floating-point real"
 msgstr ""
 
-#: ../../source/notices.rst:82
+#: ../../source/notices.rst:103
 msgid "'float32', 'f4'"
 msgstr ""
 
-#: ../../source/notices.rst:82
+#: ../../source/notices.rst:103
 msgid "'f'"
 msgstr ""
 
-#: ../../source/notices.rst:83
+#: ../../source/notices.rst:104
 msgid "64-bit floating-point real"
 msgstr ""
 
-#: ../../source/notices.rst:83
+#: ../../source/notices.rst:104
 msgid "'float64', 'f8', 'float'"
 msgstr ""
 
-#: ../../source/notices.rst:83
+#: ../../source/notices.rst:104
 msgid "'d'"
 msgstr ""
 
-#: ../../source/notices.rst:84
+#: ../../source/notices.rst:105
 msgid "32-bit floating-point complex"
 msgstr ""
 
-#: ../../source/notices.rst:84
+#: ../../source/notices.rst:105
 msgid "'complex64', 'c8'"
 msgstr ""
 
-#: ../../source/notices.rst:84
+#: ../../source/notices.rst:105
 msgid "'F'"
 msgstr ""
 
-#: ../../source/notices.rst:85
+#: ../../source/notices.rst:106
 msgid "64-bit floating-point complex"
 msgstr ""
 
-#: ../../source/notices.rst:85
+#: ../../source/notices.rst:106
 msgid "'complex128', 'c16', 'complex'"
 msgstr ""
 
-#: ../../source/notices.rst:85
+#: ../../source/notices.rst:106
 msgid "'D'"
 msgstr ""
 
-#: ../../source/notices.rst:88
+#: ../../source/notices.rst:109
 msgid ""
 "Each dtype has character codes that identify it. In NLCPy, the character "
 "code 'q' and 'Q' are internally converted to 'l' and 'L', respectively. "
@@ -241,7 +248,7 @@ msgstr ""
 "上記以外のdtypeと文字コードはまだサポートされていません。 "
 "さらに、現在のバージョンは、上記のdtypeを含む構造化データ型をサポートしていません。"
 
-#: ../../source/notices.rst:93
+#: ../../source/notices.rst:114
 msgid ""
 "Please note that there are functions which can not even support above "
 "dtypes. For example, the complex version of :func:`nlcpy.mean()` does not"
@@ -250,7 +257,7 @@ msgstr ""
 "上記のdtypeをサポートできない関数もあることに注意してください。 たとえば、複素数型の :func:`nlcpy.mean()` "
 "はサポートしていません。"
 
-#: ../../source/notices.rst:103
+#: ../../source/notices.rst:124
 msgid ""
 "If the unsupported dtype appears in the parameter list or the return type"
 " for NLCPy function, *TypeError* occurs. In case a NumPy function treats "

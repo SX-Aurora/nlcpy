@@ -8,10 +8,10 @@ BASEDIR = ..
 PLAT           = el8
 ARCH           = x86_64
 VERSION_PYTHON = python3.6
-VERSION_NLCPY  = 1.0.1
+VERSION_NLCPY  = 2.0.0
 VERSION_RPM    = 1
 RELEASE        = 1
-VERSION_NUMPY  = 1.17.4
+VERSION_NUMPY  = 1.19.5
 
 DISTDIR  = $(BASEDIR)/dist
 DOCDIR   = $(BASEDIR)/doc/build/html

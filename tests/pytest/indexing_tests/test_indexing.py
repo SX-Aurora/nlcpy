@@ -129,3 +129,134 @@ class TestIndexing(unittest.TestCase):
     def test_diagonal_invalid2(self, xp):
         a = testing.shaped_arange((3, 3, 3), xp)
         a.diagonal(0, 2, -4)
+
+
+@testing.parameterize(*(
+    testing.product({
+        'n': [-1, 0, 1, 2, 4, 7, 1.5],
+        'ndim': [-1, 0, 1, 2, 3, 4]
+    })
+))
+class TestDiagIndices(unittest.TestCase):
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_diag_indices(self, xp):
+        return xp.diag_indices(self.n, self.ndim)
+
+
+class TestSelect(unittest.TestCase):
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [a > 3, a < 5]
+        choicelist = [a, a + 100]
+        return xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_default(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [a < 3, a > 5]
+        choicelist = [a, a + 100]
+        default = -100
+        return xp.select(condlist, choicelist, default)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_default_list(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [a < 3, a > 5]
+        choicelist = [a, a + 100]
+        default = xp.arange(10) - 100
+        return xp.select(condlist, choicelist, default)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_broadcast1(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        b = xp.arange(30, dtype=dtype).reshape(3, 10)
+        condlist = [a < 3, b > 8]
+        choicelist = [a, b]
+        return xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_broadcast2(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        b = xp.arange(20, dtype=dtype).reshape(2, 10)
+        condlist = [a < 4, b > 8]
+        choicelist = [xp.repeat(a, 2).reshape(2, 10), b]
+        return xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_broadcast3(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [a < 4]
+        choicelist = [a + 100]
+        default = xp.arange(20).reshape(2, 10)
+        return xp.select(condlist, choicelist, default)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_select_1D_choicelist(self, xp, dtype):
+        a = xp.array(1)
+        b = xp.array(3)
+        condlist = [a < 3, b > 8]
+        choicelist = [a, b]
+        return xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_raises()
+    def test_select_length_error(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [a > 3]
+        choicelist = [a, a ** 2]
+        xp.select(condlist, choicelist)
+
+    @testing.numpy_nlcpy_raises()
+    def test_select_type_error_choicelist(self, xp):
+        a, b = list(range(10)), list(range(-10, 0))
+        condlist = [0] * 10
+        choicelist = [a, b]
+        xp.select(condlist, choicelist)
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_raises()
+    def test_select_type_error_condlist(self, xp, dtype):
+        condlist = xp.arange(10, dtype=dtype)
+        choicelist = xp.arange(10)
+        xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_raises()
+    def test_select_not_broadcastable(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        b = xp.arange(20, dtype=dtype)
+        condlist = [a < 3, b > 8]
+        choicelist = [a, b]
+        xp.select(condlist, choicelist)
+
+    @testing.for_all_dtypes(no_bool=True)
+    @testing.numpy_nlcpy_raises()
+    def test_select_default_shape_mismatch(self, xp, dtype):
+        a = xp.arange(10)
+        b = xp.arange(20)
+        condlist = [a < 3, b > 8]
+        choicelist = [a, b]
+        xp.select(condlist, choicelist, [dtype(2)])
+
+    @testing.numpy_nlcpy_raises()
+    def test_select_integer_condlist(self, xp, dtype):
+        a = xp.arange(10, dtype=dtype)
+        condlist = [[3, ] * 10, [2, ] * 10]
+        choicelist = [a, a + 100]
+        return xp.select(condlist, choicelist)
+
+    @testing.numpy_nlcpy_raises()
+    def test_select_empty_lists(self, xp):
+        condlist = []
+        choicelist = []
+        return xp.select(condlist, choicelist)

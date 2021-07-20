@@ -29,3 +29,4 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 from nlcpy.io import npz     # NOQA
+from nlcpy.io import text     # NOQA

@@ -42,7 +42,7 @@ include(macros.m4)dnl
  * **************************/
 
 define(<--@macro_reduceat_operator@-->,<--@
-uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
+uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *indices, ve_array *y, int32_t axis, int32_t *bad_index, int32_t *psw)
 {
     int64_t *pind = (int64_t *)indices->ve_adr;
     *bad_index = -1;
@@ -104,7 +104,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *indices, ve_array *y, i
 
         do {
             if (idx[n_inner] == axis) {
-                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @TYPE1_DTAG@, $1);
+                py[iy] = @CAST_OPERATOR@(px[start[cntm]*ix0+ix], @DTAG1@, $1);
 #ifdef add_reduceat
 @#pragma _NEC ivdep
 #else
@@ -130,7 +130,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *indices, ve_array *y, i
 @#pragma _NEC ivdep
 #endif
                     for (int64_t i = 0; i < x->shape[idx[n_inner]]; i++) {
-                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @TYPE1_DTAG@, $1);
+                        py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix], @DTAG1@, $1);
                     }
                 }
             }
@@ -165,30 +165,30 @@ uint64_t FILENAME_@TYPE1_DTAG@_$1(ve_array *x, ve_array *indices, ve_array *y, i
 
 
 @-->)dnl
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 macro_reduceat_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 macro_reduceat_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 macro_reduceat_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 macro_reduceat_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 macro_reduceat_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 macro_reduceat_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 macro_reduceat_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 macro_reduceat_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 macro_reduceat_operator(bool,int32_t)dnl
 #endif

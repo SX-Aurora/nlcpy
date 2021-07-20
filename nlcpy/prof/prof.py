@@ -31,6 +31,12 @@
 
 import time
 import functools
+import contextlib
+import warnings
+import numpy
+import nlcpy
+from nlcpy import veo
+
 
 # profiling status
 NOT_PROFILING = 0
@@ -148,11 +154,18 @@ def start_profiling():
     Profiling the code block between :func:`nlcpy.prof.start_profiling` and
     :func:`nlcpy.prof.stop_profiling`.
 
+    Notes
+    -----
+    .. deprecated:: 2.0.0
+
     See Also
     --------
     nlcpy.prof.print_run_stats : Prints NLCPy run stats.
     nlcpy.prof.get_run_stats : Gets dict of NLCPy run stats.
     """
+    warnings.warn('This routine is deprecated since version 2.0.0. '
+                  'Please use nlcpy.prof.ftrace_region().',
+                  UserWarning)
     _prof.start()
 
 
@@ -162,11 +175,18 @@ def stop_profiling():
     Profiling the code block between :func:`nlcpy.prof.start_profiling` and
     :func:`nlcpy.prof.stop_profiling`.
 
+    Notes
+    -----
+    .. deprecated:: 2.0.0
+
     See Also
     --------
     nlcpy.prof.print_run_stats : Prints NLCPy run stats.
     nlcpy.prof.get_run_stats : Gets dict of NLCPy run stats.
     """
+    warnings.warn('This routine is deprecated since version 2.0.0. '
+                  'Please use nlcpy.prof.ftrace_region().',
+                  UserWarning)
     _prof.stop()
 
 
@@ -259,6 +279,10 @@ def _print_impl(msg, val, is_exp):
 def print_run_stats():
     """Prints NLCPy run stats.
 
+    Notes
+    -----
+    .. deprecated:: 2.0.0
+
     Examples
     --------
     Sample Program::
@@ -298,6 +322,9 @@ def print_run_stats():
         ----------------------------------------
 
     """
+    warnings.warn('This routine is deprecated since version 2.0.0. '
+                  'Please use nlcpy.prof.ftrace_region().',
+                  UserWarning)
     if _prof.status != END_PROFILING:
         raise Exception('profiling not finished')
     print("\n----------- NLCPy Run Stats ------------")
@@ -333,6 +360,10 @@ def print_run_stats():
 def get_run_stats():
     """Gets dict of NLCPy run stats.
 
+    Notes
+    -----
+    .. deprecated:: 2.0.0
+
     Returns
     -------
     out : dict
@@ -363,4 +394,150 @@ def get_run_stats():
         'veo_write_mem': {'elapsed_time': 0, 'number_of_call': 0},
         'vh_runtime': {'elapsed_time': 0.0008327960968017578}}
     """
+    warnings.warn('This routine is deprecated since version 2.0.0. '
+                  'Please use nlcpy.prof.ftrace_region().',
+                  UserWarning)
     return _prof.get_stats()
+
+
+_lib_prof = None
+
+
+def _load_library():
+    proc = veo._get_veo_proc()
+    lib = proc.load_library(
+        (nlcpy._path._here + "/lib/libnlcpy_profiling.so").encode('utf-8'))
+    if lib is None:
+        raise RuntimeError("cannot detect profiling kernel")
+    return lib
+
+
+def _get_lib():
+    global _lib_prof
+    if _lib_prof is None:
+        _lib_prof = _load_library()
+    return _lib_prof
+
+
+def ftrace_region_begin(message):
+    """Begins an ftrace region.
+
+    A file ftrace.out is generated after running your program that invokes
+    this routine.
+    The ftrace.out includes performance information of your program.
+
+    Notes
+    -----
+    It is necessary to specify an identical string *message* to
+    :func:`ftrace_region_begin` and :func:`ftrace_region_end`.
+
+    Parameters
+    ----------
+    message : str
+        Any string can be specified to distinguish a user-specified region.
+
+    See Also
+    --------
+    ftrace_region: Enables an ftrace region.
+    ftrace_region_end : Ends an ftrace region.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.random.rand(10000, 10000)
+    >>> vp.prof.ftrace_region_begin('dgemm')
+    >>> # something you want to profile
+    >>> _ = x @ x
+    >>> vp.prof.ftrace_region_end('dgemm')
+    """
+
+    nlcpy.request.flush()
+    ctx = veo._get_veo_ctx()
+    lib = _get_lib()
+    f = lib.find_function("nlcpy_profiling_region_begin".encode('utf-8'))
+    f.args_type(b"void *")
+    f.ret_type("void")
+    if type(message) is not bytes:
+        message = message.encode('utf-8')
+    buff = numpy.frombuffer(message, dtype=numpy.uint8)
+    req = f(ctx, veo.OnStack(buff))
+    req.wait_result()
+
+
+def ftrace_region_end(message):
+    """Ends an ftrace region.
+
+    A file ftrace.out is generated after running your program that invokes
+    this routine.
+    The ftrace.out includes performance information of your program.
+
+    Notes
+    -----
+    It is necessary to specify an identical string *message* to
+    :func:`ftrace_region_begin` and :func:`ftrace_region_end`.
+
+    Parameters
+    ----------
+    message : str
+        Any string can be specified to distinguish a user-specified region.
+
+    See Also
+    --------
+    ftrace_region : Enables an ftrace region.
+    ftrace_region_begin : Begins an ftrace region.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.random.rand(10000, 10000)
+    >>> vp.prof.ftrace_region_begin('dgemm')
+    >>> # something you want to profile
+    >>> _ = x @ x
+    >>> vp.prof.ftrace_region_end('dgemm')
+    """
+
+    nlcpy.request.flush()
+    ctx = veo._get_veo_ctx()
+    lib = _get_lib()
+    f = lib.find_function("nlcpy_profiling_region_end".encode('utf-8'))
+    f.args_type(b"void *")
+    f.ret_type("void")
+    if type(message) is not bytes:
+        message = message.encode('utf-8')
+    buff = numpy.frombuffer(message, dtype=numpy.uint8)
+    req = f(ctx, veo.OnStack(buff))
+    req.wait_result()
+
+
+@contextlib.contextmanager
+def ftrace_region(message):
+    """Enables profiling with an ftrace region during \'with\' statement.
+
+    A file ftrace.out is generated after running your program that invokes
+    this routine.
+    The ftrace.out includes performance information of your program.
+
+    Parameters
+    ----------
+    message : str
+        Any string can be specified to distinguish a user-specified region.
+
+    See Also
+    --------
+    ftrace_region_begin : Begins ftrace region.
+    ftrace_region_end : Ends ftrace region.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.random.rand(10000, 10000)
+    >>> with vp.prof.ftrace_region('dgemm'):
+    ...     # something you want to profile
+    ...     _ = x @ x
+    """
+
+    ftrace_region_begin(message)
+    try:
+        yield
+    finally:
+        ftrace_region_end(message)

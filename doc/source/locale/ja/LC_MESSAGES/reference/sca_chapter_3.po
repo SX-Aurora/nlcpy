@@ -1,0 +1,408 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/sca_chapter_3.rst:4
+msgid "Advanced Usage"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:6
+msgid "This section describes some details on the use of the SCA interface."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:8
+msgid ":ref:`label_sca_coef`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:9
+msgid ":ref:`label_sca_for_loop`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:10
+msgid ":ref:`label_sca_auto_cre`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:11
+msgid ":ref:`label_sca_offset`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:12
+msgid ":ref:`label_sca_indexing`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:13
+msgid ":ref:`label_sca_multi`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:14
+msgid ":ref:`label_sca_complex`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:19
+msgid "Applying Coefficient"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:21
+msgid ""
+"In the SCA interface, coefficients of stencil computation can be "
+"specified as a scalar or an array. For details of the coefficients, see "
+"also :ref:`label_sca_concept`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:24
+msgid "A scalar constant is set as the coefficient:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:26
+msgid ""
+"You can set the coefficient as a scalar constant. Below is an easy "
+"example:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:28
+msgid "In [1]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:38
+msgid "Out[1]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:44
+msgid "An element of an :class:`nlcpy.ndarray` is set as the coefficient:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:46
+msgid ""
+"You can also set the coefficients as an element of an "
+":class:`nlcpy.ndarray`:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:48
+msgid "In [2]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:57
+msgid "Out[2]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:63
+msgid ""
+"Here, the operators with a description  (``dx[-1]`` or ``dx[1]``) are "
+"overloaded. The overloaded operators hold the address of the coefficient "
+"``coef``, not the value of that. So if the value of the coefficient is "
+"updated, the SCA kernel refers to the value at the time. In other words, "
+"if the coefficients are given as an :class:`nlcpy.ndarray` object, the "
+"updated values can be used without recreating a SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:69
+msgid "In [3]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:77
+msgid "Out[3]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:85
+msgid ""
+"If the operators with a description refers to one or more temporary "
+"elements, the SCA kernel does NOT use the updated values after "
+":func:`nlcpy.sca.create_kernel()` is called because the SCA kernel refers"
+" to each address of the temporary elements, not each value of those. "
+"Below is an easy example that ``1.0 * coef[0]`` and ``1.0 * coef[1]`` are"
+" specified as the temporary elements."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:104
+#: ../../source/reference/sca_chapter_3.rst:176
+msgid ""
+"Similarly, if ``coef`` is set as ``numpy.ndarray``, updating ``coef`` "
+"does not affect the results because numpy.ndarray is converted into a "
+"temporaly :class:`nlcpy.ndarray` in :func:`nlcpy.sca.create_kernel()`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:118
+msgid "An :class:`nlcpy.ndarray` is set as the coefficient:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:120
+msgid "You can also set the coefficients as an :class:`nlcpy.ndarray`:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:122
+msgid "In [4]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:131
+msgid "Out[4]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:138
+msgid ""
+"In[4] is similar to In[2]. The overloaded operator with the description "
+"``dx[0]`` hold the address of ``coef``, not the values of that. So when "
+"the values of ``coef`` are updated, the SCA kernel refers to the values "
+"at the time."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:142
+msgid "In [5]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:150
+msgid "Out[5]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:158
+msgid ""
+"If the operators with a description refers to one or more temporary "
+"arrays, the SCA kernel does NOT use the updated values after "
+":func:`nlcpy.sca.create_kernel()` is called because the SCA kernel refers"
+" to each address of the temporary arrays, not each value of those. Below "
+"is an easy example that ``1.0 * coef`` is specified as a temporary array."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:182
+msgid "Definition of Stencil Description Using for Loop"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:184
+msgid ""
+"You can also use \"for-loop\" in a definition of a stencil description. "
+"For example, if you want to perform a stencil computation consisting of "
+"10 elements, it is possible to define using for-loop as follows:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:186
+msgid "In [6]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:197
+msgid "Out[6]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:205
+msgid ""
+"In the above example, :func:`nlcpy.sca.empty_description` is used to "
+"create an empty stencil description, and 10 neighboring stencil "
+"descriptoions are added to it. Depending on the application, it is "
+"possible to create more complex stencil descriptions. The following is an"
+" example of creating the 3x3 XY planar stencil description."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:209
+msgid "In [7]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:221
+msgid "Out[7]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:237:<autosummary>:1
+msgid ":obj:`nlcpy.sca.empty_description <nlcpy.sca.empty_description>`"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:237:<autosummary>:1
+msgid "Returns an empty stencil description."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:241
+msgid "Automatic Creation of Output Array"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:242
+msgid ""
+"If the keyword argument ``desc_o`` of :func:`nlcpy.sca.create_kernel` is "
+"omitted, an output :class:`nlcpy.ndarray` is automatically created."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:244
+msgid "In [8]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:250
+msgid "Out[8]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:259
+msgid "Offset Adjustment for Output Array"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:261
+msgid ""
+"The offset of the output :class:`nlcpy.ndarray` can be adjusted by the "
+"keyword argument ``desc_o`` of :func:`nlcpy.sca.create_kernel`. For "
+"example, if you want to set the offset to -1, ``desc_o`` is specified as "
+"follows:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:263
+msgid "In [9]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:270
+msgid "Out[9]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:276
+msgid ""
+"If you want to set the offset to 1, ``desc_o`` is specified as follows: "
+"In [10]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:284
+msgid "Out[10]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:292
+msgid ""
+"Note that an IndexError occurs if the offset position is an out-of-range "
+"reference."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:305
+msgid "Simplified Indexing"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:306
+msgid ""
+"Indexing for stencil elements can be simplified by using ``Ellipsis "
+"(...)`` or ``Slice(None) (:)``. Any axis specified by ``...`` or ``:`` is"
+" interpreted as that indexing starts at 0."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:309
+msgid "In [11]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:316
+msgid "Out[11]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:327
+msgid "In [12]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:333
+msgid "Out[12]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:344
+msgid "In [13]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:350
+msgid "Out[13]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:361
+msgid "In [14]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:367
+msgid "Out[14]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:381
+msgid "Stencil Calculation Using Multiple Ndarrays"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:382
+msgid ""
+"Even if there are two or more ``ndarrays`` used for stencil computations,"
+" the same procedure can be used."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:384
+msgid "In [15]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:393
+msgid "Out[15]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:399
+msgid ""
+"When shapes are different between multiple ``ndarrays``, the narrowest "
+"range is selected as the effective range. Below is an example of "
+"``x.shape = (5, 5)``, ``y.shape = (4, 6)``"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:402
+msgid "In [16]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:412
+msgid "Out[16]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:425
+msgid "In the above example"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:423
+msgid "Effective range of x: [1:4, 1:4]"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:425
+msgid "Effective range of y: [1:3, 1:5]"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:427
+msgid ""
+"Therefore, the effective range of the output :class:`nlcpy.ndarray` "
+"becomes ``[1: 3, 1: 4]``, which is the minimum range for each axis. In "
+"this example, the output is automatically created, but when specifying "
+"the output destination :class:`nlcpy.ndarray`, the following condition "
+"must be satisfied."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst
+msgid "out.shape[i] >= min(in1.shape[i], in2.shape[i], ..., inN.shape[i])"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst
+msgid "i: 0 to n (For n-dimensional arrays)"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:433
+msgid ""
+"When the output array is automatically created, an :class:`nlcpy.ndarray`"
+" whose shape meets above condition is returned by "
+":func:`nlcpy.sca.create_kernel`."
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:438
+msgid "Stencil Calculation for Complex Types"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:440
+msgid ""
+"The SCA interface does not support complex number types. When performing "
+"stencil computations for complex numbers, use :obj:`nlcpy.ndarray.real` "
+"and :obj:`nlcpy.ndarray.imag` as follows:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:443
+msgid "In [17]:"
+msgstr ""
+
+#: ../../source/reference/sca_chapter_3.rst:454
+msgid "Out[17]:"
+msgstr ""
+

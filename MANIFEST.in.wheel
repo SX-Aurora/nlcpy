@@ -1,0 +1,2 @@
+global-exclude *.o *.c *.h *.cpp *.pyx *.pxd *.pxi *.m4 *.master *.master2
+include nlcpy/include/*.h

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -82,6 +82,11 @@ typedef struct linspace_arguments_tag {
     uint64_t endpoint;
     ve_array denormal;
 } linspace_arguments;
+
+typedef struct tri_arguments_tag {
+    ve_array out;
+    int64_t k;
+} tri_arguments;
 
 typedef struct nonzero_arguments_tag {
     ve_array a;
@@ -205,6 +210,14 @@ typedef struct repeat_arguments_tag {
     ve_array info;
 } repeat_arguments;
 
+typedef struct roll_arguments_tag {
+    ve_array a;
+    ve_array shift;
+    ve_array axis;
+    ve_array work;
+    ve_array result;
+} roll_arguments;
+
 typedef struct diff_arguments_tag {
     ve_array a;
     uint64_t n;
@@ -224,7 +237,44 @@ typedef struct copy_masked_op_arguments_tag {
     ve_array where;
 } copy_masked_op_arguments;
 
+typedef struct sca_op_arguments_tag {
+    uint64_t code;
+} sca_op_arguments;
 
+typedef struct sort_multi_op_arguments_tag {
+    ve_array x;
+    ve_array y;
+    ve_array w;
+    int32_t stable;
+} sort_multi_op_arguments;
+
+typedef struct shuffle_op_arguments_tag {
+    ve_array x;
+    ve_array idx;
+    ve_array work;
+    int32_t axis;
+} shuffle_op_arguments;
+
+typedef struct clip_op_arguments_tag {
+    ve_array a;
+    ve_array out;
+    ve_array work;
+    ve_array amin;
+    ve_array amax;
+    ve_array where;
+} clip_op_arguments;
+
+typedef struct fill_diagonal_op_arguments_tag {
+    ve_array a;
+    ve_array val;
+    int64_t wrap;
+} fill_diagonal_op_arguments;
+
+typedef struct block_op_arguments_tag {
+    ve_array arrays;
+    ve_array out;
+    ve_array offsets;
+} block_op_arguments;
 
 typedef union ve_arguments_tag{
     binary_op_arguments binary;
@@ -233,6 +283,7 @@ typedef union ve_arguments_tag{
     take_arguments take;
     eye_arguments eye;
     linspace_arguments linspace;
+    tri_arguments tri;
     nonzero_arguments nonzero;
     prepare_indexing_arguments prepare_indexing;
     scatter_arguments scatter;
@@ -246,16 +297,23 @@ typedef union ve_arguments_tag{
     insert_arguments insert;
     tile_arguments tile;
     repeat_arguments repeat;
+    roll_arguments roll;
     diff_arguments diff;
     copy_op_arguments copy;
     copy_masked_op_arguments copy_masked;
+    sca_op_arguments sca;
+    sort_multi_op_arguments sort_multi;
+    shuffle_op_arguments shuffle;
+    clip_op_arguments clip;
+    fill_diagonal_op_arguments fill_diagonal;
+    block_op_arguments block;
     /* creation, manipulation, indexing, and more...  */
 } ve_arguments;
 
 
 typedef struct request_package_tag {
-    /* to select what function execute */     
-    uint64_t funcnum;   
+    /* to select what function execute */
+    uint64_t funcnum;
     /* to select function type */
     uint64_t functype;
     /* arguments for request */

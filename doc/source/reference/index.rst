@@ -26,6 +26,7 @@ Here is a list of functionalites provided by NLCPy.
     indexing
     io
     random
+    sca
     sorting
     statistics
     linalg

@@ -10,6 +10,7 @@ Generating Index Arrays
     :toctree: generated/
     :nosignatures:
 
+    nlcpy.diag_indices
     nlcpy.nonzero
     nlcpy.where
 
@@ -22,4 +23,14 @@ Indexing-like Operations
 
     nlcpy.diag
     nlcpy.diagonal
+    nlcpy.select
     nlcpy.take
+
+Inserting data into arrays
+--------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :nosignatures:
+
+    nlcpy.fill_diagonal

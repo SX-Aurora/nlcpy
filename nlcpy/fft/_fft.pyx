@@ -64,7 +64,8 @@ import numbers
 import operator
 import itertools
 import time
-from nlcpy import veo, request, conjugate, empty, arange
+from nlcpy import veo, conjugate, empty, arange
+from nlcpy.request import request
 from nlcpy.request.ve_kernel cimport check_error
 from numpy.compat import integer_types
 from functools import reduce
@@ -365,26 +366,23 @@ def _raw_fft(a, n, axis, inv_norm, is_real=False, inv=False):
         (out_shape, out_dtype) = (t.shape, t.dtype)
 
     out = nlcpy.ndarray(shape=out_shape, dtype=out_dtype, order=_order)
-    fpe_flags = numpy.empty(1, dtype=numpy.int32)
-
-    request.flush()
-    v = veo.VeoAlloc()
 
     dt = numpy.dtype(a.dtype)
     fn, reuse_key = _generate_fn_key(dt, is_real, inv, "1d")
     is_reuse = (_handle_info is not None and (reuse_key, n) == _handle_info)
 
+    fpe = request._get_fpe_flag()
     args = (a._ve_array,
             out._ve_array,
             axis,
             <int>n,
             <int>(1 if is_reuse else 0),
-            veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
-    req = v.lib.func[fn.encode('utf-8')](v.ctx, *args)
-    ret = req.wait_result()
-    check_error(ret)
-    nlcpy.core.check_fpe_flags(fpe_flags[0])
+    request._push_and_flush_request(
+        fn,
+        args,
+    )
 
     _set_handle_info(reuse_key, n)
 
@@ -442,10 +440,6 @@ def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
     else:
         (out_shape, out_dtype) = (t.shape, t.dtype)
     out = nlcpy.ndarray(shape=out_shape, dtype=out_dtype, order=_order)
-    fpe_flags = numpy.empty(1, dtype=numpy.int32)
-
-    request.flush()
-    v = veo.VeoAlloc()
 
     fft_dim = len(axes)
     if fft_dim == 2:
@@ -459,17 +453,18 @@ def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
     fn, reuse_key = _generate_fn_key(dt, is_real, inv, dim_key)
     is_reuse = (_handle_info is not None and (reuse_key, _size) == _handle_info)
 
+    fpe = request._get_fpe_flag()
     args = (a._ve_array,
             out._ve_array,
             _axes._ve_array,
             s_in._ve_array,
             <int>(1 if is_reuse else 0),
-            veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
-    req = v.lib.func[fn.encode()](v.ctx, *args)
-    ret = req.wait_result()
-    check_error(ret)
-    nlcpy.core.check_fpe_flags(fpe_flags[0])
+    request._push_and_flush_request(
+        fn,
+        args,
+    )
 
     _set_handle_info(reuse_key, _size)
 

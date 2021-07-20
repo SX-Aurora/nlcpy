@@ -176,31 +176,31 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 @-->)dnl
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
 macro_unary_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
 macro_unary_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
 macro_unary_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
 macro_unary_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
 macro_unary_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
 macro_unary_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
 macro_unary_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
 macro_unary_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
 macro_unary_operator(bool,int32_t)dnl
 #endif
 
@@ -213,31 +213,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     if (x->size == 0 || y->size == 0) return (uint64_t)NLCPY_ERROR_OK;
     uint64_t err = NLCPY_ERROR_OK;
     switch (y->dtype) {
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
     case ve_i32:  err = FILENAME_i32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
     case ve_i64:  err = FILENAME_i64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
     case ve_u32:  err = FILENAME_u32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
     case ve_u64:  err = FILENAME_u64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
     case ve_f32:  err = FILENAME_f32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
     case ve_f64:  err = FILENAME_f64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
     case ve_c64:  err = FILENAME_c64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
     case ve_c128: err = FILENAME_c128(x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
     case ve_bool: err = FILENAME_bool(x, y, where, psw); break;
 #endif
     default: err = NLCPY_ERROR_DTYPE;

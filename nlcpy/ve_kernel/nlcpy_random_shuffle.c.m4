@@ -42,7 +42,7 @@ include(macros.m4)dnl
  * **************************/
 
 define(<--@macro_random_shuffle@-->,<--@
-uint64_t nlcpy_random_shuffle_$1(ve_array *x, ve_array *idx, ve_array *work, int32_t *psw)
+uint64_t nlcpy_random_shuffle_$1(ve_array *x, ve_array *idx, ve_array *work, int32_t axis, int32_t *psw)
 {
     $2 *px = ($2 *)x->ve_adr;
     if (px == NULL) return 0LU;
@@ -102,22 +102,40 @@ uint64_t nlcpy_random_shuffle_$1(ve_array *x, ve_array *idx, ve_array *work, int
         const int64_t cntm_e = lenm * (it + 1) / nt;
         for (int64_t cntm = cntm_s; cntm < cntm_e; cntm++) {
             ix = cntm * x->strides[n_outer] / x->itemsize;
-            iw = pi[cntm*ii0] * work->strides[n_outer] / work->itemsize;
+            if (n_outer == axis){
+                iw = pi[cntm*ii0] * work->strides[n_outer] / work->itemsize;
+            } else {
+                iw = cntm * work->strides[n_outer] / work->itemsize;
+            }
             for (;;) {
                 // most inner loop for vectorize
-                for (i = 0; i < x->shape[n_inner]; i++) {
-                    px[ix+i*ix0] = pw[iw+i*iw0];
+                if (n_inner == axis) {
+                    for (i = 0; i < x->shape[n_inner]; i++) {
+                        px[ix+i*ix0] = pw[iw+pi[i*ii0]*iw0];
+                    }
+                } else {
+                    for (i = 0; i < x->shape[n_inner]; i++) {
+                        px[ix+i*ix0] = pw[iw+i*iw0];
+                    }
                 }
                 // set next index
                 for (k = n_inner-1; k >= 1; k--) {
                     if (++cnt_x[k] < x->shape[k]) {
                         ix += x->strides[k] / x->itemsize;
-                        iw += work->strides[k] / work->itemsize;
+                        if (k == axis){
+                            iw += (pi[cnt_x[k]] - pi[cnt_x[k-1]]) * work->strides[k] / work->itemsize;
+                        } else {
+                            iw += work->strides[k] / work->itemsize;
+                        }
                         break;
                     }
                     cnt_x[k] = 0;
                     ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                    iw -= (work->strides[k] / work->itemsize) * (work->shape[k] - 1);
+                    if (k == axis) {
+                        iw -= (work->strides[k] / work->itemsize) * (pi[work->shape[k] - 1] - pi[0]);
+                    } else {
+                        iw -= (work->strides[k] / work->itemsize) * (work->shape[k] - 1);
+                    }
                 }
                 if (k < 1) break;
             }
@@ -146,28 +164,29 @@ macro_random_shuffle(c128,double _Complex)dnl
 
 uint64_t nlcpy_random_shuffle(ve_arguments *args, int32_t *psw)
 {
-    ve_array *x = &(args->binary.x);
-    ve_array *idx = &(args->binary.y);
-    ve_array *work = &(args->binary.z);
+    ve_array *x = &(args->shuffle.x);
+    ve_array *idx = &(args->shuffle.idx);
+    ve_array *work = &(args->shuffle.work);
+    int32_t axis = args->shuffle.axis;
     
     assert(x->dtype == work->dtype);
     assert(idx->ndim == 1);
     assert(x->ndim == work->ndim);
     assert(x->size == work->size);
     assert(idx->is_c_contiguous);
-    assert(x->shape[0] == idx->size);
+    assert(x->shape[axis] == idx->size);
     uint64_t err;
     
     switch (x->dtype) {
-    case ve_bool:  err = nlcpy_random_shuffle_bool (x, idx, work, psw); break;
-    case ve_i32 :  err = nlcpy_random_shuffle_i32  (x, idx, work, psw); break;
-    case ve_i64 :  err = nlcpy_random_shuffle_i64  (x, idx, work, psw); break;
-    case ve_u32 :  err = nlcpy_random_shuffle_u32  (x, idx, work, psw); break;
-    case ve_u64 :  err = nlcpy_random_shuffle_u64  (x, idx, work, psw); break;
-    case ve_f32 :  err = nlcpy_random_shuffle_f32  (x, idx, work, psw); break;
-    case ve_f64 :  err = nlcpy_random_shuffle_f64  (x, idx, work, psw); break;
-    case ve_c64 :  err = nlcpy_random_shuffle_c64  (x, idx, work, psw); break;
-    case ve_c128:  err = nlcpy_random_shuffle_c128 (x, idx, work, psw); break;
+    case ve_bool:  err = nlcpy_random_shuffle_bool (x, idx, work, axis, psw); break;
+    case ve_i32 :  err = nlcpy_random_shuffle_i32  (x, idx, work, axis, psw); break;
+    case ve_i64 :  err = nlcpy_random_shuffle_i64  (x, idx, work, axis, psw); break;
+    case ve_u32 :  err = nlcpy_random_shuffle_u32  (x, idx, work, axis, psw); break;
+    case ve_u64 :  err = nlcpy_random_shuffle_u64  (x, idx, work, axis, psw); break;
+    case ve_f32 :  err = nlcpy_random_shuffle_f32  (x, idx, work, axis, psw); break;
+    case ve_f64 :  err = nlcpy_random_shuffle_f64  (x, idx, work, axis, psw); break;
+    case ve_c64 :  err = nlcpy_random_shuffle_c64  (x, idx, work, axis, psw); break;
+    case ve_c128:  err = nlcpy_random_shuffle_c128 (x, idx, work, axis, psw); break;
     default: err = NLCPY_ERROR_DTYPE;
     }
     return (uint64_t)err;

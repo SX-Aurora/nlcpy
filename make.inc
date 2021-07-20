@@ -6,6 +6,7 @@ PYTHON=$(shell echo ${PYTHONPATH} | sed -e "s/\([^:]*\)\(.*\)/\1/")
 SRCDIR=$(BASEDIR)/nlcpy/ve_kernel
 TOOLDIR=$(BASEDIR)/scripts
 DISTDIR=$(BASEDIR)/dist
+OBJDIR_COMMON=$(BASEDIR)/obj/common
 OBJDIR_NO_FAST_MATH=$(BASEDIR)/obj/no_fast_math
 OBJDIR_FAST_MATH=$(BASEDIR)/obj/fast_math
 LIBDIR=$(BASEDIR)/nlcpy/lib

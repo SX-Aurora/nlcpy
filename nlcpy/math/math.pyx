@@ -507,16 +507,16 @@ def angle(z, deg=False):
 
     out = ndarray(x.shape, dtype=dtype_out, order=order_out)
 
-    fpe_flags = numpy.empty(1, dtype=numpy.int32)
+    fpe_flags = request._get_fpe_flag()
     args = (
         x._ve_array,
         out._ve_array,
         veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),)
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func[b'nlcpy_angle'](v.ctx, *args)
-    ve_adr = req.wait_result()
-    core.check_fpe_flags(fpe_flags[0])
+
+    request._push_and_flush_request(
+        'nlcpy_angle',
+        args,
+    )
 
     if deg:
         return nlcpy.rad2deg(out)
@@ -718,3 +718,59 @@ def prod(a, axis=None, dtype=None, out=None, keepdims=False,
                                 out=out, keepdims=keepdims, initial=initial, where=where)
 
     return ret
+
+
+def clip(a, a_min, a_max, out=None, **kwargs):
+    """Clips (limits) the values in an array.
+
+    Given an interval, values outside the interval are clipped to the interval edges.
+    For example, if an interval of ``[0, 1]`` is specified, values smaller than 0 become
+    0, and values larger than 1 become 1.
+
+    Equivalent to but faster than ``vp.maximum(a_min, vp.minimum(a, a_max))``.
+    No check is performed to ensure ``a_min < a_max``.
+
+    Parameters
+    ----------
+    a : array_like
+        Array containing elements to clip.
+    a_min : scalar or array_like or None
+        Minimum value. If *None*, clipping is not performed on the lower interval edge.
+        Not more than one of *a_min* and *a_max* may be *None*.
+    a_max : scalar or array_like or None
+        Maximum value. If *None*, clipping is not performed on the upper interval edge.
+        Not more than one of *a_min* and *a_max* may be *None*.
+        If *a_min* or *a_max* are array_like, then *a*, *a_min*, and *a_max* will be
+        broadcasted to match their shapes.
+    out : ndarray, optional
+        The results will be placed in this array. It may be the input array for
+        in-place clipping. *out* must be of the right shape to hold the output.
+        Its type is preserved.
+    **kwargs
+        For other keyword-only arguments,
+        see the :ref:`ufunc docs <optional_keyword_arg>`.
+
+    Returns
+    -------
+    clipped_array : ndarray
+        An array with the elements of *a*, but where values < *a_min* are replaced with
+        *a_min*, and those > *a_max* with *a_max*.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> a = vp.arange(10)
+    >>> vp.clip(a, 1, 8)
+    array([1, 1, 2, 3, 4, 5, 6, 7, 8, 8])
+    >>> a
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> vp.clip(a, 3, 6, out=a)
+    array([3, 3, 3, 3, 4, 5, 6, 6, 6, 6])
+    >>> a = vp.arange(10)
+    >>> a
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> vp.clip(a, [3, 4, 1, 1, 1, 4, 4, 4, 4, 4], 8)
+    array([3, 4, 2, 3, 4, 5, 6, 7, 8, 8])
+    """
+    a = nlcpy.asanyarray(a)
+    return a.clip(a_min, a_max, out, **kwargs)

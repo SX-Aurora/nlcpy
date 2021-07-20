@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -53,7 +53,7 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct
     pool->ctx           = ctx;
 
     // allocate mng on VE
-    int iret; 
+    int iret;
     uint64_t ireq;
     struct veo_args *args = veo_args_alloc();
     size_t poolsize = SMALL_POOL_SIZE + LARGE_POOL_SIZE;
@@ -92,8 +92,8 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct
     large = pool->large;
 
     // create a dictionary (hash table) to get a block id from VE address
-    const uint64_t maxid = (small->maxid > large->maxid) ? small->maxid : large->maxid;
-    pool->hash = nlcpy__mempool_create_hash(EXPAND_RATIO*maxid);
+    const uint64_t maxid = small->maxid + large->maxid;
+    pool->hash = nlcpy__mempool_create_hash(maxid);
     if (pool->hash == NULL) {
         nlcpy_mempool_free(pool);
         return NULL;
@@ -113,16 +113,20 @@ int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
     int iret;
     uint64_t lid, gid;
 
-    if (size<=POOL_THREASHOLD) {
-        iret = nlcpy__mempool_reserve(small, size, &lid, ve_adr);
+    // If 0 byte reservation is ordered, this function internally reserves 8 bytes.
+    size_t asize = size;
+    if(size==0) asize=8;
+
+    if (asize<=POOL_THREASHOLD) {
+        iret = nlcpy__mempool_reserve(small, asize, &lid, ve_adr);
         gid= 2*lid;     // even
     } else {
-        iret = nlcpy__mempool_reserve(large, size, &lid, ve_adr);
+        iret = nlcpy__mempool_reserve(large, asize, &lid, ve_adr);
         gid= 2*lid + 1; // odd
     }
 #if defined(DEBUG)
     uint64_t maxmax = ( small->maxp > large->maxp ) ? small->maxp : large->maxp;
-    fprintf(stderr,"  %s: ve_adr=%lx size=%ld, base=%lx, endptr=%lx, gid=%ld, lid=%ld\n", (gid%2==0)?"SMALL":"LARGE", *ve_adr, size, pool->base,maxmax, gid, lid);
+    fprintf(stderr,"  %s: ve_adr=%lx size=%ld, base=%lx, endptr=%lx, gid=%ld, lid=%ld\n", (gid%2==0)?"SMALL":"LARGE", *ve_adr, asize, pool->base,maxmax, gid, lid);
 #endif
     if (iret!=NLCPY_RESULT_OK && iret!=NLCPY_POOL_NOT_USED) return iret;
 
@@ -131,7 +135,7 @@ int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
         iret = nlcpy__mempool_append_to_hash(*ve_adr, gid, pool->hash);
     } else {
         // overflow
-        iret = veo_alloc_mem(pool->hnd, ve_adr, size);
+        iret = veo_alloc_mem(pool->hnd, ve_adr, asize);
         if (iret == -1) return NLCPY_OUT_OF_MEMORY;
         if (iret == -2) return NLCPY_INTERNAL_ERROR;
         iret = NLCPY_POOL_NOT_USED;
@@ -176,7 +180,7 @@ void nlcpy_mempool_free(mempool_t *pool)
     // So, nothing to do on VE side.
 /*
     if (pool->base != 0) {
-        // free pool
+        //free pool
         int iret;
         uint64_t ireq, retval;
         struct veo_args *args = veo_args_alloc();
@@ -208,8 +212,8 @@ bool nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
     }
 #if defined(DEBUG)
     bool iret = nlcpy__mempool_is_available(mng, size);
-    size_t capa = nlcpy__mempool_get_capasity(mng);
-//    printf("capa = %llu\n",capa);
+//    size_t capa = nlcpy__mempool_get_capasity(mng);
+//    printf("capa = %zu\n",capa);
     return iret;
 #endif
     return nlcpy__mempool_is_available(mng, size);
@@ -235,7 +239,7 @@ mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, uint64_t li
     // initialization for the deallocation
     mng->buff        = NULL;
     mng->blocks      = NULL;
-    mng->sort        = NULL; 
+    mng->sort        = NULL;
     mng->dora        = NULL;
     mng->merged      = true;
 
@@ -323,7 +327,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
 
         // update pointer;
         mng->p = new_p;
-    
+
     } else {
 #if 0
         //
@@ -419,8 +423,8 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
 
             // update pointer;
             mng->p = new_p;
-        }   
-    }   
+        }
+    }
     return NLCPY_RESULT_OK;
 }
 
@@ -470,7 +474,7 @@ void nlcpy__mempool_free_mng(mempool_mng_t *mng)
     //
     nlcpy__mempool_free_sort(mng->sort);
     //
-    free(mng);
+    FREE(mng);
     //
     return;
 }
@@ -488,7 +492,7 @@ sort_t *nlcpy__mempool_create_sort(const size_t n)
 
     st->buff = (uint64_t *)malloc(sizeof(uint64_t)*n*2);
     if (st->buff == NULL) {
-        free(st);
+        FREE(st);
         return NULL;
     }
 
@@ -510,7 +514,7 @@ hash_t *nlcpy__mempool_create_hash(const size_t n)
 
     hh->buff = (uint64_t *)malloc(sizeof(uint64_t)*((size_t)n*2));
     if (hh->buff == NULL) {
-        free(hh);
+        FREE(hh);
         return NULL;
     }
     hh->next = hh->buff;
@@ -519,7 +523,7 @@ hash_t *nlcpy__mempool_create_hash(const size_t n)
     hh->head = (uint64_t *)malloc(sizeof(uint64_t)*((size_t)HASH_SIZE));
     hh->tail = END;
     uint64_t i;
-    for (i=0;i<HASH_SIZE;i++) hh->head[i] = hh->tail; 
+    for (i=0;i<HASH_SIZE;i++) hh->head[i] = hh->tail;
 
     hh->maxnum = n;
     return hh;
@@ -589,15 +593,15 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
         return NLCPY_OUT_OF_MEMORY;
     }
 
-    uint64_t *ptrs  = buff; 
-    uint64_t *bytes = buff + n; 
+    uint64_t *ptrs  = buff;
+    uint64_t *bytes = buff + n;
 #if ! defined(POOL_EXTENTON)
-    uint64_t *next  = buff + n * 2; 
-    uint64_t *prev  = buff + n * 3; 
+    uint64_t *next  = buff + n * 2;
+    uint64_t *prev  = buff + n * 3;
 #else
-    uint64_t *esegs = buff + n * 2; 
-    uint64_t *next  = buff + n * 3; 
-    uint64_t *prev  = buff + n * 4; 
+    uint64_t *esegs = buff + n * 2;
+    uint64_t *next  = buff + n * 3;
+    uint64_t *prev  = buff + n * 4;
 #endif
 
     link_t *ll = mng->blocks;
@@ -611,8 +615,8 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
     memcpy(dora, mng->dora, sizeof(bool)*(size_t)mng->maxid);
     uint64_t i;
     for (i=mng->maxid; i<n; i++) dora[i] = false; //initialization
- 
-    free(mng->buff);
+
+    FREE(mng->buff);
     mng->buff  = buff;
     mng->ptrs  = ptrs;
     mng->bytes = bytes;
@@ -622,11 +626,13 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
     ll->next   = next;
     ll->prev   = prev;
 
-    free(mng->dora);
+    FREE(mng->dora);
     mng->dora  = dora;
 
     mng->maxid = n;
-    return NLCPY_RESULT_OK;
+
+    // extend area of mng->sort because the number of id is overflow
+    return nlcpy__mempool_extend_sort(n, mng->sort);
 }
 
 
@@ -644,7 +650,7 @@ int nlcpy__mempool_extend_sort(const size_t n, sort_t *st)
     memcpy(ids, st->ids, sizeof(uint64_t)*(st->maxnum));
     memcpy(bytes, st->bytes, sizeof(uint64_t)*(st->maxnum));
 
-    free(st->buff);
+    FREE(st->buff);
     st->buff  = buff;
     st->ids   = ids;
     st->bytes = bytes;
@@ -668,7 +674,7 @@ int nlcpy__mempool_extend_hash(const size_t n, hash_t *hh)
     memcpy(next, hh->next, sizeof(uint64_t)*hh->maxnum);
     memcpy(prev, hh->prev, sizeof(uint64_t)*hh->maxnum);
 
-    free(hh->buff);
+    FREE(hh->buff);
     hh->buff = buff;
     hh->next = next;
     hh->prev = prev;
@@ -764,12 +770,6 @@ int nlcpy__mempool_remove_from_link(const uint64_t id, link_t *ll)
 
 int nlcpy__mempool_register_to_sort(const uint64_t id, const uint64_t size, sort_t *st)
 {
-    while (st->num>st->maxnum) {
-        // the number of id is overflow
-        int iret = nlcpy__mempool_extend_sort((size_t)st->maxnum*2, st);
-        if (iret) return iret;
-    }
-    //
     uint64_t *indx = st->ids;
     uint64_t *sort = st->bytes;
     uint64_t *num  = &(st->num);
@@ -806,7 +806,7 @@ int nlcpy__mempool_extract_from_sort(sort_t *st)
     //
     if (*num<=0) {
         fprintf(stderr,"NLCPy: double free in nlcpy__mempool_extract_from_sort()\n");
-        return NLCPY_INTERNAL_ERROR; 
+        return NLCPY_INTERNAL_ERROR;
     }
     //
     uint64_t p1 = 1;
@@ -831,7 +831,7 @@ int nlcpy__mempool_extract_from_sort(sort_t *st)
         p2=p1*2;
     }
     return NLCPY_RESULT_OK;
-} 
+}
 
 
 int nlcpy__mempool_append_to_hash(const uint64_t ve_adr, const uint64_t gid, hash_t *hash)
@@ -942,12 +942,12 @@ int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
             uint64_t size = mng->bytes[id];
             id = blocks->next[id];
             while ( id != END && !mng->dora[id] ) {
-                const uint64_t s = size+mng->bytes[id]; 
+                const uint64_t s = size+mng->bytes[id];
 #if defined(POOL_EXTENTON)
                 if ( p0+s > e0 ) break;
 #endif
                 size = s;
-                mng->bytes[id] = 0; 
+                mng->bytes[id] = 0;
                 const uint64_t k = id;
                 id = blocks->next[id];  // go to next blocks
                 nlcpy__mempool_remove_from_link(k, blocks);
@@ -975,7 +975,7 @@ bool nlcpy__mempool_is_available(mempool_mng_t *mng, const size_t size)
     // Check the size of dead area
     if ( mng->sort->num > 0 ) {
         if ( mng->sort->bytes[0] >= size ) {
-            return true; 
+            return true;
         } else if ( !mng->merged ) {
             // Merge dead blocks
             int iret = nlcpy__mempool_merge_dead_blocks(mng);
@@ -1014,7 +1014,7 @@ size_t nlcpy__mempool_get_capasity(const mempool_mng_t *mng)
     }
 #endif
     size_t tcapa = ucapa + dcapa + acapa;
-    printf("unused = %llu, dead = %llu, alive = %llu, total=%llu, num=%llu\n",ucapa, dcapa, acapa, tcapa, mng->sort->num);
+    printf("unused = %zu, dead = %zu, alive = %zu, total=%zu, num=%" PRIu64 "\n",ucapa, dcapa, acapa, tcapa, mng->sort->num);
     return (ucapa>dcapa) ? ucapa : dcapa;
 }
 #endif

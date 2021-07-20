@@ -321,3 +321,41 @@ class TestReduce3(unittest.TestCase):
             x = getattr(numpy, op).reduce(a, axis=0)
             y = getattr(nlcpy, op).reduce(a, axis=0)
             numpy.testing.assert_array_equal(x, y)
+
+
+@pytest.mark.full
+class TestReduceKeepdims(unittest.TestCase):
+
+    shape = ((3, 4), )
+    axes = (0, 1, -1, (0, 1), None)
+
+    @testing.numpy_nlcpy_check_for_unary_ufunc(
+        ops, shape, dtype_x=(numpy.float64,), dtype_arg=(numpy.float64,),
+        ufunc_name='reduce', axes=axes, is_dtype=True, keepdims=True, seed=0
+    )
+    def test_reduce_keepdims_no_out_no_where(self, xp, op, in1, axis, dtype):
+        return execute_ufunc(
+            op, xp, in1, axis=axis, dtype=dtype, keepdims=True)
+
+    @testing.numpy_nlcpy_check_for_unary_ufunc(
+        ops, shape, dtype_x=(numpy.float64,), dtype_arg=(numpy.float64,),
+        ufunc_name='reduce', axes=axes, is_out=True, is_dtype=True,
+        keepdims=True, seed=0
+    )
+    def test_reduce_keepdims_with_out_no_where(self, xp, op, in1, axis, dtype, out):
+        out = xp.asarray(out)
+        return execute_ufunc(
+            op, xp, in1, axis=axis, out=out,
+            dtype=dtype, keepdims=True)
+
+    @testing.numpy_nlcpy_check_for_unary_ufunc(
+        ops, shape, dtype_x=(numpy.float64,), dtype_arg=(numpy.float64,),
+        ufunc_name='reduce', axes=axes, is_out=True, is_where=True, is_dtype=True,
+        keepdims=True, seed=0
+    )
+    def test_reduce_keepdims_with_out_with_where(self, xp, op, in1, axis, dtype,
+                                                 out, where):
+        out = xp.asarray(out)
+        return execute_ufunc(
+            op, xp, in1, axis=axis, out=out, dtype=dtype,
+            where=where, keepdims=True)

@@ -602,11 +602,13 @@ cdef _scatter_op_single(
 
 
 cdef int64_t _count_n_true_kernel(ndarray mask):
-    request.flush()
-    v = veo.VeoAlloc()
     args = (mask._ve_array,)
-    req = v.lib.func[b"nlcpy_count_n_true"](v.ctx, *args)
-    n_true = req.wait_result()
+    n_true = request._push_and_flush_request(
+        'nlcpy_count_n_true',
+        args,
+        callback=None,
+        sync=True
+    )
     return n_true
 
 cdef _getitem_mask_kernel(ndarray a, ndarray mask, ndarray out):

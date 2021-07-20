@@ -277,3 +277,135 @@ class TestNonzeroZeroDimension(unittest.TestCase):
     def test_nonzero(self, xp, dtype):
         array = xp.array(self.array, dtype=dtype)
         return xp.nonzero(array)
+
+
+@testing.parameterize(
+    {'array': numpy.random.randint(0, 2, (20,))},
+    {'array': numpy.random.randn(3, 2, 4)},
+    {'array': numpy.empty((0,))},
+    {'array': numpy.empty((0, 2))},
+    {'array': numpy.empty((0, 2, 0))},
+)
+class TestArgwhere(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere(self, xp, dtype):
+        array = xp.array(self.array, dtype=dtype)
+        return xp.argwhere(array)
+
+
+@testing.parameterize(
+    {'value': 0},
+    {'value': 3},
+)
+@testing.with_requires('numpy>=1.18')
+class TestArgwhereZeroDimension(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere(self, xp, dtype):
+        array = xp.array(self.value, dtype=dtype)
+        return xp.argwhere(array)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere_scalar(self, xp):
+        return xp.argwhere(self.value)
+
+
+@testing.parameterize(
+    {'func': 'nanargmin'},
+    {'func': 'nanargmax'},
+)
+class TestNanArgFunc(unittest.TestCase):
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan1(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[0] = xp.nan
+        return getattr(xp, self.func)(a)
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan2(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[:2] = xp.nan
+        return getattr(xp, self.func)(a)
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan3(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[8:] = xp.nan
+        return getattr(xp, self.func)(a)
+
+    @testing.for_dtypes('fdFD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan4(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[2:4] = xp.nan
+        return getattr(xp, self.func)(a)
+
+    @testing.for_dtypes('FD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan_imag(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[2:4] = a[2:4] + 1j * xp.nan
+        return getattr(xp, self.func)(a)
+
+    @testing.for_dtypes('FD')
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc_with_nan_real_imag(self, xp, dtype):
+        a = testing.shaped_random([10], xp, dtype)
+        a[2:4] = xp.nan + 1j * xp.nan
+        return getattr(xp, self.func)(a)
+
+
+@testing.parameterize(*(
+    testing.product({
+        'shape': ((3, 3), (10, 10), (3, 4, 5), (6, 4, 5), (3, 0, 2)),
+        'axis': (None, -1, 0, 1),
+        'func': ('nanargmin', 'nanargmax'),
+    }))
+)
+class TestNanArgFuncWithoutNan(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_nanargfunc(self, xp, dtype):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        if self.axis is None and a.size == 0 or \
+           self.axis is not None and a.shape[self.axis] == 0:
+            return 0
+        return getattr(xp, self.func)(a, axis=self.axis)
+
+
+@testing.parameterize(
+    {'func': 'nanargmin'},
+    {'func': 'nanargmax'},
+)
+class TestNanArgFuncFailure(unittest.TestCase):
+
+    @testing.numpy_nlcpy_raises()
+    def test_nanargfunc_all_nan1(self, xp):
+        return getattr(xp, self.func)([xp.nan, xp.nan, xp.nan])
+
+    @testing.numpy_nlcpy_raises()
+    def test_nanargfunc_all_nan2(self, xp):
+        return getattr(xp, self.func)([[xp.nan, xp.nan], [0, 0]], axis=1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_nanargfunc_on_empty(self, xp):
+        a = testing.shaped_random([3, 0, 2], xp)
+        return getattr(xp, self.func)(a, axis=1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_nanargfunc_invalid_axis(self, xp):
+        a = testing.shaped_random([2, 3], xp)
+        return getattr(xp, self.func)(a, axis=2)
+
+    @testing.numpy_nlcpy_raises()
+    def test_nanargfunc_invalid_axis2(self, xp):
+        a = testing.shaped_random([2, 3], xp)
+        return getattr(xp, self.func)(a, axis=-3)

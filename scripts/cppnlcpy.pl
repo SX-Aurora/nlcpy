@@ -38,7 +38,7 @@ our (%macro, @macro, @dtos, $asm, %branch, @branch);
 our ($infile, $outfile);
 our ($op, $vors, @ar, $type1, $type2, $ufunc_op, $op_save);
 our $mac = qr/[A-Za-z_]\w*/;    # regular expression for macro names
-our (%dtype_table,%operator_table, %irregular_intrinsic_table, %c_intrinsic_types_table);
+our (%dtag_table,%operator_table, %irregular_intrinsic_table, %c_intrinsic_types_table);
 $script =$0;
 
 ######################### Parse command-line arguments ########################
@@ -116,35 +116,35 @@ print OUTFILE "/* DO NOT EDIT THIS: This file was automatically generated. */\n\
 
 $SIG{__DIE__} = sub { unlink $outfile };   # rm outfile if preprocessor dies
 
-create_table(%dtype_table, %operator_table, %irregular_intrinsic_table, %c_intrinsic_types_table);
+create_table(%dtag_table, %operator_table, %irregular_intrinsic_table, %c_intrinsic_types_table);
 
-### set output datatypes defoned by %dtype_table ###
-if (ref($dtype_table{$op})) {
-   if (!defined($dtype_table{$op}->{'dtype'})) {
-      my @out_ref = @{$dtype_table{$op}->{'out'}};
+### set output datatypes defined by %dtag_table ###
+if (ref($dtag_table{$op})) {
+   if (!defined($dtag_table{$op}->{'dtype'})) {
+      my @out_ref = @{$dtag_table{$op}->{'out'}};
       for (my $i=0; $i<=$#out_ref; $i++){
          my @dt = split(/,/,$out_ref[$i]);
-         foreach my $dtype (@dt){
-            $dtype =~ s/\s//g;
-            $macro{"DTYPE_"."$dtype"}     = 1;
-            $macro{"DTYPE_OUT_"."$dtype"} = 1;
+         foreach my $dtag (@dt){
+            $dtag =~ s/\s//g;
+            $macro{"DTAG_"."$dtag"}  = 1;
+            $macro{"DTAG_OUT_"."$dtag"} = 1;
          }
       }
    } else {
-      my @dtype_ref = @{$dtype_table{$op}->{'dtype'}};
-      for (my $i=0; $i<=$#dtype_ref; $i++){
-         my @dt = split(/,/,$dtype_ref[$i]);
-         foreach my $dtype (@dt){
-            $dtype =~ s/\s//g;
-            $macro{"DTYPE_"."$dtype"} = 1;
+      my @dtag_ref = @{$dtag_table{$op}->{'dtype'}};
+      for (my $i=0; $i<=$#dtag_ref; $i++){
+         my @dt = split(/,/,$dtag_ref[$i]);
+         foreach my $dtag (@dt){
+            $dtag =~ s/\s//g;
+            $macro{"DTAG_"."$dtag"} = 1;
          }
       }
-      my @out_ref = @{$dtype_table{$op}->{'out'}};
+      my @out_ref = @{$dtag_table{$op}->{'out'}};
       for (my $i=0; $i<=$#out_ref; $i++){
          my @dt = split(/,/,$out_ref[$i]);
-         foreach my $dtype (@dt){
-            $dtype =~ s/\s//g;
-            $macro{"DTYPE_OUT_"."$dtype"} = 1;
+         foreach my $dtag (@dt){
+            $dtag =~ s/\s//g;
+            $macro{"DTAG_OUT_"."$dtag"} = 1;
          }
       }
    }
@@ -154,45 +154,57 @@ if (ref($dtype_table{$op})) {
 my $infile2 = "$$infile" . "2";
 if (-f $infile2 ) {
    @ar=();
-   if (ref($dtype_table{$op})) {
-      my @in_ref = @{$dtype_table{$op}->{'in'}};
+   if (ref($dtag_table{$op})) {
+      my @in_ref = @{$dtag_table{$op}->{'in'}};
       my $ary = $#in_ref+1;
       if ( $op_save =~ /_reduce$/ or  $op_save =~ /_reduceat$/ or  $op_save =~ /_accumulate$/) { $ary-- }
       if ($ary == 1) {
          my @dt1 = split(/,/,$in_ref[0]);
-         foreach my $dtype1 (@dt1){
-            $dtype1 =~ s/\s//g;
-            $ar[0] = $dtype1;
+         foreach my $dtag1 (@dt1){
+            $dtag1 =~ s/\s//g;
+            $ar[0] = $dtag1;
+            $macro{"DTAG1_"."$dtag1"} = 1;
             preprocess(openfile($infile2));
+            delete $macro{"DTAG1_"."$dtag1"};
          }
       } elsif ($ary == 2) {
          my @dt1 = split(/,/,$in_ref[0]);
-         foreach my $dtype1 (@dt1){
-            $dtype1 =~ s/\s//g;
-            $ar[0] = $dtype1;
+         foreach my $dtag1 (@dt1){
+            $dtag1 =~ s/\s//g;
+            $ar[0] = $dtag1;
+            $macro{"DTAG1_"."$dtag1"} = 1;
             my @dt2 = split(/,/,$in_ref[1]);
-            foreach my $dtype2 (@dt2){
-               $dtype2 =~ s/\s//g;
-               $ar[1] = $dtype2;
+            foreach my $dtag2 (@dt2){
+               $dtag2 =~ s/\s//g;
+               $ar[1] = $dtag2;
+               $macro{"DTAG2_"."$dtag2"} = 1;
                preprocess(openfile($infile2));
+               delete $macro{"DTAG2_"."$dtag2"};
             }
+            delete $macro{"DTAG1_"."$dtag1"};
          }
       } elsif ($ary == 3) {
          my @dt1 = split(/,/,$in_ref[0]);
-         foreach my $dtype1 (@dt1){
-            $dtype1 =~ s/\s//g;
-            $ar[0] = $dtype1;
+         foreach my $dtag1 (@dt1){
+            $dtag1 =~ s/\s//g;
+            $ar[0] = $dtag1;
+            $macro{"DTAG1_"."$dtag1"} = 1;
             my @dt2 = split(/,/,$in_ref[1]);
-            foreach my $dtype2 (@dt2){
-               $dtype2 =~ s/\s//g;
-               $ar[1] = $dtype2;
+            foreach my $dtag2 (@dt2){
+               $dtag2 =~ s/\s//g;
+               $ar[1] = $dtag2;
+               $macro{"DTAG2_"."$dtag2"} = 1;
                my @dt3 = split(/,/,$in_ref[2]);
-               foreach my $dtype3 (@dt3){
-                  $dtype3 =~ s/\s//g;
-                  $ar[2] = $dtype3;
+               foreach my $dtag3 (@dt3){
+                  $dtag3 =~ s/\s//g;
+                  $ar[2] = $dtag3;
+                  $macro{"DTAG3_"."$dtag3"} = 1;
                   preprocess(openfile($infile2));
+                  delete $macro{"DTAG2_"."$dtag2"};
                }
+               delete $macro{"DTAG2_"."$dtag2"};
             }
+            delete $macro{"DTAG1_"."$dtag1"};
          }
       } else {
          die "The number of operands is greater than 3 (Not supported).\nPlease contact R. Ogata\n";
@@ -244,68 +256,75 @@ sub preprocess {
                 @buff = (); # reset
                 close($fh);
                 # genarete codes between begin_switch and end_switch   
-                #if ($begin_counter==1){
-                   print OUTFILE "uint64_t passed = 0;\n";
-                #} else {
-                #   print OUTFILE "passed = 0;  \/\/ clear\n";
-                #}
+                print OUTFILE "uint64_t passed = 0;\n";
                 if ($#vars+1==1) {
                     for (my $i=0; $i<=$#cases; $i++){
-                        my @types0 = split(/,/,$cases[0]);
+                        my @dtags1 = split(/,/,$cases[0]);
                         print OUTFILE "switch ($vars[0]) {\n";
-                        foreach my $type0 (@types0){
-                            $ar[0] = $type0;
-                            print OUTFILE "case ve_"."$type0".":{\n";
+                        foreach my $dtag1 (@dtags1){
+                            $ar[0] = $dtag1;
+                            $macro{"DTAG1_"."$dtag1"} = 1;
+                            print OUTFILE "case ve_"."$dtag1".":{\n";
                             preprocess(openfile($tmpfile, "$$file: $line: "));
                             print OUTFILE "passed++;\nbreak;}\n";
+                            delete $macro{"DTAG1_"."$dtag1"};
                         }
                         print OUTFILE $default_case;
                     }
                 } elsif ($#vars+1==2) {
                     for (my $i=0; $i<=$#cases; $i+=2){
-                        my @types0 = split(/,/,$cases[$i]);
-                        my @types1 = split(/,/,$cases[$i+1]);
+                        my @dtags1 = split(/,/,$cases[$i]);
+                        my @dtags2 = split(/,/,$cases[$i+1]);
                         print OUTFILE "switch ($vars[0]) {\n";
-                        foreach my $type0 (@types0){
-                            $ar[0] = $type0;
-                            print OUTFILE "case ve_"."$type0".":{\n";
+                        foreach my $dtag1 (@dtags1){
+                            $ar[0] = $dtag1;
+                            $macro{"DTAG1_"."$dtag1"} = 1;
+                            print OUTFILE "case ve_"."$dtag1".":{\n";
                             print OUTFILE "switch ($vars[1]) {\n";
-                            foreach my $type1 (@types1){
-                                $ar[1] = $type1;
-                                print OUTFILE "case ve_"."$type1".":{\n";
+                            foreach my $dtag2 (@dtags2){
+                                $ar[1] = $dtag2;
+                                print OUTFILE "case ve_"."$dtag2".":{\n";
                                 preprocess(openfile($tmpfile, "$$file: $line: "));
                                 print OUTFILE "passed++;\nbreak;}\n";
+                                delete $macro{"DTAG2_"."$dtag2"};
                             }
                             print OUTFILE $default_case;
                             print OUTFILE "break;}\n";
+                            delete $macro{"DTAG1_"."$dtag1"};
                         }
                         print OUTFILE $default_case;
                     }
                 } elsif ($#vars+1==3) {
                     for (my $i=0; $i<=$#cases; $i+=3){
-                        my @types0 = split(/,/,$cases[$i]);
-                        my @types1 = split(/,/,$cases[$i+1]);
-                        my @types2 = split(/,/,$cases[$i+2]);
+                        my @dtags1 = split(/,/,$cases[$i]);
+                        my @dtags2 = split(/,/,$cases[$i+1]);
+                        my @dtags3 = split(/,/,$cases[$i+2]);
                         print OUTFILE "switch ($vars[0]) {\n";
-                        foreach my $type0 (@types0){
-                            $ar[0] = $type0;
-                            print OUTFILE "case ve_"."$type0".":{\n";
+                        foreach my $dtag1 (@dtags1){
+                            $ar[0] = $dtag1;
+                            $macro{"DTAG1_"."$dtag1"} = 1;
+                            print OUTFILE "case ve_"."$dtag1".":{\n";
                             print OUTFILE "switch ($vars[1]) {\n";
-                            foreach my $type1 (@types1){
-                                $ar[1] = $type1;
-                                print OUTFILE "case ve_"."$type1".":{\n";
+                            foreach my $dtag2 (@dtags2){
+                                $ar[1] = $dtag2;
+                                $macro{"DTAG2_"."$dtag2"} = 1;
+                                print OUTFILE "case ve_"."$dtag2".":{\n";
                                 print OUTFILE "switch ($vars[2]) {\n";
-                                foreach my $type2 (@types2){
-                                    $ar[2] = $type2;
-                                    print OUTFILE "case ve_"."$type2".":{\n";
+                                foreach my $dtag3 (@dtags3){
+                                    $ar[2] = $dtag3;
+                                    $macro{"DTAG3_"."$dtag3"} = 1;
+                                    print OUTFILE "case ve_"."$dtag3".":{\n";
                                     preprocess(openfile($tmpfile, "$$file: $line: "));
                                     print OUTFILE "passed++;\nbreak;}\n";
+                                    delete $macro{"DTAG3_"."$dtag3"};
                                 }
                                 print OUTFILE $default_case;
                                 print OUTFILE "break;}\n";
+                                delete $macro{"DTAG2_"."$dtag2"};
                             }
                             print OUTFILE $default_case;
                             print OUTFILE "break;}\n";
+                            delete $macro{"DTAG1_"."$dtag1"};
                         }
                         print OUTFILE $default_case;
                     }
@@ -315,14 +334,12 @@ sub preprocess {
                 print OUTFILE "if (passed!=1ULL) return NLCPY_ERROR_DTYPE;\n";
                 unlink $tmpfile;
                 $buffering=0;
-#                shift @cases;
             }
         } elsif ($cond[0] and $buffering) {
 ########## buffuring codes between begin_switch and end_switch ########
               push(@buff, $_);
 #######################################################
 
-        #if (my ($def,$name) = /^\s*#\s*if(n?def)\s+($mac)\b/) {    # if[n]def
         } elsif (my ($def,$name) = /^\s*#\s*if(n?def)\s+($mac)\b/) {    # if[n]def
             unshift(@cond, $cond[0] && ($def =~ /n/ != exists $macro{$name}));
             $elseflag[++$depth] = $cond[0];
@@ -369,12 +386,12 @@ sub preprocess {
                          push(@vars,$1);
                          push(@cases,$2);
                     }elsif ($d =~ /(.+)/) {
-                         # set input datatypes defined by %dtype_table
+                         # set input datatypes defined by %dtag_table
                          push(@vars,$1);
-                         if (ref($dtype_table{$op})) {
-                             my @in_ref  = @{$dtype_table{$op}->{'in'}};
+                         if (ref($dtag_table{$op})) {
+                             my @in_ref  = @{$dtag_table{$op}->{'in'}};
                              if ($ii>$#in_ref){
-                                die "Mismatch the dimensions \#define_switch and \$dtype_table{$op}.\n";
+                                die "Mismatch the dimensions \#define_switch and \$dtag_table{$op}.\n";
                              }
                              my $typ = $in_ref[$ii];
                              $typ =~ s/\s//g;
@@ -382,7 +399,7 @@ sub preprocess {
                              push(@cases,"$typ".",");
                          } else {
                              print "$_";
-                             die "Not found $op in \$dtype_table. ($$file: $line)\n";
+                             die "Not found $op in \$dtag_table. ($$file: $line)\n";
                          }
                     } else {
                          die "Parse error on $$file: $line\n";
@@ -413,7 +430,7 @@ sub preprocess {
 sub doc {
     # escape character
     s/^@//;
-    my ($lop, $rop, $ext_type, $ext_dtype);
+    my ($lop, $rop);
     my $ary = $#ar+1;
 
     s/\@OPERATOR_NAME\@/$op/g;
@@ -424,7 +441,7 @@ sub doc {
       $rop = $ar[0];
       $type1 = tag_to_Dtype($rop);
       s/\@TYPE1\@/$type1/g;
-      s/\@TYPE1_DTAG\@/$rop/g;
+      s/\@DTAG1\@/$rop/g;
     } elsif ($ary==2){
       # Binary Operator
       $lop = $ar[0];
@@ -433,8 +450,8 @@ sub doc {
       $type2 = tag_to_Dtype($rop);
       s/\@TYPE1\@/$type1/g;
       s/\@TYPE2\@/$type2/g;
-      s/\@TYPE1_DTAG\@/$lop/g;
-      s/\@TYPE2_DTAG\@/$rop/g;
+      s/\@DTAG1\@/$lop/g;
+      s/\@DTAG2\@/$rop/g;
     } elsif ($ary==3){
       die "The number of operands is greater than 3 (Not implemented).\nPlease contact R. Ogata\n"; close $file;
     }
@@ -531,6 +548,7 @@ sub evalif {
     s#/\*.*?\*/##g;
     s/defined\s*\(\s*($mac)\s*\)/0+exists $macro{$1}/ge;
     s/defined\s+($mac)/0+exists $macro{$1}/ge;
+    $_ = eval;
     s/($mac)/exists $macro{$1} ? $macro{$1} : 0/ge;
     $_ = eval;
     return $_ unless $@;
@@ -993,7 +1011,7 @@ my $bool_t= "bool";
 my $r2d = "57.29577951308232087679e0"; #180/pi
 my $d2r = "1.7453292519943295769e\-2"; #pi/180
 
-%dtype_table = (
+%dtag_table = (
 # Math operatios
 'cast'     => {
     'in'  => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
@@ -1443,8 +1461,8 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
 
 # Linear Algebra
 'dot'     => {
-    'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
-    'out' => ["$i32, $i64, $u32, $u64, $f32, $f64"],
+    'in'  => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
+    'out' => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
 },
 );
 
@@ -1499,7 +1517,7 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
      'others'          => '@op3@ = (@op1@>@op2@) ? (@ISINF1@(@op2@)) ? @op1@ : @op1@+log1p(exp((double)@op2@-(double)@op1@)) : (@ISINF2@(@op1@)) ? @op2@ : @op2@+log1p(exp((double)@op1@-(double)@op2@));',
 },
 'logaddexp2'=> {
-     'others'          => '@op3@ = (@op1@>@op2@) ? @op1@+log1p(pow((double)2.0,(double)@op2@-(double)@op1@))/(double)0.693147180559945286 : @op2@+log1p(pow((double)2.0,(double)@op1@-(double)@op2@))/(double)0.693147180559945286;',
+     'others'          => '@op3@ = (@op1@>@op2@) ? (@ISINF1@(@op2@)) ? @op1@ : @op1@+log1p(pow((double)2.0,(double)@op2@-(double)@op1@))/(double)0.693147180559945286 : (@ISINF2@(@op1@)) ? @op2@ : @op2@+log1p(pow((double)2.0,(double)@op1@-(double)@op2@))/(double)0.693147180559945286;',
 },
 'true_divide' => '@op3@ = (@ari_dtype@)(@op1@) / (@ari_dtype@)(@op2@);',
 'floor_divide'=> {

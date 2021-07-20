@@ -88,8 +88,6 @@ include 'param.pxi'
 
 cdef int64_t _boundary_size = DEFAULT_BOUNDARY_SIZE
 
-# @name The N-dimensional array(ndarray)
-# @{
 
 cdef class ndarray:
     """N-dimensional array class for VE.
@@ -291,7 +289,7 @@ cdef class ndarray:
     property _ve_array:
         def __get__(self):
             buf = request._create_ve_array_buffer(self)
-            return veo.OnStack(buf)
+            return veo.OnStack(numpy.array(buf, dtype='u8'))
 
     @property
     def ndim(self):
@@ -362,6 +360,11 @@ cdef class ndarray:
         return ufunc_op.subtract(x, y)
 
     def __mul__(x, y):
+        if hasattr(x, '__array_priority__') and \
+                hasattr(y, '__array_priority__') and \
+                hasattr(y, '__mul__'):
+            if y.__array_priority__ > x.__array_priority__:
+                return y.__mul__(x)
         return ufunc_op.multiply(x, y)
 
     def __truediv__(x, y):
@@ -476,6 +479,13 @@ cdef class ndarray:
     @imag.setter
     def imag(self, value):
         math._ndarray_imag_setter(self, value)
+
+    def clip(self, a_min, a_max, out=None, **kwargs):
+        where = kwargs.pop('where', True)
+        casting = kwargs.pop('casting', 'same_kind')
+        order = kwargs.pop('order', 'K')
+        dtype = kwargs.pop('dtype', None)
+        return math._ndarray_clip(self, a_min, a_max, out, dtype, order, where, casting)
 
     # -------------------------------------------------------------------------
     # shape manipulation
@@ -689,13 +699,26 @@ cdef class ndarray:
     def repeat(self, repeats, axis=None):
         """Repeats elements of an array.
 
-        Refer to `nlcpy.repeat` for full documentation.
+        Refer to :func:`nlcpy.repeat` for full documentation.
 
-        See Also:
-            tiling::repeat : Equivalent function.
+        See Also
+        --------
+            nlcpy.repeat : Equivalent function.
 
         """
         return manipulation._ndarray_repeat(self, repeats, axis)
+
+    def swapaxes(self, axis1, axis2):
+        """Return a view of the array with axis1 and axis2 interchanged.
+
+        Refer to :func:`nlcpy.swapaxes` for full documentation.
+
+        See Also
+        --------
+            nlcpy.swapaxes : Equivalent function.
+
+        """
+        return manipulation._ndarray_swapaxes(self, axis1, axis2)
     # -------------------------------------------------------------------------
     # sorting, searching, counting
     # -------------------------------------------------------------------------
@@ -1366,19 +1389,19 @@ cdef class ndarray:
         if self.dtype is numpy.dtype('bool'):
             a_cpu = a_cpu.astype(dtype='i4')
 
-        v = veo.VeoAlloc()
+        proc = veo._get_veo_proc()
         if self._c_contiguous or self._f_contiguous:
-            v.proc.read_mem(
+            proc.read_mem(
                 a_cpu.data,
-                veo.VEMemPtr(v.proc, self.ve_adr, self.nbytes),
+                veo.VEMemPtr(proc, self.ve_adr, self.nbytes),
                 self.nbytes
             )
         else:
             tmp = self.copy()
             request.flush()
-            v.proc.read_mem(
+            proc.read_mem(
                 a_cpu.data,
-                veo.VEMemPtr(v.proc, tmp.ve_adr, tmp.nbytes),
+                veo.VEMemPtr(proc, tmp.ve_adr, tmp.nbytes),
                 tmp.nbytes
             )
             del tmp
@@ -1901,16 +1924,22 @@ cdef _exit_mode = False
 def finalize():
     global _exit_mode
     _exit_mode = True
-    request.flush()
-
     # destroy handle
-    v = veo.VeoAlloc()
-    try:
-        req = v.lib.func[b"random_destroy_handle"](v.ctx, None)
-        req.wait_result()
-        req = v.lib.func[b"nlcpy_fft_destroy_handle"](v.ctx, None)
-        req.wait_result()
-        req = v.lib.func[b"asl_library_finalize"](v.ctx, None)
-        req.wait_result()
-    except KeyError:
-        pass
+    request._push_and_flush_request(
+        'random_destroy_handle',
+        (),
+        callback=None,
+        sync=True
+    )
+    request._push_and_flush_request(
+        'nlcpy_fft_destroy_handle',
+        (),
+        callback=None,
+        sync=True
+    )
+    request._push_and_flush_request(
+        'asl_library_finalize',
+        (),
+        callback=None,
+        sync=True
+    )

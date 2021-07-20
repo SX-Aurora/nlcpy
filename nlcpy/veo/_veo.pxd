@@ -91,6 +91,7 @@ cdef class OnStack(object):
 
 cdef class VeoArgs(object):
     cdef veo_args *args
+    cdef readonly list stacks
 
 cdef class VeoCtxt(object):
     cdef veo_thr_ctxt *thr_ctxt
@@ -102,4 +103,9 @@ cdef class VEMemPtr(object):
     cdef readonly size_t size
     cdef readonly VeoProc proc
 
+cpdef _get_veo_proc()
+cpdef _get_veo_lib()
+cpdef _get_veo_ctx()
+cpdef _get_veo_pool()
+cpdef _initialize(node=*)
 cdef _exit_mode = False

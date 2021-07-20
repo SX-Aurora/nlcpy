@@ -44,6 +44,7 @@ include "linalg_kernel_list.pxi"
 include "random_kernel_list.pxi"
 include "fft_kernel_list.pxi"
 include "reduceat_kernel_list.pxi"
+include "sca_kernel_list.pxi"
 
 _here = _path._here
 
@@ -52,10 +53,10 @@ def _register_ve_kernel(p):
     fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')
     if fast_math in ('yes', 'YES'):
         lib = p.load_library(
-            (_here + "/lib/nlcpy_ve_kernel_fast_math.so").encode('utf-8'))
+            (_here + "/lib/libnlcpy_ve_kernel_fast_math.so").encode('utf-8'))
     else:
         lib = p.load_library(
-            (_here + "/lib/nlcpy_ve_kernel_no_fast_math.so").encode('utf-8'))
+            (_here + "/lib/libnlcpy_ve_kernel_no_fast_math.so").encode('utf-8'))
     if lib is None:
         raise RuntimeError("cannot detect ve kernel")
     all_kernel_list = {
@@ -70,6 +71,7 @@ def _register_ve_kernel(p):
         **_random_kernel_list,
         **_fft_kernel_list,
         **_reduceat_kernel_list,
+        **_sca_kernel_list,
     }
     for k, v in all_kernel_list.items():
         try:

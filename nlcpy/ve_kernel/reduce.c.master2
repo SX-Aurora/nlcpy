@@ -35,15 +35,28 @@
 
 
 
+#ifndef NLCPY_REDUCE_GLOBAL_VARIABLE
+#define NLCPY_REDUCE_GLOBAL_VARIABLE
+Bint nlcpy__global_bool;
+uint32_t nlcpy__global_u32;
+uint64_t nlcpy__global_u64;
+int32_t nlcpy__global_i32;
+int64_t nlcpy__global_i64;
+float nlcpy__global_f32;
+double nlcpy__global_f64;
+float _Complex nlcpy__global_c64;
+double _Complex nlcpy__global_c128;
+#endif
+
 /****************************
  *
  *       REDUCE OPERATOR
  *
  * **************************/
 
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_i32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -55,18 +68,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     int32_t init_val = (int32_t)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -100,54 +114,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            int32_t tmp;
+#if defined(add_reduce)
+            nlcpy__global_i32 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_i32 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (int32_t)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,i32)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,i32)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_i32,i32)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_i32;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "i32" eq "i32" || "i32" eq "i64" || "i32" eq "f32" || "i32" eq "f64" || "i32" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_i32 = (int32_t)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            int32_t tmp = (int32_t)(*py);
+#if "i32" eq "f32" || "i32" eq "f64"
+            double is_there_nan = (isnan_i32(tmp)) ? 1.0 : 0.0;
+#elif "i32" eq "i32" || "i32" eq "i64" || "i32" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (int32_t)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (int32_t)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_i32,i32)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_i32;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,i32)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,i32)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -163,6 +276,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -171,7 +289,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -214,36 +332,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],i32)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "i32" eq "i32" || "i32" eq "i64" || "i32" eq "f32" || "i32" eq "f64" || "i32" eq "bool")
+                        int32_t tmp = py[iy];
+#if "i32" eq "f32" || "i32" eq "f64"
+                        float is_there_nan = (isnan_i32(py[iy])) ? 1.0 : 0.0;
+#elif "i32" eq "i32" || "i32" eq "i64" || "i32" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (int32_t)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (int32_t)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i32)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],i32)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i32)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -279,7 +441,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i32)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i32)
                                     i++;
                                     break;
                                 }
@@ -312,7 +474,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i32)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i32)
                                 }
                             }
                         }
@@ -352,9 +514,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i32(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_i64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -366,18 +528,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     int64_t init_val = (int64_t)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -411,54 +574,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            int64_t tmp;
+#if defined(add_reduce)
+            nlcpy__global_i64 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_i64 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (int64_t)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,i64)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,i64)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_i64,i64)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_i64;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "i64" eq "i32" || "i64" eq "i64" || "i64" eq "f32" || "i64" eq "f64" || "i64" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_i64 = (int64_t)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            int64_t tmp = (int64_t)(*py);
+#if "i64" eq "f32" || "i64" eq "f64"
+            double is_there_nan = (isnan_i64(tmp)) ? 1.0 : 0.0;
+#elif "i64" eq "i32" || "i64" eq "i64" || "i64" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (int64_t)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (int64_t)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_i64,i64)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_i64;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,i64)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,i64)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -474,6 +736,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -482,7 +749,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -525,36 +792,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],i64)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "i64" eq "i32" || "i64" eq "i64" || "i64" eq "f32" || "i64" eq "f64" || "i64" eq "bool")
+                        int64_t tmp = py[iy];
+#if "i64" eq "f32" || "i64" eq "f64"
+                        float is_there_nan = (isnan_i64(py[iy])) ? 1.0 : 0.0;
+#elif "i64" eq "i32" || "i64" eq "i64" || "i64" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (int64_t)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (int64_t)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i64)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],i64)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i64)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -590,7 +901,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i64)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i64)
                                     i++;
                                     break;
                                 }
@@ -623,7 +934,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,i64)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,i64)
                                 }
                             }
                         }
@@ -663,9 +974,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_i64(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_u32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -677,18 +988,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     uint32_t init_val = (uint32_t)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -722,54 +1034,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            uint32_t tmp;
+#if defined(add_reduce)
+            nlcpy__global_u32 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_u32 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (uint32_t)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,u32)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,u32)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_u32,u32)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_u32;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "u32" eq "i32" || "u32" eq "i64" || "u32" eq "f32" || "u32" eq "f64" || "u32" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_u32 = (uint32_t)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            uint32_t tmp = (uint32_t)(*py);
+#if "u32" eq "f32" || "u32" eq "f64"
+            double is_there_nan = (isnan_u32(tmp)) ? 1.0 : 0.0;
+#elif "u32" eq "i32" || "u32" eq "i64" || "u32" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (uint32_t)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (uint32_t)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_u32,u32)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_u32;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,u32)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,u32)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -785,6 +1196,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -793,7 +1209,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -836,36 +1252,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],u32)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "u32" eq "i32" || "u32" eq "i64" || "u32" eq "f32" || "u32" eq "f64" || "u32" eq "bool")
+                        uint32_t tmp = py[iy];
+#if "u32" eq "f32" || "u32" eq "f64"
+                        float is_there_nan = (isnan_u32(py[iy])) ? 1.0 : 0.0;
+#elif "u32" eq "i32" || "u32" eq "i64" || "u32" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (uint32_t)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (uint32_t)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u32)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],u32)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u32)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -901,7 +1361,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u32)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u32)
                                     i++;
                                     break;
                                 }
@@ -934,7 +1394,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u32)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u32)
                                 }
                             }
                         }
@@ -974,9 +1434,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u32(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_u64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -988,18 +1448,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     uint64_t init_val = (uint64_t)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -1033,54 +1494,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            uint64_t tmp;
+#if defined(add_reduce)
+            nlcpy__global_u64 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_u64 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (uint64_t)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,u64)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,u64)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_u64,u64)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_u64;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "u64" eq "i32" || "u64" eq "i64" || "u64" eq "f32" || "u64" eq "f64" || "u64" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_u64 = (uint64_t)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            uint64_t tmp = (uint64_t)(*py);
+#if "u64" eq "f32" || "u64" eq "f64"
+            double is_there_nan = (isnan_u64(tmp)) ? 1.0 : 0.0;
+#elif "u64" eq "i32" || "u64" eq "i64" || "u64" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (uint64_t)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (uint64_t)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_u64,u64)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_u64;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,u64)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,u64)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -1096,6 +1656,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -1104,7 +1669,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -1147,36 +1712,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],u64)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "u64" eq "i32" || "u64" eq "i64" || "u64" eq "f32" || "u64" eq "f64" || "u64" eq "bool")
+                        uint64_t tmp = py[iy];
+#if "u64" eq "f32" || "u64" eq "f64"
+                        float is_there_nan = (isnan_u64(py[iy])) ? 1.0 : 0.0;
+#elif "u64" eq "i32" || "u64" eq "i64" || "u64" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (uint64_t)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (uint64_t)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u64)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],u64)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u64)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -1212,7 +1821,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u64)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u64)
                                     i++;
                                     break;
                                 }
@@ -1245,7 +1854,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,u64)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,u64)
                                 }
                             }
                         }
@@ -1285,9 +1894,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_u64(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_f32(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -1299,18 +1908,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     float init_val = (float)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -1344,54 +1954,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            float tmp;
+#if defined(add_reduce)
+            nlcpy__global_f32 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_f32 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (float)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,f32)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,f32)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_f32,f32)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_f32;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "f32" eq "i32" || "f32" eq "i64" || "f32" eq "f32" || "f32" eq "f64" || "f32" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_f32 = (float)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            float tmp = (float)(*py);
+#if "f32" eq "f32" || "f32" eq "f64"
+            double is_there_nan = (isnan_f32(tmp)) ? 1.0 : 0.0;
+#elif "f32" eq "i32" || "f32" eq "i64" || "f32" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (float)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (float)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_f32,f32)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_f32;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,f32)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,f32)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -1407,6 +2116,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -1415,7 +2129,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -1458,36 +2172,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],f32)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "f32" eq "i32" || "f32" eq "i64" || "f32" eq "f32" || "f32" eq "f64" || "f32" eq "bool")
+                        float tmp = py[iy];
+#if "f32" eq "f32" || "f32" eq "f64"
+                        float is_there_nan = (isnan_f32(py[iy])) ? 1.0 : 0.0;
+#elif "f32" eq "i32" || "f32" eq "i64" || "f32" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (float)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (float)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f32)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],f32)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f32)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -1523,7 +2281,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f32)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f32)
                                     i++;
                                     break;
                                 }
@@ -1556,7 +2314,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f32)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f32)
                                 }
                             }
                         }
@@ -1596,9 +2354,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f32(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_f64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -1610,18 +2368,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     double init_val = (double)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -1655,54 +2414,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            double tmp;
+#if defined(add_reduce)
+            nlcpy__global_f64 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_f64 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (double)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,f64)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,f64)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_f64,f64)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_f64;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "f64" eq "i32" || "f64" eq "i64" || "f64" eq "f32" || "f64" eq "f64" || "f64" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_f64 = (double)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            double tmp = (double)(*py);
+#if "f64" eq "f32" || "f64" eq "f64"
+            double is_there_nan = (isnan_f64(tmp)) ? 1.0 : 0.0;
+#elif "f64" eq "i32" || "f64" eq "i64" || "f64" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (double)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (double)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_f64,f64)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_f64;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,f64)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,f64)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -1718,6 +2576,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -1726,7 +2589,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -1769,36 +2632,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],f64)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "f64" eq "i32" || "f64" eq "i64" || "f64" eq "f32" || "f64" eq "f64" || "f64" eq "bool")
+                        double tmp = py[iy];
+#if "f64" eq "f32" || "f64" eq "f64"
+                        float is_there_nan = (isnan_f64(py[iy])) ? 1.0 : 0.0;
+#elif "f64" eq "i32" || "f64" eq "i64" || "f64" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (double)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (double)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f64)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],f64)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f64)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -1834,7 +2741,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f64)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f64)
                                     i++;
                                     break;
                                 }
@@ -1867,7 +2774,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,f64)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,f64)
                                 }
                             }
                         }
@@ -1907,9 +2814,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_f64(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_c64(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -1921,18 +2828,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
     ve_array *w = where;
     float _Complex init_val = (float _Complex)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -1966,54 +2874,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            float _Complex tmp;
+#if defined(add_reduce)
+            nlcpy__global_c64 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_c64 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (float _Complex)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,c64)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,c64)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_c64,c64)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_c64;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "c64" eq "i32" || "c64" eq "i64" || "c64" eq "f32" || "c64" eq "f64" || "c64" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_c64 = (float _Complex)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            float _Complex tmp = (float _Complex)(*py);
+#if "c64" eq "f32" || "c64" eq "f64"
+            double is_there_nan = (isnan_c64(tmp)) ? 1.0 : 0.0;
+#elif "c64" eq "i32" || "c64" eq "i64" || "c64" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (float _Complex)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (float _Complex)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_c64,c64)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_c64;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,c64)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,c64)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -2029,6 +3036,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -2037,7 +3049,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -2080,36 +3092,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],c64)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "c64" eq "i32" || "c64" eq "i64" || "c64" eq "f32" || "c64" eq "f64" || "c64" eq "bool")
+                        float _Complex tmp = py[iy];
+#if "c64" eq "f32" || "c64" eq "f64"
+                        float is_there_nan = (isnan_c64(py[iy])) ? 1.0 : 0.0;
+#elif "c64" eq "i32" || "c64" eq "i64" || "c64" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (float _Complex)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (float _Complex)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c64)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],c64)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c64)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -2145,7 +3201,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c64)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c64)
                                     i++;
                                     break;
                                 }
@@ -2178,7 +3234,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c64)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c64)
                                 }
                             }
                         }
@@ -2218,9 +3274,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c64(ve_array *x, ve_array *y, int32_t axis, int32
 
 
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 
-uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_c128(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -2232,18 +3288,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
     ve_array *w = where;
     double _Complex init_val = (double _Complex)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -2277,54 +3334,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            double _Complex tmp;
+#if defined(add_reduce)
+            nlcpy__global_c128 = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_c128 = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (double _Complex)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,c128)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,c128)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_c128,c128)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_c128;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "c128" eq "i32" || "c128" eq "i64" || "c128" eq "f32" || "c128" eq "f64" || "c128" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_c128 = (double _Complex)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            double _Complex tmp = (double _Complex)(*py);
+#if "c128" eq "f32" || "c128" eq "f64"
+            double is_there_nan = (isnan_c128(tmp)) ? 1.0 : 0.0;
+#elif "c128" eq "i32" || "c128" eq "i64" || "c128" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (double _Complex)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (double _Complex)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_c128,c128)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_c128;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,c128)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,c128)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -2340,6 +3496,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -2348,7 +3509,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -2391,36 +3552,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],c128)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "c128" eq "i32" || "c128" eq "i64" || "c128" eq "f32" || "c128" eq "f64" || "c128" eq "bool")
+                        double _Complex tmp = py[iy];
+#if "c128" eq "f32" || "c128" eq "f64"
+                        float is_there_nan = (isnan_c128(py[iy])) ? 1.0 : 0.0;
+#elif "c128" eq "i32" || "c128" eq "i64" || "c128" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (double _Complex)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (double _Complex)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c128)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],c128)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c128)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -2456,7 +3661,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c128)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c128)
                                     i++;
                                     break;
                                 }
@@ -2489,7 +3694,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,c128)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,c128)
                                 }
                             }
                         }
@@ -2529,9 +3734,9 @@ uint64_t FILENAME_@TYPE1_DTAG@_c128(ve_array *x, ve_array *y, int32_t axis, int3
 
 
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 
-uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
+uint64_t FILENAME_@DTAG1@_bool(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
                      ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
@@ -2543,18 +3748,19 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
     ve_array *w = where;
     int32_t init_val = (int32_t)(*pi);
 
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     // initialize
     if (init_flag) {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = init_val;
     }
     else {
+@#ifdef _OPENMP
+@#pragma omp for
+@#endif /* _OPENMP */
         for (uint64_t i=0; i<y->size; i++) py[i] = 0;
     }
-} /* omp single */ 
 
 /////////
 // 0-d //
@@ -2588,54 +3794,153 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
 // 1-d //
 /////////
     } else if (x->ndim == 1){
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         uint64_t i;
         uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
+#if defined(add_reduce) || defined(multiply_reduce)
+            int32_t tmp;
+#if defined(add_reduce)
+            nlcpy__global_bool = 0;
+@#pragma omp barrier
+            tmp = 0;
+#elif defined(multiply_reduce)
+            nlcpy__global_bool = 1;
+@#pragma omp barrier
+            tmp = 1;
+#else
+#error add_reduce or minimum_reduce must be defined.
+#endif
+            uint64_t ii;
             if (!init_flag) {
                 *py = *px;
-                i = 1;
+                ii = 1;
             } else {
-                i = 0;
+                ii = 0;
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            if (it==0) tmp = (int32_t)(*py);
 @#pragma _NEC ivdep
-#endif
-            for (; i < x->shape[0]; i++) {
-                @UNARY_OPERATOR@(px[i*ix],*py,bool)
+            for (i=ii+ist; i < ii+ien; i++) {
+                @UNARY_OPERATOR@(px[i*ix],tmp,bool)
             }
-        } else {
-            Bint *pw = (Bint *)w->ve_adr;
-            const uint64_t iw = w->strides[0]/w->itemsize;
-            if (!init_flag) {
-                for (i = 0; i < x->shape[0]; i++) {
-                    if (pw[i*iw]) {
-                        *py = *px;
-                        i++;
-                        break;
-                    }
+@#pragma _NEC novector
+            for (i=0; i < nt; i++) {
+                if (i==it) {
+                    @UNARY_OPERATOR@(tmp,nlcpy__global_bool,bool)
                 }
-            } else {
-                i = 0;
+@#pragma omp barrier
             }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
+            *py = nlcpy__global_bool;
+#elif ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "bool" eq "i32" || "bool" eq "i64" || "bool" eq "f32" || "bool" eq "f64" || "bool" eq "bool")
+            // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
+            uint64_t ii;
+            if (!init_flag) {
+                *py = *px;
+                ii = 1;
+            } else {
+                ii = 0;
+            }
+            nlcpy__global_bool = (int32_t)(*py);
+@#pragma omp barrier
+            const int it = omp_get_thread_num();
+            const int nt = omp_get_max_threads();
+            const uint64_t ist = (x->shape[0]-ii)*it/nt;
+            const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
+            int32_t tmp = (int32_t)(*py);
+#if "bool" eq "f32" || "bool" eq "f64"
+            double is_there_nan = (isnan_bool(tmp)) ? 1.0 : 0.0;
+#elif "bool" eq "i32" || "bool" eq "i64" || "bool" eq "bool"
+            double is_there_nan = 0.0;
 #else
-@#pragma _NEC ivdep
+#error Not Impletended
 #endif
-            for (; i < x->shape[0]; i++) {
-                if (pw[i*iw]) {
+@#pragma _NEC ivdep
+            for (i=ii+ist; i < ii+ien; i++) {
+#if defined(maximum_reduce)
+                tmp = (tmp > px[i*ix]) ? tmp : (int32_t)px[i*ix];
+#elif defined(minimum_reduce)
+                tmp = (tmp < px[i*ix]) ? tmp : (int32_t)px[i*ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                // NaN check: 
+                // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
+                @TYPE1@ xx;
+                *(&xx) = px[i*ix];
+                // The following line checks for NaN and it is in an unnatural way.
+                // Here, NaN == NaN becomes False.
+                // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                // qNaN might not be detected qNaN by compiler optimizations.
+                // However, we prioritize the performance.
+                is_there_nan += (! (xx == px[i*ix]) ) ? 1.0 : 0.0;
+#endif
+            }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+            if (is_there_nan != (float)0) {
+                tmp = NAN;
+                // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                retrieve_fpe_flags(psw);
+                *psw &= 0x0000003d;
+                set_fpe_flags(*psw);
+            }
+#endif
+@#pragma omp critical
+            {
+                @UNARY_OPERATOR@(tmp,nlcpy__global_bool,bool)
+            }
+@#pragma omp barrier
+            *py = nlcpy__global_bool;
+#else
+        // Unvectorizable case
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                if (!init_flag) {
+                    *py = *px;
+                    i = 1;
+                } else {
+                    i = 0;
+                }
+@#pragma _NEC novector
+                for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,bool)
                 }
-            }
+            } /* omp single */ 
+#endif
+        } else {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+            { 
+                Bint *pw = (Bint *)w->ve_adr;
+                const uint64_t iw = w->strides[0]/w->itemsize;
+                if (!init_flag) {
+                    for (i = 0; i < x->shape[0]; i++) {
+                        if (pw[i*iw]) {
+                            *py = *px;
+                            i++;
+                            break;
+                        }
+                    }
+                } else {
+                    i = 0;
+                }
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (; i < x->shape[0]; i++) {
+                    if (pw[i*iw]) {
+                        @UNARY_OPERATOR@(px[i*ix],*py,bool)
+                    }
+                }
+            } /* omp single */ 
         }
-} /* omp single */ 
 
 /////////
 // N-d //
@@ -2651,6 +3956,11 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
         if (x->ndim > 2) {
             int64_t max_idx[3], tmp;
             nlcpy__argnsort(x, max_idx, 3);
+#ifndef add_reduce
+            if (idx[max_idx[0]] == axis) {
+                max_idx[0] = max_idx[1];
+            }
+#endif
             if (max_idx[0] != n_inner) {
                 tmp = idx[n_inner];
                 idx[n_inner] = idx[max_idx[0]];
@@ -2659,7 +3969,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
             if (idx[max_idx[1]] == axis) {
                 max_idx[1] = max_idx[2];
             }
-            if (idx[max_idx[1]] != n_outer || idx[n_outer] == axis) {
+            if (idx[max_idx[1]] != n_outer) {
                 tmp = idx[n_outer];
                 idx[n_outer] = idx[max_idx[1]];
                 idx[max_idx[1]] = tmp;
@@ -2702,36 +4012,80 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
 
                 do {
                     if (n_inner2 == axis) {
-                            if (!init_flag) {
-                                py[iy] = px[ix];
-                                i = 1;
-                            } else {
-                                i = 0;
-                            }
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                            for (; i < x->shape[n_inner2]; i++) {
-                                @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],bool)
-                            }
+                        // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
+                        uint64_t ii;
+                        if (!init_flag) {
+                           py[iy] = px[ix];
+                           ii = 1;
                         } else {
-                            if (init_flag || cnt_x[axis] > 0) {
+                           ii = 0;
+                        }
+#if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "bool" eq "i32" || "bool" eq "i64" || "bool" eq "f32" || "bool" eq "f64" || "bool" eq "bool")
+                        int32_t tmp = py[iy];
+#if "bool" eq "f32" || "bool" eq "f64"
+                        float is_there_nan = (isnan_bool(py[iy])) ? 1.0 : 0.0;
+#elif "bool" eq "i32" || "bool" eq "i64" || "bool" eq "bool"
+                        float is_there_nan = 0.0;
+#else
+#error Not Impletended
+#endif
+@#pragma _NEC ivdep
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+#if defined(maximum_reduce)
+                            tmp = (tmp > px[i*ix0+ix]) ? tmp : (int32_t)px[i*ix0+ix];
+#elif defined(minimum_reduce)
+                            tmp = (tmp < px[i*ix0+ix]) ? tmp : (int32_t)px[i*ix0+ix];
+#endif
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                            // NaN check: 
+                            //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
+                            @TYPE1@ xx;
+                            *(&xx) = px[i*ix0+ix];
+                            // The following line checks for NaN and it is in an unnatural way.
+                            // Here, NaN == NaN becomes False.
+                            // If there is one or more qNaN, signaling NaN (sNaN) occurs.
+                            // qNaN might not be detected qNaN by compiler optimizations.
+                            // However, we prioritize the performance.
+                            is_there_nan += (! (xx == px[i*ix0+ix]) ) ? 1.0 : 0.0;
+#endif
+                        }
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
+                        if (is_there_nan != (float)0) {
+                            tmp = NAN;
+                            // In the following function call, PSW flags are manipulated to skip the intentional sNaN above.
+                            retrieve_fpe_flags(psw);
+                            *psw &= 0x0000003d;
+                            set_fpe_flags(*psw);
+                        }
+#endif
+                        py[iy] = tmp;
+#else
+                        // General case
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
-                                }
-                            } else {
-                                for (i = 0; i < x->shape[n_inner2]; i++) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,bool)
-                                }
+                        for (i = ii; i < x->shape[n_inner2]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[iy],bool)
+                        }
+#endif
+                    } else {
+                        if (init_flag || cnt_x[axis] > 0) {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                             }
+                        } else {
+                            for (i = 0; i < x->shape[n_inner2]; i++) {
+                                py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,bool)
                             }
                         }
+                    }
                     for (k = n_inner - 1; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (kk == axis) {
@@ -2767,7 +4121,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
                         if (!init_flag) {
                             for (i = 0; i < w->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,bool)
+                                    py[iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,bool)
                                     i++;
                                     break;
                                 }
@@ -2800,7 +4154,7 @@ uint64_t FILENAME_@TYPE1_DTAG@_bool(ve_array *x, ve_array *y, int32_t axis, int3
                         } else {
                             for (i = 0; i < x->shape[n_inner2]; i++) {
                                 if (pw[i*iw0+iw]) {
-                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@TYPE1_DTAG@,bool)
+                                    py[i*iy0+iy] = @CAST_OPERATOR@(px[i*ix0+ix],@DTAG1@,bool)
                                 }
                             }
                         }

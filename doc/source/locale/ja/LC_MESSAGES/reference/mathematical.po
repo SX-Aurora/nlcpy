@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-19 15:45+0900\n"
+"POT-Creation-Date: 2021-06-17 17:08+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/reference/mathematical.rst:2
 msgid "Mathematical Functions"
@@ -425,12 +425,12 @@ msgstr ""
 msgid ":obj:`nlcpy.fmod <nlcpy.fmod>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
 msgid ":obj:`nlcpy.absolute <nlcpy.absolute>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
 msgid "Computes the element-wise absolute value."
 msgstr ""
@@ -487,71 +487,79 @@ msgstr ""
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
+msgid ":obj:`nlcpy.clip <nlcpy.clip>`"
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
+msgid "Clips (limits) the values in an array."
+msgstr ""
+
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.sqrt <nlcpy.sqrt>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes the element-wise square-root of the input."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.cbrt <nlcpy.cbrt>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes the element-wise cubic-root of the input."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.square <nlcpy.square>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes the element-wise square of the input."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.fabs <nlcpy.fabs>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.sign <nlcpy.sign>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Returns the element-wise indication of the sign of a number."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.heaviside <nlcpy.heaviside>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes Heaviside step function."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.maximum <nlcpy.maximum>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes the element-wise maximum of the inputs."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.minimum <nlcpy.minimum>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid "Computes the element-wise minimum of the inputs."
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.fmax <nlcpy.fmax>`"
 msgstr ""
 
-#: ../../source/reference/mathematical.rst:129:<autosummary>:1
+#: ../../source/reference/mathematical.rst:130:<autosummary>:1
 msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
 msgstr ""
 

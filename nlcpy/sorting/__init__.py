@@ -29,3 +29,5 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 from nlcpy.sorting import sort # NOQA
+from nlcpy.sorting import count # NOQA
+from nlcpy.sorting import search # NOQA

@@ -261,3 +261,137 @@ def hstack(tup):
         return manipulation._ndarray_concatenate(arrays, 0, None)
     else:
         return manipulation._ndarray_concatenate(arrays, 1, None)
+
+
+def block(arrays):
+    """Assembles an nd-array from nested lists of blocks.
+
+    Blocks in the innermost lists are concatenated (see :func:`concatenate`) along the
+    last dimension (-1), then these are concatenated along the second-last dimension
+    (-2), and so on until the outermost list is reached.
+
+    Blocks can be of any dimension, but will not be broadcasted using the normal rules.
+    Instead, leading axes of size 1 are inserted, to make ``block.ndim`` the same for
+    all blocks. This is primarily useful for working with scalars, and means that code
+    like ``vp.block([v, 1])`` is valid, where ``v.ndim == 1``.
+
+    When the nested list is two levels deep, this allows block matrices to be
+    constructed from their components.
+
+    Parameters
+    ----------
+    arrays : nested list of array_like or scalars (but not tuples)
+        If passed a single ndarray or scalar (a nested list of depth 0), this is
+        returned unmodified (and not copied).
+        Elements shapes must match along the appropriate axes (without broadcasting),
+        but leading 1s will be prepended to the shape as necessary to make the
+        dimensions match.
+
+    Returns
+    -------
+    block_array : ndarray
+        The array assembled from the given blocks.
+        The dimensionality of the output is equal to the greatest of:
+        - the dimensionality of all the inputs
+        - the depth to which the input list is nested
+
+    See Also
+    --------
+    vsplit : Splits an array into multiple sub-arrays vertically (row-wise).
+    concatenate : Joins a sequence of arrays along an existing axis.
+    stack : Joins a sequence of arrays along a new axis.
+    hstack : Stacks arrays in sequence horizontally (column wise).
+    vstack : Stacks arrays in sequence vertically (row wise).
+
+    Note
+    ----
+    When called with only scalars, ``vp.block`` is equivalent to an ndarray call.
+    So ``vp.block([[1, 2], [3, 4]])`` is equivalent to ``vp.array([[1, 2], [3, 4]])``.
+
+    This function does not enforce that the blocks lie on a fixed grid.
+    ``vp.block([[a, b], [c, d]])`` is not restricted to arrays of the form::
+
+        AAAbb
+        AAAbb
+        cccDD
+
+    But is also allowed to produce, for some ``a, b, c, d``::
+
+        AAAbb
+        AAAbb
+        cDDDD
+
+    Since concatenation happens along the last axis first, `block` is **not**
+    capable of producing the following directly::
+
+        AAAbb
+        cccbb
+        cccDD
+
+    Matlab's "square bracket stacking", ``[A, B, ...; p, q, ...]``, is equivalent to
+    ``vp.block([[A, B, ...], [p, q, ...]])``.
+
+    Examples
+    --------
+    The most common use of this function is to build a block matrix
+
+    >>> import nlcpy as vp
+    >>> A = vp.eye(2) * 2
+    >>> B = vp.eye(3) * 3
+    >>> vp.block([
+    ...     [A,               vp.zeros((2, 3))],
+    ...     [vp.ones((3, 2)), B               ]
+    ... ])
+    array([[2., 0., 0., 0., 0.],
+           [0., 2., 0., 0., 0.],
+           [1., 1., 3., 0., 0.],
+           [1., 1., 0., 3., 0.],
+           [1., 1., 0., 0., 3.]])
+
+    With a list of depth 1, block can be used as :func:`hstack`
+
+    >>> vp.block([1, 2, 3])              # hstack([1, 2, 3])
+    array([1, 2, 3])
+
+    >>> a = vp.array([1, 2, 3])
+    >>> b = vp.array([2, 3, 4])
+    >>> vp.block([a, b, 10])             # hstack([a, b, 10])
+    array([ 1,  2,  3,  2,  3,  4, 10])
+
+    >>> A = vp.ones((2, 2), int)
+    >>> B = 2 * A
+    >>> vp.block([A, B])                 # hstack([A, B])
+    array([[1, 1, 2, 2],
+           [1, 1, 2, 2]])
+
+    With a list of depth 2, block can be used in place of :func:`vstack`:
+
+    >>> a = vp.array([1, 2, 3])
+    >>> b = vp.array([2, 3, 4])
+    >>> vp.block([[a], [b]])             # vstack([a, b])
+    array([[1, 2, 3],
+           [2, 3, 4]])
+
+    >>> A = vp.ones((2, 2), int)
+    >>> B = 2 * A
+    >>> vp.block([[A], [B]])             # vstack([A, B])
+    array([[1, 1],
+           [1, 1],
+           [2, 2],
+           [2, 2]])
+
+    It can also be used in places of :func:`atleast_1d` and :func:`atleast_2d`
+
+    >>> a = vp.array(0)
+    >>> b = vp.array([1])
+    >>> vp.block([a])                    # atleast_1d(a)
+    array([0])
+    >>> vp.block([b])                    # atleast_1d(b)
+    array([1])
+
+    >>> vp.block([[a]])                  # atleast_2d(a)
+    array([[0]])
+    >>> vp.block([[b]])                  # atleast_2d(b)
+    array([[1]])
+    """
+    return manipulation._block(arrays)

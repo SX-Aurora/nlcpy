@@ -72,6 +72,16 @@ cdef extern from "../ve_kernel/ve_dtype.h":
         ve_c128
         entrust
 
+cdef DT_BOOL
+cdef DT_I32
+cdef DT_I64
+cdef DT_U32
+cdef DT_U64
+cdef DT_F32
+cdef DT_F64
+cdef DT_C64
+cdef DT_C128
+
 
 cdef _nlcpy_not_supported_type_set
 

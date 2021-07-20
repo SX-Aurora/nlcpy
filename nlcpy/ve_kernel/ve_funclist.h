@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -170,6 +170,7 @@ uint64_t nlcpy_take(ve_arguments *, int32_t *);
 uint64_t nlcpy_prepare_indexing(ve_arguments *, int32_t *);
 uint64_t nlcpy_scatter_update(ve_arguments *, int32_t *);
 uint64_t nlcpy_where(ve_arguments *, int32_t *);
+uint64_t nlcpy_fill_diagonal(ve_arguments *, int32_t *);
 
 
 
@@ -186,6 +187,7 @@ uint64_t nlcpy_copy(ve_arguments *, int32_t *);
 uint64_t nlcpy_copy_masked(ve_arguments *, int32_t *);
 uint64_t nlcpy_eye(ve_arguments *, int32_t *);
 uint64_t nlcpy_linspace(ve_arguments *, int32_t *);
+uint64_t nlcpy_tri(ve_arguments *, int32_t *);
 
 
 
@@ -197,9 +199,11 @@ uint64_t nlcpy_linspace(ve_arguments *, int32_t *);
 /* function pointer */
 typedef uint64_t (*manipulation_op)(ve_arguments *, int32_t *);
 /* function proto types */
+uint64_t nlcpy_block(ve_arguments *, int32_t *);
 uint64_t nlcpy_delete(ve_arguments *, int32_t *);
 uint64_t nlcpy_insert(ve_arguments *, int32_t *);
 uint64_t nlcpy_repeat(ve_arguments *, int32_t *);
+uint64_t nlcpy_roll(ve_arguments *, int32_t *);
 uint64_t nlcpy_tile(ve_arguments *, int32_t *);
 
 
@@ -428,6 +432,7 @@ typedef uint64_t (*sorting_op)(ve_arguments *, int32_t *);
 /* function proto types */
 uint64_t nlcpy_sort(ve_arguments *, int32_t *);
 uint64_t nlcpy_argsort(ve_arguments *, int32_t *);
+uint64_t nlcpy_sort_multi(ve_arguments *, int32_t *);
 
 /****************************
  *
@@ -438,6 +443,7 @@ uint64_t nlcpy_argsort(ve_arguments *, int32_t *);
 typedef uint64_t (*math_op)(ve_arguments *, int32_t *);
 /* function proto types */
 uint64_t nlcpy_diff(ve_arguments *, int32_t *);
+uint64_t nlcpy_clip(ve_arguments *, int32_t *);
 
 
 /****************************
@@ -449,6 +455,17 @@ uint64_t nlcpy_diff(ve_arguments *, int32_t *);
 typedef uint64_t (*random_op)(ve_arguments *, int32_t *);
 /* function proto types */
 uint64_t nlcpy_random_shuffle(ve_arguments *, int32_t *);
+
+
+/****************************
+ *
+ *       SCA
+ *
+ * **************************/
+/* function pointer */
+typedef uint64_t (*sca_op)(ve_arguments *, int32_t *);
+/* function proto types */
+uint64_t nlcpy_sca_code_execute(ve_arguments *, int32_t *);
 
 
 /****************************

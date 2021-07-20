@@ -33,6 +33,7 @@ import nlcpy
 import numpy
 from nlcpy.ufuncs import operations as ufunc_op
 from nlcpy.linalg import cblas_wrapper
+from nlcpy.request import request
 
 
 def dot(a, b, out=None):
@@ -44,6 +45,12 @@ def dot(a, b, out=None):
       :func:`nlcpy.matmul` or ``a @ b`` is preferred.
     - If either *a* or *b* is 0-D (scalar), it is equivalent to multiply and using
       ``nlcpy.multiply(a,b)`` or ``a * b`` is preferred.
+    - If *a* is an N-D array and *b* is a 1-D array, it is a sum product over the last
+      axis of *a* and *b*.
+    - If *a* is an N-D array and *b* is an M-D array (where ``M>=2``), it is a
+      sum product over the last axis of *a* and the second-to-last axis of *b*:
+
+      ``dot(a, b)[i,j,k,m] = sum(a[i,j,:] * b[k,:,m])``
 
     Parameters
     ----------
@@ -61,10 +68,6 @@ def dot(a, b, out=None):
     output : ndarray
         Returns the dot product of *a* and *b*. If *a* and *b* are both scalars or both
         1-D arrays then this function returns the result as a 0-dimention array.
-
-    Restriction
-    -----------
-     ``a.ndim > 2`` or ``b.ndim > 2`` : *NotImplementedError* occurs.
 
     Examples
     --------
@@ -85,15 +88,25 @@ def dot(a, b, out=None):
     array([[4, 1],
            [2, 2]])
 
+    >>> a = vp.arange(3*4*5*6).reshape((3, 4, 5, 6))
+    >>> b = vp.arange(3*4*5*6)[::-1].reshape((5, 4, 6, 3))
+    >>> vp.dot(a, b)[2, 3, 2, 1, 2, 2]
+    array(499128)
+    >>> sum(a[2, 3, 2, :] * b[1, 2, :, 2])
+    array(499128)
+
     """
     a = nlcpy.asanyarray(a)
     b = nlcpy.asanyarray(b)
-    if out is not None and \
-            numpy.result_type(a.dtype, b.dtype) != out.dtype:
-        raise ValueError('output array is incorrect dtype')
+    dtype_out = numpy.result_type(a.dtype, b.dtype)
+    if out is not None:
+        if not isinstance(out, nlcpy.ndarray):
+            raise TypeError("'out' must be an array")
+        if dtype_out != out.dtype:
+            raise ValueError('output array is incorrect dtype')
     # if either a or b is 0-D array, it is equivalent to nlcpy.multiply
     if a.ndim == 0 or b.ndim == 0:
-        return ufunc_op.multiply(a, b, out=out)
+        return nlcpy.asanyarray(ufunc_op.multiply(a, b, out=out), order='C')
     # if both a and b are 1-D arrays, it is inner product of vectors
     if a.ndim == 1 and b.ndim == 1:
         return cblas_wrapper.cblas_dot(a, b, out=out)
@@ -102,11 +115,38 @@ def dot(a, b, out=None):
         return cblas_wrapper.cblas_gemm(
             a, b, out=out, dtype=numpy.result_type(a.dtype, b.dtype))
 
-    # TODO:
     # if either a or b are N-D array, it is sum product over the
     # last(or second-last) axis.
-    raise NotImplementedError(
-        'array \'a\' or \'b\' are N-D array case is not implemented yet.')
+    if b.ndim > 1:
+        if a.shape[-1] != b.shape[-2]:
+            raise ValueError('mismatch input shape')
+        shape_out = a.shape[:-1] + b.shape[:-2] + (b.shape[-1],)
+    else:
+        if a.shape[-1] != b.shape[-1]:
+            raise ValueError('mismatch input shape')
+        shape_out = a.shape[:-1]
+
+    if out is None:
+        out = nlcpy.empty(shape_out, dtype=dtype_out)
+
+    if out.dtype in (
+        numpy.int8, numpy.int16,
+        numpy.uint8, numpy.uint16, numpy.float16
+    ):
+        raise TypeError('output dtype \'%s\' is not supported' % dtype_out)
+    elif out.shape != shape_out or not out.flags.c_contiguous:
+        raise ValueError(
+            'output array is not acceptable (must have the right datatype, '
+            'number of dimensions, and be a C-Array)')
+
+    out.fill(0)
+    if a.size > 0 and b.size > 0:
+        request._push_request(
+            "nlcpy_dot",
+            "linalg_op",
+            (a, b, out),
+        )
+    return out
 
 
 def inner(a, b):

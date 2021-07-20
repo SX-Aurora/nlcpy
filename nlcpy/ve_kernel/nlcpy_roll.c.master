@@ -1,0 +1,151 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020-2021 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+@#include "nlcpy.h"
+#define_switch (a->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+uint64_t nlcpy_roll(ve_arguments *args, int32_t *psw)
+{
+    ve_array *a = &(args->roll.a);
+    ve_array *out = &(args->roll.result);
+    ve_array *shift = &(args->roll.shift);
+    ve_array *axis = &(args->roll.axis);
+    ve_array *work = &(args->roll.work);
+    int64_t *psh = (int64_t*)shift->ve_adr;
+    int64_t *pax = (int64_t*)axis->ve_adr;
+    int64_t *pw = (int64_t*)work->ve_adr;
+    if (!psh || !pax || !pw) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif
+{
+@#pragma _NEC novector
+    for (uint64_t i = 0; i < axis->size; i++) {
+        pw[pax[i]] += psh[i];
+    }
+    for (uint64_t i = 0; i < out->ndim; i++) {
+        if (pw[i] > 0) {
+            int64_t tmp = pw[i] % out->shape[i];
+            pw[i] = tmp ? (out->shape[i] - tmp) : 0;
+        } else if (pw[i] < 0){
+            pw[i] = -pw[i] % out->shape[i];
+        }
+    }
+}
+
+#begin_switch
+    @TYPE1@ *pa = (@TYPE1@ *)a->ve_adr;
+    @TYPE1@ *pout = (@TYPE1@ *)out->ve_adr;
+
+    if (!pa || !pout) {
+        return NLCPY_ERROR_MEMORY;
+    }
+@#ifdef _OPENMP
+    const int nt = omp_get_num_threads();
+    const int it = omp_get_thread_num();
+@#else
+    const int nt = 1;
+    const int it = 0;
+@#endif
+    if (out->ndim == 1) {
+        uint64_t ia0 = a->strides[0] / a->itemsize;
+        int64_t cntm_s = (out->size - pw[0]) * it / nt + pw[0];
+        int64_t cntm_e = (out->size - pw[0]) * (it + 1) / nt + pw[0];
+        int64_t offset = pw[0];
+        for (int64_t i = cntm_s; i < cntm_e; i++) {
+            pout[i - offset] = pa[i * ia0];
+        }
+        cntm_s = pw[0] * it / nt;
+        cntm_e = pw[0] * (it + 1) / nt;
+        offset = out->size - pw[0];
+        for (int64_t i = cntm_s; i < cntm_e; i++) {
+            pout[i + offset] = pa[i * ia0];
+        }
+    } else {
+        const int64_t n_inner = out->ndim - 1;
+        const int64_t n_outer = 0;
+        int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__rearrange_axis(out, idx);
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+
+        const int64_t cntm_s = out->shape[n_outer2] * it / nt;
+        const int64_t cntm_e = out->shape[n_outer2] * (it + 1) / nt;
+        uint64_t ia0 = a->strides[n_inner2] / a->itemsize;
+        uint64_t iout0 = out->strides[n_inner2] / out->itemsize;
+        uint64_t k = 0;
+        uint64_t ia_base = 0;
+        for (int64_t i = 0; i < a->ndim; i++) {
+            if (i != n_outer2 && i != n_inner2) {
+                ia_base += pw[i] * a->strides[i] / a->itemsize;
+            }
+        }
+        int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__reset_coords(cnt, out->ndim);
+        for (uint64_t cntm = cntm_s; cntm < cntm_e; cntm++) {
+            int64_t iout = cntm * out->strides[n_outer2] / out->itemsize;
+            int64_t ia = ia_base + ((cntm + pw[n_outer2]) % a->shape[n_outer2]) * a->strides[n_outer2] / a->itemsize;
+            do {
+                for (int64_t i = 0; i < out->shape[n_inner2]; i++) {
+                    int64_t tmp2 = (i + pw[n_inner2]) % a->shape[n_inner2];
+                    pout[i * iout0 + iout] = pa[tmp2 * ia0 + ia];
+                }
+                for (k = n_inner - 1; k > 0; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt[kk] < out->shape[kk]) {
+                        if (cnt[kk] + pw[kk] == a->shape[kk]) {
+                            ia -= (a->strides[kk] / a->itemsize) * (a->shape[kk] - 1);
+                        } else {
+                            ia += a->strides[kk] / a->itemsize;
+                        }
+                        iout += out->strides[kk] / out->itemsize;
+                        break;
+                    }
+                    if (pw[kk] != 0) {
+                        ia += a->strides[kk] / a->itemsize;
+                    } else {
+                        ia -= a->strides[kk] / a->itemsize * (a->shape[kk] - 1);
+                    }
+                    iout -= out->strides[kk] / out->itemsize * (out->shape[kk] - 1);
+                    cnt[kk] = 0;
+                }
+            } while (k > 0);
+        }
+    }
+#end_switch
+    return NLCPY_ERROR_OK;
+}
+

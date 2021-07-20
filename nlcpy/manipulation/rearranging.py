@@ -58,6 +58,7 @@
 import operator
 import numpy
 import nlcpy
+from nlcpy.request import request
 from numpy import AxisError
 
 
@@ -272,3 +273,104 @@ def fliplr(m):
     if m.ndim < 2:
         raise ValueError("Input must be >= 2-d.")
     return m[:, ::-1]
+
+
+def roll(a, shift, axis=None):
+    """Rolls array elements along a given axis.
+
+    Elements that roll beyond the last position are re-introduced at the first.
+
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+    shift : int or tuple of ints
+        The number of places by which elements are shifted. If a tuple, then *axis* must
+        be a tuple of the same size, and each of the given axes is shifted by the
+        corresponding number. If an int while *axis* is a tuple of ints, then the
+        same value is used for all given axes.
+    axis : int or tuple of ints, optional
+        Axis or axes along which elements are shifted. By default, the array is
+        flattened before shifting, after which the original shape is restored.
+
+    Returns
+    -------
+    res : ndarray
+        Output array, with the same shape as *a*.
+
+    See Also
+    --------
+    rollaxis : Rolls the specified axis backwards, until it lies in a given position.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.arange(10)
+    >>> vp.roll(x, 2)
+    array([8, 9, 0, 1, 2, 3, 4, 5, 6, 7])
+    >>> vp.roll(x, -2)
+    array([2, 3, 4, 5, 6, 7, 8, 9, 0, 1])
+
+    >>> x2 = vp.reshape(x, (2,5))
+    >>> x2
+    array([[0, 1, 2, 3, 4],
+           [5, 6, 7, 8, 9]])
+    >>> vp.roll(x2, 1)
+    array([[9, 0, 1, 2, 3],
+           [4, 5, 6, 7, 8]])
+    >>> vp.roll(x2, -1)
+    array([[1, 2, 3, 4, 5],
+           [6, 7, 8, 9, 0]])
+    >>> vp.roll(x2, 1, axis=0)
+    array([[5, 6, 7, 8, 9],
+           [0, 1, 2, 3, 4]])
+    >>> vp.roll(x2, -1, axis=0)
+    array([[5, 6, 7, 8, 9],
+           [0, 1, 2, 3, 4]])
+    >>> vp.roll(x2, 1, axis=1)
+    array([[4, 0, 1, 2, 3],
+           [9, 5, 6, 7, 8]])
+    >>> vp.roll(x2, -1, axis=1)
+    array([[1, 2, 3, 4, 0],
+           [6, 7, 8, 9, 5]])
+    """
+    a = nlcpy.asanyarray(a)
+    if axis is None:
+        return roll(a.ravel(), shift, 0).reshape(a.shape)
+
+    if type(axis) not in (tuple, list):
+        try:
+            axis = [operator.index(axis)]
+        except TypeError:
+            pass
+
+    _axis = axis.get() if isinstance(axis, nlcpy.ndarray) else axis
+    axis = [ax + a.ndim if ax < 0 else ax for ax in _axis]
+    for ax in axis:
+        if ax < 0 or ax >= a.ndim:
+            raise AxisError(
+                'axis {} is out of bounds for array of dimension {}'
+                .format(ax, a.ndim))
+
+    shift = nlcpy.asanyarray(shift)
+    axis = nlcpy.asanyarray(axis)
+    if shift.ndim > 1 or axis.ndim > 1:
+        raise ValueError(
+            "'shift' and 'axis' should be scalars or 1D sequences")
+
+    if shift.size > axis.size:
+        axis = nlcpy.broadcast_to(axis, shift.shape)
+    else:
+        shift = nlcpy.broadcast_to(shift, axis.shape)
+
+    shift = nlcpy.array(shift, dtype='l')
+    axis = nlcpy.array(axis, dtype='l')
+    result = nlcpy.empty(a.shape, dtype=a.dtype)
+    work = nlcpy.zeros(a.ndim, dtype='l')
+    request._push_request(
+        'nlcpy_roll',
+        'manipulation_op',
+        (a, shift, axis, work, result)
+    )
+
+    return result

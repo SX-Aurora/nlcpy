@@ -15,8 +15,10 @@
 # $ pip install . -> install nlcpy to your python directory
 #
 
+import shutil
 from setuptools import setup, Extension
 from setuptools.command import build_ext
+from setuptools.command.sdist import sdist
 from wheel.bdist_wheel import bdist_wheel
 import numpy
 from os import path
@@ -66,6 +68,10 @@ ext_modules = {
     'fft': [
         'nlcpy.fft._fft',
     ],
+    'request': [
+        'nlcpy.request.ve_kernel',
+        'nlcpy.request.request',
+    ],
     'others': [
         'nlcpy.core.core',
         'nlcpy.core.internal',
@@ -85,8 +91,6 @@ ext_modules = {
         'nlcpy.core.math',
         'nlcpy.linalg.cblas_wrapper',
         'nlcpy.math.math',
-        'nlcpy.request.ve_kernel',
-        'nlcpy.request.request',
         'nlcpy.ufuncs.outer',
         'nlcpy.ufuncs.reduceat',
         'nlcpy.ufuncs.accumulate',
@@ -94,6 +98,12 @@ ext_modules = {
         'nlcpy.statistics.average',
         'nlcpy.statistics.correlating',
         'nlcpy.statistics.histograms',
+        'nlcpy.sca.utility',
+        'nlcpy.sca.handle',
+        'nlcpy.sca.kernel',
+        'nlcpy.sca.internal',
+        'nlcpy.sca.descriptor',
+        'nlcpy.sca.description',
     ],
 }
 
@@ -114,6 +124,10 @@ include_dirs = {
         NLC_PATH + '/include',
         numpy.get_include(),
     ],
+    'request': [
+        'veo', '/opt/nec/ve/veos/include',
+        numpy.get_include(),
+    ],
     'others': [
         numpy.get_include(),
     ],
@@ -130,6 +144,8 @@ libraries = {
     ],
     'fft': [
     ],
+    'request': [
+    ],
     'others': [
     ],
 }
@@ -145,6 +161,8 @@ library_dirs = {
     ],
     'fft': [
     ],
+    'request': [
+    ],
     'others': [
     ],
 }
@@ -159,6 +177,8 @@ extra_link_args = {
     'random': [
     ],
     'fft': [
+    ],
+    'request': [
     ],
     'others': [
     ],
@@ -185,6 +205,7 @@ for key in ext_modules:
 
 class custom_bdist_wheel(bdist_wheel):
     def run(self):
+        shutil.copyfile('MANIFEST.in.wheel', 'MANIFEST.in')
         ret = subprocess.call(['make', '-f', os.getcwd() + '/Makefile'])
         if ret != 0:
             raise RuntimeError('Failed to build VE kernel.')
@@ -199,9 +220,16 @@ class custom_build_ext(build_ext.build_ext):
         build_ext.build_ext.run(self)
 
 
+class custom_sdist(sdist):
+    def run(self):
+        shutil.copyfile('MANIFEST.in.sdist', 'MANIFEST.in')
+        sdist.run(self)
+
+
 cmdclass = {}
 cmdclass['bdist_wheel'] = custom_bdist_wheel
 cmdclass['build_ext'] = custom_build_ext
+cmdclass['sdist'] = custom_sdist
 
 
 #####################################################

@@ -173,7 +173,8 @@ cdef class VeoFunction(object):
             x = args[i]
             if isinstance(x, OnStack):
                 try:
-                    a.set_stack(x.scope(), i, x.c_pointer(), x.size())
+                    # a.set_stack(x.scope(), i, x.c_pointer(), x.size())
+                    a.set_stack(x, i)
                 except Exception as e:
                     raise ValueError("%r : arg on stack: c_pointer = %r, size = %r" %
                                      (e, x.c_pointer(), x.size()))
@@ -361,9 +362,11 @@ cdef class VeoArgs(object):
         self.args = veo_args_alloc()
         if self.args == NULL:
             raise RuntimeError("Failed to alloc veo_args")
+        self.stacks = []
 
     def __dealloc__(self):
         veo_args_free(self.args)
+        self.stacks.clear()
 
     def set_i64(self, int argnum, int64_t val):
         veo_args_set_i64(self.args, argnum, val)
@@ -377,12 +380,17 @@ cdef class VeoArgs(object):
     def set_double(self, int argnum, double val):
         veo_args_set_double(self.args, argnum, val)
 
-    def set_stack(self, veo_args_intent inout, int argnum,
-                  uint64_t buff, size_t len):
-        veo_args_set_stack(self.args, inout, argnum, <char *>buff, len)
+    # def set_stack(self, veo_args_intent inout, int argnum,
+    #               uint64_t buff, size_t len):
+    def set_stack(self, OnStack x, int argnum):
+        cdef uint64_t buff = x.c_pointer()
+        veo_args_set_stack(
+            self.args, x.scope(), argnum, <char *>buff, x.size())
+        self.stacks.append(x)
 
     def clear(self):
         veo_args_clear(self.args)
+
 
 cdef class VeoCtxt(object):
     """
@@ -448,6 +456,9 @@ cdef class VeoCtxt(object):
             PyBuffer_Release(&data)
             raise RuntimeError("veo_write_mem failed")
         return VeoMemRequest.create(self, req, data)
+
+    def context_sync(self):
+        veo_context_sync(self.thr_ctxt)
 
 
 # Memory Pool Threashold
@@ -522,15 +533,16 @@ cdef class VeoProc(object):
                 if veo_alloc_mem(self.proc_handle, &addr, size):
                     raise MemoryError("Out of memory on VE")
         else:
-            v = VeoAlloc()
-            addr = v.pool.reserve(<size_t>size)
+            pool = _get_veo_pool()
+            addr = pool.reserve(<size_t>size)
         return VEMemPtr(self, addr, size)
 
     def realloc_mem(self, src, size_t size):
-        v = VeoAlloc()
+        ctx = _get_veo_ctx()
+        lib = _get_veo_lib()
         dst = self.alloc_mem(size)
         args = (dst.addr, src.addr, size)
-        req = v.lib.func[b"nlcpy_memcpy"](v.ctx, *args)
+        req = lib.func[b"nlcpy_memcpy"](ctx, *args)
         req.wait_result()
         return dst
 
@@ -542,9 +554,9 @@ cdef class VeoProc(object):
             if veo_free_mem(self.proc_handle, memptr.addr):
                 raise RuntimeError("veo_free_mem failed")
         else:
-            v = VeoAlloc()
-            if v.pool is not None:
-                v.pool.release(memptr.addr)
+            pool = _get_veo_pool()
+            if pool is not None:
+                pool.release(memptr.addr)
 
     @prof.profile_read_mem
     def read_mem(self, dst, VEMemPtr src, Py_ssize_t size):
@@ -634,47 +646,80 @@ cdef class VEMemPtr(object):
         return out
 
 
-# metaclass for singleton
-class Singleton(type):
-    _instance = None
-
-    def __call__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instance
-
-
 _here = _path._here
 
+cdef object _proc = None
+cdef object _lib = None
+cdef object _ctx = None
+cdef object _pool = None
 
-class VeoAlloc(metaclass=Singleton):
-    def __init__(self):
-        set_proc_init_hook(register._register_ve_kernel)
-        self.proc = VeoProc(-1)
-        self.lib = None
 
-        fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')
-        if fast_math in ('yes', 'YES'):
-            self.lib = self.proc.lib[
-                (
-                    _here + "/lib/nlcpy_ve_kernel_fast_math.so"
-                ).encode('utf-8')
-            ]
-        else:
-            self.lib = self.proc.lib[
-                (
-                    _here + "/lib/nlcpy_ve_kernel_no_fast_math.so"
-                ).encode('utf-8')
-            ]
+# TODO: thread lock
+cpdef _get_veo_proc():
+    global _proc
+    return _proc
 
-        if self.lib is None:
-            raise RuntimeError("cannot detect ve kernel")
-        self.ctx = self.proc.open_context()
-        self.pool = self.proc.alloc_mempool()
+cdef _set_veo_proc(proc):
+    global _proc
+    _proc = proc
+
+cpdef _get_veo_lib():
+    global _lib
+    return _lib
+
+cdef _set_veo_lib(lib):
+    global _lib
+    _lib = lib
+
+cpdef _get_veo_ctx():
+    global _ctx
+    return _ctx
+
+cdef _set_veo_ctx(ctx):
+    global _ctx
+    _ctx = ctx
+
+cpdef _get_veo_pool():
+    global _pool
+    return _pool
+
+cdef _set_veo_pool(pool):
+    global _pool
+    _pool = pool
+
+
+cpdef _initialize(node=-1):
+    set_proc_init_hook(register._register_ve_kernel)
+    proc = VeoProc(node)
+    lib = None
+
+    fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')
+    if fast_math in ('yes', 'YES'):
+        lib = proc.lib[
+            (
+                _here + "/lib/libnlcpy_ve_kernel_fast_math.so"
+            ).encode('utf-8')
+        ]
+    else:
+        lib = proc.lib[
+            (
+                _here + "/lib/libnlcpy_ve_kernel_no_fast_math.so"
+            ).encode('utf-8')
+        ]
+
+    if lib is None:
+        raise RuntimeError("cannot detect ve kernel")
+    ctx = proc.open_context()
+    pool = proc.alloc_mempool()
+
+    _set_veo_proc(proc)
+    _set_veo_lib(lib)
+    _set_veo_ctx(ctx)
+    _set_veo_pool(pool)
 
 
 @atexit.register
 def finalize():
-    v = VeoAlloc()
-    v.proc.free_mempool(v.pool)
-    v.pool = None
+    proc = _get_veo_proc()
+    pool = _get_veo_pool()
+    proc.free_mempool(pool)

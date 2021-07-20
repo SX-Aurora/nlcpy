@@ -82,13 +82,16 @@ ops = [
 ]
 
 
-def adjust_dtype(xp, op, dtype, dtype_out):
+def adjust_dtype(xp, op, dtype_in, dtype, dtype_out):
     if xp is numpy:
         if dtype == numpy.bool or dtype is None and dtype_out == numpy.bool:
             if op in ('divide', 'true_divide', 'logaddexp', 'logaddexp2',
                       'heaviside', 'arctan2', 'hypot', 'copysign', 'nextafter'):
                 dtype = numpy.float32
-            elif op in ('power', 'right_shift', 'left_shift'):
+            elif op in ('power', 'right_shift', 'left_shift', 'subtract'):
+                dtype = numpy.int32
+        elif dtype_in == numpy.bool:
+            if op == 'subtract':
                 dtype = numpy.int32
     return dtype
 
@@ -99,7 +102,7 @@ def is_executable(op, dtype_in=None, dtype=None, dtype_out=None):
             'divide', 'true_divide', 'arctan2', 'hypot', 'copysign',
             'logaddexp', 'logaddexp2', 'nextafter', 'heaviside',
             'power', 'floor_divide', 'mod', 'remainder', 'fmod', 'nextafter',
-            'right_shift', 'left_shift',
+            'right_shift', 'left_shift', 'subtract'
         ):
             return dtype != numpy.bool and not (dtype is None and dtype_in == numpy.bool)
 
@@ -110,7 +113,7 @@ def execute_ufunc(xp, op, in1, out=None, dtype=None, axis=0):
     dtype_out = None if out is None else out.dtype
     if not is_executable(op, in1.dtype, dtype, dtype_out):
         return 0
-    dtype = adjust_dtype(xp, op, dtype, dtype_out)
+    dtype = adjust_dtype(xp, op, in1.dtype, dtype, dtype_out)
     return getattr(xp, op).accumulate(in1, out=out, dtype=dtype, axis=axis)
 
 

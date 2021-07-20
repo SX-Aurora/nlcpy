@@ -12,3 +12,5 @@ Example programs using NLCPy are listed in the following pages:
     averaging
     spectrum
     clustering
+    wave
+    cfd

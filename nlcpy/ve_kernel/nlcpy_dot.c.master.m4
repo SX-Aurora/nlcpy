@@ -60,18 +60,14 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         }
     }
 
-    pz[0] = 0;
-
-/////////
-// 0-d //
-/////////
-    if (x->ndim == 0) {
-        @BINARY_OPERATOR@(*px,*py,*pz,$1)
-    
 /////////
 // 1-d //
 /////////
-    } else if (x->ndim == 1) {
+    if (x->ndim == 1 && y->ndim == 1) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
         int64_t i;
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
@@ -80,8 +76,126 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,$1)
         }
+} /* omp single */
+/////////
+// N-d //
+/////////
     } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+
+        int64_t i, j;
+        int64_t len_idx = z->ndim + 1;
+        int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * len_idx);
+        int64_t *shape = (int64_t*)alloca(sizeof(int64_t) * len_idx);
+        for (i = 0; i < z->ndim; i++) {
+            shape[i] = z->shape[i];
+        }
+        shape[len_idx - 1] = x->shape[x->ndim - 1];
+        nlcpy__rearrange_axis(z, idx);
+        if (z->ndim == 1) {
+            idx[1] = 1;
+        } else {
+            if (shape[idx[z->ndim - 1]] <= shape[len_idx - 1]) {
+                uint64_t temp = idx[0];
+                idx[0] = idx[z->ndim - 1];
+                idx[z->ndim - 1] = temp;
+                idx[len_idx - 1] = len_idx - 1;
+            } else {
+                idx[len_idx - 1] = idx[z->ndim - 1];
+                idx[z->ndim - 1] = len_idx - 1;
+            }
+        }
+        int64_t *cnt_idx = (int64_t*)alloca(sizeof(int64_t) * len_idx);
+        nlcpy__reset_coords(cnt_idx, len_idx);
+        const int64_t n_inner = idx[len_idx - 1];
+        const int64_t n_outer = idx[0];
+
+        uint64_t ix = 0;
+        uint64_t iy = 0;
+        uint64_t iz = 0;
+        const uint64_t axis_y = (y->ndim > 1) ? (y->ndim - 2) : 0;
+        uint64_t ix0, iy0, iz0;
+        if (n_inner > z->ndim - 1) {
+            ix0 = x->strides[x->ndim - 1] / x->itemsize;
+            iy0 = y->strides[axis_y] / y->itemsize;
+            iz0 = 0;
+        } else {
+            if (n_inner < x->ndim - 1) {
+                ix0 = x->strides[n_inner] / x->itemsize;
+                iy0 = 0;
+            } else {
+                ix0 = 0;
+                uint64_t idx_y = n_inner - x->ndim + 1;
+                if (idx_y == axis_y) idx_y++;
+                iy0 = y->strides[idx_y] / y->itemsize;
+            }
+            iz0 = z->strides[n_inner] / z->itemsize;
+        }
+        const int64_t lenm = z->shape[n_outer];
+        const int64_t cnt_s = lenm * it / nt;
+        const int64_t cnt_e = lenm * (it + 1) / nt;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            if (n_outer < x->ndim - 1) {
+                ix = cnt * x->strides[n_outer] / x->itemsize;
+                iy = 0;
+            } else {
+                ix = 0;
+                uint64_t idx_y = n_outer - x->ndim + 1;
+                if (idx_y == axis_y) idx_y++;
+                iy = cnt * y->strides[idx_y] / y->itemsize;
+            }
+            iz = cnt * z->strides[n_outer] / z->itemsize;
+            do {
+                if (n_inner == len_idx - 1) {
+                    for (i = 0; i < shape[n_inner]; i++) {
+                        @BINARY_OPERATOR@(px[ix+i*ix0],py[iy+i*iy0],pz[iz],$1)
+                    }
+                } else {
+                    for (i = 0; i < shape[n_inner]; i++) {
+                        @BINARY_OPERATOR@(px[ix+i*ix0],py[iy+i*iy0],pz[iz+i*iz0],$1)
+                    }
+                }
+                for (j = len_idx - 2; j >= 1; j--) {
+                    int64_t jj = idx[j];
+                    if (++cnt_idx[jj] < shape[jj]) {
+                        if (jj < z->ndim) {
+                            iz += z->strides[jj] / z->itemsize;
+                            if (jj < x->ndim - 1) {
+                                ix += x->strides[jj] / x->itemsize;
+                            } else {
+                                uint64_t idx_y = jj - x->ndim + 1;
+                                if (idx_y == axis_y) idx_y++;
+                                iy += y->strides[idx_y] / y->itemsize;
+                            }
+                        } else {
+                            ix += x->strides[x->ndim - 1] / x->itemsize;
+                            iy += y->strides[axis_y] / y->itemsize;
+                        }
+                        break;
+                    }
+                    cnt_idx[jj] = 0;
+                    if (jj < z->ndim) {
+                        iz -= (z->strides[jj] / z->itemsize) * (shape[jj] - 1);
+                        if (jj < x->ndim - 1) {
+                            ix -= (x->strides[jj] / x->itemsize) * (shape[jj] - 1);
+                        } else {
+                            uint64_t idx_y = jj - x->ndim + 1;
+                            if (idx_y == axis_y) idx_y++;
+                            iy -= (y->strides[idx_y] / y->itemsize) * (shape[jj] - 1);
+                        }
+                    } else {
+                        ix -= (x->strides[x->ndim - 1] / x->itemsize) * (shape[jj] - 1);
+                        iy -= (y->strides[axis_y] / y->itemsize) * (shape[jj] - 1);
+                    }
+                }
+            } while (j >= 1);
+        }
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -90,6 +204,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
 
 
 @-->)dnl
+macro_binary_operator(bool, int32_t,        ve_i32)dnl
 macro_binary_operator(i32,  int32_t,        ve_i32)dnl
 macro_binary_operator(i64,  int64_t,        ve_i64)dnl
 macro_binary_operator(u32,  uint32_t,       ve_u32)dnl
@@ -104,19 +219,12 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 //ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
 {
     uint64_t err = NLCPY_ERROR_OK;
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
     ve_array *x = &(args->binary.x);
     ve_array *y = &(args->binary.y);
     ve_array *z = &(args->binary.z);
 
-    assert(x->size == y->size);
-    assert(x->ndim == y->ndim);
-    for (uint64_t i = 0; i < x->ndim; i++) assert(x->shape[i] == y->shape[i]);
-    
     switch (z->dtype) {
+    case ve_bool:  err = FILENAME_bool (x, y, z, psw); break;
     case ve_i32:  err = FILENAME_i32 (x, y, z, psw); break;
     case ve_i64:  err = FILENAME_i64 (x, y, z, psw); break;
     case ve_u32:  err = FILENAME_u32 (x, y, z, psw); break;
@@ -127,6 +235,5 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     case ve_c128: err = FILENAME_c128(x, y, z, psw); break;
     default: err = NLCPY_ERROR_DTYPE; break;
     }
-} /* omp single */
     return (uint64_t)err;
 }

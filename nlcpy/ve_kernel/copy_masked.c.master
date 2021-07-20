@@ -42,7 +42,7 @@
  *
  * **************************/
 
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
 
 uint64_t FILENAME_i32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -177,7 +177,7 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
 
 uint64_t FILENAME_i64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -312,7 +312,7 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
 
 uint64_t FILENAME_u32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -447,7 +447,7 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
 
 uint64_t FILENAME_u64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -582,7 +582,7 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
 
 uint64_t FILENAME_f32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -717,7 +717,7 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
 
 uint64_t FILENAME_f64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -852,7 +852,7 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
 
 uint64_t FILENAME_c64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -987,7 +987,7 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
 
 uint64_t FILENAME_c128(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -1122,7 +1122,7 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 
 
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
 
 uint64_t FILENAME_bool(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 {
@@ -1267,31 +1267,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     if (x->size == 0 || y->size == 0) return (uint64_t)NLCPY_ERROR_OK;
     uint64_t err = NLCPY_ERROR_OK;
     switch (y->dtype) {
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
     case ve_i32:  err = FILENAME_i32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
     case ve_i64:  err = FILENAME_i64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
     case ve_u32:  err = FILENAME_u32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
     case ve_u64:  err = FILENAME_u64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
     case ve_f32:  err = FILENAME_f32 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
     case ve_f64:  err = FILENAME_f64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
     case ve_c64:  err = FILENAME_c64 (x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
     case ve_c128: err = FILENAME_c128(x, y, where, psw); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
     case ve_bool: err = FILENAME_bool(x, y, where, psw); break;
 #endif
     default: err = NLCPY_ERROR_DTYPE;

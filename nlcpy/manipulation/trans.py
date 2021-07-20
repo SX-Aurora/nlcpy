@@ -177,3 +177,47 @@ def transpose(a, axes=None):
     """
     a = nlcpy.asanyarray(a)
     return a.transpose(axes)
+
+
+def swapaxes(a, axis1, axis2):
+    """ Interchanges two axes of an array.
+
+    Parameters
+    ----------
+    a : array_like
+        Input array.
+    axis1 : int
+        First axis.
+    axis2 : int
+        Second axis.
+
+    Returns
+    -------
+    a_swapped : ndarray
+        If *a* is an ndarray, then a view of *a* is returned;
+        otherwise a new array is created.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> x = vp.array([[1, 2, 3]])
+    >>> vp.swapaxes(x, 0, 1)
+    array([[1],
+           [2],
+           [3]])
+    >>> x = vp.array([[[0,1],[2,3]],[[4,5],[6,7]]])
+    >>> x
+    array([[[0, 1],
+            [2, 3]],
+    <BLANKLINE>
+           [[4, 5],
+            [6, 7]]])
+    >>> vp.swapaxes(x,0,2)
+    array([[[0, 4],
+            [2, 6]],
+    <BLANKLINE>
+           [[1, 5],
+            [3, 7]]])
+    """
+    a = nlcpy.asanyarray(a)
+    return a.swapaxes(axis1, axis2)

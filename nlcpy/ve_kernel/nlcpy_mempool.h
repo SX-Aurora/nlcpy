@@ -42,6 +42,7 @@
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
+#include <inttypes.h>
 
 #if !defined(__ve__)
 #include <ve_offload.h>

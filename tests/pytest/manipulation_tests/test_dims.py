@@ -50,7 +50,9 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import pytest
 
+import numpy
 import nlcpy
 from nlcpy import testing
 
@@ -128,13 +130,35 @@ class TestDims(unittest.TestCase):
         a = testing.shaped_arange((2, 3), xp)
         return xp.expand_dims(a, -2)
 
-    @testing.with_requires('numpy>=1.13', 'numpy<1.18')
-    @testing.numpy_nlcpy_array_equal()
+    @testing.numpy_nlcpy_raises()
     def test_expand_dims_negative2(self, xp):
         a = testing.shaped_arange((2, 3), xp)
-        # Too large and too small axis is deprecated in NumPy 1.13
-        with testing.assert_warns(DeprecationWarning):
-            return xp.expand_dims(a, -4)
+        return xp.expand_dims(a, -4)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_expand_dims_tuple_axis(self, xp):
+        a = testing.shaped_arange((2, 2, 2), xp)
+        return [xp.expand_dims(a, axis) for axis in [
+            (0, 1, 2),
+            (0, -1, -2),
+            (0, 3, 5),
+            (0, -3, -5),
+            (),
+            (1,),
+        ]]
+
+    def test_expand_dims_out_of_range(self):
+        for xp in (numpy, nlcpy):
+            a = testing.shaped_arange((2, 2, 2), xp)
+            for axis in [(1, -6), (1, 5)]:
+                with pytest.raises(numpy.AxisError):
+                    xp.expand_dims(a, axis)
+
+    def test_expand_dims_repeated_axis(self):
+        for xp in (numpy, nlcpy):
+            a = testing.shaped_arange((2, 2, 2), xp)
+            with pytest.raises(ValueError):
+                xp.expand_dims(a, (1, 1))
 
     @testing.numpy_nlcpy_array_equal()
     def test_squeeze1(self, xp):
@@ -244,3 +268,94 @@ class TestDims(unittest.TestCase):
     def test_external_squeeze(self, xp):
         a = testing.shaped_arange((1, 2, 1, 3, 1, 1, 4, 1), xp)
         return xp.squeeze(a)
+
+
+@testing.parameterize(
+    {'shapes': [(), ()]},
+    {'shapes': [(0,), (0,)]},
+    {'shapes': [(1,), (1,)]},
+    {'shapes': [(2,), (2,)]},
+    {'shapes': [(0,), (1,)]},
+    {'shapes': [(2, 3), (1, 3)]},
+    {'shapes': [(2, 1, 3, 4), (3, 1, 4)]},
+    {'shapes': [(4, 3, 2, 3), (2, 3)]},
+    {'shapes': [(2, 0, 1, 1, 3), (2, 1, 0, 0, 3)]},
+    {'shapes': [(0, 1, 1, 3), (2, 1, 0, 0, 3)]},
+    {'shapes': [(0, 1, 1, 0, 3), (5, 2, 0, 1, 0, 0, 3), (2, 1, 0, 0, 0, 3)]},
+)
+class TestBroadcastArrays(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_array_equal()
+    def test_broadcast_arrays(self, xp, dtype, order):
+        arrays = [testing.shaped_arange(s, xp, dtype, order) for s in self.shapes]
+        return xp.broadcast_arrays(*arrays)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_broadcast_arrays_with_list_input(self, xp):
+        arrays = [testing.shaped_arange(s, xp).tolist() for s in self.shapes]
+        return xp.broadcast_arrays(*arrays)
+
+
+@testing.parameterize(
+    {'shapes': [(3,), (2,)]},
+    {'shapes': [(3, 2), (2, 3)]},
+    {'shapes': [(3, 2), (3, 4)]},
+    {'shapes': [(0, ), (2, )]},
+)
+class TestBroadcastArraysInvalidShape(unittest.TestCase):
+
+    @testing.numpy_nlcpy_raises()
+    def test_broadcast_arrays_invalid_shape(self, xp):
+        arrays = [testing.shaped_arange(s, xp) for s in self.shapes]
+        xp.broadcast_arrays(*arrays)
+
+
+class TestBroadcastArraysFailure(unittest.TestCase):
+
+    def test_broadcast_arrays_subok(self):
+        try:
+            nlcpy.broadcast_arrays(nlcpy.empty([1, 3]), nlcpy.empty([2, 1]), subok=True)
+        except NotImplementedError:
+            return
+        raise Exception
+
+
+class TestAtLeast(unittest.TestCase):
+
+    def check_atleast(self, func, xp):
+        a = testing.shaped_arange((), xp, 'i')
+        b = testing.shaped_arange((2,), xp, 'f')
+        c = testing.shaped_arange((3, 4), xp, 'd')
+        d = testing.shaped_arange((4, 2, 3), xp, 'F', order='F')
+        e = 1
+        f = xp.float32(1)
+        return func(a, b, c, d, e, f)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_1d(self, xp):
+        return self.check_atleast(xp.atleast_1d, xp)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_1d2(self, xp):
+        a = testing.shaped_arange((4, 2, 3), xp)
+        return xp.atleast_1d(a)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_2d(self, xp):
+        return self.check_atleast(xp.atleast_2d, xp)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_2d2(self, xp):
+        a = testing.shaped_arange((4, 2, 3), xp)
+        return xp.atleast_2d(a)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_3d(self, xp):
+        return self.check_atleast(xp.atleast_3d, xp)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_atleast_3d2(self, xp):
+        a = testing.shaped_arange((4, 2, 3), xp)
+        return xp.atleast_3d(a)

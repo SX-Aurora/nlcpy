@@ -81,7 +81,6 @@
 import numpy
 
 import operator
-import warnings
 import nlcpy
 from nlcpy.core.core import on_VE, on_VH, on_VE_VH
 from nlcpy.request import request
@@ -262,14 +261,7 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis
     (array([2.  , 2.25, 2.5 , 2.75, 3.  ]), array([0.25]))
 
     """
-    try:
-        num = operator.index(num)
-    except TypeError:
-        msg = ("object of type {} cannot be safely interpreted as "
-               "an integer.".format(type(num)))
-        warnings.warn(msg, DeprecationWarning, stacklevel=2)
-        num = int(num)
-
+    num = operator.index(num)
     if num < 0:
         raise ValueError("Number of samples, %s, must be non-negative." % num)
 
@@ -289,16 +281,16 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis
     start = nlcpy.asarray(start, dtype=dt)
     stop = nlcpy.asarray(stop, dtype=dt)
     delta = stop - start
-
+    div = (num - 1) if endpoint else num
     if num == 0:
         ret = nlcpy.empty((num,) + delta.shape, dtype=dtype)
         if retstep:
             ret = (ret, nlcpy.NaN)
         return ret
-    elif num == 1:
+    elif div == 0 or num == 1:
         ret = nlcpy.resize(start, (1,) + delta.shape).astype(dtype)
         if retstep:
-            ret = (ret, nlcpy.NaN)
+            ret = (ret, stop)
         return ret
     else:
         ret = nlcpy.empty((num,) + delta.shape, dtype=dtype)
@@ -307,7 +299,6 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis
     delta = delta[nlcpy.newaxis]
     start = nlcpy.array(nlcpy.broadcast_to(start, delta.shape))
     stop = nlcpy.array(nlcpy.broadcast_to(stop, delta.shape))
-    div = (num - 1) if endpoint else num
     step = delta / div if div > 1 else delta
     if retdata._memloc in {on_VE, on_VE_VH}:
         denormal = nlcpy.zeros(1, dtype='l')

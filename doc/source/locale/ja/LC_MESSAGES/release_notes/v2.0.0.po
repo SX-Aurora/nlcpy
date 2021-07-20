@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-07-14 14:58+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/release_notes/v2.0.0.rst:3
+msgid "What's new in Version 2.0.0 (July 29, 2021)"
+msgstr "バージョン2.0.0の更新事項 (2021年7月29日)"
+
+#: ../../source/release_notes/v2.0.0.rst:7
+msgid "New Features"
+msgstr "新機能"
+
+#: ../../source/release_notes/v2.0.0.rst:9
+msgid ""
+"Newly added :ref:`SCA Interface <label_sca_top>`, which enables Python "
+"scripts to call SCA functions of `NEC Numeric Library Collection "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_."
+msgstr ""
+":ref:`SCAインタフェース <label_sca_top>` を新規に追加しました。 "
+"これにより、`NEC Numeric Library Collection <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/ja/index.html>`_ "
+"で提供しているSCAの関数群をPythonスクリプトから利用できるようになりました。 "
+
+#: ../../source/release_notes/v2.0.0.rst:12
+msgid ""
+"Newly added the :ref:`profiling routines with FTRACE "
+"<label_profiling_ftrace>`."
+msgstr ":ref:`FTRACEを用いたプロファイル機能 <label_profiling_ftrace>` を新規に追加しました。"
+
+#: ../../source/release_notes/v2.0.0.rst:14
+msgid "Newly added the following functions."
+msgstr "以下の関数を新規に追加しました。"
+
+#: ../../source/release_notes/v2.0.0.rst:16
+msgid ":func:`nlcpy.save`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:17
+msgid ":func:`nlcpy.savetxt`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:18
+msgid ":func:`nlcpy.savez`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:19
+msgid ":func:`nlcpy.savez_compressed`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:20
+msgid ":func:`nlcpy.roll`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:21
+msgid ":func:`nlcpy.swapaxes`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:22
+msgid ":func:`nlcpy.unique`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:23
+msgid ":func:`nlcpy.count_nonzero`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:24
+msgid ":func:`nlcpy.broadcast_arrays`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:25
+msgid ":func:`nlcpy.diag_indices`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:26
+msgid ":func:`nlcpy.diagflat`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:27
+msgid ":func:`nlcpy.tri`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:28
+msgid ":func:`nlcpy.tril`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:29
+msgid ":func:`nlcpy.triu`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:30
+msgid ":func:`nlcpy.fill_diagonal`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:31
+msgid ":func:`nlcpy.hsplit`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:32
+msgid ":func:`nlcpy.vsplit`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:33
+msgid ":func:`nlcpy.split`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:34
+msgid ":func:`nlcpy.atleast_1d`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:35
+msgid ":func:`nlcpy.atleast_2d`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:36
+msgid ":func:`nlcpy.atleast_3d`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:37
+msgid ":func:`nlcpy.block`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:38
+msgid ":func:`nlcpy.clip`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:39
+msgid ":func:`nlcpy.select`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:40
+msgid ":func:`nlcpy.nanargmax`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:41
+msgid ":func:`nlcpy.nanargmin`"
+msgstr ""
+
+#: ../../source/release_notes/v2.0.0.rst:45
+msgid "Performance Enhancements"
+msgstr "性能改善"
+
+#: ../../source/release_notes/v2.0.0.rst:47
+msgid ""
+"Improved the overall performance of NLCPy by applying asynchronous VE "
+"function calls."
+msgstr "VE関数の非同期呼び出しを適用し、NLCPy全体の性能を改善しました。"
+
+#: ../../source/release_notes/v2.0.0.rst:48
+msgid ""
+"Improved the performance of reduction operations such as "
+":func:`nlcpy.sum`, :func:`nlcpy.amax`, and :func:`nlcpy.amin`."
+msgstr "リダクション演算の性能を改善しました（:func:`nlcpy.sum`、:func:`nlcpy.amax`、:func:`nlcpy.amin` など）。"
+

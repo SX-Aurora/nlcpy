@@ -198,31 +198,31 @@ static uint64_t broadcast_$1(const ve_array *src, ve_array *out, const ve_array 
 }
 @-->)dnl
 
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
 macro_outer_operator(i32,int32_t)dnl
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
 macro_outer_operator(i64,int64_t)dnl
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
 macro_outer_operator(u32,uint32_t)dnl
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
 macro_outer_operator(u64,uint64_t)dnl
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
 macro_outer_operator(f32,float)dnl
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
 macro_outer_operator(f64,double)dnl
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
 macro_outer_operator(c64,float _Complex)dnl
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
 macro_outer_operator(c128,double _Complex)dnl
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
 macro_outer_operator(bool,int32_t)dnl
 #endif
 macro_broadcast(i32,int32_t)dnl
@@ -251,31 +251,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
   ve_array * bcast_src = &(args->outer.bcast_src);
 
   switch (workspace->dtype) {
-#if defined(DTYPE_i32)
+#if defined(DTAG_i32)
   case ve_i32: err = FILENAME_i32(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_i64)
+#if defined(DTAG_i64)
   case ve_i64: err = FILENAME_i64(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_u32)
+#if defined(DTAG_u32)
   case ve_u32: err = FILENAME_u32(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_u64)
+#if defined(DTAG_u64)
   case ve_u64: err = FILENAME_u64(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_f32)
+#if defined(DTAG_f32)
   case ve_f32: err = FILENAME_f32(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_f64)
+#if defined(DTAG_f64)
   case ve_f64: err = FILENAME_f64(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_c64)
+#if defined(DTAG_c64)
   case ve_c64: err = FILENAME_c64(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_c128)
+#if defined(DTAG_c128)
   case ve_c128: err = FILENAME_c128(workspace, a, b, where_vectorize); break;
 #endif
-#if defined(DTYPE_bool)
+#if defined(DTAG_bool)
   case ve_bool: err = FILENAME_bool(workspace, a, b, where_vectorize); break;
 #endif
   default: err = NLCPY_ERROR_DTYPE;
@@ -296,31 +296,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 @#endif /* _OPENMP */
   int32_t pswc;
   switch(out->dtype){
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
   case ve_i32: err |= nlcpy_cast_i32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
   case ve_i64: err |= nlcpy_cast_i64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
   case ve_u32: err |= nlcpy_cast_u32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
   case ve_u64: err |= nlcpy_cast_u64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
   case ve_f32: err |= nlcpy_cast_f32(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
   case ve_f64: err |= nlcpy_cast_f64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
   case ve_c64: err |= nlcpy_cast_c64(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
   case ve_c128: err |= nlcpy_cast_c128(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
   case ve_bool: err |= nlcpy_cast_bool(workspace, temp_pout, temp_where_flag, where, &pswc); break;
 #endif
   default: err = NLCPY_ERROR_DTYPE;
@@ -333,31 +333,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 @#pragma omp barrier
 @#endif /* _OPENMP */
     switch(out->dtype){
-#if defined(DTYPE_OUT_i32)
+#if defined(DTAG_OUT_i32)
     case ve_i32: err |= broadcast_i32(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_i64)
+#if defined(DTAG_OUT_i64)
     case ve_i64: err |= broadcast_i64(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_u32)
+#if defined(DTAG_OUT_u32)
     case ve_u32: err |= broadcast_u32(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_u64)
+#if defined(DTAG_OUT_u64)
     case ve_u64: err |= broadcast_u64(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_f32)
+#if defined(DTAG_OUT_f32)
     case ve_f32: err |= broadcast_f32(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_f64)
+#if defined(DTAG_OUT_f64)
     case ve_f64: err |= broadcast_f64(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_c64)
+#if defined(DTAG_OUT_c64)
     case ve_c64: err |= broadcast_c64(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_c128)
+#if defined(DTAG_OUT_c128)
     case ve_c128: err |= broadcast_c128(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
-#if defined(DTYPE_OUT_bool)
+#if defined(DTAG_OUT_bool)
     case ve_bool: err |= broadcast_bool(bcast_src, out, bcast_dim, flag_where, where); break;
 #endif
     default: err = NLCPY_ERROR_DTYPE;

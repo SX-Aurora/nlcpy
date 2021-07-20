@@ -30,3 +30,4 @@
 #
 from nlcpy.indexing import generate  # NOQA
 from nlcpy.indexing import indexing  # NOQA
+from nlcpy.indexing import inserting  # NOQA

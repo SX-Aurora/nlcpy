@@ -1,0 +1,118 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020-2021 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+
+@#include "nlcpy.h"
+
+#define_switch (out->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+
+uint64_t nlcpy_block(ve_arguments *args, int32_t *psw)
+{
+    int64_t i, j, k;
+    ve_array *arrays = &(args->block.arrays);
+    ve_array *out = &(args->block.out);
+    ve_array *ofs = &(args->block.offsets);
+    uint64_t *parrays = (uint64_t *)arrays->ve_adr;
+    uint64_t *pofs = (uint64_t *)ofs->ve_adr;
+
+@#ifdef _OPENMP
+    const int nt = omp_get_num_threads();
+    const int it = omp_get_thread_num();
+@#else
+    const int nt = 1;
+    const int it = 0;
+@#endif
+
+    const int64_t i_s = arrays->shape[0] * it / nt;
+    const int64_t i_e = arrays->shape[0] * (it + 1) / nt;
+    for (i = i_s; i < i_e; i++) {
+        uint64_t a_idx = i * (arrays->strides[0] / arrays->itemsize);
+        uint64_t a_ndim = parrays[a_idx + NDIM_OFFSET];
+        uint64_t *a_shape = &(parrays[a_idx + SHAPE_OFFSET]);
+        uint64_t *a_strides = &(parrays[a_idx + STRIDES_OFFSET]);
+        uint64_t a_itemsize = parrays[a_idx + ITEMSIZE_OFFSET];
+        int64_t subdim = out->ndim - a_ndim;
+        int64_t ia = 0;
+        int64_t iout = 0;
+        for (j = 0; j < ofs->shape[1]; j++) {
+            iout += (out->strides[j + out->ndim - ofs->shape[1]] / out->itemsize) * pofs[j + i * ofs->strides[0] / ofs->itemsize];
+        }
+#begin_switch
+        @TYPE1@ *pout = (@TYPE1@ *)out->ve_adr;
+        @TYPE1@ *pa = (@TYPE1@ *)parrays[a_idx + VE_ADR_OFFSET];
+
+        if (a_ndim == 0) {
+            pout[iout] = *pa;
+        } else {
+            int64_t n_inner = a_ndim - 1;
+            int64_t max_len = a_shape[n_inner];
+            int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * a_ndim);
+            for (j = 0; j < a_ndim; j++) {
+                idx[j] = j;
+            }
+            for (j = 0; j < a_ndim - 1; j++) {
+                if (max_len < a_shape[j]) {
+                    int64_t tmp = idx[n_inner];
+                    idx[n_inner] = j;
+                    idx[j] = tmp;
+                    max_len = a_shape[j];
+                }
+            }
+            const int64_t n_inner2 = idx[n_inner];
+            const int64_t ia0 = a_strides[n_inner2] / a_itemsize;
+            const int64_t iout0 = out->strides[subdim + n_inner2] / out->itemsize;
+            int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * a_ndim);
+            nlcpy__reset_coords(cnt, a_ndim);
+            
+            do {
+                for (j = 0; j < a_shape[n_inner2]; j++) {
+                    pout[iout + j * iout0] = pa[ia + j * ia0];
+                }
+                for (k = a_ndim - 2; k >= 0; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt[kk] < a_shape[kk]) {
+                        ia += a_strides[kk] / a_itemsize;
+                        iout += out->strides[kk + subdim] / out->itemsize;
+                        break;
+                    }
+                    ia -= a_strides[kk] / a_itemsize * (a_shape[kk] - 1);
+                    iout -= out->strides[kk + subdim] / out->itemsize * (a_shape[kk] - 1);
+                    cnt[kk] = 0;
+                }
+            } while (k >= 0);
+        }
+#end_switch
+    }
+    return (uint64_t)NLCPY_ERROR_OK;
+}

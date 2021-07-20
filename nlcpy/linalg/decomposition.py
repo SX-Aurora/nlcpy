@@ -61,8 +61,21 @@ import numpy
 import warnings
 from nlcpy import veo
 from nlcpy.request import request
-from nlcpy.request.ve_kernel import check_error
 from . import util
+
+
+def _take_along_axis(arr, indices, axis):
+    shape = arr.shape
+    shape_ones = (1,) * indices.ndim
+    dest_dims = list(range(axis)) + [None] + list(range(axis + 1, indices.ndim))
+    fancy_index = []
+    for dim, n in zip(dest_dims, shape):
+        if dim is None:
+            fancy_index.append(indices)
+        else:
+            ind_shape = shape_ones[:dim] + (-1,) + shape_ones[dim + 1:]
+            fancy_index.append(nlcpy.arange(n).reshape(ind_shape))
+    return arr[tuple(fancy_index)]
 
 
 def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
@@ -174,22 +187,19 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
         if compute_uv:
             # lapack returns eigenvalues in reverse order, so to reconsist.
             s, u = nlcpy.linalg.eigh(a)
-            signs = nlcpy.sign(s[..., ::-1])
-            u = u[..., ::-1]
+            signs = nlcpy.sign(s)
+            s = abs(s)
+            sidx = nlcpy.argsort(s)[..., ::-1]
+            signs = _take_along_axis(signs, sidx, signs.ndim - 1)
+            s = _take_along_axis(s, sidx, s.ndim - 1)
+            u = _take_along_axis(u, sidx[..., None, :], u.ndim - 1)
             # singular values are unsigned, move the sign into v
             vt = nlcpy.conjugate(u * signs[..., None, :])
             vt = nlcpy.moveaxis(vt, -2, -1)
-            if c_order:
-                s = abs(s[..., ::-1])
-            else:
-                s = abs(s)[..., ::-1]
             return u, s, vt
         else:
             s = nlcpy.linalg.eigvalsh(a)
-            if c_order:
-                s = nlcpy.asarray(abs(s)[..., ::-1], dtype=f_dtype, order='C')
-            else:
-                s = nlcpy.asarray(abs(s), dtype=f_dtype)[..., ::-1]
+            s = nlcpy.sort(abs(s))[..., ::-1]
             return s
 
     m = a.shape[-2]
@@ -291,7 +301,7 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
     iwork = nlcpy.empty(8 * min_mn, dtype=f_dtype)
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         ord(job),
         a._ve_array,
@@ -304,12 +314,11 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_svd'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_svd',
+        args,
+    )
 
     if c_order:
         s = nlcpy.asarray(nlcpy.moveaxis(s, 0, -1), order='C')
@@ -396,19 +405,19 @@ def cholesky(a):
 
     a = nlcpy.array(nlcpy.moveaxis(a, (-1, -2), (1, 0)), dtype=dtype, order='F')
     info = numpy.empty(1, dtype='i')
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_cholesky'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    util._assertPositiveDefinite(info)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_cholesky',
+        args,
+        callback=util._assertPositiveDefinite(info)
+    )
+
     if c_order:
         L = nlcpy.asarray(nlcpy.moveaxis(a, (1, 0), (-1, -2)), dtype=L_dtype, order='C')
     else:
@@ -496,9 +505,9 @@ def qr(a, mode='reduced'):
            [2, 1]])
     >>> b = vp.array([1, 0, 2, 1])
     >>> q, r = vp.linalg.qr(A)
-    >>> p = np.dot(q.T, b)
-    >>> np.dot(vp.linalg.inv(r), p)   # doctest: +SKIP
-    array([1.11022302e-16, 1.00000000e+00])
+    >>> p = vp.dot(q.T, b)
+    >>> vp.dot(vp.linalg.inv(r), p)
+    array([1.1102230246251565e-16, 1.0000000000000002e+00])
 
     """
     if mode not in ('reduced', 'complete', 'r', 'raw'):
@@ -559,7 +568,7 @@ def qr(a, mode='reduced'):
     tau = nlcpy.empty(k, dtype=dtype)
     r = nlcpy.zeros(r_shape, dtype=dtype)
     work = nlcpy.empty(n * 64, dtype=dtype)
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         m, n, jobq,
         a._ve_array,
@@ -568,12 +577,11 @@ def qr(a, mode='reduced'):
         work._ve_array,
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_qr'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_qr',
+        args,
+    )
 
     if mode == 'raw':
         return a.T, tau

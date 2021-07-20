@@ -8,60 +8,114 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"POT-Creation-Date: 2021-07-14 14:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/reference/profiling.rst:4
 msgid "Profiling Routines"
 msgstr ""
 
 #: ../../source/reference/profiling.rst:6
-msgid "The following table show profiling routines provided by NLCPy."
+msgid "The following table shows profiling routines provided by NLCPy."
 msgstr ""
 
-#: ../../source/reference/profiling.rst:9
+#: ../../source/reference/profiling.rst:11
+msgid "Profiling with FTRACE"
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid ":obj:`nlcpy.prof.ftrace_region <nlcpy.prof.ftrace_region>`"
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid "Enables profiling with an ftrace region during 'with' statement."
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid ":obj:`nlcpy.prof.ftrace_region_begin <nlcpy.prof.ftrace_region_begin>`"
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid "Begins an ftrace region."
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid ":obj:`nlcpy.prof.ftrace_region_end <nlcpy.prof.ftrace_region_end>`"
+msgstr ""
+
+#: ../../source/reference/profiling.rst:20:<autosummary>:1
+msgid "Ends an ftrace region."
+msgstr ""
+
+#: ../../source/reference/profiling.rst:21
+msgid ""
+"FTRACE is a performance analysis tool, which can obtain performance "
+"information such as the exclusive time and vectorization aspect on the "
+"VE. Please note that VE offloading overhead is included in performance "
+"information. For details of FTRACE, see `PROGINF/FTRACE User's Guide "
+"<https://www.hpc.nec/documents/sdk/pdfs/g2at03e-"
+"PROGINF_FTRACE_User_Guide_en.pdf>`_."
+msgstr ""
+
+#: ../../source/reference/profiling.rst:29
+msgid ""
+"VE functions in NLCPy are multithreaded. However, the ftrace.out includes"
+" performance information of only a master thread. To obtain performance "
+"information of all threads, it is necessary to compile C programs of "
+"NLCPy by using ncc with the option '-ftrace'. If needed, please download "
+"source programs of NLCPy from GitHub."
+msgstr ""
+
+#: ../../source/reference/profiling.rst:38
+msgid "**The following routines are deprecated since NLCPy version 2.0.0.**"
+msgstr ""
+
+#: ../../source/reference/profiling.rst:41
 msgid "Start and Stop Profiling"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:17:<autosummary>:1
+#: ../../source/reference/profiling.rst:49:<autosummary>:1
 msgid ":obj:`nlcpy.prof.start_profiling <nlcpy.prof.start_profiling>`"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:17:<autosummary>:1
+#: ../../source/reference/profiling.rst:49:<autosummary>:1
 msgid "Starts profiling."
 msgstr ""
 
-#: ../../source/reference/profiling.rst:17:<autosummary>:1
+#: ../../source/reference/profiling.rst:49:<autosummary>:1
 msgid ":obj:`nlcpy.prof.stop_profiling <nlcpy.prof.stop_profiling>`"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:17:<autosummary>:1
+#: ../../source/reference/profiling.rst:49:<autosummary>:1
 msgid "Stops profiling."
 msgstr ""
 
-#: ../../source/reference/profiling.rst:19
+#: ../../source/reference/profiling.rst:51
 msgid "Get Result"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:26:<autosummary>:1
+#: ../../source/reference/profiling.rst:58:<autosummary>:1
 msgid ":obj:`nlcpy.prof.get_run_stats <nlcpy.prof.get_run_stats>`"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:26:<autosummary>:1
+#: ../../source/reference/profiling.rst:58:<autosummary>:1
 msgid "Gets dict of NLCPy run stats."
 msgstr ""
 
-#: ../../source/reference/profiling.rst:26:<autosummary>:1
+#: ../../source/reference/profiling.rst:58:<autosummary>:1
 msgid ":obj:`nlcpy.prof.print_run_stats <nlcpy.prof.print_run_stats>`"
 msgstr ""
 
-#: ../../source/reference/profiling.rst:26:<autosummary>:1
+#: ../../source/reference/profiling.rst:58:<autosummary>:1
 msgid "Prints NLCPy run stats."
 msgstr ""
+
+#~ msgid "The following table show profiling routines provided by NLCPy."
+#~ msgstr ""
 

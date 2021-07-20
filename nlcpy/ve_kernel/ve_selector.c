@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -84,43 +84,43 @@ binary_op get_binary_func(int64_t func_num) {
     case VE_FUNC_GREATER      :
         return nlcpy_greater;
     case VE_FUNC_GREATER_EQUAL:
-        return nlcpy_greater_equal; 
-    case VE_FUNC_LESS         : 
-        return nlcpy_less; 
-    case VE_FUNC_LESS_EQUAL   : 
-        return nlcpy_less_equal; 
-    case VE_FUNC_NOT_EQUAL    : 
-        return nlcpy_not_equal; 
-    case VE_FUNC_EQUAL        : 
-        return nlcpy_equal; 
-    case VE_FUNC_LOGICAL_AND  : 
-        return nlcpy_logical_and; 
-    case VE_FUNC_LOGICAL_OR   : 
-        return nlcpy_logical_or; 
-    case VE_FUNC_LOGICAL_XOR  : 
-        return nlcpy_logical_xor; 
-    case VE_FUNC_MAXIMUM      : 
-        return nlcpy_maximum; 
-    case VE_FUNC_MINIMUM      : 
-        return nlcpy_minimum; 
-    case VE_FUNC_FMAX         : 
-        return nlcpy_fmax; 
-    case VE_FUNC_FMIN         : 
-        return nlcpy_fmin; 
-    case VE_FUNC_ARCTAN2      : 
+        return nlcpy_greater_equal;
+    case VE_FUNC_LESS         :
+        return nlcpy_less;
+    case VE_FUNC_LESS_EQUAL   :
+        return nlcpy_less_equal;
+    case VE_FUNC_NOT_EQUAL    :
+        return nlcpy_not_equal;
+    case VE_FUNC_EQUAL        :
+        return nlcpy_equal;
+    case VE_FUNC_LOGICAL_AND  :
+        return nlcpy_logical_and;
+    case VE_FUNC_LOGICAL_OR   :
+        return nlcpy_logical_or;
+    case VE_FUNC_LOGICAL_XOR  :
+        return nlcpy_logical_xor;
+    case VE_FUNC_MAXIMUM      :
+        return nlcpy_maximum;
+    case VE_FUNC_MINIMUM      :
+        return nlcpy_minimum;
+    case VE_FUNC_FMAX         :
+        return nlcpy_fmax;
+    case VE_FUNC_FMIN         :
+        return nlcpy_fmin;
+    case VE_FUNC_ARCTAN2      :
         return nlcpy_arctan2;
-    case VE_FUNC_HYPOT        : 
+    case VE_FUNC_HYPOT        :
         return nlcpy_hypot;
-    case VE_FUNC_COPYSIGN     : 
-        return nlcpy_copysign; 
-    case VE_FUNC_NEXTAFTER    : 
-        return nlcpy_nextafter; 
-    case VE_FUNC_MODF         : 
-        //return nlcpy_modf; 
-    case VE_FUNC_LDEXP        : 
-        return nlcpy_ldexp; 
-    case VE_FUNC_FEXP         : 
-        //return nlcpy_fexp; 
+    case VE_FUNC_COPYSIGN     :
+        return nlcpy_copysign;
+    case VE_FUNC_NEXTAFTER    :
+        return nlcpy_nextafter;
+    case VE_FUNC_MODF         :
+        //return nlcpy_modf;
+    case VE_FUNC_LDEXP        :
+        return nlcpy_ldexp;
+    case VE_FUNC_FEXP         :
+        //return nlcpy_fexp;
 #endif /* ADD_ONLY */
 #endif /* NO_OPERATOR */
     default                   :
@@ -137,99 +137,99 @@ unary_op get_unary_func(int64_t func_num) {
 #ifndef ADD_ONLY
     case VE_FUNC_NEGATIVE   :
         return nlcpy_negative;
-    case VE_FUNC_POSITIVE   : 
+    case VE_FUNC_POSITIVE   :
         return nlcpy_positive;
-    case VE_FUNC_ABSOLUTE   : 
+    case VE_FUNC_ABSOLUTE   :
         return nlcpy_absolute;
-    case VE_FUNC_FABS       : 
+    case VE_FUNC_FABS       :
         return nlcpy_fabs;
-    case VE_FUNC_RINT       : 
+    case VE_FUNC_RINT       :
         return nlcpy_rint;
-    case VE_FUNC_SIGN       : 
+    case VE_FUNC_SIGN       :
         return nlcpy_sign;
-    case VE_FUNC_CONJ       : 
+    case VE_FUNC_CONJ       :
         return nlcpy_conj;
-    case VE_FUNC_CONJUGATE  : 
+    case VE_FUNC_CONJUGATE  :
         return nlcpy_conjugate;
-    case VE_FUNC_EXP        : 
+    case VE_FUNC_EXP        :
         return nlcpy_exp;
-    case VE_FUNC_EXP2       : 
+    case VE_FUNC_EXP2       :
         return nlcpy_exp2;
-    case VE_FUNC_LOG        : 
+    case VE_FUNC_LOG        :
         return nlcpy_log;
-    case VE_FUNC_LOG2       : 
+    case VE_FUNC_LOG2       :
         return nlcpy_log2;
-    case VE_FUNC_LOG10      : 
+    case VE_FUNC_LOG10      :
         return nlcpy_log10;
-    case VE_FUNC_EXPM1      : 
+    case VE_FUNC_EXPM1      :
         return nlcpy_expm1;
-    case VE_FUNC_LOG1P      : 
+    case VE_FUNC_LOG1P      :
         return nlcpy_log1p;
-    case VE_FUNC_SQRT       : 
+    case VE_FUNC_SQRT       :
         return nlcpy_sqrt;
-    case VE_FUNC_SQUARE     : 
+    case VE_FUNC_SQUARE     :
         return nlcpy_square;
-    case VE_FUNC_CBRT       : 
+    case VE_FUNC_CBRT       :
         return nlcpy_cbrt;
-    case VE_FUNC_RECIPROCAL : 
+    case VE_FUNC_RECIPROCAL :
         return nlcpy_reciprocal;
-    case VE_FUNC_SIN        : 
+    case VE_FUNC_SIN        :
         return nlcpy_sin;
-    case VE_FUNC_COS        : 
+    case VE_FUNC_COS        :
         return nlcpy_cos;
-    case VE_FUNC_TAN        : 
+    case VE_FUNC_TAN        :
         return nlcpy_tan;
-    case VE_FUNC_ARCSIN     : 
+    case VE_FUNC_ARCSIN     :
         return nlcpy_arcsin;
-    case VE_FUNC_ARCCOS     : 
+    case VE_FUNC_ARCCOS     :
         return nlcpy_arccos;
-    case VE_FUNC_ARCTAN     : 
+    case VE_FUNC_ARCTAN     :
         return nlcpy_arctan;
-    case VE_FUNC_SINH       : 
+    case VE_FUNC_SINH       :
         return nlcpy_sinh;
-    case VE_FUNC_COSH       : 
+    case VE_FUNC_COSH       :
         return nlcpy_cosh;
-    case VE_FUNC_TANH       : 
+    case VE_FUNC_TANH       :
         return nlcpy_tanh;
-    case VE_FUNC_ARCSINH    : 
+    case VE_FUNC_ARCSINH    :
         return nlcpy_arcsinh;
-    case VE_FUNC_ARCCOSH    : 
+    case VE_FUNC_ARCCOSH    :
         return nlcpy_arccosh;
-    case VE_FUNC_ARCTANH    : 
+    case VE_FUNC_ARCTANH    :
         return nlcpy_arctanh;
-    case VE_FUNC_DEG2RAD    : 
+    case VE_FUNC_DEG2RAD    :
         return nlcpy_deg2rad;
-    case VE_FUNC_RAD2DEG    : 
+    case VE_FUNC_RAD2DEG    :
         return nlcpy_rad2deg;
-    case VE_FUNC_DEGREES    : 
+    case VE_FUNC_DEGREES    :
         return nlcpy_degrees;
-    case VE_FUNC_RADIANS    : 
+    case VE_FUNC_RADIANS    :
         return nlcpy_radians;
-    case VE_FUNC_INVERT     : 
+    case VE_FUNC_INVERT     :
         return nlcpy_invert;
-    case VE_FUNC_LOGICAL_NOT: 
+    case VE_FUNC_LOGICAL_NOT:
         return nlcpy_logical_not;
-    case VE_FUNC_ISFINITE   : 
+    case VE_FUNC_ISFINITE   :
         return nlcpy_isfinite;
-    case VE_FUNC_ISINF      : 
+    case VE_FUNC_ISINF      :
         return nlcpy_isinf;
-    case VE_FUNC_ISNAN      : 
+    case VE_FUNC_ISNAN      :
         return nlcpy_isnan;
-    case VE_FUNC_SIGNBIT    : 
+    case VE_FUNC_SIGNBIT    :
         return nlcpy_signbit;
-    case VE_FUNC_SPACING    : 
+    case VE_FUNC_SPACING    :
         return nlcpy_spacing;
-    case VE_FUNC_FLOOR      : 
+    case VE_FUNC_FLOOR      :
         return nlcpy_floor;
-    case VE_FUNC_CEIL       : 
+    case VE_FUNC_CEIL       :
         return nlcpy_ceil;
-    case VE_FUNC_TRUNC      : 
+    case VE_FUNC_TRUNC      :
         return nlcpy_trunc;
-    case VE_FUNC_ANGLE      : 
+    case VE_FUNC_ANGLE      :
         return nlcpy_angle;
-    case VE_FUNC_ERF        : 
+    case VE_FUNC_ERF        :
         return nlcpy_erf;
-    case VE_FUNC_ERFC       : 
+    case VE_FUNC_ERFC       :
         return nlcpy_erfc;
 #endif /* ADD_ONLY */
 #endif /* NO_OPERATOR */
@@ -254,6 +254,8 @@ indexing_op get_indexing_func(int64_t func_num) {
         return nlcpy_scatter_update;
     case VE_FUNC_WHERE:
         return nlcpy_where;
+    case VE_FUNC_FILL_DIAGONAL:
+        return nlcpy_fill_diagonal;
     default:
         return nlcpy__select_err;
     }
@@ -273,6 +275,8 @@ creation_op get_creation_func(int64_t func_num) {
         return nlcpy_linspace;
     case VE_FUNC_COPY_MASKED :
         return nlcpy_copy_masked;
+    case VE_FUNC_TRI        :
+        return nlcpy_tri;
     default:
         return nlcpy__select_err;
     }
@@ -282,6 +286,8 @@ creation_op get_creation_func(int64_t func_num) {
 manipulation_op get_manipulation_func(int64_t func_num) {
     //printf("func_num = %d\n", func_num);
     switch (func_num) {
+    case VE_FUNC_BLOCK  :
+        return nlcpy_block;
     case VE_FUNC_DELETE :
         return nlcpy_delete;
     case VE_FUNC_INSERT :
@@ -290,6 +296,8 @@ manipulation_op get_manipulation_func(int64_t func_num) {
         return nlcpy_tile;
     case VE_FUNC_REPEAT   :
         return nlcpy_repeat;
+    case VE_FUNC_ROLL   :
+        return nlcpy_roll;
     default:
         return nlcpy__select_err;
     }
@@ -577,11 +585,11 @@ searching_op get_searching_func(int64_t func_num) {
     switch (func_num) {
     case VE_FUNC_NONZERO      :
         return nlcpy_nonzero;
-    case VE_FUNC_ARGMAX       : 
+    case VE_FUNC_ARGMAX       :
         return nlcpy_argmax;
-    case VE_FUNC_ARGMIN       : 
+    case VE_FUNC_ARGMIN       :
         return nlcpy_argmin;
-    case VE_FUNC_ARGWHERE     : 
+    case VE_FUNC_ARGWHERE     :
         return nlcpy_argwhere;
     default:
         return nlcpy__select_err;
@@ -596,6 +604,8 @@ sorting_op get_sorting_func(int64_t func_num) {
         return nlcpy_sort;
     case VE_FUNC_ARGSORT   :
         return nlcpy_argsort;
+    case VE_FUNC_SORT_MULTI:
+        return nlcpy_sort_multi;
     default:
         return nlcpy__select_err;
     }
@@ -605,6 +615,8 @@ math_op get_math_func(int64_t func_num) {
     switch (func_num) {
     case VE_FUNC_DIFF     :
         return nlcpy_diff;
+    case VE_FUNC_CLIP     :
+        return nlcpy_clip;
     default:
         return nlcpy__select_err;
     }
@@ -614,6 +626,15 @@ random_op get_random_func(int64_t func_num) {
     switch (func_num) {
     case VE_FUNC_SHUFFLE     :
         return nlcpy_random_shuffle;
+    default:
+        return nlcpy__select_err;
+    }
+}
+
+sca_op get_sca_func(int64_t func_num) {
+    switch (func_num) {
+    case VE_FUNC_SCA_EXECUTE :
+        return nlcpy_sca_code_execute;
     default:
         return nlcpy__select_err;
     }

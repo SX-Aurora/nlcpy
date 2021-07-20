@@ -57,10 +57,8 @@
 #
 
 import nlcpy
-import numpy
 from nlcpy import veo
 from nlcpy.request import request
-from nlcpy.request.ve_kernel import check_error
 
 
 def _lange(x, norm, axis):
@@ -81,7 +79,7 @@ def _lange(x, norm, axis):
     x = nlcpy.asarray(nlcpy.moveaxis(x, (axis[0], axis[1]), (0, 1)), order='F')
     y = nlcpy.empty(x.shape[2:], dtype=dtype, order='F')
     work = nlcpy.empty(lwork, dtype=dtype)
-    fpe = numpy.empty(1, dtype='i')
+    fpe = request._get_fpe_flag()
     args = (
         ord(norm),
         x._ve_array,
@@ -89,12 +87,12 @@ def _lange(x, norm, axis):
         work._ve_array,
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
-    v = veo.VeoAlloc()
-    request.flush()
-    req = v.lib.func['nlcpy_norm'.encode('utf-8')](v.ctx, *args)
-    err = req.wait_result()
-    check_error(err)
-    nlcpy.core.check_fpe_flags(fpe[0])
+
+    request._push_and_flush_request(
+        'nlcpy_norm',
+        args,
+    )
+
     return nlcpy.asarray(y, order=order)
 
 

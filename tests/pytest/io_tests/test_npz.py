@@ -62,10 +62,10 @@ class TestNpz(unittest.TestCase):
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_save_load(self, xp, dtype):
-        a = testing.shaped_arange((2, 3, 4), numpy, dtype=dtype)
+        a = testing.shaped_arange((2, 3, 4), xp, dtype=dtype)
 
         with io.BytesIO() as f:
-            numpy.save(f, a)
+            xp.save(f, a)
             val = f.getvalue()
 
         with io.BytesIO(val) as f:
@@ -76,11 +76,28 @@ class TestNpz(unittest.TestCase):
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_savez(self, xp, dtype):
-        a1 = testing.shaped_arange((2, 3, 4), numpy, dtype=dtype)
-        a2 = testing.shaped_arange((3, 4, 5), numpy, dtype=dtype)
+        a1 = testing.shaped_arange((2, 3, 4), xp, dtype=dtype)
+        a2 = testing.shaped_arange((3, 4, 5), xp, dtype=dtype)
 
         with io.BytesIO() as f:
-            numpy.savez(f, a1, a2)
+            xp.savez(f, a1, a2)
+            val = f.getvalue()
+
+        with io.BytesIO(val) as f:
+            d = xp.load(f)
+            b1 = d['arr_0']
+            b2 = d['arr_1']
+
+        return b1, b2
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_savez_compressed(self, xp, dtype):
+        a1 = testing.shaped_arange((2, 3, 4), xp, dtype=dtype)
+        a2 = testing.shaped_arange((3, 4, 5), xp, dtype=dtype)
+
+        with io.BytesIO() as f:
+            xp.savez_compressed(f, a1, a2)
             val = f.getvalue()
 
         with io.BytesIO(val) as f:

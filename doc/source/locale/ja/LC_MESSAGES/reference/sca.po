@@ -1,0 +1,127 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/sca.rst:5
+msgid "Stencil Code Accelerator Interface"
+msgstr ""
+
+#: ../../source/reference/sca.rst:9
+msgid "Coding Guide"
+msgstr ""
+
+#: ../../source/reference/sca.rst:10
+msgid ""
+"The Stencil Code Accelerator (SCA) interface accelerates stencil "
+"computations, a processing pattern frequently used in image processing, "
+"scientific or engineering simulations, deep learning, and so on. The SCA "
+"interface enables Python scripts to call functions provided by `SCA "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/sca/c/en/index.html>`_"
+" of `NEC Numeric Library Collection "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_,"
+" which is highly optimized for Vector Engine of SX-Aurora TSUBASA."
+msgstr ""
+
+#: ../../source/reference/sca.rst:24
+msgid "Functions"
+msgstr ""
+
+#: ../../source/reference/sca.rst:27
+msgid "Creation of Stencil Descriptor"
+msgstr ""
+
+#: ../../source/reference/sca.rst:34:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_descriptor <nlcpy.sca.create_descriptor>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:34:<autosummary>:1
+msgid "Returns one or more stencil descriptors."
+msgstr ""
+
+#: ../../source/reference/sca.rst:34:<autosummary>:1
+msgid ":obj:`nlcpy.sca.empty_description <nlcpy.sca.empty_description>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:34:<autosummary>:1
+msgid "Returns an empty stencil description."
+msgstr ""
+
+#: ../../source/reference/sca.rst:36
+msgid "Creation of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca.rst:42:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_kernel <nlcpy.sca.create_kernel>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:42:<autosummary>:1
+msgid "Creates a SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca.rst:44
+msgid "Execution of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca.rst:50:<autosummary>:1
+msgid ":obj:`nlcpy.sca.kernel.kernel.execute <nlcpy.sca.kernel.kernel.execute>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:50:<autosummary>:1
+msgid ""
+"Executes the created SCA kernel and returns the result of stencil "
+"computations."
+msgstr ""
+
+#: ../../source/reference/sca.rst:52
+msgid "Destruction of Kernel"
+msgstr ""
+
+#: ../../source/reference/sca.rst:58:<autosummary>:1
+msgid ":obj:`nlcpy.sca.destroy_kernel <nlcpy.sca.destroy_kernel>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:58:<autosummary>:1
+msgid "Destroy a SCA kernel."
+msgstr ""
+
+#: ../../source/reference/sca.rst:60
+msgid "Stride Adjustment"
+msgstr ""
+
+#: ../../source/reference/sca.rst:66:<autosummary>:1
+msgid ""
+":obj:`nlcpy.sca.convert_optimized_array "
+"<nlcpy.sca.convert_optimized_array>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:66:<autosummary>:1
+msgid ""
+"Converts existing ndarrays into optimized ndarrays, whose strides are "
+"adjusted to improve perfomance, filled with zeros."
+msgstr ""
+
+#: ../../source/reference/sca.rst:66:<autosummary>:1
+msgid ":obj:`nlcpy.sca.create_optimized_array <nlcpy.sca.create_optimized_array>`"
+msgstr ""
+
+#: ../../source/reference/sca.rst:66:<autosummary>:1
+msgid ""
+"Creates an optimized ndarray, whose strides are adjusted to improve "
+"perfomance, filled with zeros."
+msgstr ""
+

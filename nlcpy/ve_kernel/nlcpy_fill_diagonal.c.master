@@ -1,0 +1,108 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+# 
+#     Copyright (c) 2020-2021 NEC Corporation
+#     All rights reserved.
+#     
+#     Redistribution and use in source and binary forms, with or witha
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       witha specific prior written permission.
+#     
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+@#include "nlcpy.h"
+
+#define_switch (a->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
+
+uint64_t nlcpy_fill_diagonal(ve_arguments *args, int32_t *psw
+) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+    ve_array *a = &(args->fill_diagonal.a);
+    ve_array *val = &(args->fill_diagonal.val);
+    int32_t wrap = args->fill_diagonal.wrap;
+
+#begin_switch
+    @TYPE1@ *pa = (@TYPE1@ *)nlcpy__get_ptr(a);
+    @TYPE1@ *pval = (@TYPE1@ *)nlcpy__get_ptr(val);
+    if  (pa == NULL || pval == NULL) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+/////////
+// 2-d //
+/////////
+    if (a->ndim == 2) {
+        uint64_t ia = 0;
+        uint64_t ival = 0;
+        uint64_t end;
+        if (a->is_c_contiguous || !wrap) {
+            uint64_t ia0 = (a->strides[0] + a->strides[1]) / a->itemsize;
+            if (wrap) {
+                end = ((a->shape[0] - 1) * a->strides[0] + a->shape[1] * a->strides[1]) / a->itemsize;
+            } else if (a->shape[0] < a->shape[1]){
+                end = a->shape[0] * ia0;
+            } else {
+                end = a->shape[1] * ia0;
+            }
+            for (; ia < end; ia+=ia0, ival++) {
+                pa[ia] = pval[ival%val->size];
+            }
+        } else {
+            for (uint64_t i = 0; i < a->shape[0]; i++) {
+                uint64_t tmp1 = i + i / a->shape[1];
+                if (tmp1 >= a->shape[0]) break;
+                tmp1 *= a->strides[0];
+                uint64_t tmp2 = (i % a->shape[1]) * a->strides[1];
+                pa[(tmp1 + tmp2) / a->itemsize] = pval[i % val->size];
+            }
+        }
+
+/////////
+// N-d //
+/////////
+    } else if (a->ndim > 2 && a->ndim <= NLCPY_MAXNDIM) {
+        uint64_t ia = 0;
+        uint64_t ival = 0;
+        uint64_t ia0 = 0;
+        uint64_t end;
+        for (int64_t i = 0; i < a->ndim; i++) {
+            ia0 += a->strides[i];
+        }
+        ia0 /= a->itemsize;
+        end = ia0 * a->shape[0];
+        for (; ia < end; ival++, ia+=ia0) {
+            pa[ia] = pval[ival % val->size];
+        }
+    } else {
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+
+#end_switch
+} /* omp single */
+    retrieve_fpe_flags(psw);
+    return (uint64_t)NLCPY_ERROR_OK;
+}
+

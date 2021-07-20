@@ -42,25 +42,9 @@ installed on your x86 Node of SX-Aurora TSUBASA.
     - required NEC C/C++ compiler version: >= 3.2.1
     - required NLC version: >= 2.3.0
 
-* | `Alternative VE Offloading (AVEO) <https://www.hpc.nec/documents/veos/en/aveo/index.html>`_
+* | `VEOS <https://www.hpc.nec/documentation/>`_
 
-    .. attention::
-
-        The following installation of AVEO is not necessary if VEOS 2.5.1 or later is installed on your machine.
-
-  | To install the packages to run programs by `yum`, execute the following command as root.
-
-    - If you install NLCPy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
-
-      ::
-
-          $ yum install veoffload-aveo veoffload-aveorun
-
-    - If you install NLCPy from source, the development packages of Alternative VE Offloading(AVEO) are required.
-
-      ::
-
-          $ yum install veoffload-aveo-devel veoffload-aveorun-devel
+    - required version: >= 2.8.1
 
 * | `Python <https://www.python.org/>`_
 
@@ -93,7 +77,7 @@ You can install NLCPy by executing either of following commands.
 
            $ pip install <path_to_wheel>
 
-The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Version 3.2.1 and NumPy v1.17.4.
+The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Version 3.2.1 and NumPy v1.19.2.
 
 
 Install from source (with building)

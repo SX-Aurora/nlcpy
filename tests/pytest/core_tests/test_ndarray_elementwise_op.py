@@ -216,7 +216,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         with testing.NumpyError(divide='ignore'):
             self.check_array_array_op(operator.floordiv, no_complex=True)
 
-    @testing.with_requires('numpy>=1.10', 'numpy<1.18')
+    @testing.with_requires('numpy>=1.10')
     def test_ifloordiv_array(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")
@@ -303,7 +303,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         with testing.NumpyError(divide='ignore'):
             self.check_array_broadcasted_op(operator.floordiv, no_complex=True)
 
-    @testing.with_requires('numpy>=1.10', 'numpy<1.18')
+    @testing.with_requires('numpy>=1.10')
     def test_broadcasted_ifloordiv(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")

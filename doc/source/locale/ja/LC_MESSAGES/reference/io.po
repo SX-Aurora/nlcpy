@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"POT-Creation-Date: 2021-06-17 11:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/reference/io.rst:2
 msgid "Input and Output"
@@ -29,35 +29,67 @@ msgstr ""
 msgid "NumPy binary files(NPY, NPZ)"
 msgstr ""
 
-#: ../../source/reference/io.rst:15:<autosummary>:1
+#: ../../source/reference/io.rst:18:<autosummary>:1
 msgid ":obj:`nlcpy.load <nlcpy.load>`"
 msgstr ""
 
-#: ../../source/reference/io.rst:15:<autosummary>:1
+#: ../../source/reference/io.rst:18:<autosummary>:1
 msgid "Loads arrays or pickled objects from ``.npy``, ``.npz`` or pickled files."
 msgstr ""
 
-#: ../../source/reference/io.rst:17
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid ":obj:`nlcpy.save <nlcpy.save>`"
+msgstr ""
+
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid "Saves an array to a binary file in NumPy ``.npy`` format."
+msgstr ""
+
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid ":obj:`nlcpy.savez <nlcpy.savez>`"
+msgstr ""
+
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid "Saves several arrays into a single file in uncompressed ``.npz`` format."
+msgstr ""
+
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid ":obj:`nlcpy.savez_compressed <nlcpy.savez_compressed>`"
+msgstr ""
+
+#: ../../source/reference/io.rst:18:<autosummary>:1
+msgid "Saves several arrays into a single file in compressed ``.npz`` format."
+msgstr ""
+
+#: ../../source/reference/io.rst:20
 msgid "Text files"
 msgstr ""
 
-#: ../../source/reference/io.rst:25:<autosummary>:1
+#: ../../source/reference/io.rst:29:<autosummary>:1
 msgid ":obj:`nlcpy.loadtxt <nlcpy.loadtxt>`"
 msgstr ""
 
-#: ../../source/reference/io.rst:25:<autosummary>:1
+#: ../../source/reference/io.rst:29:<autosummary>:1
 msgid "Loads data from a text file."
 msgstr ""
 
-#: ../../source/reference/io.rst:27
+#: ../../source/reference/io.rst:29:<autosummary>:1
+msgid ":obj:`nlcpy.savetxt <nlcpy.savetxt>`"
+msgstr ""
+
+#: ../../source/reference/io.rst:29:<autosummary>:1
+msgid "Saves an array to a text file."
+msgstr ""
+
+#: ../../source/reference/io.rst:31
 msgid "Raw binary files"
 msgstr ""
 
-#: ../../source/reference/io.rst:33:<autosummary>:1
+#: ../../source/reference/io.rst:37:<autosummary>:1
 msgid ":obj:`nlcpy.fromfile <nlcpy.fromfile>`"
 msgstr ""
 
-#: ../../source/reference/io.rst:33:<autosummary>:1
+#: ../../source/reference/io.rst:37:<autosummary>:1
 msgid "Constructs an array from data in a text or binary file."
 msgstr ""
 

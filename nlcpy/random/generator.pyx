@@ -94,6 +94,7 @@ from nlcpy import empty
 from nlcpy import any
 from nlcpy import nan
 from nlcpy.request import request
+from nlcpy import AxisError
 
 # change in the future
 from numpy import broadcast
@@ -742,19 +743,7 @@ class RandomState():
                [0, 1, 2],
                [3, 4, 5]])
         """
-        if isinstance(x, (int, nlcpy.integer)):
-            arr = nlcpy.arange(x)
-            self.shuffle(arr)
-            return arr
-
-        arr = nlcpy.asarray(x)
-        if arr.ndim < 1:
-            raise IndexError("x must be an integer or at least 1-dimensional")
-
-        if nlcpy.may_share_memory(arr, x):
-            arr = nlcpy.array(arr)
-        self.shuffle(arr)
-        return arr
+        return self._generate_random_permutation(x)
 
     def binomial(self, n, p, size=None):
         """Draws samples from a binomial distribution.
@@ -1726,14 +1715,15 @@ class RandomState():
                     self._ve_seed > self._asl_seed_max):
                 raise ValueError('Seed must be between 0 and 2**32 - 1')
             self._ve_seed = self._ve_seed.astype(dtype='u4', copy=False)
-            request.flush()
 
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
+        fpe = request._get_fpe_flag()
         args = (self._ve_seed._ve_array,
-                veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_set_seed"](v.ctx, *args)
-        ret = req.wait_result()
+                veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        request._push_and_flush_request(
+            'nlcpy_random_set_seed',
+            args,
+            callback=self._asl_error_check
+        )
         self._vh_seed = self._ve_seed.get()
 
     def _update_vh_seed(self, size):
@@ -1768,30 +1758,32 @@ class RandomState():
                     str(ret))
 
     def _asl_get_state(self):
-        v = veo.VeoAlloc()
-
-        req = v.lib.func[b"nlcpy_random_get_state_size"](v.ctx, None)
-        shape = req.wait_result()
+        shape = request._push_and_flush_request(
+            'nlcpy_random_get_state_size',
+            (),
+            callback=None,
+            sync=True
+        )
 
         state = ndarray(shape, dtype=nlcpy.uint32)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        args = (state._ve_array, veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_save_state"](v.ctx, *args)
 
-        ret = req.wait_result()
-        self._asl_error_check(ret)
-
+        fpe = request._get_fpe_flag()
+        args = (state._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        request._push_and_flush_request(
+            'nlcpy_random_save_state',
+            args,
+            callback=self._asl_error_check,
+        )
         return state
 
     def _asl_set_state(self, state):
-        v = veo.VeoAlloc()
-
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        args = (state._ve_array, veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-
-        req = v.lib.func[b"nlcpy_random_restore_state"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+        fpe = request._get_fpe_flag()
+        args = (state._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        request._push_and_flush_request(
+            'nlcpy_random_restore_state',
+            args,
+            callback=self._asl_error_check
+        )
         return
 
     def _generate_random_uniform(self, size=None, dtype=float):
@@ -1801,14 +1793,14 @@ class RandomState():
             size = ()
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
-        args = (out._ve_array, veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_uniform_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
-
+        fpe = request._get_fpe_flag()
+        args = (out._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        request._push_and_flush_request(
+            'nlcpy_random_generate_uniform_f64',
+            args,
+            callback=self._asl_error_check
+        )
         return out
 
     def _generate_random_integers(self, low, high, size=None, dtype=int):
@@ -1820,23 +1812,23 @@ class RandomState():
         out = ndarray(shape=size, dtype=dtype)
         work = ndarray(shape=size, dtype=nlcpy.uint64)
 
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
+        fpe = request._get_fpe_flag()
 
         args = (
             out._ve_array,
             work._ve_array,
             low,
             high - low,
-            veo.OnStack(
-                fpe_flags,
-                inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_integers"](v.ctx, *args) \
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        name = 'nlcpy_random_generate_integers' \
             if numpy.dtype(dtype).name not in _unsigned_integers_types \
-            else v.lib.func[b"nlcpy_random_generate_unsigned_integers"](v.ctx, *args)
-        ret = req.wait_result()
+            else 'nlcpy_random_generate_unsigned_integers'
 
-        self._asl_error_check(ret)
+        request._push_and_flush_request(
+            name,
+            args,
+            callback=self._asl_error_check,
+        )
 
         return out
 
@@ -1850,20 +1842,18 @@ class RandomState():
             return nlcpy.zeros(size, dtype=int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
-
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             loc,
             scale,
-            veo.OnStack(
-                fpe_flags,
-                inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_normal_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
+        request._push_and_flush_request(
+            'nlcpy_random_generate_normal_f64',
+            args,
+            callback=self._asl_error_check
+        )
         return out
 
     def _generate_random_gamma(self, shape, scale, size=None, dtype=float):
@@ -1876,19 +1866,19 @@ class RandomState():
             return nlcpy.zeros(size, dtype=int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             shape,
             1 / scale,
-            veo.OnStack(
-                fpe_flags,
-                inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_gamma_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_gamma_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -1902,18 +1892,18 @@ class RandomState():
             return nlcpy.zeros(size, int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             lam,
-            veo.OnStack(
-                fpe_flags,
-                inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_poisson_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+            veo.OnStack(fpe, inout=veo.INTENT_OUT))
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_poisson_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -1924,19 +1914,21 @@ class RandomState():
             size = ()
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
+        fpe = request._get_fpe_flag()
 
         args = (
             out._ve_array,
             loc,
             scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_logistic_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_logistic_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -1950,19 +1942,21 @@ class RandomState():
             return nlcpy.zeros(size, dtype=int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             a,
             b,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_weibull_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_weibull_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -1976,19 +1970,20 @@ class RandomState():
             return nlcpy.zeros(size, dtype=int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_exponential_f64"](
-            v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_exponential_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -1999,19 +1994,21 @@ class RandomState():
             size = ()
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             a,
             b,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_cauchy_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_cauchy_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -2026,19 +2023,21 @@ class RandomState():
             return nlcpy.ones(size, dtype)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             mean,
             sigma,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_lognormal_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_lognormal_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -2053,19 +2052,21 @@ class RandomState():
             return nlcpy.zeros(size, dtype=int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             loc,
             scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_gumbel_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_gumbel_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
@@ -2076,13 +2077,15 @@ class RandomState():
             size = ()
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
-        args = (out._ve_array, p, veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_geometric_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+        fpe = request._get_fpe_flag()
+        args = (out._ve_array, p, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_geometric_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out + 1
 
@@ -2096,100 +2099,111 @@ class RandomState():
             return nlcpy.zeros(size, int)
 
         out = ndarray(shape=size, dtype=dtype)
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
 
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             n,
             p,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_binomial_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_binomial_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return out
 
     def _generate_random_uniform_for_generator(self, size=None, out=None):
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
+        fpe = request._get_fpe_flag()
+        args = (out._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
-        args = (out._ve_array, veo.OnStack(fpe_flags, inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_uniform_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+        request._push_and_flush_request(
+            'nlcpy_random_generate_uniform_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return
 
     def _generate_random_exponential_for_generator(
             self, scale=1.0, size=None, out=None):
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
-
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_exponential_f64"](
-            v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_exponential_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return
 
     def _generate_random_normal_for_generator(
             self, loc=0.0, scale=1.0, size=None, out=None):
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
-
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             loc,
             scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_normal_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_normal_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return
 
     def _generate_random_gamma_for_generator(
             self, shape, scale=1.0, size=None, out=None):
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
-        v = veo.VeoAlloc()
-
+        fpe = request._get_fpe_flag()
         args = (
             out._ve_array,
             shape,
             1 / scale,
             veo.OnStack(
-                fpe_flags,
+                fpe,
                 inout=veo.INTENT_OUT))
-        req = v.lib.func[b"nlcpy_random_generate_gamma_f64"](v.ctx, *args)
-        ret = req.wait_result()
-        self._asl_error_check(ret)
+
+        request._push_and_flush_request(
+            'nlcpy_random_generate_gamma_f64',
+            args,
+            callback=self._asl_error_check
+        )
 
         return
 
-    def _generate_random_shuffle(self, x):
+    def _generate_random_shuffle(self, x, axis=0):
         if x.ndim == 0 or x.size == 1:
             return
         for i in range(x.ndim):
             if x._shape[i] == 0:
                 return
-        fpe_flags = numpy.empty(1, dtype=numpy.int32)
+
+        fpe = request._get_fpe_flag()
+        if axis < 0:
+            axis += x.ndim
+        if axis < -x.ndim or axis >= x.ndim:
+            raise AxisError(
+                f'axis {axis} is out of bounds for array of dimension {x.ndim}')
 
         np_state = numpy.random.get_state()
         numpy.random.seed(self._vh_seed)
         self._update_vh_seed(x.size)
 
-        shuffle_idx = numpy.arange(x.shape[0], dtype='i8')
+        shuffle_idx = numpy.arange(x.shape[axis], dtype='i8')
         numpy.random.shuffle(shuffle_idx)
         shuffle_idx = nlcpy.array(shuffle_idx, dtype='i8')
         shuffle_work = x.copy()
@@ -2199,9 +2213,24 @@ class RandomState():
         request._push_request(
             "nlcpy_random_shuffle",
             "random_op",
-            (x, shuffle_idx, shuffle_work),
+            (x, shuffle_idx, shuffle_work, axis),
         )
         return
+
+    def _generate_random_permutation(self, x, axis=0):
+        if isinstance(x, (int, nlcpy.integer)):
+            arr = nlcpy.arange(x)
+            self._generate_random_shuffle(arr, axis)
+            return arr
+
+        arr = nlcpy.asarray(x)
+        if arr.ndim < 1:
+            raise IndexError("x must be an integer or at least 1-dimensional")
+
+        if nlcpy.may_share_memory(arr, x):
+            arr = nlcpy.array(arr)
+        self._generate_random_shuffle(arr, axis)
+        return arr
 
 
 _rand = RandomState()

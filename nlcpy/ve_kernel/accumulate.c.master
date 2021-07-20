@@ -53,63 +53,63 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 #begin_switch
     if (y->dtype==w->dtype) {
         switch (y->dtype) {
-#if defined(DTYPE_i32)
-        case ve_i32:  err = FILENAME_@TYPE1_DTAG@_i32 (x, y, axis, psw); break;
+#if defined(DTAG_i32)
+        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_i64)
-        case ve_i64:  err = FILENAME_@TYPE1_DTAG@_i64 (x, y, axis, psw); break;
+#if defined(DTAG_i64)
+        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_u32)
-        case ve_u32:  err = FILENAME_@TYPE1_DTAG@_u32 (x, y, axis, psw); break;
+#if defined(DTAG_u32)
+        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_u64)
-        case ve_u64:  err = FILENAME_@TYPE1_DTAG@_u64 (x, y, axis, psw); break;
+#if defined(DTAG_u64)
+        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_f32)
-        case ve_f32:  err = FILENAME_@TYPE1_DTAG@_f32 (x, y, axis, psw); break;
+#if defined(DTAG_f32)
+        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_f64)
-        case ve_f64:  err = FILENAME_@TYPE1_DTAG@_f64 (x, y, axis, psw); break;
+#if defined(DTAG_f64)
+        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_c64)
-        case ve_c64:  err = FILENAME_@TYPE1_DTAG@_c64 (x, y, axis, psw); break;
+#if defined(DTAG_c64)
+        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_c128)
-        case ve_c128: err = FILENAME_@TYPE1_DTAG@_c128(x, y, axis, psw); break;
+#if defined(DTAG_c128)
+        case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, psw); break;
 #endif
-#if defined(DTYPE_bool)
-        case ve_bool: err = FILENAME_@TYPE1_DTAG@_bool(x, y, axis, psw); break;
+#if defined(DTAG_bool)
+        case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, psw); break;
 #endif
         default: return (uint64_t)NLCPY_ERROR_DTYPE;
         }
     } else {
         switch(w->dtype) {
-#if defined(DTYPE_i32)
-        case ve_i32:  err = FILENAME_@TYPE1_DTAG@_i32 (x, w, axis, psw); break;
+#if defined(DTAG_i32)
+        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_i64)
-        case ve_i64:  err = FILENAME_@TYPE1_DTAG@_i64 (x, w, axis, psw); break;
+#if defined(DTAG_i64)
+        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_u32)
-        case ve_u32:  err = FILENAME_@TYPE1_DTAG@_u32 (x, w, axis, psw); break;
+#if defined(DTAG_u32)
+        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_u64)
-        case ve_u64:  err = FILENAME_@TYPE1_DTAG@_u64 (x, w, axis, psw); break;
+#if defined(DTAG_u64)
+        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_f32)
-        case ve_f32:  err = FILENAME_@TYPE1_DTAG@_f32 (x, w, axis, psw); break;
+#if defined(DTAG_f32)
+        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_f64)
-        case ve_f64:  err = FILENAME_@TYPE1_DTAG@_f64 (x, w, axis, psw); break;
+#if defined(DTAG_f64)
+        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_c64)
-        case ve_c64:  err = FILENAME_@TYPE1_DTAG@_c64 (x, w, axis, psw); break;
+#if defined(DTAG_c64)
+        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_c128)
-        case ve_c128: err = FILENAME_@TYPE1_DTAG@_c128(x, w, axis, psw); break;
+#if defined(DTAG_c128)
+        case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, psw); break;
 #endif
-#if defined(DTYPE_bool)
-        case ve_bool: err = FILENAME_@TYPE1_DTAG@_bool(x, w, axis, psw); break;
+#if defined(DTAG_bool)
+        case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, psw); break;
 #endif
         default: return (uint64_t)NLCPY_ERROR_DTYPE;
         }
@@ -122,31 +122,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
         ve_array where;
         err |= nlcpy_cast (w, y, 0, where, &pswc);
 //        switch (y->dtype) {
-//#if defined(DTYPE_OUT_i32)
+//#if defined(DTAG_OUT_i32)
 //        case ve_i32:  err |= nlcpy_cast_i32 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_i64)
+//#if defined(DTAG_OUT_i64)
 //        case ve_i64:  err |= nlcpy_cast_i64 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_u32)
+//#if defined(DTAG_OUT_u32)
 //        case ve_u32:  err |= nlcpy_cast_u32 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_u64)
+//#if defined(DTAG_OUT_u64)
 //        case ve_u64:  err |= nlcpy_cast_u64 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_f32)
+//#if defined(DTAG_OUT_f32)
 //        case ve_f32:  err |= nlcpy_cast_f32 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_f64)
+//#if defined(DTAG_OUT_f64)
 //        case ve_f64:  err |= nlcpy_cast_f64 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_c64)
+//#if defined(DTAG_OUT_c64)
 //        case ve_c64:  err |= nlcpy_cast_c64 (w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_c128)
+//#if defined(DTAG_OUT_c128)
 //        case ve_c128: err |= nlcpy_cast_c128(w, y, 0, where, &pswc); break;
 //#endif
-//#if defined(DTYPE_OUT_bool)
+//#if defined(DTAG_OUT_bool)
 //        case ve_bool: err |= nlcpy_cast_bool(w, y, 0, where, &pswc); break;
 //#endif
 //        default: return (uint64_t)NLCPY_ERROR_DTYPE;

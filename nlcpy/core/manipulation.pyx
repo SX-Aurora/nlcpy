@@ -374,6 +374,18 @@ cpdef ndarray _rollaxis(ndarray a, Py_ssize_t axis, Py_ssize_t start=0):
     axes.insert(axes.begin() + start, axis)
     return _transpose(a, axes)
 
+cpdef ndarray _ndarray_swapaxes(ndarray self, Py_ssize_t axis1, Py_ssize_t axis2):
+    cdef Py_ssize_t ndim = self.ndim
+    cdef vector.vector[Py_ssize_t] axes
+    if axis1 < -ndim or axis1 >= ndim or axis2 < -ndim or axis2 >= ndim:
+        raise AxisError('Axis out of range')
+    axis1 %= ndim
+    axis2 %= ndim
+    for i in range(ndim):
+        axes.push_back(i)
+    axes[axis1], axes[axis2] = axes[axis2], axes[axis1]
+    return _transpose(self, axes)
+
 cpdef ndarray _transpose(ndarray self, const vector[Py_ssize_t] &axes):
     cdef vector.vector[Py_ssize_t] a_axes
     cdef vector.vector[char] axis_flags
@@ -576,9 +588,9 @@ cdef ndarray _concatenate_flattened_arrays(n, arrays, order, ret):
 
 
 cdef _realloc_kernel(ndarray src, nbytes):
-    v = veo.VeoAlloc()
-    dst = v.proc.realloc_mem(
-        veo.VEMemPtr(v.proc, src.ve_adr, nbytes), nbytes)
+    proc = veo._get_veo_proc()
+    dst = proc.realloc_mem(
+        veo.VEMemPtr(proc, src.ve_adr, nbytes), nbytes)
     return dst.addr
 
 
@@ -649,15 +661,14 @@ cdef bint _has_element(const vector.vector[Py_ssize_t] &source, Py_ssize_t n):
     return False
 
 cpdef ndarray _expand_dims(ndarray a, axis):
-    if axis > a.ndim or axis < -a.ndim - 1:
-        warnings.warn("Both axis > a.ndim and axis < -a.ndim - 1 are"
-                      " deprecated and will raise an AxisError"
-                      " in the future.", DeprecationWarning, stacklevel=2)
-    lst = list(a.shape)
-    if axis < 0:
-        axis = a.ndim + axis + 1
-    ll = lst[:axis] + [1, ] + lst[axis:]
-    shape_out = tuple(ll)
+    cdef vector.vector[Py_ssize_t] axis2
+    if type(axis) not in (tuple, list):
+        axis = (axis,)
+    out_ndim = len(axis) + a.ndim
+    _normalize_axis_tuple(axis, out_ndim, axis2)
+    axis = tuple(axis2)
+    shape_it = iter(a.shape)
+    shape_out = [1 if ax in axis else next(shape_it) for ax in range(out_ndim)]
     return a.reshape(shape_out)
 
 
@@ -742,3 +753,173 @@ cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
     if rep.ndim > 0 and info == -1:
         raise ValueError('repeats may not contain negative values.')
     return out
+
+
+cpdef _block(arrays):
+    narrays = [0]
+    arrays, list_ndim, result_ndim, dtype = _block_setup(arrays, narrays)
+    cdef bint use_slicing = narrays[0] <= 10
+    shape, offsets, arrays = _block_info_recursion(
+        arrays, use_slicing, list_ndim, result_ndim, dtype, 0)
+#    F_order = all(arr.flags['F_CONTIGUOUS'] for arr in arrays)
+#    C_order = all(arr.flags['C_CONTIGUOUS'] for arr in arrays)
+    cdef ndarray arr
+    cdef bint F_order = True
+    cdef bint C_order = True
+    for arr in arrays:
+        if not arr.flags['F_CONTIGUOUS']:
+            F_order = False
+        if not arr.flags['C_CONTIGUOUS']:
+            C_order = False
+    order = 'F' if F_order and not C_order else 'C'
+    result = nlcpy.empty(shape=shape, dtype=dtype, order=order)
+
+    if use_slicing:
+        for the_slice, arr in zip(offsets, arrays):
+            result[(Ellipsis,) + the_slice] = arr
+    else:
+        ve_arr = [request._create_ve_array_buffer(arr) for arr in arrays]
+        ve_arr = nlcpy.array(ve_arr, dtype='L')
+        offsets = nlcpy.array(offsets, dtype='L')
+        request._push_request(
+            'nlcpy_block',
+            'manipulation_op',
+            (ve_arr, result, offsets)
+        )
+    return result
+
+
+cdef _block_setup(arrays, list narrays):
+    cdef dtypes = []
+    bottom_index, arr_ndim = _block_check_depths_match(arrays, narrays, dtypes, [])
+    dtype = numpy.result_type(*dtypes)
+    list_ndim = len(bottom_index)
+    if bottom_index and bottom_index[-1] is None:
+        raise ValueError(
+            'List at {} cannot be empty'.format(
+                _block_format_index(bottom_index)
+            )
+        )
+    result_ndim = max(arr_ndim, list_ndim)
+    return arrays, list_ndim, result_ndim, dtype
+
+
+cdef _block_info_recursion(arrays, const bint use_slicing, const Py_ssize_t max_depth,
+                           const Py_ssize_t result_ndim, dtype, const Py_ssize_t depth):
+    cdef tuple shape, offsets_tuple, arrays_tuple
+    cdef list offsets, offset_prefixes
+    cdef ndarray ndarr
+    cdef Py_ssize_t axis
+    if depth < max_depth:
+        shapes, offsets_tuple, arrays_tuple = zip(
+            *[_block_info_recursion(
+                arr, use_slicing, max_depth, result_ndim, dtype, depth + 1)
+              for arr in arrays])
+
+        axis = result_ndim - max_depth + depth
+        shape, offset_prefixes = _concatenate_shapes(shapes, axis, use_slicing)
+
+        offsets = [offset_prefix + the_offset
+                   for offset_prefix, inner_offsets in
+                   zip(offset_prefixes, offsets_tuple)
+                   for the_offset in inner_offsets]
+
+        # Flatten the array list
+        arrays = reduce(operator.add, arrays_tuple)
+
+        return shape, offsets, arrays
+    else:
+        # We've 'bottomed out' - arrays is either a scalar or an array
+        # type(arrays) is not list
+        # Return the slice and the array inside a list to be consistent with
+        # the recursive case.
+        if use_slicing:
+            ndarr = nlcpy.array(arrays, ndmin=result_ndim, copy=False)
+            shape = ndarr.shape
+        else:
+            ndarr = nlcpy.asarray(arrays, dtype=dtype)
+            shape = (1,) * (result_ndim - ndarr.ndim) + ndarr.shape
+        return shape, [()], [ndarr]
+
+
+cdef _concatenate_shapes(tuple shapes, Py_ssize_t axis, const bint use_slicing):
+    shape_at_axis = [shape[axis] for shape in shapes]
+    first_shape = shapes[0]
+    first_shape_pre = first_shape[:axis]
+    first_shape_post = first_shape[axis + 1:]
+
+    if any(shape[:axis] != first_shape_pre or
+           shape[axis + 1:] != first_shape_post for shape in shapes):
+        raise ValueError(
+            'Mismatched array shapes in block along axis {}.'.format(axis))
+
+    shape = (first_shape_pre + (sum(shape_at_axis),) + first_shape[axis + 1:])
+    cdef Py_ssize_t value = 0
+    cdef Py_ssize_t v
+    offsets_at_axis = []
+    if use_slicing:
+        for v in shape_at_axis:
+            value += v
+            offsets_at_axis.append(value)
+        slice_prefixes = [(slice(start, end),)
+                          for start, end in zip([0] + offsets_at_axis, offsets_at_axis)]
+        return shape, slice_prefixes
+    else:
+        for v in shape_at_axis:
+            offsets_at_axis.append((value,))
+            value += v
+        return shape, offsets_at_axis
+
+
+def _block_format_index(index):
+    """
+    Convert a list of indices ``[0, 1, 2]`` into ``"arrays[0][1][2]"``.
+    """
+    idx_str = ''.join('[{}]'.format(i) for i in index if i is not None)
+    return 'arrays' + idx_str
+
+
+cdef _block_check_depths_match(arrays, list narrays, list dtypes, list parent_index):
+    cdef Py_ssize_t max_arr_ndim, ndim
+    if type(arrays) is list and len(arrays) > 0:
+        idxs_ndims = (_block_check_depths_match(arr, narrays, dtypes, parent_index + [i])
+                      for i, arr in enumerate(arrays))
+
+        first_index, max_arr_ndim = next(idxs_ndims)
+        for index, ndim in idxs_ndims:
+            if ndim > max_arr_ndim:
+                max_arr_ndim = ndim
+            if len(index) != len(first_index):
+                raise ValueError(
+                    "List depths are mismatched. First element was at depth "
+                    "{}, but there is an element at depth {} ({})".format(
+                        len(first_index),
+                        len(index),
+                        _block_format_index(index)
+                    )
+                )
+            # propagate our flag that indicates an empty list at the bottom
+            if index[-1] is None:
+                first_index = index
+
+        return first_index, max_arr_ndim
+    elif type(arrays) in (nlcpy.ndarray, numpy.ndarray):
+        narrays[0] += 1
+        dtypes.append(arrays.dtype)
+        return parent_index, arrays.ndim
+    elif type(arrays) is list and len(arrays) == 0:
+        narrays[0] += 1
+        dtypes.append('float64')
+        return parent_index + [None], 0
+    elif type(arrays) is tuple:
+        raise TypeError(
+            '{} is a tuple. '
+            'Only lists can be used to arrange blocks, and np.block does '
+            'not allow implicit conversion from tuple to ndarray.'.format(
+                _block_format_index(parent_index)
+            )
+        )
+    else:
+        narrays[0] += 1
+        dtypes.append(type(arrays))
+        return parent_index, 0

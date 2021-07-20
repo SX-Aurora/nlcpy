@@ -148,7 +148,7 @@ def array(object, dtype=None, copy=True, order='K', subok=False, ndmin=0):
     return core.array(object, dtype, copy, order, subok, ndmin)
 
 
-def copy(a, order='K'):
+def copy(a, order='K', subok=False):
     """Returns an array copy of the given object.
 
     Parameters
@@ -160,6 +160,9 @@ def copy(a, order='K'):
         means 'F' if *a* is Fortran contiguous, 'C' otherwise. 'K' means match the layout
         of *a* as closely as possible. (Note that this function and :func:`ndarray.copy`
         are very similar, but have different default values for their order= arguments.)
+    subok : bool, optional
+        If True, then sub-classes will be passed-through, otherwise the returned array
+        will be forced to be a base-class array (defaults to False).
 
     Returns
     -------
@@ -192,6 +195,8 @@ def copy(a, order='K'):
     >>> x[0] == z[0]
     array(False)
     """
+    if subok is not False:
+        raise NotImplementedError('subok in array is not implemented yet.')
     a = nlcpy.asanyarray(a)
     return a.copy(order=order)
 

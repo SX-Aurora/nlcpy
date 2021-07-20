@@ -130,7 +130,6 @@ class TestSvd(unittest.TestCase):
     })
 ))
 class TestSvdHermitian(unittest.TestCase):
-    @testing.with_requires('numpy<1.19')
     @testing.for_orders('CF')
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
@@ -164,7 +163,6 @@ class TestSvdHermitian(unittest.TestCase):
         numpy.testing.assert_allclose(a, x, atol=tol, rtol=tol)
         return ret
 
-    @testing.with_requires('numpy<1.19')
     @testing.for_orders('CF')
     @testing.for_dtypes('fF')
     @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
@@ -172,7 +170,6 @@ class TestSvdHermitian(unittest.TestCase):
         a = xp.asarray(testing.shaped_random(self.shape, xp, dtype), order=order)
         return xp.linalg.svd(a, self.full_matrices, False, True)
 
-    @testing.with_requires('numpy<1.19')
     @testing.for_orders('CF')
     @testing.for_dtypes('?ilILdD')
     @testing.numpy_nlcpy_allclose(atol=1e-12, rtol=1e-12)

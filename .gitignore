@@ -11,4 +11,5 @@
 /.tox/
 /doc/build/
 generated
+MANIFEST.in
 __pycache__

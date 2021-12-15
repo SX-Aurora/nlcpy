@@ -30,6 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+@#include <float.h>
+@#include <math.h>
+@#include <complex.h>
 
 @#include "nlcpy.h"
 
@@ -42,27 +52,24 @@ include(macros.m4)dnl
  * **************************/
 
 define(<--@macro_unary_operator@-->,<--@
-uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *where, int32_t *psw)
-{
-    @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
-    if (px == NULL) return NLCPY_ERROR_MEMORY;
-    $2 *py = ($2 *)nlcpy__get_ptr(y);
-    if (py == NULL) return NLCPY_ERROR_MEMORY;
-    ve_array *w = NULL;
-    Bint *pw = NULL;
-    if (where_flag) {
-        w = where;
-        pw = (Bint *)w->ve_adr;
-    }
-
-@#ifdef _OPENMP
-    const int nt = omp_get_num_threads();
-    const int it = omp_get_thread_num();
-@#else
-    const int nt = 1;
-    const int it = 0;
-@#endif /* _OPENMP */
-
+uint64_t FILENAME_@DTAG1@_$1(
+    ve_array *x,
+    @TYPE1@ *px,
+    ve_array *y,
+    $2 *py,
+    ve_array *w,
+    Bint *pw,
+    const int64_t cnt_s,
+    const int64_t cnt_e,
+    int64_t *cnt_y,
+    int64_t *idx,
+    const int64_t n_inner,
+    const int64_t n_outer,
+    const uint64_t ix0,
+    const uint64_t iy0,
+    const uint64_t iw0,
+    int32_t *psw
+){
 
 /////////
 // 0-d //
@@ -72,7 +79,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
 @#pragma omp single
 @#endif /* _OPENMP */
 {
-        if (!where_flag) {
+        if (w == NULL) {
             @UNARY_OPERATOR@(*px,*py,$1)
         } else {
             if (*pw) {
@@ -84,14 +91,10 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
 ////////////////
 // contiguous //
 ////////////////
-    } else if (!where_flag &&
-               ( (x->is_c_contiguous & y->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous) ))
-    {
+    } else if (w == NULL &&
+            ( (x->is_c_contiguous & y->is_c_contiguous) ||
+              (x->is_f_contiguous & y->is_f_contiguous) ) ) {
         int64_t i;
-        const int64_t len = y->size;
-        const int64_t cnt_s = len * it / nt;
-        const int64_t cnt_e = len * (it + 1) / nt;
         if (x->size == 1) {
             @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
@@ -110,19 +113,12 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
 /////////
     } else if (y->ndim == 1) {
         int64_t i;
-        const int64_t n_inner = y->ndim - 1;
-        const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
-        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        const int64_t len = y->size;
-        const int64_t cnt_s = len * it / nt;
-        const int64_t cnt_e = len * (it + 1) / nt;
-        if (!where_flag) {
+        if (w == NULL) {
 @#pragma _NEC ivdep
             for (i = cnt_s; i < cnt_e; i++) {
                 @UNARY_OPERATOR@(px[i*ix0],py[i*iy0],$1)
             }
         } else {
-            const uint64_t iw0 = w->strides[n_inner]/w->itemsize;
 @#pragma _NEC ivdep
             for (i = cnt_s; i < cnt_e; i++) {
                 if (pw[i*iw0]) {
@@ -134,36 +130,22 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
 /////////
 // N-d //
 /////////
-    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
-        int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
-        nlcpy__rearrange_axis(y, idx);
-        int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
+    } else {
         int64_t i, j, k;
-        int64_t n_inner = y->ndim - 1;
-        int64_t n_outer = 0;
-        const int64_t n_inner2 = idx[n_inner];
-        const int64_t n_outer2 = idx[n_outer];
-        nlcpy__reset_coords(cnt_y, y->ndim);
-
         uint64_t ix = 0;
         uint64_t iy = 0;
-        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
-        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
-        const int64_t len = y->shape[n_outer2];
-        const int64_t cnt_s = len * it / nt;
-        const int64_t cnt_e = len * (it + 1) / nt;
-        if (!where_flag) {
+        if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
-                ix = cnt * x->strides[n_outer2] / x->itemsize;
-                iy = cnt * y->strides[n_outer2] / y->itemsize;
+                ix = cnt * x->strides[n_outer] / x->itemsize;
+                iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                    for (i = 0; i < y->shape[n_inner]; i++) {
                         @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],$1)
                     }
                     // set next index
-                    for (k = n_inner-1; k >= 1; k--) {
+                    for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (++cnt_y[kk] < y->shape[kk]) {
                             ix += x->strides[kk] / x->itemsize;
@@ -179,21 +161,20 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
             }
         } else {
             uint64_t iw = 0;
-            uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
-                ix = cnt * x->strides[n_outer2] / x->itemsize;
-                iy = cnt * y->strides[n_outer2] / y->itemsize;
-                iw = cnt * w->strides[n_outer2] / w->itemsize;
+                ix = cnt * x->strides[n_outer] / x->itemsize;
+                iy = cnt * y->strides[n_outer] / y->itemsize;
+                iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner2]; i++) {
+                    for (i = 0; i < y->shape[n_inner]; i++) {
                         if (pw[i*iw0+iw]) {
                             @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],$1)
                         }
                     }
                     // set next index
-                    for (k = n_inner-1; k >= 1; k--) {
+                    for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
                         if (++cnt_y[kk] < y->shape[kk]) {
                             ix += x->strides[kk] / x->itemsize;
@@ -210,9 +191,6 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_ar
                 }
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;

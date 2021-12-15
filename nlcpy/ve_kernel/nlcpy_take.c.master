@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,14 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+
 @#include "nlcpy.h"
 
 #define_switch (a_src->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ a_idx->dtype:i64)
@@ -44,6 +52,15 @@ uint64_t nlcpy_take(ve_arguments *args, int32_t *psw) {
     int64_t index_range = args->take.index_range;
     assert(a_idx->size == a_out->size);
     assert(a_src->dtype == a_out->dtype);
+    assert(a_src->ndim == 1);
+    assert(a_idx->ndim == a_out->ndim);
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
 
 #begin_switch
     @TYPE1@ *d_src = (@TYPE1@ *)a_src->ve_adr;
@@ -72,63 +89,140 @@ uint64_t nlcpy_take(ve_arguments *args, int32_t *psw) {
 // 1-d //
 /////////
     } else if (a_idx->ndim == 1) {
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         int64_t i;
         int64_t n_inner_idx = a_idx->ndim - 1;
-        int64_t i0x = a_idx->strides[n_inner_idx] / a_idx->itemsize;
-        for (i = 0; i < a_out->size; i++) {
-            int64_t idx_out = d_idx[i*i0x];
+        uint64_t isrc0 = a_src->strides[0] / a_src->itemsize;
+        uint64_t iidx0 = a_idx->strides[n_inner_idx] / a_idx->itemsize;
+        int64_t len = a_out->size;
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+        /*
+        for (i = cnt_s; i < cnt_e; i++) {
+            int64_t idx_out = d_idx[i*iidx0] % index_range;
             if (idx_out < 0) idx_out += index_range;
             if (ldim != 1) idx_out += (i / (cdim * rdim)) * index_range;
             if (rdim != 1) idx_out = idx_out * rdim + i % rdim;
-            d_out[i] = d_src[idx_out];
+            d_out[i] = d_src[idx_out*isrc0];
         }
-} /* omp single */
+        */
+        if (ldim != 1 && rdim != 1) {
+            for (i = cnt_s; i < cnt_e; i++) {
+                int64_t idx_out = d_idx[i*iidx0] % index_range;
+                if (idx_out < 0) idx_out += index_range;
+                idx_out += (i / (cdim * rdim)) * index_range;
+                idx_out = idx_out * rdim + i % rdim;
+                d_out[i] = d_src[idx_out*isrc0];
+            }
+        } else if (ldim == 1 && rdim != 1) {
+            for (i = cnt_s; i < cnt_e; i++) {
+                int64_t idx_out = d_idx[i*iidx0] % index_range;
+                if (idx_out < 0) idx_out += index_range;
+                idx_out = idx_out * rdim + i % rdim;
+                d_out[i] = d_src[idx_out*isrc0];
+            }
+        } else if (ldim != 1 && rdim == 1) {
+            for (i = cnt_s; i < cnt_e; i++) {
+                int64_t idx_out = d_idx[i*iidx0] % index_range;
+                if (idx_out < 0) idx_out += index_range;
+                idx_out += (i / (cdim * rdim)) * index_range;
+                d_out[i] = d_src[idx_out*isrc0];
+            }
+        } else {
+            for (i = cnt_s; i < cnt_e; i++) {
+                int64_t idx_out = d_idx[i*iidx0] % index_range;
+                if (idx_out < 0) idx_out += index_range;
+                d_out[i] = d_src[idx_out*isrc0];
+            }
+        }
 
 /////////
 // N-d //
 /////////
     } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
-// TODO: parallelization
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
-        int64_t *cnt_idx = (int64_t*)alloca(sizeof(int64_t)*a_idx->ndim);
-        int64_t totalcnt = 0;
-        int64_t i, j;
-        int64_t n_inner_idx = a_idx->ndim - 1;
+        int64_t i, k;
+        int64_t n_inner = a_idx->ndim - 1;
+        int64_t n_outer = 0;
+
+        int64_t *rel_idx = (int64_t *)alloca(sizeof(int64_t) * a_idx->ndim);
+        nlcpy__rearrange_axis(a_idx, rel_idx);
+        n_inner = rel_idx[n_inner];
+        n_outer = rel_idx[n_outer];
+        int64_t *cnt_idx = (int64_t *)alloca(sizeof(int64_t) * a_idx->ndim);
         nlcpy__reset_coords(cnt_idx, a_idx->ndim);
-        
-        uint64_t idx = 0;
+        int64_t len = a_idx->shape[n_outer];
+        const int64_t cnt_s = len * it / nt;
+        const int64_t cnt_e = len * (it + 1) / nt;
+
+        uint64_t iidx = 0;
         uint64_t iout = 0;
-        uint64_t idx0 = a_idx->strides[n_inner_idx] / a_idx->itemsize;
-        uint64_t iout0 = a_out->strides[a_out->ndim-1] / a_out->itemsize;
-        for(;;) {
-            for (i = 0; i < a_idx->shape[n_inner_idx]; i++) {
-                int64_t idx_out = d_idx[i*idx0+idx];
-                if (idx_out < 0) idx_out += index_range;
-                if (ldim != 1) idx_out += (totalcnt / (cdim * rdim)) * index_range;
-                if (rdim != 1) idx_out = idx_out * rdim + totalcnt % rdim;
-                d_out[i*iout0+iout] = d_src[idx_out];
-                totalcnt++;
-            }
-            for (j = n_inner_idx - 1; j >= 0; j--) {
-                if (++cnt_idx[j] < a_idx->shape[j]) {
-                    idx += a_idx->strides[j] / a_idx->itemsize;
-                    iout += a_out->strides[j] / a_out->itemsize;
-                    break;
+        uint64_t isrc0 = a_src->strides[0] / a_src->itemsize;
+        uint64_t iidx0 = a_idx->strides[n_inner] / a_idx->itemsize;
+        uint64_t iout0 = a_out->strides[n_inner] / a_out->itemsize;
+        int64_t totalcnt = 0;
+
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            iidx = cnt * a_idx->strides[n_outer] / a_idx->itemsize;
+            iout = cnt * a_out->strides[n_outer] / a_out->itemsize;
+            for(;;) {
+                /*
+                for (i = 0; i < a_idx->shape[n_inner]; i++) {
+                    int64_t idx_out = d_idx[i*iidx0+iidx] % index_range;
+                    int64_t totalcnt = i*iout0 + iout;
+                    if (idx_out < 0) idx_out += index_range;
+                    if (ldim != 1) idx_out += (totalcnt / (cdim * rdim)) * index_range;
+                    if (rdim != 1) idx_out = idx_out * rdim + totalcnt % rdim;
+                    d_out[totalcnt] = d_src[idx_out*isrc0];
                 }
-                cnt_idx[j] = 0;
-                idx -= (a_idx->strides[j] / a_idx->itemsize) * (a_idx->shape[j] - 1);
-                iout -= (a_out->strides[j] / a_out->itemsize) * (a_out->shape[j] - 1);
+                */
+
+                if (ldim != 1 && rdim != 1) {
+                    for (i = 0; i < a_idx->shape[n_inner]; i++) {
+                        int64_t idx_out = d_idx[i*iidx0+iidx] % index_range;
+                        int64_t totalcnt = i*iout0 + iout;
+                        if (idx_out < 0) idx_out += index_range;
+                        idx_out += (totalcnt / (cdim * rdim)) * index_range;
+                        idx_out = idx_out * rdim + totalcnt % rdim;
+                        d_out[totalcnt] = d_src[idx_out*isrc0];
+                    }
+                } else if (ldim == 1 && rdim != 1) {
+                    for (i = 0; i < a_idx->shape[n_inner]; i++) {
+                        int64_t idx_out = d_idx[i*iidx0+iidx] % index_range;
+                        int64_t totalcnt = i*iout0 + iout;
+                        if (idx_out < 0) idx_out += index_range;
+                        idx_out = idx_out * rdim + totalcnt % rdim;
+                        d_out[totalcnt] = d_src[idx_out*isrc0];
+                    }
+                } else if (ldim != 1 && rdim == 1) {
+                    for (i = 0; i < a_idx->shape[n_inner]; i++) {
+                        int64_t idx_out = d_idx[i*iidx0+iidx] % index_range;
+                        int64_t totalcnt = i*iout0 + iout;
+                        if (idx_out < 0) idx_out += index_range;
+                        idx_out += (totalcnt / (cdim * rdim)) * index_range;
+                        d_out[totalcnt] = d_src[idx_out*isrc0];
+                    }
+                } else {
+                    for (i = 0; i < a_idx->shape[n_inner]; i++) {
+                        int64_t idx_out = d_idx[i*iidx0+iidx] % index_range;
+                        int64_t totalcnt = i*iout0 + iout;
+                        if (idx_out < 0) idx_out += index_range;
+                        d_out[totalcnt] = d_src[idx_out*isrc0];
+                    }
+                }
+
+                for (k = a_idx->ndim - 2; k >= 1; k--) {
+                    int64_t kk = rel_idx[k];
+                    if (++cnt_idx[kk] < a_idx->shape[kk]) {
+                        iidx += a_idx->strides[kk] / a_idx->itemsize;
+                        iout += a_out->strides[kk] / a_out->itemsize;
+                        break;
+                    }
+                    cnt_idx[kk] = 0;
+                    iidx -= (a_idx->strides[kk] / a_idx->itemsize) * (a_idx->shape[kk] - 1);
+                    iout -= (a_out->strides[kk] / a_out->itemsize) * (a_out->shape[kk] - 1);
+                }
+                if (k < 1) break;
             }
-            if (j < 0) break;
         }
-} /* omp single */
 
     } else {
         // above NLCPY_MAXNDIM
@@ -138,4 +232,3 @@ uint64_t nlcpy_take(ve_arguments *args, int32_t *psw) {
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
-

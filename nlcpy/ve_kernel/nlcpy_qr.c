@@ -32,16 +32,24 @@
 */
 
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 
-extern void dgeqrf_(const int32_t *m, const int32_t *n, double *pa, const int32_t *lda, double *ptau, double *pw, const int32_t *lwork, int32_t *info);
-extern void dorgqr_(const int32_t *m, const int32_t *mc, const int32_t *k, double *pa, const int32_t *lda, double *ptau, double *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_qr_d(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
+extern void dgeqrf_(const int64_t *m, const int64_t *n, double *pa, const int64_t *lda, double *ptau, double *pw, const int64_t *lwork, int64_t *info);
+extern void dorgqr_(const int64_t *m, const int64_t *mc, const int64_t *k, double *pa, const int64_t *lda, double *ptau, double *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_qr_d(int64_t m, int64_t n, int64_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
 {
-    int32_t lda = a->shape[0];
-    const int32_t lwork = work->size;
-    int32_t info;
+    int64_t lda = a->shape[0];
+    const int64_t lwork = work->size;
+    int64_t info;
 
     double *pa = (double*)a->ve_adr;
     double *ptau = (double*)tau->ve_adr;
@@ -65,21 +73,21 @@ uint64_t nlcpy_qr_d(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *t
         }
     }
     if (jobq) {
-        const int32_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
-        const int32_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
+        const int64_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
+        const int64_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
         dorgqr_(&m, &mc, &k, pa, &lda, ptau, pw, &lwork, &info);
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void zgeqrf_(const int32_t *m, const int32_t *n, double _Complex *pa, const int32_t *lda, double _Complex *ptau, double _Complex *pw, const int32_t *lwork, int32_t *info);
-extern void zungqr_(const int32_t *m, const int32_t *mc, const int32_t *k, double _Complex *pa, const int32_t *lda, double _Complex *ptau, double _Complex *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_qr_z(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
+extern void zgeqrf_(const int64_t *m, const int64_t *n, double _Complex *pa, const int64_t *lda, double _Complex *ptau, double _Complex *pw, const int64_t *lwork, int64_t *info);
+extern void zungqr_(const int64_t *m, const int64_t *mc, const int64_t *k, double _Complex *pa, const int64_t *lda, double _Complex *ptau, double _Complex *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_qr_z(int64_t m, int64_t n, int64_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
 {
-    int32_t lda = a->shape[0];
-    const int32_t lwork = work->size;
-    int32_t info;
+    int64_t lda = a->shape[0];
+    const int64_t lwork = work->size;
+    int64_t info;
 
     double _Complex *pa = (double _Complex*)a->ve_adr;
     double _Complex *ptau = (double _Complex*)tau->ve_adr;
@@ -103,15 +111,15 @@ uint64_t nlcpy_qr_z(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *t
         }
     }
     if (jobq) {
-        const int32_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
-        const int32_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
+        const int64_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
+        const int64_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
         zungqr_(&m, &mc, &k, pa, &lda, ptau, pw, &lwork, &info);
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_qr(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw) {
+uint64_t nlcpy_qr(int64_t m, int64_t n, int64_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-14 15:41+0900\n"
+"POT-Creation-Date: 2021-10-05 14:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -126,130 +126,136 @@ msgstr "一時的な流速 :math:`\\boldsymbol{u}^{\\star}` を決定します�
 
 #: ../../source/example/cfd.rst:66
 msgid ""
-"\\boldsymbol{u}^{\\star}=\\boldsymbol{u}^{n}-\\Delta t(\\boldsymbol{u}^n "
-"\\cdot \\nabla)\\boldsymbol{u}^{n}+\\frac{\\Delta "
-"t}{Re}\\nabla^2\\boldsymbol{u}^{n} \\tag{A}"
+"\\begin{equation}\n"
+"  \\boldsymbol{u}^{\\star}=\\boldsymbol{u}^{n}-\\Delta "
+"t(\\boldsymbol{u}^n \\cdot \\nabla)\\boldsymbol{u}^{n}+\\frac{\\Delta "
+"t}{Re}\\nabla^2\\boldsymbol{u}^{n} \\tag{A}\n"
+"\\end{equation}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:70
+#: ../../source/example/cfd.rst:73
 msgid ""
 "where :math:`\\boldsymbol{u}^{n}` is the flow velocity at the time step "
 ":math:`n`."
 msgstr "ここで、:math:`\\boldsymbol{u}^{n}` はタイムステップ :math:`n` での流速です。"
 
-#: ../../source/example/cfd.rst:73
+#: ../../source/example/cfd.rst:76
 msgid "Determine the pressure :math:`p^{n+1}` by solving the Poisson equation"
 msgstr "ポアソン方程式を解いて圧力 :math:`p^{n+1}` を決定します。"
 
-#: ../../source/example/cfd.rst:75
+#: ../../source/example/cfd.rst:78
 msgid ""
-"\\nabla^2 p^{n+1} = \\frac{\\nabla \\cdot "
-"\\boldsymbol{u}^{\\star}}{\\Delta t} \\tag{B}"
+"\\begin{equation}\n"
+"  \\nabla^2 p^{n+1} = \\frac{\\nabla \\cdot "
+"\\boldsymbol{u}^{\\star}}{\\Delta t} \\tag{B}\n"
+"\\end{equation}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:79
+#: ../../source/example/cfd.rst:85
 msgid "To solve this Poisson equation, we use the Jacobi method."
 msgstr "ポアソン方程式を解くために、ヤコビ法を用います。"
 
-#: ../../source/example/cfd.rst:82
+#: ../../source/example/cfd.rst:88
 msgid "Determine the flow velocity :math:`\\boldsymbol{u}^{n+1}`"
 msgstr "流速 :math:`\\boldsymbol{u}^{n+1}` を決定します。"
 
-#: ../../source/example/cfd.rst:84
+#: ../../source/example/cfd.rst:90
 msgid ""
-"\\boldsymbol{u}^{n+1} = \\boldsymbol{u}^{\\star} - \\Delta t \\nabla "
-"p^{n+1} \\tag{C}"
+"\\begin{equation}\n"
+"  \\boldsymbol{u}^{n+1} = \\boldsymbol{u}^{\\star} - \\Delta t \\nabla "
+"p^{n+1} \\tag{C}\n"
+"\\end{equation}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:89
+#: ../../source/example/cfd.rst:98
 msgid "Boundary Conditions"
 msgstr "境界値条件"
 
-#: ../../source/example/cfd.rst:92
+#: ../../source/example/cfd.rst:1
 msgid "Boundary"
 msgstr "境界値"
 
-#: ../../source/example/cfd.rst:92
+#: ../../source/example/cfd.rst:1
 msgid "Flow Velocity"
 msgstr "流速"
 
-#: ../../source/example/cfd.rst:92
+#: ../../source/example/cfd.rst:1
 msgid "Pressure"
 msgstr "圧力"
 
-#: ../../source/example/cfd.rst:94
+#: ../../source/example/cfd.rst:1
 msgid "Injection(:math:`x=0, y=0, y=LY`)"
 msgstr "流入(:math:`x=0, y=0, y=LY`)"
 
-#: ../../source/example/cfd.rst:94
-msgid ":math:`(0.9, 0.1)`"
+#: ../../source/example/cfd.rst:1
+msgid ":math:`0.9, 0.1`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:94 ../../source/example/cfd.rst:97
+#: ../../source/example/cfd.rst:1
 msgid ":math:`0`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:95
+#: ../../source/example/cfd.rst:1
 msgid "Leak(:math:`x=LX`)"
 msgstr "流出(:math:`x=LX`)"
 
-#: ../../source/example/cfd.rst:95
+#: ../../source/example/cfd.rst:1
 msgid ":math:`\\frac{\\partial \\boldsymbol{u}}{\\partial x}=0`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:95
+#: ../../source/example/cfd.rst:1
 msgid ":math:`\\frac{\\partial p}{\\partial x}=0`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:96
+#: ../../source/example/cfd.rst:1
 msgid "Object Surface"
 msgstr "物体表面"
 
-#: ../../source/example/cfd.rst:96 ../../source/example/cfd.rst:97
+#: ../../source/example/cfd.rst:1
 msgid ":math:`(0, 0)`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:96
+#: ../../source/example/cfd.rst:1
 msgid ""
 ":math:`\\frac{\\partial p}{\\partial x}=0, \\frac{\\partial p}{\\partial "
 "y}=0`"
 msgstr ""
 
-#: ../../source/example/cfd.rst:97
+#: ../../source/example/cfd.rst:1
 msgid "Object Inner"
 msgstr "物体内部"
 
-#: ../../source/example/cfd.rst:102
+#: ../../source/example/cfd.rst:111
 msgid "Program"
 msgstr "プログラム"
 
-#: ../../source/example/cfd.rst:337
+#: ../../source/example/cfd.rst:346
 msgid "Simulation Result"
 msgstr "シミュレーション結果"
 
-#: ../../source/example/cfd.rst:339
+#: ../../source/example/cfd.rst:348
 msgid "The temporal change in speed of each grid point is shown below."
 msgstr "各格子点の速さの時間的変化を以下に示します。"
 
-#: ../../source/example/cfd.rst:346
+#: ../../source/example/cfd.rst:355
 msgid "Appendix"
 msgstr "付録"
 
-#: ../../source/example/cfd.rst:349
+#: ../../source/example/cfd.rst:358
 msgid "Discrete Equations"
 msgstr "離散方程式"
 
-#: ../../source/example/cfd.rst:351
+#: ../../source/example/cfd.rst:360
 msgid ""
 "The superscript indicates the time step, and the subscript indicates the "
 "x coordinate and y coordinate."
 msgstr "上付き文字はタイムステップを示し、下付き文字はx,y座標を示します。"
 
-#: ../../source/example/cfd.rst:353
+#: ../../source/example/cfd.rst:362
 msgid "**Equation (A):**"
 msgstr "**方程式 (A):**"
 
-#: ../../source/example/cfd.rst:355
+#: ../../source/example/cfd.rst:364
 msgid ""
 "\\begin{eqnarray}\n"
 "  u^{\\star}_{i,j}=(1-\\frac{2\\Delta t}{Re\\Delta x^2}-\\frac{2\\Delta "
@@ -262,7 +268,7 @@ msgid ""
 "\\end{eqnarray}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:364
+#: ../../source/example/cfd.rst:374
 msgid ""
 "\\begin{eqnarray}\n"
 "  v^{\\star}_{i,j}=(1-\\frac{2\\Delta t}{Re\\Delta x^2}-\\frac{2\\Delta "
@@ -276,46 +282,67 @@ msgid ""
 "\\end{eqnarray}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:374
+#: ../../source/example/cfd.rst:385
 msgid ""
 "where :math:`u` is the x-axial velocity and :math:`v` is the y-axial "
 "velocity."
 msgstr ":math:`u` 、:math:`v` はそれぞれx軸、y軸の流速を示します。"
 
-#: ../../source/example/cfd.rst:377
+#: ../../source/example/cfd.rst:388
 msgid "**Equation (B):**"
 msgstr "**方程式 (B):**"
 
-#: ../../source/example/cfd.rst:379
+#: ../../source/example/cfd.rst:390
 msgid ""
 "S^{n}_{i,j}=\\frac{1}{2\\Delta t\\Delta x}(u^{\\star n}_{i+1,j}-u^{\\star"
 " n}_{i-1,j})+\\frac{1}{2\\Delta t \\Delta y}(v^{\\star "
 "n}_{i,j+1}-v^{\\star n}_{i,j-1})"
 msgstr ""
 
-#: ../../source/example/cfd.rst:383
+#: ../../source/example/cfd.rst:394
 msgid ""
 "p^{n+1}_{i,j}=\\frac{\\Delta y^2(p^{n+1}_{i+1,j}+p^{n+1}_{i-1,j})+\\Delta"
 " x^2(p^{n+1}_{i,j+1}+p^{n+1}_{i,j-1})-\\Delta x^2\\Delta y^2 "
 "S^{n}_{i,j}}{2(\\Delta x^2 + \\Delta y^2)}"
 msgstr ""
 
-#: ../../source/example/cfd.rst:387
+#: ../../source/example/cfd.rst:398
 msgid "where :math:`S` is the right hand side of the Poisson equation."
 msgstr "ここで、:math:`S` はポアソン方程式の右辺を示します。"
 
-#: ../../source/example/cfd.rst:390
+#: ../../source/example/cfd.rst:401
 msgid "**Equation (C):**"
 msgstr "**方程式 (C):**"
 
-#: ../../source/example/cfd.rst:392
+#: ../../source/example/cfd.rst:403
 msgid ""
 "u^{n+1}_{i,j} = u^{\\star}_{i,j}-\\frac{\\Delta t}{2\\Delta "
 "x}(p^{n+1}_{i+1,j}-p^{n+1}_{i-1,j})"
 msgstr ""
 
-#: ../../source/example/cfd.rst:396
+#: ../../source/example/cfd.rst:407
 msgid ""
 "v^{n+1}_{i,j} = v^{\\star}_{i,j}-\\frac{\\Delta t}{2\\Delta "
 "y}(p^{n+1}_{i,j+1}-p^{n+1}_{i,j-1})"
 msgstr ""
+
+#~ msgid ""
+#~ "\\boldsymbol{u}^{\\star}=\\boldsymbol{u}^{n}-\\Delta "
+#~ "t(\\boldsymbol{u}^n \\cdot "
+#~ "\\nabla)\\boldsymbol{u}^{n}+\\frac{\\Delta "
+#~ "t}{Re}\\nabla^2\\boldsymbol{u}^{n} \\tag{A}"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\\nabla^2 p^{n+1} = \\frac{\\nabla \\cdot "
+#~ "\\boldsymbol{u}^{\\star}}{\\Delta t} \\tag{B}"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\\boldsymbol{u}^{n+1} = \\boldsymbol{u}^{\\star} -"
+#~ " \\Delta t \\nabla p^{n+1} \\tag{C}"
+#~ msgstr ""
+
+#~ msgid ":math:`(0.9, 0.1)`"
+#~ msgstr ""
+

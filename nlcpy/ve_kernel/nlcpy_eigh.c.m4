@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,21 +32,29 @@
 */
 
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_eigh_real@-->,<--@
-extern void $1syevd_(const char *jobz, const char *uplo, const int32_t *n, $2 *pa, const int32_t *lda, $2 *pw, $2 *pwork, const int32_t *lwork, int32_t *iwork, const int32_t *liwork, int32_t *info);
-uint64_t nlcpy_eigh_$1(ve_array *a, ve_array *w, ve_array *work, ve_array *iwork, const char jobz, const char uplo, int32_t *info, int32_t *psw)
+extern void $1syevd_(const char *jobz, const char *uplo, const int64_t *n, $2 *pa, const int64_t *lda, $2 *pw, $2 *pwork, const int64_t *lwork, int64_t *iwork, const int64_t *liwork, int64_t *info);
+uint64_t nlcpy_eigh_$1(ve_array *a, ve_array *w, ve_array *work, ve_array *iwork, const char jobz, const char uplo, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t lwork = work->size;
-    const int32_t liwork = iwork->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t lwork = work->size;
+    const int64_t liwork = iwork->size;
 
     $2 *pa = ($2*)a->ve_adr;
     $2 *pw = ($2*)w->ve_adr;
     $2 *pwork = ($2*)work->ve_adr;
-    int32_t *piwork = (int32_t*)iwork->ve_adr;
+    int64_t *piwork = (int64_t*)iwork->ve_adr;
 
     if (pa == NULL || pw == NULL || pwork == NULL || piwork == NULL) {
         return NLCPY_ERROR_MEMORY;
@@ -79,20 +87,20 @@ macro_eigh_real(s, float)dnl
 macro_eigh_real(d, double)dnl
 
 define(<--@macro_eigh_complex@-->,<--@
-extern void $1heevd_(const char *jobz, const char *uplo, const int32_t *n, $2 *pa, const int32_t *lda, $3 *pw, $2 *pwork, const int32_t *lwork, $3 *rwork, const int32_t *lrwork, int32_t *iwork, const int32_t *liwork, int32_t *info);
-uint64_t nlcpy_eigh_$1(ve_array *a, ve_array *w, ve_array *work, ve_array *rwork, ve_array *iwork, const char jobz, const char uplo, int32_t *info, int32_t *psw)
+extern void $1heevd_(const char *jobz, const char *uplo, const int64_t *n, $2 *pa, const int64_t *lda, $3 *pw, $2 *pwork, const int64_t *lwork, $3 *rwork, const int64_t *lrwork, int64_t *iwork, const int64_t *liwork, int64_t *info);
+uint64_t nlcpy_eigh_$1(ve_array *a, ve_array *w, ve_array *work, ve_array *rwork, ve_array *iwork, const char jobz, const char uplo, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t lwork = work->size;
-    const int32_t lrwork = rwork->size;
-    const int32_t liwork = iwork->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t lwork = work->size;
+    const int64_t lrwork = rwork->size;
+    const int64_t liwork = iwork->size;
 
     $2 *pa = ($2*)a->ve_adr;
     $3 *pw = ($3*)w->ve_adr;
     $2 *pwork = ($2*)work->ve_adr;
     $3 *prwork = ($3*)rwork->ve_adr;
-    int32_t *piwork = (int32_t*)iwork->ve_adr;
+    int64_t *piwork = (int64_t*)iwork->ve_adr;
 
     if (pa == NULL || pw == NULL || pwork == NULL || prwork == NULL || piwork == NULL) {
         return NLCPY_ERROR_MEMORY;
@@ -124,7 +132,7 @@ uint64_t nlcpy_eigh_$1(ve_array *a, ve_array *w, ve_array *work, ve_array *rwork
 macro_eigh_complex(c, float _Complex, float)dnl
 macro_eigh_complex(z, double _Complex, double)dnl
 
-uint64_t nlcpy_eigh(ve_array *a, ve_array *w, ve_array *work, ve_array *rwork, ve_array *iwork, int32_t jobz, int32_t uplo, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_eigh(ve_array *a, ve_array *w, ve_array *work, ve_array *rwork, ve_array *iwork, int64_t jobz, int64_t uplo, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f32:

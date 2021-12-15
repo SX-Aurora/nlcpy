@@ -51,7 +51,16 @@
 #endif /* end NDEBUG */
 
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
+#include <inc_i64/sca.h>
 
 define(<--@macro_sca_stencil_create@-->,<--@
 uint64_t nlcpy_sca_stencil_create_$1(uint64_t *hnd_adr, int32_t *psw)
@@ -94,6 +103,7 @@ uint64_t nlcpy_sca_stencil_reset_elements(sca_stencil_t *sten, int32_t *psw)
 uint64_t nlcpy_sca_stencil_destroy(sca_stencil_t *sten, int32_t *psw)
 {
     sca_error_t err;
+    if (sten == NULL) return NLCPY_ERROR_MEMORY;
     err = sca_stencil_destroy(*sten);
     if (err != SCA_ERROR_OK) {
         return NLCPY_ERROR_SCA;
@@ -107,6 +117,7 @@ uint64_t nlcpy_sca_stencil_destroy(sca_stencil_t *sten, int32_t *psw)
 uint64_t nlcpy_sca_code_destroy(sca_code_t *code, int32_t *psw)
 {
     sca_error_t err;
+    if (code == NULL) return NLCPY_ERROR_MEMORY;
     err = sca_code_destroy(*code);
     if (err != SCA_ERROR_OK) {
         return NLCPY_ERROR_SCA;

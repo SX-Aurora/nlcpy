@@ -30,8 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
 #include "nlcpy.h"
+#include <inc_i64/asl.h>
 
 include(macros.m4)dnl
 
@@ -109,7 +117,7 @@ uint64_t nlcpy_$1_1d_$2_$2(ve_array *x, ve_array *y, const int64_t axis, const i
 
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
-        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err); 
+        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         err = asl_fft_create_complex_1d_$5(&fft, n_in);
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
@@ -717,7 +725,7 @@ macro_recursive_rfft_1d(irfft,c128,f64,ifft,c128,c128)dnl
 macro_recursive_rfft_1d(rfft,f32,c64,fft,c64,c64)dnl
 macro_recursive_rfft_1d(irfft,c64,f32,ifft,c64,c64)dnl
 
-static inline uint64_t check_multiplicity_convertible_axes(int64_t *axes, uint64_t start, uint64_t end) 
+static inline uint64_t check_multiplicity_convertible_axes(int64_t *axes, uint64_t start, uint64_t end)
 {
     const uint64_t len = end - start + 1;
     uint64_t unique_check[len];
@@ -922,7 +930,7 @@ uint64_t nlcpy_$1_2d_$2_$3(ve_array *x, ve_array *y, ve_array *axes, ve_array *n
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -976,7 +984,7 @@ ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -1203,7 +1211,7 @@ uint64_t nlcpy_$1_3d_$2_$3(ve_array *x, ve_array *y, ve_array *axes, ve_array *n
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
@@ -1256,7 +1264,7 @@ ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
@@ -1497,7 +1505,7 @@ uint64_t nlcpy_$1_nd_$2_$3(ve_array *x, ve_array *y, ve_array *axes, ve_array *n
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
@@ -1558,7 +1566,7 @@ ifelse(<--@$7@-->,<--@forward@-->,<--@dnl
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 ifelse(<--@$7@-->,<--@forward@-->,<--@dnl

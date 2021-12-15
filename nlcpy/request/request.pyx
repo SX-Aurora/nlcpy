@@ -38,6 +38,7 @@ import time
 import nlcpy
 
 from nlcpy import veo
+from nlcpy.veo._veo cimport VeoFunction
 from nlcpy.veo._veo cimport VeoRequest
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport core
@@ -52,7 +53,7 @@ import numpy
 cimport numpy as cnp
 
 cdef MAX_LAZY_REQUEST = 100
-# cdef MAX_ASYNC_REQUEST = 1000
+cdef MAX_ASYNC_REQUEST = 1000
 cdef object _request_manager = None
 cdef object _veo_requests = None
 cdef object _fpe_flag = None
@@ -87,32 +88,34 @@ cdef class VeoReqs:
     cdef:
         readonly list veo_reqs
         readonly list callbacks
+        readonly Py_ssize_t cnt
 
     def __init__(self):
-        self.veo_reqs = []
-        self.callbacks = []
+        self.veo_reqs = [None for _ in range(MAX_ASYNC_REQUEST)]
+        self.callbacks = [None for _ in range(MAX_ASYNC_REQUEST)]
+        self.cnt = 0
 
     def _push_req(self, VeoRequest req, callback=None):
-        self.veo_reqs.append(req)
+        self.veo_reqs[self.cnt] = req
         if callback is None:
             callback = check_error
         elif callback == 'nothing':
             callback = _nothing
         if not callable(callback):
             raise RuntimeError
-        self.callbacks.append(callback)
-        # if len(self.veo_reqs) > MAX_ASYNC_REQUEST:
-        #     self._wait_result_all()
+        self.callbacks[self.cnt] = callback
+        self.cnt += 1
+        if self.cnt >= MAX_ASYNC_REQUEST:
+            self._wait_result_all()
 
     def _wait_result_all(self):
         err = None
         try:
-            for req, chk in zip(self.veo_reqs, self.callbacks):
-                err = req.wait_result()
-                chk(err)
+            for i in range(self.cnt):
+                err = self.veo_reqs[i].wait_result()
+                self.callbacks[i](err)
         finally:
-            self.veo_reqs.clear()
-            self.callbacks.clear()
+            self.cnt = 0
         core.check_fpe_flags(_get_fpe_flag())
         return err
 
@@ -237,6 +240,24 @@ cpdef _push_and_flush_request(str name, tuple args, callback='default', sync=Fal
     vr._push_req(req, callback=callback)
     if sync or _rm.timing == 'on-the-fly':
         return vr._wait_result_all()
+
+# for not lazy and JIT
+cpdef _push_and_flush_request_with_JIT(
+        VeoFunction func, tuple args, callback='default', sync=False):
+    _rm = _get_request_manager()
+    if _rm.nreq > 0:
+        _rm._flush(sync=False)
+    ctx = veo._get_veo_ctx()
+    req = func(ctx, *args)
+    if callback == 'default':
+        callback = check_error
+    elif callback is None:
+        callback = _nothing
+    vr = _get_veo_requests()
+    vr._push_req(req, callback=callback)
+    if sync or _rm.timing == 'on-the-fly':
+        return vr._wait_result_all()
+
 
 cpdef _clear_requests():
     _rm = _get_request_manager()

@@ -30,16 +30,23 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
-
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_cholesky@-->,<--@
-extern void $1potrf_(const char *uplo, const int32_t *n, $2 *pa, const int32_t *lda, int32_t *info);
-uint64_t nlcpy_cholesky_$1(ve_array *a, int32_t *info, int32_t *psw)
+extern void $1potrf_(const char *uplo, const int64_t *n, $2 *pa, const int64_t *lda, int64_t *info);
+uint64_t nlcpy_cholesky_$1(ve_array *a, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
     const char uplo = 'L';
 
     $2 *pa = ($2*)a->ve_adr;
@@ -77,7 +84,7 @@ uint64_t nlcpy_cholesky_$1(ve_array *a, int32_t *info, int32_t *psw)
 macro_cholesky(d, double)dnl
 macro_cholesky(z, double _Complex)dnl
 
-uint64_t nlcpy_cholesky(ve_array *a, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_cholesky(ve_array *a, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

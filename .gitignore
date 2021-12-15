@@ -4,6 +4,8 @@
 *_log\.*
 *.npy
 *.npz
+*.png
+*.pickle
 *.egg-info
 /build/
 /dist/
@@ -13,3 +15,5 @@
 generated
 MANIFEST.in
 __pycache__
+htmlcov
+.coverage

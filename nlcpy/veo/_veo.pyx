@@ -167,10 +167,15 @@ cdef class VeoFunction(object):
             raise RuntimeError("VeoFunction needs arguments format info before call()")
         if len(args) > VEO_MAX_NUM_ARGS:
             raise ValueError("call_async: too many arguments (%d)" % len(args))
+        if len(args) != len(self.args_conv):
+            raise ValueError("invalid number of arguments, expected `{}`, got `{}`"
+                             .format(len(self.args_conv), len(args)))
 
         a = VeoArgs()
         for i in xrange(len(self.args_conv)):
             x = args[i]
+            if isinstance(x, nlcpy.ndarray):
+                x = x._ve_array
             if isinstance(x, OnStack):
                 try:
                     # a.set_stack(x.scope(), i, x.c_pointer(), x.size())
@@ -368,8 +373,14 @@ cdef class VeoArgs(object):
         veo_args_free(self.args)
         self.stacks.clear()
 
+    def set_i32(self, int argnum, int32_t val):
+        veo_args_set_i32(self.args, argnum, val)
+
     def set_i64(self, int argnum, int64_t val):
         veo_args_set_i64(self.args, argnum, val)
+
+    def set_u32(self, int argnum, uint32_t val):
+        veo_args_set_u64(self.args, argnum, val)
 
     def set_u64(self, int argnum, uint64_t val):
         veo_args_set_u64(self.args, argnum, val)
@@ -518,6 +529,13 @@ cdef class VeoProc(object):
         lib = VeoLibrary(self, <bytes> libname, res)
         self.lib[<bytes>libname] = lib
         return lib
+
+    def unload_library(self, VeoLibrary lib):
+        cdef int res = veo_unload_library(self.proc_handle, lib.lib_handle)
+        if res != 0:
+            raise RuntimeError("veo_unload_library '%s' failed" % lib.name)
+        self.lib_handle = 0LU
+        del self.lib[<bytes>lib.name]
 
     def static_library(self):
         lib = VeoLibrary(self, "__static__", 0UL)
@@ -722,4 +740,7 @@ cpdef _initialize(node=-1):
 def finalize():
     proc = _get_veo_proc()
     pool = _get_veo_pool()
-    proc.free_mempool(pool)
+    try:
+        proc.free_mempool(pool)
+    except AttributeError as e:
+        pass

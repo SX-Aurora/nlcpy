@@ -135,6 +135,12 @@ uint64_t call_sca_func(int64_t funcnum, ve_arguments *args, int32_t *psw) {
     return res;
 }
 
+uint64_t call_mask_func(int64_t funcnum, ve_arguments *args, int32_t *psw) {
+    uint64_t res;
+    res = get_mask_func(funcnum)(args, psw);
+    return res;
+}
+
 
 uint64_t run_request(request_package *pack, int32_t *psw) {
     uint64_t err;
@@ -191,6 +197,9 @@ uint64_t run_request(request_package *pack, int32_t *psw) {
         break;
     case SCA_OP:
         err = call_sca_func(pack->funcnum, &(pack->arguments), psw);
+        break;
+    case MASK_OP:
+        err = call_mask_func(pack->funcnum, &(pack->arguments), psw);
         break;
 default:
         return NLCPY_ERROR_FUNCTYPE;

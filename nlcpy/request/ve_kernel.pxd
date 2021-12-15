@@ -302,6 +302,8 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         # sca functions
         VE_FUNC_SCA_EXECUTE
 
+        # mask functions
+        VE_FUNC_DOMAIN_MASK
 
 cdef dict funcNumList
 
@@ -325,6 +327,7 @@ cdef extern from "../ve_kernel/ve_functype.h":
         MATH_OP
         RANDOM_OP
         SCA_OP
+        MASK_OP
 
 
 cdef dict funcTypeList

@@ -81,7 +81,7 @@ def _geev(a, jobvr):
     work = nlcpy.empty(
         65 * n if a_complex else 66 * n, dtype=dtype, order='F')
     rwork = nlcpy.empty(2 * n if a_complex else 1, dtype=f_dtype, order='F')
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
@@ -178,7 +178,7 @@ def _syevd(a, jobz, UPLO):
     n = a.shape[0]
     if a.size > 1:
         if a_complex:
-            lwork = max(2 * n + n * n, n + 48) if jobz else n + 48
+            lwork = max(2 * n + n * n, n + 48)
             lrwork = 1 + 5 * n + 2 * n * n if jobz else n
         else:
             lwork = max(2 * n + 32, 1 + 6 * n + 2 * n * n) if jobz else 2 * n + 32
@@ -191,8 +191,8 @@ def _syevd(a, jobz, UPLO):
 
     work = nlcpy.empty(lwork, dtype=dtype)
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
-    iwork = nlcpy.empty(liwork, dtype='i')
-    info = numpy.empty(1, dtype='i')
+    iwork = nlcpy.empty(liwork, dtype='l')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,22 +30,29 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
-
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_inv@-->,<--@
-extern void $1getrf_(const int32_t *m, const int32_t *n, $2 *pa, const int32_t *lda, int32_t *ipiv, int32_t *info);
-extern void $1getri_(const int32_t *n, $2 *pa, const int32_t *lda, int32_t *ipiv, $2 *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_inv_$1(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info, int32_t *psw)
+extern void $1getrf_(const int64_t *m, const int64_t *n, $2 *pa, const int64_t *lda, int64_t *ipiv, int64_t *info);
+extern void $1getri_(const int64_t *n, $2 *pa, const int64_t *lda, int64_t *ipiv, $2 *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_inv_$1(ve_array *a, ve_array *ipiv, ve_array *work, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t lwork = work->size;
 
     $2 *pa = ($2*)a->ve_adr;
     $2 *pw = ($2*)work->ve_adr;
-    int32_t *pipiv = (int32_t*)ipiv->ve_adr;
+    int64_t *pipiv = (int64_t*)ipiv->ve_adr;
     if (pa == NULL || pw == NULL || pipiv == NULL ) {
         return NLCPY_ERROR_MEMORY;
     }
@@ -76,7 +83,7 @@ uint64_t nlcpy_inv_$1(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info
 macro_inv(d, double)dnl
 macro_inv(z, double _Complex)dnl
 
-uint64_t nlcpy_inv(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_inv(ve_array *a, ve_array *ipiv, ve_array *work, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

@@ -29,6 +29,7 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+from nlcpy.veo._veo cimport VeoFunction
 from libc.stdint cimport *
 from nlcpy.core.core cimport ndarray
 from libcpp.vector cimport vector
@@ -39,6 +40,8 @@ cpdef _get_veo_requests()
 cpdef _get_fpe_flag()
 cpdef _push_request(str name, str typ, args)
 cpdef _push_and_flush_request(str name, tuple args, callback=*, sync=*)
+cpdef _push_and_flush_request_with_JIT(
+    VeoFunction func, tuple args, callback=*, sync=*)
 cpdef _clear_requests()
 cpdef _print_requests()
 cpdef _clear_requests()

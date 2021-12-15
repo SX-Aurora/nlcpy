@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,21 +31,28 @@
 #
 */
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
 #include "nlcpy.h"
 
 
-extern void dgetrf_(const int32_t *m, const int32_t *n, double *pa, const int32_t *lda, int32_t *ipiv, int32_t *info);
-extern void dgetri_(const int32_t *n, double *pa, const int32_t *lda, int32_t *ipiv, double *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_inv_d(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info, int32_t *psw)
+extern void dgetrf_(const int64_t *m, const int64_t *n, double *pa, const int64_t *lda, int64_t *ipiv, int64_t *info);
+extern void dgetri_(const int64_t *n, double *pa, const int64_t *lda, int64_t *ipiv, double *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_inv_d(ve_array *a, ve_array *ipiv, ve_array *work, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t lwork = work->size;
 
     double *pa = (double*)a->ve_adr;
     double *pw = (double*)work->ve_adr;
-    int32_t *pipiv = (int32_t*)ipiv->ve_adr;
+    int64_t *pipiv = (int64_t*)ipiv->ve_adr;
     if (pa == NULL || pw == NULL || pipiv == NULL ) {
         return NLCPY_ERROR_MEMORY;
     }
@@ -73,17 +80,17 @@ uint64_t nlcpy_inv_d(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info,
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void zgetrf_(const int32_t *m, const int32_t *n, double _Complex *pa, const int32_t *lda, int32_t *ipiv, int32_t *info);
-extern void zgetri_(const int32_t *n, double _Complex *pa, const int32_t *lda, int32_t *ipiv, double _Complex *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_inv_z(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info, int32_t *psw)
+extern void zgetrf_(const int64_t *m, const int64_t *n, double _Complex *pa, const int64_t *lda, int64_t *ipiv, int64_t *info);
+extern void zgetri_(const int64_t *n, double _Complex *pa, const int64_t *lda, int64_t *ipiv, double _Complex *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_inv_z(ve_array *a, ve_array *ipiv, ve_array *work, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t lwork = work->size;
 
     double _Complex *pa = (double _Complex*)a->ve_adr;
     double _Complex *pw = (double _Complex*)work->ve_adr;
-    int32_t *pipiv = (int32_t*)ipiv->ve_adr;
+    int64_t *pipiv = (int64_t*)ipiv->ve_adr;
     if (pa == NULL || pw == NULL || pipiv == NULL ) {
         return NLCPY_ERROR_MEMORY;
     }
@@ -111,7 +118,7 @@ uint64_t nlcpy_inv_z(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info,
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_inv(ve_array *a, ve_array *ipiv, ve_array *work, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_inv(ve_array *a, ve_array *ipiv, ve_array *work, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

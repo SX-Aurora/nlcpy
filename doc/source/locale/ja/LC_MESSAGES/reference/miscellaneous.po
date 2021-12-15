@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"POT-Creation-Date: 2021-11-18 10:59+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/reference/miscellaneous.rst:2
 msgid "Miscellaneous Routines"
@@ -29,11 +29,31 @@ msgstr ""
 msgid "Memory Ranges"
 msgstr ""
 
-#: ../../source/reference/miscellaneous.rst:13:<autosummary>:1
+#: ../../source/reference/miscellaneous.rst:15:<autosummary>:1
 msgid ":obj:`nlcpy.may_share_memory <nlcpy.may_share_memory>`"
 msgstr ""
 
-#: ../../source/reference/miscellaneous.rst:13:<autosummary>:1
+#: ../../source/reference/miscellaneous.rst:15:<autosummary>:1
 msgid "Determine if two arrays might share memory."
+msgstr ""
+
+#: ../../source/reference/miscellaneous.rst:17
+msgid "Utility"
+msgstr ""
+
+#: ../../source/reference/miscellaneous.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.get_include <nlcpy.get_include>`"
+msgstr ""
+
+#: ../../source/reference/miscellaneous.rst:24:<autosummary>:1
+msgid "Returns the directory path that contains the NLCPy \\*.h header files."
+msgstr ""
+
+#: ../../source/reference/miscellaneous.rst:24:<autosummary>:1
+msgid ":obj:`nlcpy.show_config <nlcpy.show_config>`"
+msgstr ""
+
+#: ../../source/reference/miscellaneous.rst:24:<autosummary>:1
+msgid "Shows library versions in the system on which NLCPy is running."
 msgstr ""
 

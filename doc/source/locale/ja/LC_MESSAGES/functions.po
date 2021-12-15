@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-14 14:58+0900\n"
+"POT-Creation-Date: 2021-11-18 10:59+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -402,6 +402,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`nlcpy.broadcast_arrays`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.broadcast_shapes`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2037,6 +2041,10 @@ msgid ":obj:`numpy.show_config`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`nlcpy.show_config`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.sign`"
 msgstr ""
 
@@ -2372,7 +2380,7 @@ msgstr ""
 msgid ":obj:`nlcpy.zeros_like`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:392
+#: ../../source/comparison_table.rst.inc:393
 msgid "Multi-Dimensional Array"
 msgstr "多次元配列"
 
@@ -2724,7 +2732,7 @@ msgstr ""
 msgid ":meth:`nlcpy.ndarray.view`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:458
+#: ../../source/comparison_table.rst.inc:459
 msgid "Linear Algebra"
 msgstr "線形代数"
 
@@ -2852,7 +2860,7 @@ msgstr ""
 msgid ":obj:`numpy.linalg.tensorsolve`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:490
+#: ../../source/comparison_table.rst.inc:491
 msgid "Discrete Fourier Transform"
 msgstr "離散フーリエ変換"
 
@@ -3000,7 +3008,7 @@ msgstr ""
 msgid ":obj:`nlcpy.fft.rfftn`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:520
+#: ../../source/comparison_table.rst.inc:521
 msgid "Random Sampling"
 msgstr "乱数生成"
 
@@ -3150,6 +3158,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`nlcpy.random.Generator.permutation`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.permuted`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1

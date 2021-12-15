@@ -64,8 +64,11 @@ for the number of time steps.
 1.  Determine the temporary flow velocity :math:`\boldsymbol{u}^{\star}`
 
     .. math::
+        :nowrap:
 
-        \boldsymbol{u}^{\star}=\boldsymbol{u}^{n}-\Delta t(\boldsymbol{u}^n \cdot \nabla)\boldsymbol{u}^{n}+\frac{\Delta t}{Re}\nabla^2\boldsymbol{u}^{n} \tag{A}
+        \begin{equation}
+          \boldsymbol{u}^{\star}=\boldsymbol{u}^{n}-\Delta t(\boldsymbol{u}^n \cdot \nabla)\boldsymbol{u}^{n}+\frac{\Delta t}{Re}\nabla^2\boldsymbol{u}^{n} \tag{A}
+        \end{equation}
 
     where :math:`\boldsymbol{u}^{n}` is the flow velocity at the time step :math:`n`.
 
@@ -73,8 +76,11 @@ for the number of time steps.
 2.  Determine the pressure :math:`p^{n+1}` by solving the Poisson equation
 
     .. math::
+        :nowrap:
 
-        \nabla^2 p^{n+1} = \frac{\nabla \cdot \boldsymbol{u}^{\star}}{\Delta t} \tag{B}
+        \begin{equation}
+          \nabla^2 p^{n+1} = \frac{\nabla \cdot \boldsymbol{u}^{\star}}{\Delta t} \tag{B}
+        \end{equation}
 
     To solve this Poisson equation, we use the Jacobi method.
 
@@ -82,20 +88,23 @@ for the number of time steps.
 3.  Determine the flow velocity :math:`\boldsymbol{u}^{n+1}`
 
     .. math::
+        :nowrap:
 
-        \boldsymbol{u}^{n+1} = \boldsymbol{u}^{\star} - \Delta t \nabla p^{n+1} \tag{C}
+        \begin{equation}
+          \boldsymbol{u}^{n+1} = \boldsymbol{u}^{\star} - \Delta t \nabla p^{n+1} \tag{C}
+        \end{equation}
 
 Boundary Conditions
 ^^^^^^^^^^^^^^^^^^^
 
-================================= ==================================================== ========================================================================
-Boundary                          Flow Velocity                                        Pressure
-================================= ==================================================== ========================================================================
-Injection(:math:`x=0, y=0, y=LY`) :math:`(0.9, 0.1)`                                   :math:`0`
-Leak(:math:`x=LX`)                :math:`\frac{\partial \boldsymbol{u}}{\partial x}=0` :math:`\frac{\partial p}{\partial x}=0`
-Object Surface                    :math:`(0, 0)`                                       :math:`\frac{\partial p}{\partial x}=0, \frac{\partial p}{\partial y}=0`
-Object Inner                      :math:`(0, 0)`                                       :math:`0`
-================================= ==================================================== ========================================================================
+.. csv-table::
+    :header: "Boundary", "Flow Velocity", "Pressure"
+    :widths: 20, 10, 10
+
+    "Injection(:math:`x=0, y=0, y=LY`)", ":math:`0.9, 0.1`", ":math:`0`"
+    "Leak(:math:`x=LX`)", ":math:`\frac{\partial \boldsymbol{u}}{\partial x}=0`", ":math:`\frac{\partial p}{\partial x}=0`"
+    "Object Surface", ":math:`(0, 0)`", ":math:`\frac{\partial p}{\partial x}=0, \frac{\partial p}{\partial y}=0`"
+    "Object Inner", ":math:`(0, 0)`", ":math:`0`"
 
 
 Program
@@ -353,6 +362,7 @@ The superscript indicates the time step, and the subscript indicates the x coord
 **Equation (A):**
 
 .. math::
+    :nowrap:
 
     \begin{eqnarray}
       u^{\star}_{i,j}=(1-\frac{2\Delta t}{Re\Delta x^2}-\frac{2\Delta t}{Re\Delta y^2})u^{n}_{i,j}- \\
@@ -362,6 +372,7 @@ The superscript indicates the time step, and the subscript indicates the x coord
     \end{eqnarray}
 
 .. math::
+    :nowrap:
 
     \begin{eqnarray}
       v^{\star}_{i,j}=(1-\frac{2\Delta t}{Re\Delta x^2}-\frac{2\Delta t}{Re\Delta y^2})v^{n}_{i,j}- \\

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+@#include <float.h>
+@#include <math.h>
+@#include <complex.h>
 
 @#include "nlcpy.h"
 
@@ -92,7 +102,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
         if (!where_flag) {
             if (!init_flag) {
                 *py = *px;
-            } 
+            }
             else{
                 @UNARY_OPERATOR@(*px,*py,$1)
             }
@@ -107,7 +117,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                 }
             }
         }
-} /* omp single */ 
+} /* omp single */
 
 /////////
 // 1-d //
@@ -185,7 +195,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                 tmp = (tmp < px[i*ix]) ? tmp : ($2)px[i*ix];
 #endif
 #if defined(DTAG1_f32) || defined(DTAG1_f64)
-                // NaN check: 
+                // NaN check:
                 // is_there_nan += (float)isnan_@DTAG1@(px[i*ix]);
                 @TYPE1@ xx;
                 *(&xx) = px[i*ix];
@@ -217,7 +227,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
-            { 
+            {
                 if (!init_flag) {
                     *py = *px;
                     i = 1;
@@ -228,13 +238,13 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                 for (; i < x->shape[0]; i++) {
                     @UNARY_OPERATOR@(px[i*ix],*py,$1)
                 }
-            } /* omp single */ 
+            } /* omp single */
 #endif
         } else {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
-            { 
+            {
                 Bint *pw = (Bint *)w->ve_adr;
                 const uint64_t iw = w->strides[0]/w->itemsize;
                 if (!init_flag) {
@@ -258,7 +268,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                         @UNARY_OPERATOR@(px[i*ix],*py,$1)
                     }
                 }
-            } /* omp single */ 
+            } /* omp single */
         }
 
 /////////
@@ -296,7 +306,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
         } else if (n_outer == axis) {
             idx[0] = 1;
             idx[1] = 0;
-        }    
+        }
         int64_t n_inner2 = idx[n_inner];
         int64_t n_outer2 = idx[n_outer];
 
@@ -356,7 +366,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                             tmp = (tmp < px[i*ix0+ix]) ? tmp : ($2)px[i*ix0+ix];
 #endif
 #if defined(DTAG1_f32) || defined(DTAG1_f64)
-                            // NaN check: 
+                            // NaN check:
                             //   is_there_nan += (float)isnan_@DTAG1@(px[i*ix0+ix]);
                             @TYPE1@ xx;
                             *(&xx) = px[i*ix0+ix];

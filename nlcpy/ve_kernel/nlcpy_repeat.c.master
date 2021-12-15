@@ -30,6 +30,13 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
 
 @#include "nlcpy.h"
 #define_switch (a->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)

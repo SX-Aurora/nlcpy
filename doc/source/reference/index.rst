@@ -25,6 +25,7 @@ Here is a list of functionalites provided by NLCPy.
     fft
     indexing
     io
+    jit/index
     random
     sca
     sorting
@@ -32,6 +33,7 @@ Here is a list of functionalites provided by NLCPy.
     linalg
     logic
     request
+    ma
     error_handling
     miscellaneous
     profiling

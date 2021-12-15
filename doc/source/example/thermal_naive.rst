@@ -42,6 +42,7 @@ Boundary Conditions
 ^^^^^^^^^^^^^^^^^^^
 
 .. math::
+    :nowrap:
 
     \begin{eqnarray*}
       T &=& T_1  ~ (x=0, x={\rm LX}, y=0) \\
@@ -52,6 +53,7 @@ Initial Conditions
 ^^^^^^^^^^^^^^^^^^
 
 .. math::
+    :nowrap:
 
     \begin{eqnarray*}
       T &=& T_0 \\

@@ -51,6 +51,7 @@ enum ve_functype {
     MATH_OP               = 0x000f,
     RANDOM_OP             = 0x0010,
     SCA_OP                = 0x0011,
+    MASK_OP               = 0x0012,
     COPY_OP               = 0x00ff,
 };
 

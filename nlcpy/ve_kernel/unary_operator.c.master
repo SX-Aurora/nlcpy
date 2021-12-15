@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,13 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
 
 @#include "nlcpy.h"
 
@@ -47,73 +54,122 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     ve_array *y = &(args->unary.z);
     ve_array *w = &(args->unary.w);
     int32_t where_flag = args->unary.where_flag;
-    ve_array *where = &(args->unary.where);
     if (x->size == 0 || y->size == 0) return (uint64_t)NLCPY_ERROR_OK;
-
     uint64_t err = NLCPY_ERROR_OK;
+
+    void *px = (void *)nlcpy__get_ptr(x);
+    if (px == NULL) return NLCPY_ERROR_MEMORY;
+    void *py = (void *)nlcpy__get_ptr(y);
+    if (py == NULL) return NLCPY_ERROR_MEMORY;
+
+    ve_array *where = NULL;
+    Bint *pwhere = NULL;
+    if (where_flag) {
+        where = &(args->unary.where);
+        pwhere = (Bint *)where->ve_adr;
+    }
+
+@#ifdef _OPENMP
+    const int nt = omp_get_num_threads();
+    const int it = omp_get_thread_num();
+@#else
+    const int nt = 1;
+    const int it = 0;
+@#endif /* _OPENMP */
+
+    int64_t len = 0;
+    int64_t *idx = NULL;
+    int64_t *cnt_y = NULL;
+    int64_t n_inner = y->ndim - 1;
+    int64_t n_outer = 0;
+    if (y->ndim == 1 || !where_flag &&
+          ( (x->is_c_contiguous & w->is_c_contiguous) ||
+            (x->is_f_contiguous & w->is_f_contiguous) ) ) {
+        len = y->size;
+    } else if (y->ndim <= NLCPY_MAXNDIM) {
+        cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__reset_coords(cnt_y, y->ndim);
+        idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
+        nlcpy__rearrange_axis(y, idx);
+        n_inner = idx[n_inner];
+        n_outer = idx[n_outer];
+        len = y->shape[n_outer];
+    } else if (y->ndim > NLCPY_MAXNDIM) {
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    }
+    const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
+    const uint64_t iw0 = (where_flag) ? where->strides[n_inner] / where->itemsize : 0;
+    const int64_t cnt_s = len * it / nt;
+    const int64_t cnt_e = len * (it + 1) / nt;
+
     if (y->dtype==w->dtype) {
+        const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
 #begin_switch
         switch (y->dtype) {
 #if defined(DTAG_i32)
-        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, where_flag, where, psw); break;
+        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_i64)
-        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, where_flag, where, psw); break;
+        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_u32)
-        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, where_flag, where, psw); break;
+        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_u64)
-        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, where_flag, where, psw); break;
+        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_f32)
-        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, where_flag, where, psw); break;
+        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_f64)
-        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, where_flag, where, psw); break;
+        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_c64)
-        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, where_flag, where, psw); break;
+        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_c128)
-        case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, where_flag, where, psw); break;
+        case ve_c128: err = FILENAME_@DTAG1@_c128(x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_bool)
-        case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, where_flag, where, psw); break;
+        case ve_bool: err = FILENAME_@DTAG1@_bool(x, px, y, py, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
         default: err = NLCPY_ERROR_DTYPE;
         }
 #end_switch
 
     } else {
+        void *pw = (void *)nlcpy__get_ptr(w);
+        if (pw == NULL) return NLCPY_ERROR_MEMORY;
+        const uint64_t iy0 = w->strides[n_inner] / w->itemsize;
 #begin_switch
         switch (w->dtype) {
 #if defined(DTAG_i32)
-        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, where_flag, where, psw); break;
+        case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_i64)
-        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, where_flag, where, psw); break;
+        case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_u32)
-        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, where_flag, where, psw); break;
+        case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_u64)
-        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, where_flag, where, psw); break;
+        case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_f32)
-        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, where_flag, where, psw); break;
+        case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_f64)
-        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, where_flag, where, psw); break;
+        case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_c64)
-        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, where_flag, where, psw); break;
+        case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_c128)
-        case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, where_flag, where, psw); break;
+        case ve_c128: err = FILENAME_@DTAG1@_c128(x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
 #if defined(DTAG_bool)
-        case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, where_flag, where, psw); break;
+        case ve_bool: err = FILENAME_@DTAG1@_bool(x, px, w, pw, where, pwhere, cnt_s, cnt_e, cnt_y, idx, n_inner, n_outer, ix0, iy0, iw0, psw); break;
 #endif
         default: err = NLCPY_ERROR_DTYPE;
         }

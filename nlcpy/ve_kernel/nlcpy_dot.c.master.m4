@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,8 +30,15 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
-
 include(macros.m4)dnl
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+
 @#include "nlcpy.h"
 
 #define_switch (x->dtype @ y->dtype)
@@ -72,7 +79,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,$1)
         }

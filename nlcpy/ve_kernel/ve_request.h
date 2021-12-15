@@ -276,6 +276,13 @@ typedef struct block_op_arguments_tag {
     ve_array offsets;
 } block_op_arguments;
 
+typedef struct domain_mask_arguments_tag {
+    ve_array a;
+    ve_array b;
+    ve_array arr;
+    ve_array out;
+} domain_mask_arguments;
+
 typedef union ve_arguments_tag{
     binary_op_arguments binary;
     unary_op_arguments unary;
@@ -307,6 +314,7 @@ typedef union ve_arguments_tag{
     clip_op_arguments clip;
     fill_diagonal_op_arguments fill_diagonal;
     block_op_arguments block;
+    domain_mask_arguments domain_mask;
     /* creation, manipulation, indexing, and more...  */
 } ve_arguments;
 

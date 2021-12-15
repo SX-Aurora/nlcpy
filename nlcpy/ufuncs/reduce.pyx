@@ -537,7 +537,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                 z = z.reshape(y.shape)
             x = nlcpy.full_like(z, initial_after, dtype=initial_after.dtype)
             w = z
-            w2 = nlcpy.ndarray(z.shape, dtype=dtype)
+            w2 = y if y.dtype == dtype else nlcpy.empty_like(y, dtype=dtype)
             request._push_request(
                 'nlcpy_'+op_name,
                 'binary_op',

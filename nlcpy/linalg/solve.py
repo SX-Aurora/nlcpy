@@ -157,7 +157,7 @@ def solve(a, b):
     a = nlcpy.array(nlcpy.moveaxis(a, (-1, -2), (1, 0)), dtype=dtype, order='F')
     b = nlcpy.array(nlcpy.moveaxis(b, (-1, -2), (1, 0)), dtype=dtype, order='F')
 
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
@@ -327,7 +327,7 @@ def lstsq(a, b, rcond='warn'):
     else:
         b = nlcpy.array(b, dtype=x_dtype, order='F')
     s = nlcpy.empty(min(m, n), dtype=f_dtype)
-    rank = numpy.empty(1, dtype='i')
+    rank = numpy.empty(1, dtype='l')
 
     nlvl = max(0, int(nlcpy.log(minmn / 26.0) / nlcpy.log(2)) + 1)
     mnthr = int(minmn * 1.6)
@@ -368,9 +368,9 @@ def lstsq(a, b, rcond='warn'):
 
     liwork = minmn * (11 + 3 * nlvl)
     work = nlcpy.empty(lwork)
-    iwork = nlcpy.empty(liwork, dtype='i')
+    iwork = nlcpy.empty(liwork, dtype='l')
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,
@@ -475,7 +475,7 @@ def inv(a):
     a = nlcpy.array(nlcpy.moveaxis(a, (-1, -2), (1, 0)), dtype=dtype, order='F')
     ipiv = nlcpy.empty(a.shape[-1])
     work = nlcpy.empty(a.shape[-1] * 256)
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,

@@ -57,6 +57,7 @@ sorting_op get_sorting_func(int64_t func_num);
 math_op get_math_func(int64_t func_num);
 random_op get_random_func(int64_t func_num);
 sca_op get_sca_func(int64_t func_num);
+mask_op get_mask_func(int64_t func_num);
 
 
 #ifdef __cplusplus

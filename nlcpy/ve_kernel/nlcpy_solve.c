@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,17 +32,25 @@
 */
 
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 
-extern void dgesv_(const int32_t *n, const int32_t *nrhs, double *pa, const int32_t *lda, int32_t *ipiv, double *pb, const int32_t *ldb, int32_t *info);
-uint64_t nlcpy_solve_d(ve_array *a, ve_array *b, int32_t *info, int32_t *psw)
+extern void dgesv_(const int64_t *n, const int64_t *nrhs, double *pa, const int64_t *lda, int64_t *ipiv, double *pb, const int64_t *ldb, int64_t *info);
+uint64_t nlcpy_solve_d(ve_array *a, ve_array *b, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldb = n;
-    const int32_t nrhs = b->shape[1];
-    int32_t *ipiv = (int32_t*)alloca(sizeof(int32_t)*n);
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldb = n;
+    const int64_t nrhs = b->shape[1];
+    int64_t *ipiv = (int64_t*)alloca(sizeof(int64_t)*n);
 
     double *pa = (double*)a->ve_adr;
     double *pb = (double*)b->ve_adr;
@@ -74,14 +82,14 @@ uint64_t nlcpy_solve_d(ve_array *a, ve_array *b, int32_t *info, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void zgesv_(const int32_t *n, const int32_t *nrhs, double _Complex *pa, const int32_t *lda, int32_t *ipiv, double _Complex *pb, const int32_t *ldb, int32_t *info);
-uint64_t nlcpy_solve_z(ve_array *a, ve_array *b, int32_t *info, int32_t *psw)
+extern void zgesv_(const int64_t *n, const int64_t *nrhs, double _Complex *pa, const int64_t *lda, int64_t *ipiv, double _Complex *pb, const int64_t *ldb, int64_t *info);
+uint64_t nlcpy_solve_z(ve_array *a, ve_array *b, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldb = n;
-    const int32_t nrhs = b->shape[1];
-    int32_t *ipiv = (int32_t*)alloca(sizeof(int32_t)*n);
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldb = n;
+    const int64_t nrhs = b->shape[1];
+    int64_t *ipiv = (int64_t*)alloca(sizeof(int64_t)*n);
 
     double _Complex *pa = (double _Complex*)a->ve_adr;
     double _Complex *pb = (double _Complex*)b->ve_adr;
@@ -113,7 +121,7 @@ uint64_t nlcpy_solve_z(ve_array *a, ve_array *b, int32_t *info, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_solve(ve_array *a, ve_array *b, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_solve(ve_array *a, ve_array *b, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

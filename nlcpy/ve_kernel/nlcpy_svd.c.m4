@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,25 +32,33 @@
 */
 
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_svd_real@-->,<--@
-extern void $1gesdd_(const char *job, const int32_t *m, const int32_t *n, $2 *pa, const int32_t *lda, $2 *ps, $2 *pu, const int32_t *ldu, $2 *pvt, const int32_t *ldvt, $2 *pw, const int32_t *lwork, int32_t *piw, int32_t *info);
-uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *iwork, int32_t *info, int32_t *psw)
+extern void $1gesdd_(const char *job, const int64_t *m, const int64_t *n, $2 *pa, const int64_t *lda, $2 *ps, $2 *pu, const int64_t *ldu, $2 *pvt, const int64_t *ldvt, $2 *pw, const int64_t *lwork, int64_t *piw, int64_t *info);
+uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *iwork, int64_t *info, int32_t *psw)
 {
-    const int32_t m = a->shape[0];
-    const int32_t n = a->shape[1];
-    const int32_t lda = m;
-    const int32_t ldu = u->shape[0];
-    const int32_t ldvt = vt->shape[0];
-    const int32_t lwork = work->size;
+    const int64_t m = a->shape[0];
+    const int64_t n = a->shape[1];
+    const int64_t lda = m;
+    const int64_t ldu = u->shape[0];
+    const int64_t ldvt = vt->shape[0];
+    const int64_t lwork = work->size;
 
     $2 *pa = ($2*)a->ve_adr;
     $2 *ps = ($2*)s->ve_adr;
     $2 *pu = ($2*)u->ve_adr;
     $2 *pvt = ($2*)vt->ve_adr;
     $2 *pw = ($2*)work->ve_adr;
-    int32_t *piw = (int32_t*)iwork->ve_adr;
+    int64_t *piw = (int64_t*)iwork->ve_adr;
     if (!pa || !ps || !pu || !pvt || !pw || !piw) {
         return NLCPY_ERROR_MEMORY;
     }
@@ -88,15 +96,15 @@ macro_svd_real(s, float)dnl
 macro_svd_real(d, double)dnl
 
 define(<--@macro_svd_complex@-->,<--@
-extern void $1gesdd_(const char *job, const int32_t *m, const int32_t *n, $2 *pa, const int32_t *lda, $3 *ps, $2 *pu, const int32_t *ldu, $2 *pvt, const int32_t *ldvt, $2 *pw, const int32_t *lwork, $3 *prw, int32_t *piw, int32_t *info);
-uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *rwork, ve_array *iwork, int32_t *info, int32_t *psw)
+extern void $1gesdd_(const char *job, const int64_t *m, const int64_t *n, $2 *pa, const int64_t *lda, $3 *ps, $2 *pu, const int64_t *ldu, $2 *pvt, const int64_t *ldvt, $2 *pw, const int64_t *lwork, $3 *prw, int64_t *piw, int64_t *info);
+uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *rwork, ve_array *iwork, int64_t *info, int32_t *psw)
 {
-    const int32_t m = a->shape[0];
-    const int32_t n = a->shape[1];
-    const int32_t lda = m;
-    const int32_t ldu = u->shape[0];
-    const int32_t ldvt = vt->shape[0];
-    const int32_t lwork = work->size;
+    const int64_t m = a->shape[0];
+    const int64_t n = a->shape[1];
+    const int64_t lda = m;
+    const int64_t ldu = u->shape[0];
+    const int64_t ldvt = vt->shape[0];
+    const int64_t lwork = work->size;
 
     $2 *pa = ($2*)a->ve_adr;
     $3 *ps = ($3*)s->ve_adr;
@@ -104,7 +112,7 @@ uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_
     $2 *pvt = ($2*)vt->ve_adr;
     $2 *pw = ($2*)work->ve_adr;
     $3 *prw = ($3*)rwork->ve_adr;
-    int32_t *piw = (int32_t*)iwork->ve_adr;
+    int64_t *piw = (int64_t*)iwork->ve_adr;
     if (!pa || !ps || !pu || !pvt || !pw || !prw || !piw) {
         return NLCPY_ERROR_MEMORY;
     }
@@ -141,7 +149,7 @@ uint64_t nlcpy_svd_$1(const char job, ve_array *a, ve_array *s, ve_array *u, ve_
 macro_svd_complex(c, float _Complex, float)dnl
 macro_svd_complex(z, double _Complex, double)dnl
 
-uint64_t nlcpy_svd(int32_t job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *rwork, ve_array *iwork, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_svd(int64_t job, ve_array *a, ve_array *s, ve_array *u, ve_array *vt, ve_array *work, ve_array *rwork, ve_array *iwork, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f32:

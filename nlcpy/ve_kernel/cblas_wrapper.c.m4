@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,9 +31,16 @@
 #
 */
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
-#include <cblas.h>
 #include "nlcpy.h"
+#include <inc_i64/cblas.h>
 
 define(<--@cblas_wrapper@-->,<--@
 uint64_t wrapper_cblas_$1(ve_arguments *args, int32_t *psw)
@@ -62,7 +69,7 @@ uint64_t wrapper_cblas_$1(ve_arguments *args, int32_t *psw)
     }
     $2 *pz = ($2 *)z->ve_adr;
     if (pz == NULL) {
-       return (uint64_t)NLCPY_ERROR_MEMORY; 
+       return (uint64_t)NLCPY_ERROR_MEMORY;
     }
     assert(x->ndim <= 1);
     assert(y->ndim <= 1);
@@ -70,10 +77,10 @@ uint64_t wrapper_cblas_$1(ve_arguments *args, int32_t *psw)
     assert(x->size == y->size);
 
 ifelse($3,sub,<--@
-    cblas_$1(x->size, px, x->strides[0] / x->itemsize, 
+    cblas_$1(x->size, px, x->strides[0] / x->itemsize,
                         py, y->strides[0] / y->itemsize, pz);
 @-->,<--@dnl
-    *pz = cblas_$1(x->size, px, x->strides[0] / x->itemsize, 
+    *pz = cblas_$1(x->size, px, x->strides[0] / x->itemsize,
                             py, y->strides[0] / y->itemsize);
 @-->)dnl
 } /* omp single */
@@ -91,12 +98,12 @@ cblas_wrapper(zdotu_sub, double _Complex, sub)dnl
 define(<--@cblas_wrapper@-->,<--@
 uint64_t wrapper_cblas_$1(ve_arguments *args, int32_t *psw)
 {
-    const int32_t order = args->gemm.order;
-    const int32_t transA = args->gemm.transA;
-    const int32_t transB = args->gemm.transB;
-    const int32_t m = args->gemm.m;
-    const int32_t n = args->gemm.n;
-    const int32_t k = args->gemm.k;
+    const int64_t order = args->gemm.order;
+    const int64_t transA = args->gemm.transA;
+    const int64_t transB = args->gemm.transB;
+    const int64_t m = args->gemm.m;
+    const int64_t n = args->gemm.n;
+    const int64_t k = args->gemm.k;
 ifelse($3,complex,<--@dnl
     const void *alpha = (void *)nlcpy__get_scalar(&(args->gemm.alpha));
     if (alpha == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
@@ -104,9 +111,9 @@ ifelse($3,complex,<--@dnl
     const $2 alpha = *(($2 *)nlcpy__get_scalar(&(args->gemm.alpha)));
 @-->)dnl
     $2* const a = ($2 *)args->gemm.a.ve_adr;
-    const int32_t lda = args->gemm.lda;
+    const int64_t lda = args->gemm.lda;
     $2* const b = ($2 *)args->gemm.b.ve_adr;
-    const int32_t ldb = args->gemm.ldb;
+    const int64_t ldb = args->gemm.ldb;
 ifelse($3,complex,<--@dnl
     const void *beta = (void *)nlcpy__get_scalar(&(args->gemm.beta));
     if (beta == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
@@ -114,7 +121,7 @@ ifelse($3,complex,<--@dnl
     const $2 beta = *(($2 *)nlcpy__get_scalar(&(args->gemm.beta)));
 @-->)dnl
     $2* const c = ($2 *)args->gemm.c.ve_adr;
-    const int32_t ldc = args->gemm.ldc;
+    const int64_t ldc = args->gemm.ldc;
 
     if (a == NULL || b == NULL || c == NULL) {
         return NLCPY_ERROR_MEMORY;
@@ -122,25 +129,25 @@ ifelse($3,complex,<--@dnl
 
 
 #ifdef _OPENMP
-    const int32_t nt = omp_get_num_threads();
-    const int32_t it = omp_get_thread_num();
+    const int64_t nt = omp_get_num_threads();
+    const int64_t it = omp_get_thread_num();
 #else
-    const int32_t nt = 1;
-    const int32_t it = 0;
+    const int64_t nt = 1;
+    const int64_t it = 0;
 #endif /* _OPENMP */
 
-    const int32_t m_s = m * it / nt;
-    const int32_t m_e = m * (it + 1) / nt;
-    const int32_t m_d = m_e - m_s;
-    const int32_t n_s = n * it / nt;
-    const int32_t n_e = n * (it + 1) / nt;
-    const int32_t n_d = n_e - n_s;
-    
-    int32_t mode = 1;
-    if ( n > nt ) { 
+    const int64_t m_s = m * it / nt;
+    const int64_t m_e = m * (it + 1) / nt;
+    const int64_t m_d = m_e - m_s;
+    const int64_t n_s = n * it / nt;
+    const int64_t n_e = n * (it + 1) / nt;
+    const int64_t n_d = n_e - n_s;
+
+    int64_t mode = 1;
+    if ( n > nt ) {
         mode = 2;
     }
-    int32_t iar, iac, ibr, ibc, icr, icc;
+    int64_t iar, iac, ibr, ibc, icr, icc;
     if (transA == CblasNoTrans ) {
         iar = 1;
         iac = lda;
@@ -164,20 +171,20 @@ ifelse($3,complex,<--@dnl
     }
 
     if (order == CblasColMajor) {
-        if ( mode == 1 ) { 
+        if ( mode == 1 ) {
             // split 'm'
-            cblas_$1(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);  
+            cblas_$1(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);
         } else {
             // split 'n'
-            cblas_$1(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);  
+            cblas_$1(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);
         }
     } else {
-        if ( mode == 1 ) { 
+        if ( mode == 1 ) {
             // split 'm'
-            cblas_$1(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);  
+            cblas_$1(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);
         } else {
             // split 'n'
-            cblas_$1(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);  
+            cblas_$1(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);
         }
     }
 

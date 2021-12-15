@@ -106,6 +106,7 @@ cdef class kernel:
         self.destroyed = True
 
     def __dealloc__(self):
-        if self.destroyed:
+        # exclude True and None
+        if self.destroyed is not False:
             return
         self._destroy()

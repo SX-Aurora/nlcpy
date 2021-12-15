@@ -245,13 +245,13 @@ def _make_decorator(check_func, name, type_check, accept_error, sp_name=None,
 
             # shape check
             for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
-                if type(numpy_r) is numpy.ndarray:
+                if isinstance(numpy_r, numpy.ndarray):
                     assert numpy_r.shape == nlcpy_r.shape
 
             # type check
             if type_check:
                 for numpy_r, nlcpy_r in zip(numpy_result, nlcpy_result):
-                    if type(numpy_r) is not numpy.ndarray:
+                    if not isinstance(numpy_r, numpy.ndarray):
                         continue
                     if numpy_r.dtype != nlcpy_r.dtype:
                         msg = ['\n']
@@ -266,7 +266,27 @@ def _make_decorator(check_func, name, type_check, accept_error, sp_name=None,
             # result check
             if not skip:
                 for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
-                    check_func(nlcpy_r, numpy_r)
+                    if isinstance(numpy_r, numpy.ma.MaskedArray):
+                        if numpy_r is numpy.ma.masked and nlcpy_r is numpy.ma.masked:
+                            continue
+                        msg = ['\n']
+                        if not isinstance(nlcpy_r, nlcpy.ma.MaskedArray):
+                            msg.append(' numpy.type: {}'.format(type(numpy_r)))
+                            msg.append(' nlcpy.type: {}'.format(type(nlcpy_r)))
+                            raise AssertionError('\n'.join(msg))
+                        if (numpy_r is numpy.ma.masked) != (nlcpy_r is nlcpy.ma.masked):
+                            msg.append(' numpy: {}'.format(numpy_r))
+                            msg.append(' nlcpy: {}'.format(nlcpy_r))
+                            raise AssertionError('\n'.join(msg))
+                        check_func(nlcpy_r.data, numpy_r.data)
+                        check_func(nlcpy_r.mask, numpy_r.mask)
+                        check_func(nlcpy_r.fill_value, numpy_r.fill_value)
+                        if numpy_r.sharedmask != nlcpy_r.sharedmask:
+                            raise AssertionError("sharedmask is differ")
+                        if numpy_r.hardmask != nlcpy_r.hardmask:
+                            raise AssertionError("hardmask is differ")
+                    else:
+                        check_func(nlcpy_r, numpy_r)
         return test_func
     return decorator
 

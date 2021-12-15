@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,15 +32,23 @@
 */
 
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 
-extern float slange_(const char*, const int32_t*, const int32_t*, const float*, const int32_t*, float*);
+extern float slange_(const char*, const int64_t*, const int64_t*, const float*, const int64_t*, float*);
 uint64_t nlcpy_norm_s(const char norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw)
 {
-    const int32_t m = x->shape[0];
-    const int32_t n = x->shape[1];
-    const int32_t lda = m;
+    const int64_t m = x->shape[0];
+    const int64_t n = x->shape[1];
+    const int64_t lda = m;
 
     float* const px = (float*)x->ve_adr;
     float* const py = (float*)y->ve_adr;
@@ -72,12 +80,12 @@ uint64_t nlcpy_norm_s(const char norm, ve_array *x, ve_array *y, ve_array *work,
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern double dlange_(const char*, const int32_t*, const int32_t*, const double*, const int32_t*, double*);
+extern double dlange_(const char*, const int64_t*, const int64_t*, const double*, const int64_t*, double*);
 uint64_t nlcpy_norm_d(const char norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw)
 {
-    const int32_t m = x->shape[0];
-    const int32_t n = x->shape[1];
-    const int32_t lda = m;
+    const int64_t m = x->shape[0];
+    const int64_t n = x->shape[1];
+    const int64_t lda = m;
 
     double* const px = (double*)x->ve_adr;
     double* const py = (double*)y->ve_adr;
@@ -110,12 +118,12 @@ uint64_t nlcpy_norm_d(const char norm, ve_array *x, ve_array *y, ve_array *work,
 }
 
 
-extern float clange_(const char*, const int32_t*, const int32_t*, const float _Complex*, const int32_t*, float*);
+extern float clange_(const char*, const int64_t*, const int64_t*, const float _Complex*, const int64_t*, float*);
 uint64_t nlcpy_norm_c(const char norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw)
 {
-    const int32_t m = x->shape[0];
-    const int32_t n = x->shape[1];
-    const int32_t lda = m;
+    const int64_t m = x->shape[0];
+    const int64_t n = x->shape[1];
+    const int64_t lda = m;
 
     float _Complex* const px = (float _Complex*)x->ve_adr;
     float* const py = (float*)y->ve_adr;
@@ -147,12 +155,12 @@ uint64_t nlcpy_norm_c(const char norm, ve_array *x, ve_array *y, ve_array *work,
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern double zlange_(const char*, const int32_t*, const int32_t*, const double _Complex*, const int32_t*, double*);
+extern double zlange_(const char*, const int64_t*, const int64_t*, const double _Complex*, const int64_t*, double*);
 uint64_t nlcpy_norm_z(const char norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw)
 {
-    const int32_t m = x->shape[0];
-    const int32_t n = x->shape[1];
-    const int32_t lda = m;
+    const int64_t m = x->shape[0];
+    const int64_t n = x->shape[1];
+    const int64_t lda = m;
 
     double _Complex* const px = (double _Complex*)x->ve_adr;
     double* const py = (double*)y->ve_adr;
@@ -184,7 +192,7 @@ uint64_t nlcpy_norm_z(const char norm, ve_array *x, ve_array *y, ve_array *work,
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_norm(int32_t norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw) {
+uint64_t nlcpy_norm(int64_t norm, ve_array *x, ve_array *y, ve_array *work, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(x->dtype) {
     case ve_f32:

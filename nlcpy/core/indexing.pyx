@@ -142,7 +142,7 @@ cdef ndarray _take(ndarray a, indices, int li, int ri, ndarray out=None):
     else:
         if not isinstance(indices, ndarray):
             indices = core.array(indices, dtype=int)
-        indices = indices.astype(dtype=int, copy=True)
+        indices = indices.astype(dtype=int, copy=False)
         indices_shape = indices.shape
         cdim = indices.size
 
@@ -173,13 +173,14 @@ cdef ndarray _take(ndarray a, indices, int li, int ri, ndarray out=None):
     if a.size == 0 and out.size != 0:
         raise IndexError('cannot do a non-empty take from an empty axes.')
 
-    indices %= index_range
+    # indices %= index_range
 
-    reduced_view = manipulation._reduced_view(a)
-    if reduced_view.base is not None:
-        reduced = reduced_view.copy()
-    else:
-        reduced = reduced_view
+    # reduced_view = manipulation._reduced_view(a)
+    # if reduced_view.base is not None:
+    #     reduced = reduced_view.copy()
+    # else:
+    #     reduced = reduced_view
+    reduced = a.ravel()
     if isinstance(indices, ndarray):
         return _take_kernel(
             reduced, indices, ldim, cdim, rdim, index_range, out)
@@ -452,7 +453,7 @@ cdef ndarray _simple_getitem(ndarray a, list slice_list):
             raise TypeError('Invalid index type: %s' % type(slice_list[i]))
 
     v = a._view(shape, strides, True, True, True,
-                vh_view=None, dtype=None, offset=offset)
+                vh_view=None, dtype=None, type=None, offset=offset)
     return v
 
 cdef Py_ssize_t _get_mask_index(list slice_list) except *:

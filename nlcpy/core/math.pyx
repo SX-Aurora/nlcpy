@@ -83,6 +83,7 @@ cdef ndarray _ndarray_real_getter(ndarray self):
             False,
             vh_view=None,
             dtype=_dtype.get_dtype(self.dtype.char.lower()),
+            type=None,
             offset=0,
         )
 
@@ -122,6 +123,7 @@ cdef ndarray _ndarray_imag_getter(ndarray self):
             False,
             vh_view=None,
             dtype=_dtype.get_dtype(self.dtype.char.lower()),
+            type=None,
             offset=self.itemsize // 2,
         )
         return view

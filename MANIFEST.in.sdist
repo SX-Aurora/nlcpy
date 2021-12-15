@@ -5,5 +5,6 @@ prune nlcpy.egg-info
 include Makefile
 include make.inc
 include MANIFEST.in.sdist
+include MANIFEST.in.wheel
 recursive-include nlcpy *
 recursive-include scripts *

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,12 +33,12 @@
 #ifndef ARRAY_UTILITY_H_INCLUDED
 #define ARRAY_UTILITY_H_INCLUDED
 
+#include <stdint.h>
 #include "ve_array.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 uint64_t nlcpy__get_scalar(ve_array *val);
 uint64_t nlcpy__get_ptr(ve_array *a);
@@ -55,9 +55,86 @@ void nlcpy__argnsort(ve_array *a, int64_t *idx, int64_t n);
 #define MINVL_THRESHOLD 64
 #define NG_STRIDE       0x80   // 128 Byte
 
+typedef int32_t Bint;
+
+typedef union bf_f64_tag{
+    int64_t bf[1];
+    double x;
+} bf_f64_t;
+
+typedef union bf_f32_tag{
+    int32_t bf[1];
+    float x;
+} bf_f32_t;
+
+inline Bint f64_to_Bint(double x) {
+    bf_f64_t y;
+    y.x = x;
+    return (y.bf[0]&0x7fffffffffffffff) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint f32_to_Bint(float x) {
+    bf_f32_t y;
+    y.x = x;
+    return (y.bf[0]&0x7fffffff) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint u64_to_Bint(uint64_t x) {
+    return (x!=(uint64_t)0) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint u32_to_Bint(uint32_t x) {
+    return (x!=(uint32_t)0) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint i64_to_Bint(int64_t x) {
+    return (x!=(int64_t)0) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint i32_to_Bint(int32_t x) {
+    return (x!=(int32_t)0) ? (Bint)1 : (Bint)0;
+}
+
+// isinf
+inline Bint isinf_f64(double x) {
+    const int64_t E  = 0x7ff0000000000000;
+    const int64_t M  = 0x000fffffffffffff;
+    bf_f64_t y;
+    y.x = x;
+    const int64_t Isinf =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) == (int64_t)0);
+    return ( Isinf ) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint isinf_f32(float x) {
+    const int32_t E  = 0x7f800000;
+    const int32_t M  = 0x007fffff;
+    bf_f32_t y;
+    y.x = x;
+    const int32_t Isinf =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) == (int32_t)0);
+    return ( Isinf ) ? (Bint)1 : (Bint)0;
+}
+
+// isnan
+inline Bint isnan_f64(double x) {
+    const int64_t E  = 0x7ff0000000000000;
+    const int64_t M  = 0x000fffffffffffff;
+    bf_f64_t y;
+    y.x = x;
+    const int64_t Isnan =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) != (int64_t)0);
+    return ( Isnan ) ? (Bint)1 : (Bint)0;
+}
+
+inline Bint isnan_f32(float x) {
+    const int32_t E  = 0x7f800000;
+    const int32_t M  = 0x007fffff;
+    bf_f32_t y;
+    y.x = x;
+    const int32_t Isnan =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) != (int32_t)0);
+    return ( Isnan ) ? (Bint)1 : (Bint)0;
+}
+
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* ARRAY_UTILITY_H_INCLUDED */

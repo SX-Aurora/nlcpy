@@ -1,0 +1,24 @@
+===============================================
+What's new in Version 2.1.0 (December 31, 2021)
+===============================================
+
+.. attention::
+
+    NLCPy v2.1.0 requires to install the RPM version later than or equal to
+    nec-blas-ve-2.3.0-2.5.
+
+New Features
+------------
+
+* Newly added :ref:`Just-In-Time compilation functionality <label_jit>`,
+  which enables your Python scripts to call VE functions written by C/C++/Fortran.
+
+* Newly added :ref:`Masked Array <label_ma>`.
+
+
+Performance Enhancements
+------------------------
+
+* Improved the performance of :meth:`nlcpy.ndarray.__getitem__` with list, tuple, or :class:`nlcpy.ndarray` elements.
+
+* Improved the performance of :func:`nlcpy.linalg.eigvalsh`.

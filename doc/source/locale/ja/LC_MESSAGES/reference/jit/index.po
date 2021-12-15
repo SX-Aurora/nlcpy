@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/jit/index.rst:6
+msgid "Just-In-Time Compilation"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:9
+msgid "Overview"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:10
+msgid ""
+"NLCPy provides a Just-In-Time(JIT) compilation functionality. By using "
+"this, you can customize your C/C++/Fortran kernel directly on your Python"
+" program."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:13
+msgid "Here is a simple example."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:43
+msgid "To compile and execute the VE function from raw source code:"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:45
+msgid "Define source code in Python code as a string."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:46
+msgid ""
+"Pass the string source into ``code`` argument of "
+":class:`nlcpy.jit.CustomVELibrary`."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:47
+msgid "Call :meth:`CustomVELibrary.get_function` to get a function symbol."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:48
+msgid ""
+"Execute the object that is returned from "
+":meth:`CustomVELibrary.get_function` as a function."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:49
+msgid "Unload the loaded library if needed."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:52
+msgid "Coding Guide"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:63
+msgid "APIs"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:66
+msgid "Customize VE Library and Kernel"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+msgid ":obj:`nlcpy.jit.CustomVELibrary <nlcpy.jit.CustomVELibrary>`"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+msgid "Custom VE library class."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+msgid ":obj:`nlcpy.jit.CustomVEKernel <nlcpy.jit.CustomVEKernel>`"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+msgid "Custom VE kernel class."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:75
+msgid "Helper Routines"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid ":obj:`nlcpy.jit.get_default_cflags <nlcpy.jit.get_default_cflags>`"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid "Gets default compiler flags."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid ":obj:`nlcpy.jit.get_default_ldflags <nlcpy.jit.get_default_ldflags>`"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid "Gets default linker flags."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid ":obj:`nlcpy.jit.unload_library <nlcpy.jit.unload_library>`"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+msgid "Unloads the loaded library."
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:87
+msgid "Constants"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst
+msgid "Returns"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:93
+msgid "**'void'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:99
+msgid "**'char'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:106
+msgid "**'int32_t'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:112
+msgid "**'int64_t'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:118
+msgid "**'uint32_t'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:124
+msgid "**'uint64_t'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:130
+msgid "**'float'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:136
+msgid "**'double'** : string"
+msgstr ""
+
+#: ../../source/reference/jit/index.rst:142
+msgid "**'void *'** : string"
+msgstr ""
+

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,13 @@
 #
 */
 
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
 
 @#include "nlcpy.h"
 
@@ -72,7 +79,7 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,bool)
         }
@@ -238,7 +245,7 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,i32)
         }
@@ -404,7 +411,7 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,i64)
         }
@@ -570,7 +577,7 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,u32)
         }
@@ -736,7 +743,7 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,u64)
         }
@@ -902,7 +909,7 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,f32)
         }
@@ -1068,7 +1075,7 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,f64)
         }
@@ -1234,7 +1241,7 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,c64)
         }
@@ -1400,7 +1407,7 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
         const int64_t n_inner = 0;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
- 
+
         for (i = 0; i < x->size; i++) {
             @BINARY_OPERATOR@(px[i*ix0],py[i*iy0],*pz,c128)
         }

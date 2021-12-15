@@ -2,6 +2,7 @@ import numpy  # NOQA
 from numpy import _NoValue  # NOQA
 import os  # NOQA
 from distutils.version import StrictVersion  # NOQA
+from nlcpy.__config__ import show_config  # NOQA
 
 # -----------------------------------------------------------------------------
 # set environment variable
@@ -44,6 +45,11 @@ from nlcpy.core import ndarray  # NOQA
 # ve offload
 # --------------------------------------------------
 from nlcpy import veo  # NOQA
+
+# --------------------------------------------------
+# MaskedArray
+# --------------------------------------------------
+from nlcpy.ma import MaskedArray  # NOQA
 
 # --------------------------------------------------
 # Array Creation routines
@@ -354,6 +360,10 @@ del _push_and_flush_request
 # get include file path
 # -----------------------------------------------------------------------------
 def get_include():
+    """Returns the directory path that contains the NLCPy \\*.h header files.
+
+    """
+
     return _here + '/include'
 
 # -----------------------------------------------------------------------------
@@ -373,6 +383,12 @@ from nlcpy import sca  # NOQA
 # -----------------------------------------------------------------------------
 from nlcpy import fft # NOQA
 
+# --------------------------------------------------
+# JIT
+# --------------------------------------------------
+
+from nlcpy import ve_types  # NOQA
+from nlcpy import jit  # NOQA
 
 # -----------------------------------------------------------------------------
 # warm up

@@ -33,110 +33,17 @@
 #ifndef NLCPY_H_INCLUDED
 #define NLCPY_H_INCLUDED
 
-#define ASL_LIB_INT64
-#define SCA_LIB_INT64
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <stdbool.h>
-#include <complex.h>
-#include <alloca.h>
-#include <math.h>
-#include <limits.h>
-#include <float.h>
-#include <time.h>
-#include <assert.h>
-#include <asl.h>
-#include <sca.h>
+
 #include "array_utility.h"
 #include "ve_array.h"
 #include "ve_dtype.h"
 #include "fpe_flags.h"
 #include "ve_error.h"
-
 #include "ve_request.h"
 #include "ve_selector.h"
 #include "ve_funclist.h"
 #include "ve_funcnum.h"
 #include "ve_functype.h"
-
-typedef int32_t Bint;
-
-typedef union bf_f64_tag{
-    int64_t bf[1];
-    double x;
-} bf_f64_t;
-
-typedef union bf_f32_tag{
-    int32_t bf[1];
-    float x;
-} bf_f32_t;
-
-inline Bint f64_to_Bint(double x) {
-    bf_f64_t y;
-    y.x = x;
-    return (y.bf[0]&0x7fffffffffffffff) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint f32_to_Bint(float x) {
-    bf_f32_t y;
-    y.x = x;
-    return (y.bf[0]&0x7fffffff) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint u64_to_Bint(uint64_t x) {
-    return (x!=(uint64_t)0) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint u32_to_Bint(uint32_t x) {
-    return (x!=(uint32_t)0) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint i64_to_Bint(int64_t x) {
-    return (x!=(int64_t)0) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint i32_to_Bint(int32_t x) {
-    return (x!=(int32_t)0) ? (Bint)1 : (Bint)0;
-}
-
-// isinf
-inline Bint isinf_f64(double x) {
-    const int64_t E  = 0x7ff0000000000000;
-    const int64_t M  = 0x000fffffffffffff;
-    bf_f64_t y;
-    y.x = x;
-    const int64_t Isinf =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) == (int64_t)0);
-    return ( Isinf ) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint isinf_f32(float x) {
-    const int32_t E  = 0x7f800000;
-    const int32_t M  = 0x007fffff;
-    bf_f32_t y;
-    y.x = x;
-    const int32_t Isinf =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) == (int32_t)0);
-    return ( Isinf ) ? (Bint)1 : (Bint)0;
-}
-
-// isnan
-inline Bint isnan_f64(double x) {
-    const int64_t E  = 0x7ff0000000000000;
-    const int64_t M  = 0x000fffffffffffff;
-    bf_f64_t y;
-    y.x = x;
-    const int64_t Isnan =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) != (int64_t)0);
-    return ( Isnan ) ? (Bint)1 : (Bint)0;
-}
-
-inline Bint isnan_f32(float x) {
-    const int32_t E  = 0x7f800000;
-    const int32_t M  = 0x007fffff;
-    bf_f32_t y;
-    y.x = x;
-    const int32_t Isnan =  ((y.bf[0] & E) == E) && ((y.bf[0] & M) != (int32_t)0);
-    return ( Isnan ) ? (Bint)1 : (Bint)0;
-}
 
 #endif /* NLCPY_H_INCLUDED */

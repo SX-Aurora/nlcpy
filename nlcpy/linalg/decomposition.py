@@ -300,7 +300,7 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
         lrwork = 1
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
     iwork = nlcpy.empty(8 * min_mn, dtype=f_dtype)
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         ord(job),
@@ -404,7 +404,7 @@ def cholesky(a):
     c_order = a.flags.c_contiguous or sum([i > 1 for i in a.shape[:-2]]) < 2
 
     a = nlcpy.array(nlcpy.moveaxis(a, (-1, -2), (1, 0)), dtype=dtype, order='F')
-    info = numpy.empty(1, dtype='i')
+    info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         a._ve_array,

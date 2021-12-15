@@ -470,6 +470,17 @@ uint64_t nlcpy_sca_code_execute(ve_arguments *, int32_t *);
 
 /****************************
  *
+ *       MASK OPERATOR
+ *
+ * **************************/
+/* function pointer */
+typedef uint64_t (*mask_op)(ve_arguments *, int32_t *);
+/* function proto types */
+uint64_t nlcpy_domain_mask(ve_arguments *, int32_t *);
+
+
+/****************************
+ *
  *       ERROR FUNCS
  *
  * **************************/

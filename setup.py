@@ -129,6 +129,7 @@ include_dirs = {
         numpy.get_include(),
     ],
     'others': [
+        'veo', '/opt/nec/ve/veos/include',
         numpy.get_include(),
     ],
 }

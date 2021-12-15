@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,14 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+
 @#include "nlcpy.h"
 
 #define_switch (out->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128)
@@ -120,7 +128,7 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
         const int64_t n_inner2 = idx[n_inner];
         const int64_t n_outer2 = idx[n_outer];
         nlcpy__reset_coords(cnt_out, out->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iout = 0;
@@ -159,8 +167,8 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
                     cnt_out[kk] = 0;
                     ix -= (x->strides[kk] / x->itemsize) * (x->shape[kk] - 1);
                     iy -= (y->strides[kk] / y->itemsize) * (y->shape[kk] - 1);
-                    iout -= (out->strides[kk] / out->itemsize) * (out->shape[kk] - 1); 
-                    icond -= (condition->strides[kk] / condition->itemsize) * (condition->shape[kk] - 1); 
+                    iout -= (out->strides[kk] / out->itemsize) * (out->shape[kk] - 1);
+                    icond -= (condition->strides[kk] / condition->itemsize) * (condition->shape[kk] - 1);
                 }
                 if (k < 1) break;
             }

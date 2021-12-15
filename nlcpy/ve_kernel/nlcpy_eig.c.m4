@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,17 +32,26 @@
 */
 
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+#include <complex.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_eig_real@-->,<--@
-extern void $1geev_(const char *jobvl, const char *jobvr, const int32_t *n, $2 *pa, const int32_t *lda, $2 *pwr, $2 *pwi, $2 *pvl, const int32_t *ldvl, $2 *pvr, const int32_t *ldvr, $2 *pwork, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_eig_$1(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int32_t *info, int32_t *psw)
+extern void $1geev_(const char *jobvl, const char *jobvr, const int64_t *n, $2 *pa, const int64_t *lda, $2 *pwr, $2 *pwi, $2 *pvl, const int64_t *ldvl, $2 *pvr, const int64_t *ldvr, $2 *pwork, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_eig_$1(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     $2 *pa = ($2*)a->ve_adr;
@@ -118,14 +127,14 @@ macro_eig_real(s, float)dnl
 macro_eig_real(d, double)dnl
 
 define(<--@macro_eig_complex@-->,<--@
-extern void $1geev_(const char *jobvl, const char *jobvr, const int32_t *n, $2 *pa, const int32_t *lda, $2 *pw, $2 *pvl, const int32_t *ldvl, $2 *pvr, const int32_t *ldvr, $2 *pwork, const int32_t *lwork, $3 *prwork, int32_t *info);
-uint64_t nlcpy_eig_$1(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int32_t *info, int32_t *psw)
+extern void $1geev_(const char *jobvl, const char *jobvr, const int64_t *n, $2 *pa, const int64_t *lda, $2 *pw, $2 *pvl, const int64_t *ldvl, $2 *pvr, const int64_t *ldvr, $2 *pwork, const int64_t *lwork, $3 *prwork, int64_t *info);
+uint64_t nlcpy_eig_$1(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     $2 *pa = ($2*)a->ve_adr;
@@ -166,7 +175,7 @@ uint64_t nlcpy_eig_$1(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_
 macro_eig_complex(c, float _Complex, float)dnl
 macro_eig_complex(z, double _Complex, double)dnl
 
-uint64_t nlcpy_eig(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, ve_array *rwork, int32_t jobvr, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_eig(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, ve_array *rwork, int64_t jobvr, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f32:

@@ -30,8 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
 #include "nlcpy.h"
+#include <inc_i64/asl.h>
 
 
 
@@ -109,7 +117,7 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
 
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
-        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err); 
+        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         err = asl_fft_create_complex_1d_d(&fft, n_in);
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
@@ -228,7 +236,7 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
 
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
-        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err); 
+        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         err = asl_fft_create_complex_1d_d(&fft, n_in);
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
@@ -347,7 +355,7 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
 
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
-        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err); 
+        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         err = asl_fft_create_complex_1d_s(&fft, n_in);
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
@@ -466,7 +474,7 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
 
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
-        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err); 
+        if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         err = asl_fft_create_complex_1d_s(&fft, n_in);
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
@@ -2210,7 +2218,7 @@ uint64_t nlcpy_recursive_irfft_1d_c64_f32(ve_array *x, ve_array *y, ve_array *ax
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-static inline uint64_t check_multiplicity_convertible_axes(int64_t *axes, uint64_t start, uint64_t end) 
+static inline uint64_t check_multiplicity_convertible_axes(int64_t *axes, uint64_t start, uint64_t end)
 {
     const uint64_t len = end - start + 1;
     uint64_t unique_check[len];
@@ -2713,7 +2721,7 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
@@ -2755,7 +2763,7 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
@@ -2829,7 +2837,7 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
@@ -2871,7 +2879,7 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
@@ -2945,7 +2953,7 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
@@ -2987,7 +2995,7 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
@@ -3061,7 +3069,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
@@ -3103,7 +3111,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_spatial_long_stride_2d(fft, ls_2[axis_1], ls_2[axis_2]);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_frequency_long_stride_2d(fft, ls_1[axis_1], ls_1[axis_2]);
@@ -3602,7 +3610,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_1[axis_1], ls_1[axis_2], ls_1[axis_3]);
@@ -3643,7 +3651,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_1[axis_1], ls_1[axis_2], ls_1[axis_3]);
@@ -3716,7 +3724,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_2[axis_1], ls_2[axis_2], ls_2[axis_3]);
@@ -3757,7 +3765,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_2[axis_1], ls_2[axis_2], ls_2[axis_3]);
@@ -3830,7 +3838,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_1[axis_1], ls_1[axis_2], ls_1[axis_3]);
@@ -3871,7 +3879,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_1[axis_1], ls_1[axis_2], ls_1[axis_3]);
@@ -3944,7 +3952,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_2[axis_1], ls_2[axis_2], ls_2[axis_3]);
@@ -3985,7 +3993,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[i] / x->itemsize;
                 ls_2[i] = y->strides[i] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride_3d(fft, ls_2[axis_1], ls_2[axis_2], ls_2[axis_3]);
@@ -4531,7 +4539,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_1);
@@ -4580,7 +4588,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_1);
@@ -4656,7 +4664,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_2);
@@ -4705,7 +4713,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_2);
@@ -4781,7 +4789,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_1);
@@ -4830,7 +4838,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_1);
@@ -4906,7 +4914,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_2);
@@ -4955,7 +4963,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
                 ls_1[i] = x->strides[_axes[i]] / x->itemsize;
                 ls_2[i] = y->strides[_axes[i]] / y->itemsize;
             }
-            
+
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
             err = asl_fft_set_spatial_long_stride(fft, ls_2);

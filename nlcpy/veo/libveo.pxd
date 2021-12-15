@@ -77,6 +77,7 @@ cdef extern from "<ve_offload.h>":
     veo_proc_handle *veo_proc_create_static(int, char *)
     int veo_proc_destroy(veo_proc_handle *)
     uint64_t veo_load_library(veo_proc_handle *, const char *)
+    int veo_unload_library(veo_proc_handle *, const uint64_t)
     uint64_t veo_get_sym(veo_proc_handle *, uint64_t, const char *)
     veo_thr_ctxt *veo_context_open(veo_proc_handle *)
     int veo_context_close(veo_thr_ctxt *)

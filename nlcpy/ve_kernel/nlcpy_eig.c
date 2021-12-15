@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,17 +32,26 @@
 */
 
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+#include <complex.h>
+
 #include "nlcpy.h"
 
 
-extern void sgeev_(const char *jobvl, const char *jobvr, const int32_t *n, float *pa, const int32_t *lda, float *pwr, float *pwi, float *pvl, const int32_t *ldvl, float *pvr, const int32_t *ldvr, float *pwork, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_eig_s(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int32_t *info, int32_t *psw)
+extern void sgeev_(const char *jobvl, const char *jobvr, const int64_t *n, float *pa, const int64_t *lda, float *pwr, float *pwi, float *pvl, const int64_t *ldvl, float *pvr, const int64_t *ldvr, float *pwork, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_eig_s(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     float *pa = (float*)a->ve_adr;
@@ -114,14 +123,14 @@ uint64_t nlcpy_eig_s(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_a
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void dgeev_(const char *jobvl, const char *jobvr, const int32_t *n, double *pa, const int32_t *lda, double *pwr, double *pwi, double *pvl, const int32_t *ldvl, double *pvr, const int32_t *ldvr, double *pwork, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_eig_d(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int32_t *info, int32_t *psw)
+extern void dgeev_(const char *jobvl, const char *jobvr, const int64_t *n, double *pa, const int64_t *lda, double *pwr, double *pwi, double *pvl, const int64_t *ldvl, double *pvr, const int64_t *ldvr, double *pwork, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_eig_d(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     double *pa = (double*)a->ve_adr;
@@ -194,14 +203,14 @@ uint64_t nlcpy_eig_d(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_a
 }
 
 
-extern void cgeev_(const char *jobvl, const char *jobvr, const int32_t *n, float _Complex *pa, const int32_t *lda, float _Complex *pw, float _Complex *pvl, const int32_t *ldvl, float _Complex *pvr, const int32_t *ldvr, float _Complex *pwork, const int32_t *lwork, float *prwork, int32_t *info);
-uint64_t nlcpy_eig_c(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int32_t *info, int32_t *psw)
+extern void cgeev_(const char *jobvl, const char *jobvr, const int64_t *n, float _Complex *pa, const int64_t *lda, float _Complex *pw, float _Complex *pvl, const int64_t *ldvl, float _Complex *pvr, const int64_t *ldvr, float _Complex *pwork, const int64_t *lwork, float *prwork, int64_t *info);
+uint64_t nlcpy_eig_c(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     float _Complex *pa = (float _Complex*)a->ve_adr;
@@ -239,14 +248,14 @@ uint64_t nlcpy_eig_c(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_a
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void zgeev_(const char *jobvl, const char *jobvr, const int32_t *n, double _Complex *pa, const int32_t *lda, double _Complex *pw, double _Complex *pvl, const int32_t *ldvl, double _Complex *pvr, const int32_t *ldvr, double _Complex *pwork, const int32_t *lwork, double *prwork, int32_t *info);
-uint64_t nlcpy_eig_z(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int32_t *info, int32_t *psw)
+extern void zgeev_(const char *jobvl, const char *jobvr, const int64_t *n, double _Complex *pa, const int64_t *lda, double _Complex *pw, double _Complex *pvl, const int64_t *ldvl, double _Complex *pvr, const int64_t *ldvr, double _Complex *pwork, const int64_t *lwork, double *prwork, int64_t *info);
+uint64_t nlcpy_eig_z(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_array *rwork, const char jobvr, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
-    const int32_t ldvl = 1;
-    const int32_t ldvr = n;
-    const int32_t lwork = work->size;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
+    const int64_t ldvl = 1;
+    const int64_t ldvr = n;
+    const int64_t lwork = work->size;
     const char jobvl = 'N';
 
     double _Complex *pa = (double _Complex*)a->ve_adr;
@@ -284,7 +293,7 @@ uint64_t nlcpy_eig_z(ve_array *a, ve_array *w, ve_array *v, ve_array *work, ve_a
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_eig(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, ve_array *rwork, int32_t jobvr, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_eig(ve_array *a, ve_array *wr, ve_array *wi, ve_array *vr, ve_array *vc, ve_array *work, ve_array *rwork, int64_t jobvr, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f32:

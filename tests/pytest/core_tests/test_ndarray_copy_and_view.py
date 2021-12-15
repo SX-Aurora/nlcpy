@@ -86,6 +86,26 @@ class TestArrayCopyAndView(unittest.TestCase):
         a = xp.array(1.5, dtype=numpy.float32)
         return a.view(dtype=numpy.int32)
 
+    @testing.numpy_nlcpy_array_equal()
+    def test_view_dtype_is_ma(self, xp):
+        a = xp.arange(3)
+        return a.view(dtype=xp.ma.MaskedArray)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_view_type_is_ma(self, xp):
+        a = xp.arange(3)
+        return a.view(type=xp.ma.MaskedArray)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_view_dtype_and_type(self, xp):
+        a = xp.arange(3)
+        return a.view(dtype=numpy.float64, type=xp.ma.MaskedArray)
+
+    @testing.numpy_nlcpy_raises()
+    def test_view_specify_type_twice(self, xp):
+        a = xp.arange(3)
+        return a.view(dtype=xp.ndarray, type=xp.ma.MaskedArray)
+
     """failure
     @testing.for_dtypes([numpy.int32, numpy.int64])
     @testing.numpy_nlcpy_raises()

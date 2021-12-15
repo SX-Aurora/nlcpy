@@ -1,0 +1,275 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/jit/basic_usage.rst:6
+msgid "Basic Usage"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:8
+msgid "This section describes how to customize a VE function."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:14
+msgid "Constructing Custom VE Library"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:16
+msgid "There are two ways to construct a custom VE library:"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:18
+msgid "**A. Compiling and Loading From Source Code**"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:20
+msgid "Define source code as a Python string."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:32
+msgid ""
+"When using the tripple quotes ``\"\"\"`` or ``'''``, always prepend them "
+"by ``r`` such that the content is interpreted as raw string. Otherwise "
+"the escaped characters will be interpreted and spoil the source code."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:37
+msgid "Compile and Load from the Python string."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:44
+msgid "**B. Loading From Pre-built Binary**"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:50
+msgid "If you need complicated build rules, we recommend using case ``B``."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:53
+msgid ":class:`nlcpy.jit.CustomVELibrary`"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:57
+msgid "Getting a Symbol of a Function"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:59
+msgid ""
+"You need to call :meth:`CustomVELibrary.get_function` to get a symbol of "
+"a funtion on VE."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:70
+msgid "``ve_add`` is the instance of :class:`CustomVEKernel` class."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:72
+msgid ""
+"The tuple of character string element or the tuple of constant element of"
+" the ``nlcpy.ve_types`` can be passed into the argument ``args_type``. "
+"Also, the character string or the constant of the ``nlcpy.ve_types`` can "
+"be passed into the argument ``ret_type``."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:77
+msgid "The supported data-types and its corresponding notations are as follows:"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "data-type description"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "character strings"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "constants of nlcpy.ve_types"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "void"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'void'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.void"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "8-bit character"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'char'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.char"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "32-bit signed integer"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'int32_t'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.int32"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "64-bit signed integer"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'int64_t'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.int64"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "32-bit unsigned integer"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'uint32_t'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.uint32"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "64-bit unsigned integer"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'uint64_t'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.uint64"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "32-bit floating-point real"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'float'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.float32"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "64-bit floating-point real"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'double'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.float64"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "void pointer"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "'void \\*'"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:1
+msgid "nlcpy.ve_types.void_p"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:93
+msgid ""
+"For the complex data-type, it is necessary to transfer data as "
+":class:`nlcpy.ndarray` or ``nlcpy.veo.OnStack``. Please refer to the "
+":ref:`Advanced Topics <label_advanced_topics>`."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:98
+msgid ":meth:`nlcpy.jit.CustomVELibrary.get_function`"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:100
+msgid ":class:`nlcpy.jit.CustomVEKernel`"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:103
+msgid "Execution"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:105
+msgid ""
+"Here, you can execute the instance of :class:`CustomVEKernel` as a VE "
+"function."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:116
+msgid ""
+"Just only pass the attribute ``ndarray.ve_adr`` into arguments, the VE "
+"function can get the pointer of the array."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:120
+msgid ""
+"You can invoke the VE function without recompiling by calling "
+":meth:`CustomVEKernel.__call__` repeatedly."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:124
+msgid ":meth:`nlcpy.jit.CustomVEKernel.__call__`"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:127
+msgid "Finalization (Optional)"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:129
+msgid "If needed, you can unload the loaded library."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:135
+msgid "Restriction"
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:137
+msgid ""
+"Please avoid unloading the shared library linked with FTRACE. Otherwise, "
+"SIGSEGV may occur."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:141
+msgid ":func:`unload_library`"
+msgstr ""
+

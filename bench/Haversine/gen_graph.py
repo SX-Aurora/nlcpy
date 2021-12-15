@@ -40,9 +40,10 @@ PNG_LINE_PATH = 'result/haversine_line.png'
 SIZE_PATH = 'result/size.dat'
 T_NP_PATH = 'result/time_numpy.dat'
 T_VP_PATH = 'result/time_nlcpy.dat'
+T_J_PATH  = 'result/time_jit.dat'
+T_JE_PATH = 'result/time_jit_e.dat'
 
-
-def gen_graph_bar(size, t_numpy, t_nlcpy):
+def gen_graph_bar(size, t_numpy, t_nlcpy, t_jit, t_jit_e):
     index = np.arange(len(t_numpy))
     labels = ["size={:,}".format(s) for s in size]
 
@@ -53,7 +54,7 @@ def gen_graph_bar(size, t_numpy, t_nlcpy):
     ax.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
     ax.ticklabel_format(style='sci',axis='x',scilimits=(0,0))
 
-    bar_height = 0.25
+    bar_height = 0.2
     alpha = 0.8
 
     plt.title('haversine performance')
@@ -65,18 +66,26 @@ def gen_graph_bar(size, t_numpy, t_nlcpy):
     plt.barh(index, t_numpy, bar_height,
     alpha=alpha, label='numpy', align='center')
 
+    plt.barh(index + bar_height*2, t_jit, bar_height,
+    alpha=alpha, label='nlcpy-jit', align='center')
+
     plt.yticks(index + bar_height/2, labels)
     plt.tick_params(labelsize=14)
+
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=14)
     plt.savefig(PNG_BAR_PATH, bbox_inches='tight', dpi=600)
 
 
-def gen_graph_line(size, t_numpy, t_nlcpy):
+def gen_graph_line(size, t_numpy, t_nlcpy, t_jit, t_jit_e):
     fig = plt.figure()
     plt.rcParams["font.size"] = 12
     ax = fig.add_subplot(1,1,1)
+
     ax.plot(size, t_numpy, label='numpy', linestyle='--', marker='o')
     ax.plot(size, t_nlcpy, label='nlcpy', linestyle='--', marker='o')
+    ax.plot(size, t_jit, label='nlcpy-jit(pre+exec)', linestyle='--', marker='x')
+    ax.plot(size, t_jit_e, label='nlcpy-jit(exec)', linestyle='--', marker='x')
+
     ax.set_xlabel('size', fontsize=14)
     ax.set_ylabel('elapsed time[sec]', fontsize=14)
     ax.legend(loc='best', fontsize=14)
@@ -90,11 +99,16 @@ if __name__ == "__main__":
     size = np.fromfile(SIZE_PATH).astype('i8')
     t_numpy = np.fromfile(T_NP_PATH)
     t_nlcpy = np.fromfile(T_VP_PATH)
+    t_jit = np.fromfile(T_J_PATH)
+    t_jit_e = np.fromfile(T_JE_PATH)
 
     # generate line graph
-    gen_graph_line(size, t_numpy, t_nlcpy)
+    gen_graph_line(size, t_numpy, t_nlcpy, t_jit, t_jit_e)
 
     # generate bar graph
     t_numpy = size/t_numpy
     t_nlcpy = size/t_nlcpy
-    gen_graph_bar(size[::-1], t_numpy[::-1], t_nlcpy[::-1])
+    t_jit = size/t_jit
+    t_jit_e = size/t_jit_e
+
+    gen_graph_bar(size[::-1], t_numpy[::-1], t_nlcpy[::-1], t_jit[::-1], t_jit_e[::-1])

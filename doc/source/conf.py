@@ -97,7 +97,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.extlinks',
               'sphinx.ext.intersphinx',
-              'sphinx.ext.mathjax',
+              # 'sphinx.ext.mathjax',
+              'sphinx.ext.imgmath',
               # 'sphinx.ext.napoleon',
               # 'numpydoc',
               'nlcpydoc',
@@ -156,3 +157,6 @@ doctest_default_flags = 0
 #    | doctest.IGNORE_EXCEPTION_DETAIL
 #    | doctest.NORMALIZE_WHITESPACE
 #)
+
+imgmath_image_format = 'svg'
+imgmath_font_size = 16

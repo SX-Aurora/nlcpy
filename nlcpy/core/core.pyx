@@ -81,6 +81,7 @@ from nlcpy.statistics.order import ptp
 from nlcpy.statistics.average import mean
 from nlcpy.statistics.average import var
 from nlcpy.statistics.average import std
+from nlcpy.sca.description cimport description
 import numpy
 cimport numpy as cnp
 
@@ -354,20 +355,37 @@ cdef class ndarray:
         return ufunc_op.not_equal(x)
 
     def __add__(x, y):
+        if hasattr(y, '__radd__'):
+            x_priority = getattr(x, '__array_priority__', -1)
+            y_priority = getattr(y, '__array_priority__', -1)
+            if y_priority > x_priority > 0:
+                return y.__radd__(x)
         return ufunc_op.add(x, y)
 
     def __sub__(x, y):
+        if hasattr(y, '__rsub__'):
+            x_priority = getattr(x, '__array_priority__', -1)
+            y_priority = getattr(y, '__array_priority__', -1)
+            if y_priority > x_priority > 0:
+                return y.__rsub__(x)
         return ufunc_op.subtract(x, y)
 
     def __mul__(x, y):
-        if hasattr(x, '__array_priority__') and \
-                hasattr(y, '__array_priority__') and \
-                hasattr(y, '__mul__'):
-            if y.__array_priority__ > x.__array_priority__:
-                return y.__mul__(x)
+        if isinstance(y, description):
+            return y.__mul__(x)
+        if hasattr(y, '__rmul__'):
+            x_priority = getattr(x, '__array_priority__', -1)
+            y_priority = getattr(y, '__array_priority__', -1)
+            if y_priority > x_priority > 0:
+                return y.__rmul__(x)
         return ufunc_op.multiply(x, y)
 
     def __truediv__(x, y):
+        if hasattr(y, '__rtruediv__'):
+            x_priority = getattr(x, '__array_priority__', -1)
+            y_priority = getattr(y, '__array_priority__', -1)
+            if y_priority > x_priority > 0:
+                return y.__rtruediv__(x)
         return ufunc_op.true_divide(x, y)
 
     def __floordiv__(x, y):
@@ -402,15 +420,23 @@ cdef class ndarray:
         return ufunc_op.matmul(x, y)
 
     def __iadd__(x, y):
+        if hasattr(y, '_data'):
+            y = y._data
         return ufunc_op.add(x, y, out=x)
 
     def __isub__(x, y):
+        if hasattr(y, '_data'):
+            y = y._data
         return ufunc_op.subtract(x, y, out=x)
 
     def __imul__(x, y):
+        if hasattr(y, '_data'):
+            y = y._data
         return ufunc_op.multiply(x, y, out=x)
 
     def __itruediv__(x, y):
+        if hasattr(y, '_data'):
+            y = y._data
         return ufunc_op.true_divide(x, y, out=x)
 
     def __ifloordiv__(x, y):
@@ -620,7 +646,7 @@ cdef class ndarray:
 
         See Also
         --------
-        ndarray.reshape : Returns an array containing
+        nlcpy.ndarray.reshape : Returns an array containing
             the same data with a new shape.
 
         Examples
@@ -667,7 +693,7 @@ cdef class ndarray:
         Restriction
         -----------
         * If order = 'F' : *NotImplementedError* occurs.
-        * | If order = 'A' or 'K' : *NotImplementedError* occurs wheni *a* is using
+        * | If order = 'A' or 'K' : *NotImplementedError* occurs when *a* is using
           |                         Fortran-style order
 
         See Also
@@ -709,7 +735,7 @@ cdef class ndarray:
         return manipulation._ndarray_repeat(self, repeats, axis)
 
     def swapaxes(self, axis1, axis2):
-        """Return a view of the array with axis1 and axis2 interchanged.
+        """Returns a view of the array with axis1 and axis2 interchanged.
 
         Refer to :func:`nlcpy.swapaxes` for full documentation.
 
@@ -842,7 +868,7 @@ cdef class ndarray:
         """
         return self.get().tolist()
 
-    cpdef ndarray view(self, dtype=None):
+    cpdef ndarray view(self, dtype=None, object type=None):
         """Returns a new view of array with the same data.
 
         Parameters
@@ -850,10 +876,9 @@ cdef class ndarray:
         dtype : dtype, optional
             Data-type descriptor of the returned view, e.g., float32 or int64. The
             default, None, results in the view having the same data-type as *a.*
-
-        Restriction
-        -----------
-        * *type* is specified : TypeError occurs in the current NLCPy.
+        type : Python type, optional
+            Type of the returned view, e.g., ndarray or matrix. Again, omission of
+            the parameter results in type preservation.
 
         Note
         ----
@@ -894,8 +919,13 @@ cdef class ndarray:
         cdef object vh_view = None
         if self._memloc in {on_VH, on_VE_VH}:
             vh_view = self.vh_data.view()
+        if dtype is ndarray or dtype in ndarray.__subclasses__():
+            if type is not None:
+                raise ValueError("Cannot specify output type twice.")
+            type = dtype
+            dtype = None
         v = self._view(self._shape, self._strides, False, False, True,
-                       vh_view=vh_view, dtype=dtype)
+                       vh_view=vh_view, dtype=dtype, type=type)
         return v
 
     cpdef ndarray copy(self, order='C'):
@@ -1419,13 +1449,20 @@ cdef class ndarray:
             bint mem_check=True,
             object vh_view=None,
             object dtype=None,
+            object type=None,
             int64_t offset=0L):
         cdef ndarray v
         cdef Py_ssize_t ndim
-        v = ndarray.__new__(ndarray)
-        v.base = self.base if self.base is not None else self
+        if type not in (None, ndarray):
+            v = ndarray.__new__(type)
+            v.__init__()
+            if type is nlcpy.ma.MaskedArray:
+                v._sharedmask = False
+        else:
+            v = ndarray.__new__(ndarray)
         v.dtype, v.itemsize = (self.dtype, self.itemsize) if dtype is None \
             else _dtype.get_dtype_with_itemsize(dtype)
+        v.base = self.base if self.base is not None else self
         v._c_contiguous = self._c_contiguous
         v._f_contiguous = self._f_contiguous
         v._is_view = True
@@ -1685,6 +1722,8 @@ cdef list _flatten_list(object obj):
             ret += _flatten_list(elem)
         return ret
     if isinstance(obj, ndarray):
+        if type(obj) is nlcpy.ma.MaskedArray:
+            obj = obj.data
         if obj.ndim == 0:
             # convert each scalar (0-dim) ndarray to 1-dim
             obj = nlcpy.expand_dims(obj, 0)
@@ -1925,21 +1964,24 @@ def finalize():
     global _exit_mode
     _exit_mode = True
     # destroy handle
-    request._push_and_flush_request(
-        'random_destroy_handle',
-        (),
-        callback=None,
-        sync=True
-    )
-    request._push_and_flush_request(
-        'nlcpy_fft_destroy_handle',
-        (),
-        callback=None,
-        sync=True
-    )
-    request._push_and_flush_request(
-        'asl_library_finalize',
-        (),
-        callback=None,
-        sync=True
-    )
+    try:
+        request._push_and_flush_request(
+            'random_destroy_handle',
+            (),
+            callback=None,
+            sync=True
+        )
+        request._push_and_flush_request(
+            'nlcpy_fft_destroy_handle',
+            (),
+            callback=None,
+            sync=True
+        )
+        request._push_and_flush_request(
+            'asl_library_finalize',
+            (),
+            callback=None,
+            sync=True
+        )
+    except Exception as e:
+        pass

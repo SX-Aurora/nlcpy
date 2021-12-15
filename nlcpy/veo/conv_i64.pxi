@@ -99,53 +99,59 @@ cdef class ConvToI64(object):
 
 cdef class ConvFromI64(object):
     @staticmethod
-    def to_char(int64_t x):
-        return <char>(x & 0xff)
+    cdef char to_char(int64_t x):
+        return <char>x
+        # return <char>(x & 0xff)
 
     @staticmethod
-    def to_uchar(int64_t x):
-        return <unsigned char>(x & 0xff)
+    cdef unsigned char to_uchar(int64_t x):
+        return <unsigned char>x
+        # return <unsigned char>(x & 0xff)
 
     @staticmethod
-    def to_short(int64_t x):
-        return <short>(x & 0xffff)
+    cdef int16_t to_short(int64_t x):
+        return <int16_t>x
+        # return <short>(x & 0xffff)
 
     @staticmethod
-    def to_ushort(int64_t x):
-        return <unsigned short>(x & 0xffff)
+    cdef uint16_t to_ushort(int64_t x):
+        return <uint16_t>x
+        # return <unsigned short>(x & 0xffff)
 
     @staticmethod
-    def to_int(int64_t x):
-        return <int>(x & 0xffffffff)
+    cdef int32_t to_int(int64_t x):
+        return <int32_t>x
+        # return <int>(x & 0xffffffff)
 
     @staticmethod
-    def to_uint(int64_t x):
-        return <unsigned int>(x & 0xffffffff)
+    cdef uint32_t to_uint(int64_t x):
+        return <uint32_t>x
+        # return <unsigned int><int64_t>(x & 0xffffffff)
 
     @staticmethod
-    def to_long(int64_t x):
+    cdef int64_t to_long(int64_t x):
         return x
 
     @staticmethod
-    def to_ulong(int64_t x):
+    cdef uint64_t to_ulong(int64_t x):
         cdef U64 u
         u.i64 = x
         return u.u64
 
     @staticmethod
-    def to_float(int64_t x):
+    cdef float to_float(int64_t x):
         cdef U64 u
         u.i64 = x
         return u.f32[1]
 
     @staticmethod
-    def to_double(int64_t x):
+    cdef double to_double(int64_t x):
         cdef U64 u
         u.i64 = x
         return u.d64
 
     @staticmethod
-    def to_void(int64_t x):
+    cdef to_void(int64_t x):
         return None
 
 
@@ -180,7 +186,9 @@ cdef conv_to_i64_func(proc, t):
         return ConvToI64.from_double
     elif t == "void":
         return ConvToI64.from_void
-    elif t.endswith(b"*"):
+    elif type(t) is str and t.endswith("*"):
+        return ConvToI64.from_memptr
+    elif type(t) is bytes and t.endswith(b"*"):
         return ConvToI64.from_memptr
     else:
         raise TypeError("Don't know how to convert '%s' to I64" % t)
@@ -216,7 +224,9 @@ cdef conv_from_i64_func(proc, t):
         return ConvFromI64.to_double
     elif t == "void":
         return ConvFromI64.to_void
-    elif t.endswith(b"*"):
+    elif type(t) is str and t.endswith("*"):
+        return proc.i64_to_memptr
+    elif type(t) is bytes and t.endswith(b"*"):
         return proc.i64_to_memptr
     else:
         raise TypeError("Don't know how to convert from I64 to '%s'" % t)

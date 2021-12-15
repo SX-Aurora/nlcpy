@@ -81,7 +81,7 @@ cdef class ndarray:
     cpdef sort(self, axis=*, kind=*, order=*)
     cpdef ndarray argsort(self, axis=*, kind=*, order=*)
     cpdef tolist(self)
-    cpdef ndarray view(self, dtype=*)
+    cpdef ndarray view(self, dtype=*, object type=*)
     cpdef ndarray copy(self, order=*)
     cpdef ndarray astype(self, dtype, order=*, casting=*, subok=*, copy=*)
     cpdef fill(self, value)
@@ -112,6 +112,7 @@ cdef class ndarray:
         bint mem_check=*,
         object vh_view=*,
         object dtype=*,
+        object type=*,
         int64_t offset=*
     )
     cpdef _set_contiguous_strides(

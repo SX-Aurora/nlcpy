@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+@#include <float.h>
+@#include <math.h>
+@#include <complex.h>
 
 @#include "nlcpy.h"
 
@@ -127,7 +137,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t *ps
                 }
             }
         }
-    }  
+    }
     @TYPE1@ *px = (@TYPE1@ *)x->ve_adr;
     if (x->ndim == 1) {
 @#ifdef _OPENMP
@@ -148,7 +158,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t *ps
             @UNARY_OPERATOR@(*px0,tmp,$1)
             *py0 = tmp;
         }
-} /* omp single */ 
+} /* omp single */
 
     } else if (x->ndim == 2) {
         if (axis == n_inner) {

@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,13 +30,21 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+
 #include "nlcpy.h"
 
 uint64_t nlcpy_prepare_indexing(ve_arguments *args, int32_t *psw) {
     ve_array *s = &(args->prepare_indexing.s);
     ve_array *reduced_idx = &(args->prepare_indexing.reduced_idx);
-    int64_t a_shape_i = args->prepare_indexing.a_shape_i;    
-    int64_t stride = args->prepare_indexing.stride;    
+    int64_t a_shape_i = args->prepare_indexing.a_shape_i;
+    int64_t stride = args->prepare_indexing.stride;
 
     assert(s->size == reduced_idx->size);
     assert(s->ndim == reduced_idx->ndim);
@@ -99,8 +107,8 @@ uint64_t nlcpy_prepare_indexing(ve_arguments *args, int32_t *psw) {
         // TODO: refine code
         nlcpy__exchange_shape_and_strides(s);
         nlcpy__exchange_shape_and_strides(reduced_idx);
-} /* omp single */ 
-       
+} /* omp single */
+
 @#ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -113,7 +121,7 @@ uint64_t nlcpy_prepare_indexing(ve_arguments *args, int32_t *psw) {
         int64_t n_inner = s->ndim - 1;
         int64_t n_outer = 0;
         nlcpy__reset_coords(cnt_x, s->ndim);
-        
+
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t ix0 = s->strides[n_inner] / s->itemsize;
@@ -147,7 +155,7 @@ uint64_t nlcpy_prepare_indexing(ve_arguments *args, int32_t *psw) {
     } else {
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
- 
+
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }

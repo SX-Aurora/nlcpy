@@ -5,7 +5,7 @@ include make.inc
 .PHONY: all nlcpy_ve_common nlcpy_ve_no_fast_math nlcpy_ve_fast_math FORCE
 
 JOBS:=$(shell grep -c ^processor /proc/cpuinfo 2>/dev/null)
-JOBS:=$(shell if [ $(JOBS) -le 16 ]; then echo "8"; else echo "16"; fi)
+JOBS:=$(shell if [ $(JOBS) -le 16 ]; then echo "8"; elif [ $(JOBS) -le 32 ]; then echo "16"; else echo "32"; fi)
 
 all: make.dep nlcpy_ve_common nlcpy_ve_no_fast_math nlcpy_ve_fast_math
 	cp $(SRCDIR)/*.h $(BASEDIR)/nlcpy/include/

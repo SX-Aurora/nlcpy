@@ -32,16 +32,24 @@
 */
 
 include(macros.m4)dnl
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
 
 define(<--@macro_qr@-->,<--@
-extern void $1geqrf_(const int32_t *m, const int32_t *n, $2 *pa, const int32_t *lda, $2 *ptau, $2 *pw, const int32_t *lwork, int32_t *info);
-extern void $3_(const int32_t *m, const int32_t *mc, const int32_t *k, $2 *pa, const int32_t *lda, $2 *ptau, $2 *pw, const int32_t *lwork, int32_t *info);
-uint64_t nlcpy_qr_$1(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
+extern void $1geqrf_(const int64_t *m, const int64_t *n, $2 *pa, const int64_t *lda, $2 *ptau, $2 *pw, const int64_t *lwork, int64_t *info);
+extern void $3_(const int64_t *m, const int64_t *mc, const int64_t *k, $2 *pa, const int64_t *lda, $2 *ptau, $2 *pw, const int64_t *lwork, int64_t *info);
+uint64_t nlcpy_qr_$1(int64_t m, int64_t n, int64_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw)
 {
-    int32_t lda = a->shape[0];
-    const int32_t lwork = work->size;
-    int32_t info;
+    int64_t lda = a->shape[0];
+    const int64_t lwork = work->size;
+    int64_t info;
 
     $2 *pa = ($2*)a->ve_adr;
     $2 *ptau = ($2*)tau->ve_adr;
@@ -65,8 +73,8 @@ uint64_t nlcpy_qr_$1(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *
         }
     }
     if (jobq) {
-        const int32_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
-        const int32_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
+        const int64_t k = (a->shape[0] < a->shape[1]) ? a->shape[0] : a->shape[1];
+        const int64_t mc = (a->shape[0] == a->shape[1]) ? a->shape[0] : k;
         $3_(&m, &mc, &k, pa, &lda, ptau, pw, &lwork, &info);
     }
     retrieve_fpe_flags(psw);
@@ -76,7 +84,7 @@ uint64_t nlcpy_qr_$1(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *
 macro_qr(d, double, dorgqr)dnl
 macro_qr(z, double _Complex, zungqr)dnl
 
-uint64_t nlcpy_qr(int32_t m, int32_t n, int32_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw) {
+uint64_t nlcpy_qr(int64_t m, int64_t n, int64_t jobq, ve_array *a, ve_array *tau, ve_array *r, ve_array *work, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

@@ -141,8 +141,8 @@ def load(file, mmap_mode=None, allow_pickle=False, fix_imports=True, encoding='A
     Store data to disk, and load it again:
 
     >>> import nlcpy as vp
-    >>> vp.save('./123', vp.array([[1, 2, 3], [4, 5, 6]]))
-    >>> vp.load('./123.npy')
+    >>> vp.save('/tmp/123', vp.array([[1, 2, 3], [4, 5, 6]]))
+    >>> vp.load('/tmp/123.npy')
     array([[1, 2, 3],
            [4, 5, 6]])
 
@@ -150,8 +150,8 @@ def load(file, mmap_mode=None, allow_pickle=False, fix_imports=True, encoding='A
 
     >>> a=vp.array([[1, 2, 3], [4, 5, 6]])
     >>> b=vp.array([1, 2])
-    >>> vp.savez('./123.npz', a=a, b=b)
-    >>> data = vp.load('./123.npz')
+    >>> vp.savez('/tmp/123.npz', a=a, b=b)
+    >>> data = vp.load('/tmp/123.npz')
     >>> data['a']
     array([[1, 2, 3],
            [4, 5, 6]])
@@ -445,8 +445,8 @@ def savez_compressed(file, *args, **kwds):
     >>> from nlcpy import testing
     >>> test_array = vp.random.rand(3, 2)
     >>> test_vector = vp.random.rand(4)
-    >>> vp.savez_compressed('./123', a=test_array, b=test_vector)
-    >>> loaded = vp.load('./123.npz')
+    >>> vp.savez_compressed('/tmp/123', a=test_array, b=test_vector)
+    >>> loaded = vp.load('/tmp/123.npz')
     >>> vp.testing.assert_array_equal(test_array, loaded['a'])
     >>> vp.testing.assert_array_equal(test_vector, loaded['b'])
     """

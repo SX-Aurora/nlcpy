@@ -1,4 +1,4 @@
-.SUFFIXES: .o .c .h .c.master .h.master .master.m4 .master
+.SUFFIXES: .o .c .h .c.master .h.master .master.m4 .master .c.m4
 
 BASEDIR = ../..
 
@@ -7,7 +7,7 @@ include $(BASEDIR)/make.inc
 NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -rV |head -1)
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
-LIB_NLC=-lasl_openmp_i64 -llapack -lcblas -lblas_openmp -lsca_openmp_i64
+LIB_NLC=-lasl_openmp_i64 -llapack_i64 -lcblas_i64 -lblas_openmp_i64 -lsca_openmp_i64
 
 LIB_COMMON=$(LIBDIR)/libnlcpy_ve_kernel_common.so
 ifeq ($(FAST_MATH),yes)
@@ -395,7 +395,8 @@ VE_BASIC_MASTER =\
   nlcpy_insert.c.master\
   nlcpy_roll.c.master\
   nlcpy_fill_diagonal.c.master\
-  nlcpy_block.c.master
+  nlcpy_block.c.master\
+  nlcpy_domain_mask.c.master
 
 
 VE_CONTROLLER =\

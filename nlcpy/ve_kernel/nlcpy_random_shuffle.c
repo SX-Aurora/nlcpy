@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,13 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
 #include "nlcpy.h"
 
@@ -55,13 +62,13 @@ uint64_t nlcpy_random_shuffle_bool(ve_array *x, ve_array *idx, ve_array *work, i
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -96,7 +103,7 @@ uint64_t nlcpy_random_shuffle_bool(ve_array *x, ve_array *idx, ve_array *work, i
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -164,13 +171,13 @@ uint64_t nlcpy_random_shuffle_i32(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -205,7 +212,7 @@ uint64_t nlcpy_random_shuffle_i32(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -273,13 +280,13 @@ uint64_t nlcpy_random_shuffle_i64(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -314,7 +321,7 @@ uint64_t nlcpy_random_shuffle_i64(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -382,13 +389,13 @@ uint64_t nlcpy_random_shuffle_u32(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -423,7 +430,7 @@ uint64_t nlcpy_random_shuffle_u32(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -491,13 +498,13 @@ uint64_t nlcpy_random_shuffle_u64(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -532,7 +539,7 @@ uint64_t nlcpy_random_shuffle_u64(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -600,13 +607,13 @@ uint64_t nlcpy_random_shuffle_f32(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -641,7 +648,7 @@ uint64_t nlcpy_random_shuffle_f32(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -709,13 +716,13 @@ uint64_t nlcpy_random_shuffle_f64(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -750,7 +757,7 @@ uint64_t nlcpy_random_shuffle_f64(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -818,13 +825,13 @@ uint64_t nlcpy_random_shuffle_c64(ve_array *x, ve_array *idx, ve_array *work, in
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -859,7 +866,7 @@ uint64_t nlcpy_random_shuffle_c64(ve_array *x, ve_array *idx, ve_array *work, in
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -927,13 +934,13 @@ uint64_t nlcpy_random_shuffle_c128(ve_array *x, ve_array *idx, ve_array *work, i
 // 0-d //
 /////////
     if (x->ndim == 0) {
-        /* nothing to do */ 
-  
+        /* nothing to do */
+
 /////////
 // 1-d //
 /////////
     } else if (x->ndim == 1) {
-#ifdef _OPENMP    
+#ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
 {
@@ -968,7 +975,7 @@ uint64_t nlcpy_random_shuffle_c128(ve_array *x, ve_array *idx, ve_array *work, i
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iw0 = work->strides[n_inner] / work->itemsize;
         const uint64_t ii0 = idx->strides[0] / idx->itemsize;
- 
+
         const int64_t lenm = x->shape[n_outer];
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
@@ -1030,7 +1037,7 @@ uint64_t nlcpy_random_shuffle(ve_arguments *args, int32_t *psw)
     ve_array *idx = &(args->shuffle.idx);
     ve_array *work = &(args->shuffle.work);
     int32_t axis = args->shuffle.axis;
-    
+
     assert(x->dtype == work->dtype);
     assert(idx->ndim == 1);
     assert(x->ndim == work->ndim);
@@ -1038,7 +1045,7 @@ uint64_t nlcpy_random_shuffle(ve_arguments *args, int32_t *psw)
     assert(idx->is_c_contiguous);
     assert(x->shape[axis] == idx->size);
     uint64_t err;
-    
+
     switch (x->dtype) {
     case ve_bool:  err = nlcpy_random_shuffle_bool (x, idx, work, axis, psw); break;
     case ve_i32 :  err = nlcpy_random_shuffle_i32  (x, idx, work, axis, psw); break;

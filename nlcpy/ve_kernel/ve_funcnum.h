@@ -296,6 +296,10 @@ enum ve_funcnum {
 
     /* sca functions */
     VE_FUNC_SCA_EXECUTE      = 0x20000,
+
+    /* mask functions */
+    VE_FUNC_DOMAIN_MASK      = 0x30000,
+
 };
 
 

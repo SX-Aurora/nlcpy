@@ -31,15 +31,22 @@
 #
 */
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
 
 #include "nlcpy.h"
 
 
-extern void dpotrf_(const char *uplo, const int32_t *n, double *pa, const int32_t *lda, int32_t *info);
-uint64_t nlcpy_cholesky_d(ve_array *a, int32_t *info, int32_t *psw)
+extern void dpotrf_(const char *uplo, const int64_t *n, double *pa, const int64_t *lda, int64_t *info);
+uint64_t nlcpy_cholesky_d(ve_array *a, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
     const char uplo = 'L';
 
     double *pa = (double*)a->ve_adr;
@@ -74,11 +81,11 @@ uint64_t nlcpy_cholesky_d(ve_array *a, int32_t *info, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-extern void zpotrf_(const char *uplo, const int32_t *n, double _Complex *pa, const int32_t *lda, int32_t *info);
-uint64_t nlcpy_cholesky_z(ve_array *a, int32_t *info, int32_t *psw)
+extern void zpotrf_(const char *uplo, const int64_t *n, double _Complex *pa, const int64_t *lda, int64_t *info);
+uint64_t nlcpy_cholesky_z(ve_array *a, int64_t *info, int32_t *psw)
 {
-    const int32_t n = a->shape[0];
-    const int32_t lda = n;
+    const int64_t n = a->shape[0];
+    const int64_t lda = n;
     const char uplo = 'L';
 
     double _Complex *pa = (double _Complex*)a->ve_adr;
@@ -113,7 +120,7 @@ uint64_t nlcpy_cholesky_z(ve_array *a, int32_t *info, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t nlcpy_cholesky(ve_array *a, int32_t *info, int32_t *psw) {
+uint64_t nlcpy_cholesky(ve_array *a, int64_t *info, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
     switch(a->dtype) {
     case ve_f64:

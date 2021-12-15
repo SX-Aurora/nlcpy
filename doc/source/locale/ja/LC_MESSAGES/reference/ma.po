@@ -1,0 +1,251 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020-2021, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/ma.rst:3
+msgid "MaskedArray"
+msgstr ""
+
+#: ../../source/reference/ma.rst:5
+msgid ""
+":class:`nlcpy.ma.MaskedArray` is the NLCPy counterpart of NumPy "
+":class:`numpy.ma.MaskedArray`."
+msgstr ""
+
+#: ../../source/reference/ma.rst:7
+msgid ""
+"For the basic concept of ``MaskedArray``, please refer to the `NumPy "
+"documentation "
+"<https://docs.scipy.org/doc/numpy/reference/maskedarray.html>`_."
+msgstr ""
+
+#: ../../source/reference/ma.rst:10
+msgid ""
+"In the current NLCPy, masked version operations are only supported by "
+"four arithmetic operations in nlcpy.ma. Other functions may raise "
+"TypeError or treat MaskedArray as ndarray."
+msgstr ""
+
+#: ../../source/reference/ma.rst:13
+msgid "MaskedArray class"
+msgstr ""
+
+#: ../../source/reference/ma.rst:21:<autosummary>:1
+msgid ":obj:`nlcpy.ma.MaskedArray <nlcpy.ma.MaskedArray>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:21:<autosummary>:1
+msgid "An array class with possibly masked values."
+msgstr ""
+
+#: ../../source/reference/ma.rst:24
+msgid "Masked Array Operations"
+msgstr ""
+
+#: ../../source/reference/ma.rst:27
+msgid "Creation"
+msgstr ""
+
+#: ../../source/reference/ma.rst:30
+msgid "From existing data"
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.ma.masked_array <nlcpy.ma.masked_array>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid "alias of :class:`nlcpy.ma.core.MaskedArray`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.ma.copy <nlcpy.ma.copy>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid "Returns a copy of the array."
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid ":obj:`nlcpy.ma.array <nlcpy.ma.array>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:39:<autosummary>:1
+msgid "Shortcut to MaskedArray."
+msgstr ""
+
+#: ../../source/reference/ma.rst:41
+msgid "Inspecting the array"
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.ma.getmask <nlcpy.ma.getmask>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid "Returns the mask of a masked array, or nomask."
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.ma.getmaskarray <nlcpy.ma.getmaskarray>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid "Returns the mask of a masked array, or full boolean array of False."
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.ma.getdata <nlcpy.ma.getdata>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid "Returns the data of a masked array as an ndarray."
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid ":obj:`nlcpy.ma.is_mask <nlcpy.ma.is_mask>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:51:<autosummary>:1
+msgid "Returns True if m is a valid, standard mask."
+msgstr ""
+
+#: ../../source/reference/ma.rst:53
+msgid "Manipulating a MaskedArray"
+msgstr ""
+
+#: ../../source/reference/ma.rst:56
+msgid "Changing the shape"
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid ":obj:`nlcpy.ma.ravel <nlcpy.ma.ravel>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid "Returns a contiguous flattened array."
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid ":obj:`nlcpy.ma.reshape <nlcpy.ma.reshape>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid "Returns an array containing the same data with a new shape."
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid ":obj:`nlcpy.ma.resize <nlcpy.ma.resize>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:65:<autosummary>:1
+msgid "Returns a new masked array with the specified size and shape."
+msgstr ""
+
+#: ../../source/reference/ma.rst:67
+msgid "Modifying axes"
+msgstr ""
+
+#: ../../source/reference/ma.rst:75:<autosummary>:1
+msgid ":obj:`nlcpy.ma.swapaxes <nlcpy.ma.swapaxes>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:75:<autosummary>:1
+msgid "Interchanges two axes of an array."
+msgstr ""
+
+#: ../../source/reference/ma.rst:75:<autosummary>:1
+msgid ":obj:`nlcpy.ma.transpose <nlcpy.ma.transpose>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:75:<autosummary>:1
+msgid "Permutes the dimensions of an array."
+msgstr ""
+
+#: ../../source/reference/ma.rst:77
+msgid "Operations on masks"
+msgstr ""
+
+#: ../../source/reference/ma.rst:80
+msgid "Creating a mask"
+msgstr ""
+
+#: ../../source/reference/ma.rst:88:<autosummary>:1
+msgid ":obj:`nlcpy.ma.make_mask <nlcpy.ma.make_mask>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:88:<autosummary>:1
+msgid "Creates a boolean mask from an array."
+msgstr ""
+
+#: ../../source/reference/ma.rst:88:<autosummary>:1
+msgid ":obj:`nlcpy.ma.make_mask_none <nlcpy.ma.make_mask_none>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:88:<autosummary>:1
+msgid "Returns a boolean mask of the given shape, filled with False."
+msgstr ""
+
+#: ../../source/reference/ma.rst:90
+msgid "Modifying a mask"
+msgstr ""
+
+#: ../../source/reference/ma.rst:98:<autosummary>:1
+msgid ":obj:`nlcpy.ma.harden_mask <nlcpy.ma.harden_mask>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:98:<autosummary>:1
+msgid "Forces the mask to hard."
+msgstr ""
+
+#: ../../source/reference/ma.rst:98:<autosummary>:1
+msgid ":obj:`nlcpy.ma.soften_mask <nlcpy.ma.soften_mask>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:98:<autosummary>:1
+msgid "Forces the mask to soft."
+msgstr ""
+
+#: ../../source/reference/ma.rst:100
+msgid "Conversion operations"
+msgstr ""
+
+#: ../../source/reference/ma.rst:103
+msgid "> to a ndarray"
+msgstr ""
+
+#: ../../source/reference/ma.rst:110:<autosummary>:1
+msgid ":obj:`nlcpy.ma.filled <nlcpy.ma.filled>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:110:<autosummary>:1
+msgid "Returns input as an array with masked data replaced by a fill value."
+msgstr ""
+
+#: ../../source/reference/ma.rst:112
+msgid "Filling a masked array"
+msgstr ""
+
+#: ../../source/reference/ma.rst:118:<autosummary>:1
+msgid ":obj:`nlcpy.ma.default_fill_value <nlcpy.ma.default_fill_value>`"
+msgstr ""
+
+#: ../../source/reference/ma.rst:118:<autosummary>:1
+msgid "Returns the default fill value for the argument object."
+msgstr ""
+

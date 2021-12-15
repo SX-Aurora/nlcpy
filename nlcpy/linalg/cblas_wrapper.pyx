@@ -47,10 +47,10 @@ from nlcpy.request cimport request
 
 import time
 
-cdef CblasRowMajor = <int32_t>101
-cdef CblasColMajor = <int32_t>102
-cdef CblasNoTrans = <int32_t>111
-cdef CblasTrans = <int32_t>112
+cdef CblasRowMajor = <int64_t>101
+cdef CblasColMajor = <int64_t>102
+cdef CblasNoTrans = <int64_t>111
+cdef CblasTrans = <int64_t>112
 
 
 cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):

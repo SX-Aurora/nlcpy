@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,7 +30,16 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <alloca.h>
+#include <assert.h>
+
 #include "nlcpy.h"
+#include <inc_i64/asl.h>
 
 #define DBG_PRT(...)
 //#define ERR_PRT(...)
@@ -101,8 +110,8 @@ uint64_t random_generate(ve_array* ve_input){
         err = ASL_ERROR_ARGUMENT;
         return (uint64_t)err;
         break;
-    }    
-    return (uint64_t)err; 
+    }
+    return (uint64_t)err;
 }
 
 uint64_t nlcpy_random_generate_uniform_f64(void* out, int32_t *psw) {
@@ -204,7 +213,7 @@ uint64_t nlcpy_random_generate_unsigned_integers(void* out, void* work, uint64_t
         ERR_PRT("[ERR]asl_random_generate_uniform_long_bits(hnd=%d) ret = 0x%x \n", rng,err);
         return (uint64_t)err;
     }
- 
+
     switch(((ve_array*)out)->dtype){
     case ve_u64:
         {
@@ -241,7 +250,7 @@ uint64_t nlcpy_random_generate_normal_f64(void* out, double m, double s, int32_t
             return (uint64_t)err;
         }
     }
-    
+
 //err = asl_random_get_parameter_normal(rng, &m, &s);
     err = asl_random_distribute_normal(rng, m, s);
     if (err != ASL_ERROR_OK ){
@@ -263,7 +272,7 @@ uint64_t nlcpy_random_generate_gamma_f64(void* out, double a, double b, int32_t 
             return (uint64_t)err;
         }
     }
-    
+
     //err = asl_random_get_parameter_gamma(rng, &a, &b);
     err = asl_random_distribute_gamma(rng, a, b);
     if (err != ASL_ERROR_OK ){
@@ -390,7 +399,7 @@ uint64_t nlcpy_random_generate_gumbel_f64(void* out, double a, double b, int32_t
             return (uint64_t)err;
         }
     }
-    
+
     err = asl_random_distribute_gumbel(rng, a, b);
     if (err != ASL_ERROR_OK ){
         ERR_PRT("[ERR]asl_random_distribute_gumbel(hnd=%d, a=%lf, b=%lf) ret = 0x%x \n", rng, a, b, err);
@@ -411,7 +420,7 @@ uint64_t nlcpy_random_generate_logistic_f64(void* out, double a, double b, int32
             return (uint64_t)err;
         }
     }
-    
+
     err = asl_random_distribute_logistic(rng, a, b);
     if (err != ASL_ERROR_OK ){
         ERR_PRT("[ERR]asl_random_distribute_logistic(hnd=%d, a=%lf, b=%lf) ret = 0x%x \n", rng, a, b, err);
@@ -432,7 +441,7 @@ uint64_t nlcpy_random_generate_lognormal_f64(void* out, double m, double s, int3
             return (uint64_t)err;
         }
     }
-    
+
     err = asl_random_distribute_lognormal(rng, m, s);
     if (err != ASL_ERROR_OK ){
         ERR_PRT("[ERR]asl_random_distribute_lognormal(hnd=%d, m=%lf, s=%lf) ret = 0x%x \n", rng, m, s, err);
@@ -453,7 +462,7 @@ uint64_t nlcpy_random_generate_lognormal_box_muller_f64(void* out, double m, dou
             return (uint64_t)err;
         }
     }
-    
+
     err = asl_random_distribute_lognormal_box_muller(rng, m, s);
     if (err != ASL_ERROR_OK ){
         ERR_PRT("[ERR]asl_random_distribute_lognormal_box_muller(hnd=%d, m=%lf, s=%lf) ret = 0x%x \n", rng, m, s, err);
@@ -521,7 +530,7 @@ uint64_t random_destroy_handle() {
 
 uint64_t nlcpy_random_set_seed(ve_array *seed, int32_t *psw) {
     asl_error_t err = ASL_ERROR_OK;
-    
+
     if (!asl_random_is_valid(rng)) {
         err = asl_random_create(&rng, ASL_RANDOMMETHOD_MT19937_64);
         if (err != ASL_ERROR_OK ){
@@ -529,7 +538,7 @@ uint64_t nlcpy_random_set_seed(ve_array *seed, int32_t *psw) {
             return (uint64_t)err;
         }
     }
- 
+
     const asl_uint32_t *sp = (uint32_t *)seed->ve_adr;
     DBG_PRT("[DBG]nlcpy_random_set_seed seed(ptr=%p,size=%d,[0]=%u)\n", sp, seed->size, sp[0]);
 
@@ -559,8 +568,8 @@ uint64_t nlcpy_random_save_state(ve_array *state, int32_t *psw){
             ERR_PRT("[ERR]asl_random_create() ret = 0x%04x \n", err);
             return (uint64_t)err;
         }
-    }    
-    
+    }
+
     asl_uint32_t *val = (uint32_t *)state->ve_adr;
     err = asl_random_save_state(rng, val);
 #if ASL_RANDOM_ERR==1

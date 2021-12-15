@@ -296,6 +296,8 @@ cdef dict funcNumList = {
     "nlcpy_random_shuffle": ve_funcnum.VE_FUNC_SHUFFLE,
     #  sca functions
     "nlcpy_sca_code_execute": ve_funcnum.VE_FUNC_SCA_EXECUTE,
+    #  mask functions
+    "nlcpy_domain_mask": ve_funcnum.VE_FUNC_DOMAIN_MASK,
 }
 
 
@@ -317,6 +319,7 @@ cdef dict funcTypeList = {
     "math_op": ve_functype.MATH_OP,
     "random_op": ve_functype.RANDOM_OP,
     "sca_op": ve_functype.SCA_OP,
+    "mask_op": ve_functype.MASK_OP,
 }
 
 

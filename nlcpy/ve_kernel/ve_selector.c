@@ -640,6 +640,15 @@ sca_op get_sca_func(int64_t func_num) {
     }
 }
 
+mask_op get_mask_func(int64_t func_num) {
+    switch (func_num) {
+    case VE_FUNC_DOMAIN_MASK    :
+        return nlcpy_domain_mask;
+    default:
+        return nlcpy__select_err;
+    }
+}
+
 uint64_t nlcpy__select_err(ve_arguments *args, int32_t *psw) {
     return NLCPY_ERROR_FUNCNUM;
 }

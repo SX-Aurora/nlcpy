@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020-2021 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,14 @@
 */
 
 include(macros.m4)dnl
+@#include <stdio.h>
+@#include <stdint.h>
+@#include <stdbool.h>
+@#include <stdlib.h>
+@#include <limits.h>
+@#include <alloca.h>
+@#include <assert.h>
+
 @#include "nlcpy.h"
 
 /****************************
@@ -58,25 +66,25 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
     if       (x->ndim==2){
         i0x = x->strides[1]/sizeof(@TYPE1@);
         i1x = x->strides[0]/sizeof(@TYPE1@);
-        m   = x->shape[0]; 
-        kx  = x->shape[1]; 
+        m   = x->shape[0];
+        kx  = x->shape[1];
     } else if (x->ndim==1){
         i0x = x->strides[0]/sizeof(@TYPE1@);
         i1x = 0;
         m   = 1;
-        kx  = x->shape[0]; 
+        kx  = x->shape[0];
     } else {
         assert(x->ndim==2||x->ndim==1);
     }
     if       (y->ndim==2){
         i0y = y->strides[1]/sizeof(@TYPE2@);
         i1y = y->strides[0]/sizeof(@TYPE2@);
-        ky  = y->shape[0]; 
-        n   = y->shape[1]; 
+        ky  = y->shape[0];
+        n   = y->shape[1];
     }else if (y->ndim==1){
         i0y = 0;
         i1y = y->strides[0]/sizeof(@TYPE2@);
-        ky= y->shape[0]; 
+        ky= y->shape[0];
         n = 1;
     } else {
         assert(y->ndim==2||y->ndim==1);
@@ -104,15 +112,15 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
     const int64_t cnt2_s = len2 * it / nt;
     const int64_t cnt2_e = len2 * (it + 1) / nt;
 
-    for (i = cnt1_s; i < cnt1_e; i++) { 
+    for (i = cnt1_s; i < cnt1_e; i++) {
         pz[i] = ($2)0;
     }
 @#ifdef _OPENMP
 @#pragma omp barrier
 @#endif
-    for (j = cnt2_s; j < cnt2_e; j++) { 
-        for (k = 0; k < kx; k++) { 
-            for (i = 0; i < m; i++) { 
+    for (j = cnt2_s; j < cnt2_e; j++) {
+        for (k = 0; k < kx; k++) {
+            for (i = 0; i < m; i++) {
                 pz[j*i0z+i*i1z] += ($2)(($2)px[k*i0x+i*i1x] * ($2)py[j*i0y+k*i1y]);
             }
         }
@@ -142,7 +150,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     ve_array *y = &(args->binary.y);
     ve_array *z = &(args->binary.z);
     assert(x->ndim<=2&&y->ndim<=2);
-    
+
     uint64_t err = NLCPY_ERROR_OK;
     switch (z->dtype) {
     case ve_i32:  err = FILENAME_i32 (x, y, z, psw); break;

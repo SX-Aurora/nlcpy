@@ -11,3 +11,14 @@ Memory Ranges
     :nosignatures:
 
     nlcpy.may_share_memory
+
+
+Utility
+----------------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :nosignatures:
+
+    nlcpy.get_include
+    nlcpy.show_config

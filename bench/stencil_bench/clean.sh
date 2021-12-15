@@ -1,3 +1,3 @@
 #!/bin/sh
 
-rm -rf result/*
+rm -rf *.png *.csv __pycache__

@@ -22,9 +22,10 @@ There are two ways to construct a custom VE library:
         ::
 
             >>> c_src=r'''
-            ...     void ve_add(double *px, double *py, double *pz, int n) {
-            ...     #pragma omp parallel for
+            ...     int ve_add(double *px, double *py, double *pz, int n) {
+            ...         #pragma omp parallel for
             ...         for (int i = 0; i  < n; i++) pz[i] = px[i] + py[i];
+            ...         return 0;
             ...     }
             ... '''
 
@@ -56,7 +57,7 @@ If you need complicated build rules, we recommend using case ``B``.
 Getting a Symbol of a Function
 ==============================
 
-You need to call :meth:`CustomVELibrary.get_function` to get a symbol of a funtion on VE.
+You need to call :meth:`CustomVELibrary.get_function` to get a symbol of a function on VE.
 
 ::
 
@@ -64,7 +65,7 @@ You need to call :meth:`CustomVELibrary.get_function` to get a symbol of a funti
     >>> ve_add = ve_lib.get_function(
     ...     've_add',
     ...     args_type=(ve_types.uint64, ve_types.uint64, ve_types.uint64, ve_types.int32),
-    ...     ret_type=ve_types.void
+    ...     ret_type=ve_types.int32
     ... )
 
 ``ve_add`` is the instance of :class:`CustomVEKernel` class.
@@ -102,19 +103,24 @@ The supported data-types and its corresponding notations are as follows:
 Execution
 =========
 
-Here, you can execute the instance of :class:`CustomVEKernel` as a VE function.
+Here, you can execute the VE function.
 
 ::
 
     >>> x = nlcpy.arange(10., dtype='f8')
     >>> y = nlcpy.arange(10., dtype='f8')
     >>> z = nlcpy.empty(10, dtype='f8')
-    >>> ve_add(x.ve_adr, y.ve_adr, z.ve_adr, z.size)
+    >>> ret = ve_add(x.ve_adr, y.ve_adr, z.ve_adr, z.size, sync=True)
     >>> z
     array([ 0.,  2.,  4.,  6.,  8., 10., 12., 14., 16., 18.])
+    >>> ret
+    0
 
 Just only pass the attribute ``ndarray.ve_adr`` into arguments,
 the VE function can get the pointer of the array.
+
+.. note::
+    If you pass the argument ``sync=False``, the return value will be None.
 
 .. note::
     You can invoke the VE function without recompiling by calling
@@ -126,7 +132,7 @@ the VE function can get the pointer of the array.
 Finalization (Optional)
 =======================
 
-If needed, you can unload the loaded library.
+If needed, you can unload the shared library.
 
 ::
 
@@ -138,5 +144,5 @@ If needed, you can unload the loaded library.
     Otherwise, SIGSEGV may occur.
 
 .. seealso::
-    :func:`unload_library`
+    :func:`nlcpy.jit.unload_library`
 

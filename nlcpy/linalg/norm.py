@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@
 import nlcpy
 from nlcpy import veo
 from nlcpy.request import request
+from numpy import AxisError
 
 
 def _lange(x, norm, axis):
@@ -68,9 +69,23 @@ def _lange(x, norm, axis):
         shape = [x.shape[i] for i in set(range(x.ndim)) - set(axis)]
         return nlcpy.zeros(shape, dtype=dtype)
     if norm in (None, 'fro', 'f'):
-        if x.dtype.kind == 'c':
-            x = abs(x)
-        return nlcpy.sqrt(nlcpy.sum(x * x, axis=axis))
+        if x.ndim == 2 and (x._c_contiguous or x._f_contiguous):
+            y = nlcpy.empty([], dtype=dtype)
+            request._push_request(
+                'nlcpy_simple_fnorm',
+                'linalg_op',
+                (x, y))
+        else:
+            shape = [x.shape[i] for i in set(range(x.ndim)) - set(axis)]
+            y = nlcpy.empty(shape, dtype=dtype, order=order)
+            work1 = nlcpy.empty(x.shape, dtype=dtype, order=order)
+            shape = [x.shape[i] for i in range(x.ndim) if i != axis[0]]
+            work2 = nlcpy.empty(shape, dtype=dtype)
+            request._push_request(
+                'nlcpy_fnorm',
+                'linalg_op',
+                (x, y, work1, work2, axis[0], axis[1]))
+        return y
     if norm == nlcpy.inf:
         norm = 'I'
     else:
@@ -219,8 +234,6 @@ def norm(x, ord=None, axis=None, keepdims=False):
     x = nlcpy.asarray(x)
     if x.dtype.char in '?ilIL':
         x = nlcpy.array(x, dtype='d')
-    # used to match the contiguous of result to numpy.
-    order = 'F' if x.flags.f_contiguous and not x.flags.c_contiguous else 'C'
 
     # Immediately handle some default, simple, fast, and common cases.
     if axis is None:
@@ -246,6 +259,7 @@ def norm(x, ord=None, axis=None, keepdims=False):
         except Exception:
             raise TypeError("'axis' must be None, an integer or a tuple of integers")
 
+    order = 'F' if x.flags.f_contiguous and not x.flags.c_contiguous else 'C'
     if len(axis) == 1:
         if ord == nlcpy.inf:
             return abs(x).max(axis=axis, keepdims=keepdims)
@@ -273,6 +287,10 @@ def norm(x, ord=None, axis=None, keepdims=False):
                 ret = nlcpy.asarray(ret, dtype='d')
             return ret
     elif len(axis) == 2:
+        for ax in axis:
+            if ax < -x.ndim or ax >= x.ndim:
+                msg = 'axis {} is out of bounds for array of dimension {}'
+                raise AxisError(msg.format(ax, x.ndim))
         row_axis, col_axis = axis
         if row_axis < 0:
             row_axis += x.ndim
@@ -292,16 +310,16 @@ def norm(x, ord=None, axis=None, keepdims=False):
                     'zero-size array to '
                     'reduction operation maximum which has no identity'
                 )
-            ret = _lange(x, ord, axis)
+            ret = _lange(x, ord, (row_axis, col_axis))
         elif ord == nlcpy.inf:
             if x.shape[row_axis] == 0:
                 raise ValueError(
                     'zero-size array to '
                     'reduction operation maximum which has no identity'
                 )
-            ret = _lange(x, ord, axis)
+            ret = _lange(x, ord, (row_axis, col_axis))
         elif ord in (None, 'fro', 'f'):
-            ret = _lange(x, ord, axis)
+            ret = _lange(x, ord, (row_axis, col_axis))
         elif ord == -1:
             if col_axis > row_axis:
                 col_axis -= 1

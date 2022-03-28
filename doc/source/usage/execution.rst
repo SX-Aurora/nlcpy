@@ -16,7 +16,7 @@ If the ``VE_OMP_NUM_THREADS`` is undefined or has an invalid value, the maximum 
 
 Examples are shown below.
 
-* Interactive mode: 
+* Interactive mode:
 
     ::
 
@@ -25,7 +25,7 @@ Examples are shown below.
 
     Subsequent computations will be performed by 4 parallel threads on a VE.
 
-* Non-interactive mode: 
+* Non-interactive mode:
 
     ::
 
@@ -36,7 +36,7 @@ Examples are shown below.
 
 When you want to specify VE Node number, you should use the environment variable ``VE_NODE_NUMBER`` as follows.
 
-* Interactive mode: 
+* Interactive mode:
 
     ::
 
@@ -45,7 +45,7 @@ When you want to specify VE Node number, you should use the environment variable
 
     Subsequent computations will be performed by 4 parallel threads on VE Node #1.
 
-* Non-interactive mode: 
+* Non-interactive mode:
 
     ::
 
@@ -62,13 +62,13 @@ Optimization for Mathematical Functions
 ---------------------------------------
 
 When the environment variable ``VE_NLCPY_FAST_MATH`` is set to ``yes`` or ``YES``,
-NLCPy uses shared objects ``nlcpy_ve_kernel_fast_math.so`` for VE.
+NLCPy uses shared objects ``libnlcpy_ve_kernel_fast_math.so`` for VE.
 By default, ``VE_NLCPY_FAST_MATH`` is not set.
-The shared objects ( ``nlcpy_ve_kernel_fast_math.so`` ) have been compiled with the following optimization options in NEC C/C++ compiler.
+The shared objects ( ``libnlcpy_ve_kernel_fast_math.so`` ) have been compiled with the following optimization options in NEC C/C++ compiler.
 
 * *-ffast-math*
 
-    Uses fast scalar version mathematical functions outside of vectorized loops. 
+    Uses fast scalar version mathematical functions outside of vectorized loops.
 
 * *-mno-vector-intrinsic-check*
 
@@ -96,15 +96,28 @@ For example, ``nan`` or ``inf`` might not be obtained correctly.
 
 You can set ``VE_NLCPY_FAST_MATH`` as follows:
 
-* Interactive mode: 
+* Interactive mode:
 
     ::
 
         $ VE_NLCPY_FAST_MATH=yes python
         >>> import nlcpy
 
-* Non-interactive mode: 
+* Non-interactive mode:
 
     ::
 
         $ VE_NLCPY_FAST_MATH=yes python example.py
+
+
+.. _label_warmup:
+
+Warming Up Threads and Memory Pre-allocation
+--------------------------------------------
+
+When the environment variable ``VE_NLCPY_WARMUP`` is set to ``yes`` or ``YES``,
+NLCPy pre-allocates memory around 10 GiB and executes some VE kernels at initialization.
+By default, ``VE_NLCPY_WARMUP`` is not set.
+
+In some cases, enabling this option improves performance.
+However, an out of memory error may be caused by memory fragmentation.

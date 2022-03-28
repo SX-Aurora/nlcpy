@@ -371,6 +371,8 @@ VE_LINALG = \
   nlcpy_eig.c\
   nlcpy_eigh.c\
   nlcpy_norm.c\
+  nlcpy_simple_fnorm.c\
+  nlcpy_fnorm.c\
   nlcpy_cholesky.c\
   nlcpy_qr.c
 

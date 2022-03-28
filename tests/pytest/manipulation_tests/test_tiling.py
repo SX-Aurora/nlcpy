@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -92,14 +92,16 @@ class TestTileFailure(unittest.TestCase):
     {'repeats': [1, 2, 3], 'axis': -2},
 )
 class TestRepeat(unittest.TestCase):
+    @testing.for_orders('CF')
     @testing.numpy_nlcpy_array_equal()
-    def test_array_repeat(self, xp):
-        x = testing.shaped_arange((2, 3, 4), xp)
+    def test_array_repeat(self, xp, order):
+        x = testing.shaped_arange((2, 3, 4), xp, order=order)
         return xp.repeat(x, self.repeats, self.axis)
 
+    @testing.for_orders('CF')
     @testing.numpy_nlcpy_array_equal()
-    def test_array_repeat2(self, xp):
-        x = testing.shaped_arange((2, 3, 4), xp)
+    def test_array_repeat2(self, xp, order):
+        x = testing.shaped_arange((2, 3, 4), xp, order=order)
         return x.repeat(self.repeats, self.axis)
 
 
@@ -149,6 +151,14 @@ class TestRepeat1DListBroadcast(unittest.TestCase):
     def test_array_repeat(self, xp):
         x = testing.shaped_arange((4,), xp)
         return xp.repeat(x, self.repeats, self.axis)
+
+
+class TestRepeatNotContiguous(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_repeat(self, xp):
+        x = testing.shaped_arange((3, 4, 5), xp)
+        x = xp.moveaxis(x, 0, 1)
+        return xp.repeat(x, [1, 2, 3], axis=1)
 
 
 @testing.parameterize(

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -163,6 +163,11 @@ class TestDelete_axis(unittest.TestCase):
     @testing.numpy_nlcpy_array_equal()
     def test_delete_N_axis(self, xp, dtype, order):
         a = testing.shaped_arange((5, 5, 5, 5, 5), xp, dtype, order)
+        return xp.delete(a, [0, 2, 4], self.axis)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_delete_N_axis_not_contiguous(self, xp):
+        a = xp.moveaxis(testing.shaped_arange((5, 5, 5, 5, 5), xp), 0, 1)
         return xp.delete(a, [0, 2, 4], self.axis)
 
     @testing.for_orders('CF')

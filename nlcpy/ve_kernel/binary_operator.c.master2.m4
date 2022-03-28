@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -94,38 +94,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_$1(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],$1)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],$1)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],$1)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],$1)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],$1)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],$1)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],$1)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],$1)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],$1)
+                    }
+                }
             }
         }
 

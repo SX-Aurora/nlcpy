@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,25 @@ uint64_t nlcpy_getitem_from_mask(
         }
 } /* omp single */
 
+////////////////
+// Contiguous //
+////////////////
+    } else if (
+        a_src->is_c_contiguous && a_mask->is_c_contiguous && a_dst->is_c_contiguous ||
+        a_src->is_f_contiguous && a_mask->is_f_contiguous && a_dst->is_f_contiguous) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        int64_t cnt = 0;
+        for (i = 0; i < a_src->size; i++) {
+            if (pm[i]) {
+                pd[cnt] = ps[i];
+                cnt++;
+            }
+        }
+} /* omp single */
 /////////
 // 1-d //
 /////////
@@ -183,6 +202,26 @@ uint64_t nlcpy_setitem_from_mask(
 {
         if (pm[0]) {
             ps[0] = pv[0];
+        }
+} /* omp single */
+
+////////////////
+// Contiguous //
+////////////////
+    } else if (
+        a_src->is_c_contiguous && a_mask->is_c_contiguous && a_val->is_c_contiguous ||
+        a_src->is_f_contiguous && a_mask->is_f_contiguous && a_val->is_f_contiguous) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        int64_t i;
+        uint64_t cnt_v = 0;
+        for (i = 0; i < a_src->size; i++) {
+            if (pm[i]) {
+                ps[i] = pv[cnt_v];
+                cnt_v++;
+            }
         }
 } /* omp single */
 

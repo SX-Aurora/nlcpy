@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -144,8 +144,6 @@ uint64_t call_mask_func(int64_t funcnum, ve_arguments *args, int32_t *psw) {
 
 uint64_t run_request(request_package *pack, int32_t *psw) {
     uint64_t err;
-    //printf("functype = %d\n", pack->functype);
-    //printf("funcnum  = %d\n", pack->funcnum);
     switch (pack->functype) {
     case BINARY_OP:
         err = call_binary_func(pack->funcnum, &(pack->arguments), psw);
@@ -208,7 +206,6 @@ default:
 }
 
 
-//uint64_t kernel_launcher(uint64_t req_adr, uint64_t nreq, int32_t *psw, double *ve_runtime) {
 uint64_t kernel_launcher(uint64_t req_adr, uint64_t nreq, int32_t *psw) {
     uint64_t err = NLCPY_ERROR_OK;
 
@@ -225,7 +222,6 @@ uint64_t kernel_launcher(uint64_t req_adr, uint64_t nreq, int32_t *psw) {
 
     for(i = 0; i < nreq; i++) {
         flag = run_request(&reqs[i], &lpsw);
-        //flag = run_request(&reqs[i], psw);
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -242,4 +238,3 @@ uint64_t kernel_launcher(uint64_t req_adr, uint64_t nreq, int32_t *psw) {
 
     return err;
 }
-

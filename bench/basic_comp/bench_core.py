@@ -6,6 +6,8 @@ def run_flush(m, func, *args):
     res = func(*args)
     if m.__name__ == 'nlcpy':
         m.request.flush()
+    elif m.__name__ == 'cupy':
+        m.cuda.Stream().null.synchronize()
     return res
 
 def gen_data(m, data_func, shape):

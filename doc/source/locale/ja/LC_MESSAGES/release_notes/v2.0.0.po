@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2020-2021, NEC Corporation
+# Copyright (C) 2020, NEC Corporation
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-14 14:58+0900\n"
+"POT-Creation-Date: 2022-02-15 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Generated-By: Babel 2.9.1\n"
 
 #: ../../source/release_notes/v2.0.0.rst:3
-msgid "What's new in Version 2.0.0 (July 29, 2021)"
-msgstr "バージョン2.0.0の更新事項 (2021年7月29日)"
+msgid "What's new in Version 2.0.0 (July, 2021)"
+msgstr "バージョン2.0.0の更新事項（2021年7月）"
 
 #: ../../source/release_notes/v2.0.0.rst:7
 msgid "New Features"
@@ -30,9 +30,10 @@ msgid ""
 "scripts to call SCA functions of `NEC Numeric Library Collection "
 "<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_."
 msgstr ""
-":ref:`SCAインタフェース <label_sca_top>` を新規に追加しました。 "
-"これにより、`NEC Numeric Library Collection <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/ja/index.html>`_ "
-"で提供しているSCAの関数群をPythonスクリプトから利用できるようになりました。 "
+":ref:`SCAインタフェース <label_sca_top>` を新規に追加しました。 これにより、`NEC Numeric Library "
+"Collection "
+"<https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/ja/index.html>`_"
+" で提供しているSCAの関数群をPythonスクリプトから利用できるようになりました。 "
 
 #: ../../source/release_notes/v2.0.0.rst:12
 msgid ""
@@ -162,5 +163,7 @@ msgstr "VE関数の非同期呼び出しを適用し、NLCPy全体の性能を�
 msgid ""
 "Improved the performance of reduction operations such as "
 ":func:`nlcpy.sum`, :func:`nlcpy.amax`, and :func:`nlcpy.amin`."
-msgstr "リダクション演算の性能を改善しました（:func:`nlcpy.sum`、:func:`nlcpy.amax`、:func:`nlcpy.amin` など）。"
+msgstr ""
+"リダクション演算の性能を改善しました（:func:`nlcpy.sum`、:func:`nlcpy.amax`、:func:`nlcpy.amin`"
+" など）。"
 

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -251,6 +251,10 @@ class TestWhereError(unittest.TestCase):
 
 @testing.parameterize(
     {'array': numpy.random.randint(0, 2, (20,))},
+    {'array': numpy.random.randint(0, 2, (4, 5))},
+    {'array': numpy.random.randint(0, 2, (5, 7, 8))},
+    {'array': numpy.random.randint(0, 2, (4, 3, 6, 5))},
+    {'array': numpy.random.randint(0, 2, (2, 6, 3, 4, 5))},
     {'array': numpy.random.randn(3, 2, 4)},
     {'array': numpy.empty((0,))},
     {'array': numpy.empty((0, 2))},
@@ -259,9 +263,10 @@ class TestWhereError(unittest.TestCase):
 class TestNonzero(unittest.TestCase):
 
     @testing.for_all_dtypes()
+    @testing.for_orders('CF')
     @testing.numpy_nlcpy_array_list_equal()
-    def test_nonzero(self, xp, dtype):
-        array = xp.array(self.array, dtype=dtype)
+    def test_nonzero(self, xp, dtype, order):
+        array = xp.array(self.array, dtype=dtype, order=order)
         return xp.nonzero(array)
 
 

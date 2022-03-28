@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -50,12 +50,13 @@ uint64_t FILENAME_bool(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
     int32_t *pb = (int32_t *)b->ve_adr;
     int32_t *wk = (int32_t *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = !wk[j+1] && wk[j] || wk[j+1] && !wk[j];
+                wk[j*iw0] = !wk[(j+1)*iw0] && wk[j*iw0] || wk[(j+1)*iw0] && !wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -67,7 +68,7 @@ uint64_t FILENAME_bool(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -124,6 +125,7 @@ uint64_t FILENAME_bool(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -135,12 +137,13 @@ uint64_t FILENAME_i32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     int32_t *pb = (int32_t *)b->ve_adr;
     int32_t *wk = (int32_t *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -152,7 +155,7 @@ uint64_t FILENAME_i32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -209,6 +212,7 @@ uint64_t FILENAME_i32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -220,12 +224,13 @@ uint64_t FILENAME_i64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     int64_t *pb = (int64_t *)b->ve_adr;
     int64_t *wk = (int64_t *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -237,7 +242,7 @@ uint64_t FILENAME_i64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -294,6 +299,7 @@ uint64_t FILENAME_i64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -305,12 +311,13 @@ uint64_t FILENAME_u32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     uint32_t *pb = (uint32_t *)b->ve_adr;
     uint32_t *wk = (uint32_t *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -322,7 +329,7 @@ uint64_t FILENAME_u32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -379,6 +386,7 @@ uint64_t FILENAME_u32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -390,12 +398,13 @@ uint64_t FILENAME_u64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     uint64_t *pb = (uint64_t *)b->ve_adr;
     uint64_t *wk = (uint64_t *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -407,7 +416,7 @@ uint64_t FILENAME_u64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -464,6 +473,7 @@ uint64_t FILENAME_u64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -475,12 +485,13 @@ uint64_t FILENAME_f32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     float *pb = (float *)b->ve_adr;
     float *wk = (float *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -492,7 +503,7 @@ uint64_t FILENAME_f32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -549,6 +560,7 @@ uint64_t FILENAME_f32(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -560,12 +572,13 @@ uint64_t FILENAME_f64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     double *pb = (double *)b->ve_adr;
     double *wk = (double *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -577,7 +590,7 @@ uint64_t FILENAME_f64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -634,6 +647,7 @@ uint64_t FILENAME_f64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -645,12 +659,13 @@ uint64_t FILENAME_c64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
     float _Complex *pb = (float _Complex *)b->ve_adr;
     float _Complex *wk = (float _Complex *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -662,7 +677,7 @@ uint64_t FILENAME_c64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -719,6 +734,7 @@ uint64_t FILENAME_c64(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t 
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
@@ -730,12 +746,13 @@ uint64_t FILENAME_c128(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
     double _Complex *pb = (double _Complex *)b->ve_adr;
     double _Complex *wk = (double _Complex *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                wk[j] = wk[j+1] - wk[j];
+                wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -747,7 +764,7 @@ uint64_t FILENAME_c128(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -804,6 +821,7 @@ uint64_t FILENAME_c128(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 

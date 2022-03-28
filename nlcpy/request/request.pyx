@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -332,47 +332,45 @@ cpdef get_offload_timing():
     return str("current offload timing is \'" + _rm.timing + "\'")
 
 
-cdef _set_request(func_num, func_type, args):
-    _rm = _get_request_manager()
+cdef _set_request(int func_num, int func_type, args):
+    cdef RequestManager _rm = _get_request_manager()
+    cdef int _rm_tail = _rm.tail
     cdef int ini_tail = _rm.tail
     cdef int n
     cdef int diff_tail = 0
     cdef cnp.ndarray[cnp.uint64_t, ndim=1] _reqs = _rm.reqs
-    # _rm.reqs[_rm.tail:_rm.tail+2] = (func_num, func_type)
-    _reqs[_rm.tail] = func_num
-    _reqs[_rm.tail + 1] = func_type
-    _rm.increment_tail(2)
+    _reqs[_rm_tail] = func_num
+    _reqs[_rm_tail + 1] = func_type
+    _rm_tail += 2
+
     for x in args:
         if isinstance(x, ndarray):
-            n = _set_ve_array_without_scalar(x, _reqs, _rm.tail)
-            _rm.increment_tail(n)
+            n = _set_ve_array_without_scalar(x, _reqs, _rm_tail)
+            _rm_tail += n
         elif isinstance(x, (numpy.number, numpy.bool_)):
-            n = _set_ve_array_with_scalar(numpy.array(x), _reqs, _rm.tail)
-            _rm.increment_tail(n)
+            n = _set_ve_array_with_scalar(numpy.array(x), _reqs, _rm_tail)
+            _rm_tail += n
         elif isinstance(x, numpy.ndarray) and x.ndim == 0:
-            n = _set_ve_array_with_scalar(numpy.array(x), _reqs, _rm.tail)
-            _rm.increment_tail(n)
+            n = _set_ve_array_with_scalar(numpy.array(x), _reqs, _rm_tail)
+            _rm_tail += n
         elif isinstance(x, (int, float, bool)):
-            n = _set_scalar(numpy.array(x), _reqs, _rm.tail)
-            _rm.increment_tail(n)
+            n = _set_scalar(numpy.array(x), _reqs, _rm_tail)
+            _rm_tail += n
         else:
             raise RuntimeError(
                 'only nlcpy.ndarray or numpy scalar or Python '
                 'scalar(not complex) can be accepted.')
-    diff_tail = <int64_t>N_REQUEST_PACKAGE - (_rm.tail - ini_tail)
-    if diff_tail > 0:
-        _rm.increment_tail(diff_tail)
-    # _rm.increment_tail(N_REQUEST_PACKAGE)
+    diff_tail = <int64_t>N_REQUEST_PACKAGE - (_rm_tail - ini_tail)
+    if <uint64_t>diff_tail > <uint64_t>N_REQUEST_PACKAGE:
+        raise RuntimeError
+    _rm.increment_tail(N_REQUEST_PACKAGE)
 
 cdef int _set_ve_array_without_scalar(
         ndarray a, cnp.ndarray[cnp.uint64_t, ndim=1] dst, int offset):
-    # cdef uint64_t[:] c_dst = dst
     dst[offset + VE_ADR_OFFSET] = a.ve_adr
     dst[offset + NDIM_OFFSET] = a.ndim
     dst[offset + SIZE_OFFSET] = a.size
     cdef int i
-    # cdef vector[Py_ssize_t] _shape = a._shape
-    # cdef vector[Py_ssize_t] _strides = a._strides
     for i in range(a.ndim):
         dst[offset + SHAPE_OFFSET + i] = a._shape[i]
         dst[offset + STRIDES_OFFSET + i] = a._strides[i]
@@ -384,7 +382,6 @@ cdef int _set_ve_array_without_scalar(
 
 cdef int _set_ve_array_with_scalar(
         cnp.ndarray a, cnp.ndarray[cnp.uint64_t, ndim=1] dst, int offset):
-    # cdef uint64_t[:] c_dst = dst
     dst[offset + VE_ADR_OFFSET] = 0L
     dst[offset + NDIM_OFFSET] = 0L
     dst[offset + SIZE_OFFSET] = 1
@@ -401,10 +398,8 @@ cdef int _set_ve_array_with_scalar(
 
 cdef int _set_scalar(
         cnp.ndarray val, cnp.ndarray[cnp.uint64_t, ndim=1] dst, int offset):
-    # cdef uint64_t[:] c_dst = dst
-    # cast bool to int32
     cdef int n = 1
-
+    # cast bool to int32
     if val.dtype == _dtype.DT_BOOL:
         val = val.astype('i4')
 
@@ -428,9 +423,9 @@ cdef int _set_scalar(
         n = 1
     return n
 
-cpdef vector[uint64_t] _create_ve_array_buffer(ndarray a):
-    cdef vector[uint64_t] buf
-    buf.resize(N_VE_ARRAY_ELEMENTS)
+cpdef _create_ve_array_buffer(ndarray a):
+    cdef cnp.ndarray[uint64_t, ndim=1] buf = cnp.ndarray(
+        N_VE_ARRAY_ELEMENTS, dtype='u8')
     buf[VE_ADR_OFFSET] = a.ve_adr
     buf[NDIM_OFFSET] = a.ndim
     buf[SIZE_OFFSET] = a.size
@@ -439,8 +434,6 @@ cpdef vector[uint64_t] _create_ve_array_buffer(ndarray a):
     buf[C_CONTIGUOUS_OFFSET] = a._c_contiguous
     buf[F_CONTIGUOUS_OFFSET] = a._f_contiguous
     cdef int i
-    # cdef vector[Py_ssize_t] _shape = a._shape
-    # cdef vector[Py_ssize_t] _strides = a._strides
     for i in range(a.ndim):
         buf[SHAPE_OFFSET + i] = a._shape[i]
         buf[STRIDES_OFFSET + i] = a._strides[i]

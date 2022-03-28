@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -336,6 +336,10 @@ linalg_op get_linalg_func(int64_t func_num) {
         return nlcpy_dot;
     case VE_FUNC_MATMUL    :
         return nlcpy_matmul;
+    case VE_FUNC_SIMPLE_FNORM      :
+        return nlcpy_simple_fnorm;
+    case VE_FUNC_FNORM      :
+        return nlcpy_fnorm;
     default:
         return nlcpy__select_err;
     }

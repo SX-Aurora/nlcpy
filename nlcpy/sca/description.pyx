@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -468,13 +468,13 @@ cdef class description:
             offset = 0
             offset += <int64_t>(arr._strides[self.ndim-1] / arr.itemsize) * \
                 self.lxm_max2
-            if self.ndim >= 1:
+            if self.ndim >= 2:
                 offset += <int64_t>(arr._strides[self.ndim-2] / arr.itemsize) * \
                     self.lym_max2
-            if self.ndim >= 2:
+            if self.ndim >= 3:
                 offset += <int64_t>(arr._strides[self.ndim-3] / arr.itemsize) * \
                     self.lzm_max2
-            if self.ndim >= 3:
+            if self.ndim >= 4:
                 offset += <int64_t>(arr._strides[self.ndim-4] / arr.itemsize) * \
                     self.lwm_max2
             se._set_offset(offset)
@@ -488,13 +488,13 @@ cdef class description:
         cdef vector[Py_ssize_t] location = se.location[0]
         offset += <int64_t>(arr._strides[self.ndim-1] / arr.itemsize) * \
             location[SCA_NDIM - 1]
-        if self.ndim >= 1:
+        if self.ndim >= 2:
             offset += <int64_t>(arr._strides[self.ndim-2] / arr.itemsize) * \
                 location[SCA_NDIM - 2]
-        if self.ndim >= 2:
+        if self.ndim >= 3:
             offset += <int64_t>(arr._strides[self.ndim-3] / arr.itemsize) * \
                 location[SCA_NDIM - 3]
-        if self.ndim >= 3:
+        if self.ndim >= 4:
             offset += <int64_t>(arr._strides[self.ndim-4] / arr.itemsize) * \
                 location[SCA_NDIM - 4]
         if offset < 0:

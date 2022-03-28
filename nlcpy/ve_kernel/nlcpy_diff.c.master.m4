@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -50,12 +50,13 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
     $2 *pb = ($2 *)b->ve_adr;
     $2 *wk = ($2 *)w->ve_adr;
     if (a->ndim == 1) {
+        int64_t iw0 = w->strides[0] / w->itemsize;
         for (i = 0; i < n; i++) {
             for (j = 0; j < a->size - i - 1; j++) {
-                ifelse($1,bool,wk[j] = !wk[j+1] && wk[j] || wk[j+1] && !wk[j];,wk[j] = wk[j+1] - wk[j];)
+                ifelse($1,bool,wk[j*iw0] = !wk[(j+1)*iw0] && wk[j*iw0] || wk[(j+1)*iw0] && !wk[j*iw0];,wk[j*iw0] = wk[(j+1)*iw0] - wk[j*iw0];)
             }
         }
-        for (i = 0; i < b->size; i++) pb[i] = wk[i];
+        for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
     } else {
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
@@ -67,7 +68,7 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
         int64_t *astep = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         for (i = 0; i < a->ndim; i++) {
             shape_wk[i] = a->shape[i];
-            astep[i] = a->strides[i] / a->itemsize;
+            astep[i] = w->strides[i] / w->itemsize;
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
@@ -124,6 +125,7 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
             }
         } while(k >= 0);
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 

@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,37 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
             @UNARY_OPERATOR@(*px,*py,$1)
         }
 } /* omp single */
+
+////////////////
+// contiguous //
+////////////////
+    } else if ((x->is_c_contiguous & y->is_c_contiguous & where->is_c_contiguous) ||
+               (x->is_f_contiguous & y->is_f_contiguous & where->is_f_contiguous) )
+    {
+        int64_t i;
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t is = y->size * it / nt;
+        const int64_t ie = y->size * (it + 1) / nt;
+        if (x->size == 1){
+            @TYPE1@ px_s = px[0];
+            for (i = is; i < ie; i++) {
+                if (pwhere[i]) {
+                    @UNARY_OPERATOR@(px_s,py[i],$1)
+                }
+            }
+        } else {
+            for (i = is; i < ie; i++) {
+                if (pwhere[i]) {
+                    @UNARY_OPERATOR@(px[i],py[i],$1)
+                }
+            }
+        }
 
 /////////
 // 1-d //

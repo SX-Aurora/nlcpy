@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -184,7 +184,14 @@ class TestClip(unittest.TestCase):
     def test_clip_with_where(self, xp):
         a = testing.shaped_arange(self.shape, xp)
         where = testing.shaped_random(self.shape, xp, bool)
-        return xp.clip(a, 3, None, where=where)
+        return xp.clip(a, 3, None, where=where)[where]
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_clip_with_where_with_out(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        where = testing.shaped_random(self.shape, xp, bool)
+        out = xp.zeros(self.shape)
+        return xp.clip(a, 3, None, where=where, out=out)
 
     @testing.numpy_nlcpy_array_equal()
     def test_clip_broadcast1(self, xp):

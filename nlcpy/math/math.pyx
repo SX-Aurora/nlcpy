@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,7 @@ from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core.dtype cimport get_dtype_number, get_dtype
+from nlcpy.core.internal cimport _compress_dims
 from nlcpy.request cimport request
 
 # ----------------------------------------------------------------------------
@@ -441,17 +442,25 @@ def diff(a, n=1, axis=-1, prepend=nlcpy._NoValue, append=nlcpy._NoValue):
         a = nlcpy.concatenate(combined, axis)
 
     shape = list(a.shape)
-    shape[axis] = max(0, shape[axis] - n)
+    len_axis = max(0, shape[axis] - n)
+    shape[axis] = len_axis
     dtype_out = a.dtype
-    order_out = 'C' if a._c_contiguous else 'F'
+    order_out = 'F' if a._f_contiguous and not a._c_contiguous else 'C'
     out = nlcpy.ndarray(shape=shape, dtype=dtype_out, order=order_out)
 
     if out.size > 0:
+        if a._c_contiguous or a._f_contiguous:
+            shape, axis = _compress_dims(a.shape, axis)
+            a = a.reshape(shape, order=order_out)
+            shape[axis] = len_axis
+            out2 = out.reshape(shape, order=order_out)
+        else:
+            out2 = out
         w = nlcpy.array(a)
         request._push_request(
             'nlcpy_diff',
             'math_op',
-            (a, n, axis, out, w),
+            (a, n, axis, out2, w),
         )
     return out
 

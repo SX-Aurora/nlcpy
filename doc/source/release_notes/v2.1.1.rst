@@ -1,0 +1,18 @@
+===============================================
+What's new in Version 2.1.1 (March, 2022)
+===============================================
+
+
+New Features
+------------
+
+* Newly added environment variable ``VE_NLCPY_WARMUP`` which enables/disables Python scripts to perform some warming up when importing `NLCPy`. For details, please refer to the :ref:`Warming Up Threads and Memory Pre-allocation <label_warmup>`.
+
+* Minor updates for `mpi4py-ve` support.
+
+Performance Enhancements
+------------------------
+
+* Improved the performance of :meth:`nlcpy.linalg.norm` if the Frobenius norm is specified.
+
+* Improved the performance of some functions if the memory layout is C-contiguous or F-contiguous.

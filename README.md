@@ -14,7 +14,7 @@
 Before the installation, the following components are required to be installed on your x86 Node of SX-Aurora TSUBASA.
 
 - [NEC SDK](https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf)
-	- required NEC C/C++ compiler version: >= 3.3.1
+	- required NEC C/C++ compiler version: >= 3.4.0
 	- required NLC version: >= 2.3.0
 
 - [Alternative VE Offloading (AVEO)](https://www.hpc.nec/documents/veos/en/aveo/index.html)
@@ -49,7 +49,7 @@ You can install NLCPy by executing either of following commands.
 
 - Install from your local computer
 
-    1. Download [the wheel package](https://github.com/SX-Aurora/nlcpy/releases/tag/v1.0.0) from GitHub.
+    1. Download [the wheel package](https://github.com/SX-Aurora/nlcpy/releases) from GitHub.
 
     2. Put the wheel package to your any directory.
 
@@ -59,7 +59,7 @@ You can install NLCPy by executing either of following commands.
         $ pip install <path_to_wheel>
         ```
 
-The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Version 3.3.1 and NumPy v1.19.2.
+The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Compiler Version 3.4.0 and NumPy v1.19.2.
 
 ## Install from source (with building)
 

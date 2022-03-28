@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,8 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         # linalg functions
         VE_FUNC_DOT
         VE_FUNC_MATMUL
+        VE_FUNC_SIMPLE_FNORM
+        VE_FUNC_FNORM
 
         # reduce functions
         VE_FUNC_ADD_REDUCE

@@ -45,3 +45,13 @@ $(OBJDIR_FAST_MATH): FORCE
 
 clean:
 	sh scripts/clean.sh $(BASEDIR)
+	rm -rf obj/
+	rm -rf build/
+	rm -rf dist/
+	rm -rf *.egg-info/
+	rm -rf .tox
+	rm -rf nlcpy/include/*.h
+	rm -rf nlcpy/lib/*.so
+
+clean_cython:
+	sh scripts/clean.sh $(BASEDIR)

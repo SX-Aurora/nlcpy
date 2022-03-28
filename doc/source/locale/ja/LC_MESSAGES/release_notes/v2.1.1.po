@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.1.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-02-16 14:56+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/release_notes/v2.1.1.rst:3
+msgid "What's new in Version 2.1.1 (March, 2022)"
+msgstr "バージョン2.1.1の更新事項（2022年3月）"
+
+#: ../../source/release_notes/v2.1.1.rst:7
+msgid "New Features"
+msgstr "新機能"
+
+#: ../../source/release_notes/v2.1.1.rst:9
+msgid ""
+"Newly added environment variable ``VE_NLCPY_WARMUP`` which "
+"enables/disables Python scripts to perform some warming up when importing"
+" `NLCPy`. For details, please refer to the :ref:`Warming Up Threads and "
+"Memory Pre-allocation <label_warmup>`."
+msgstr ""
+"環境変数 ``VE_NLCPY_WARMUP`` を新規に追加しました。これにより、 `NLCPy` のインポート時にPythonスクリプトが"
+"ウォームアップを実行するかどうかを設定できるようになりました。"
+"詳細は "
+":ref:`スレッドのウォーミングアップとメモリの事前確保 <label_warmup>` を参照してください。"
+
+#: ../../source/release_notes/v2.1.1.rst:11
+msgid "Minor updates for `mpi4py-ve` support."
+msgstr "`mpi4py-ve` サポートのための軽微な修正を実施しました。"
+
+#: ../../source/release_notes/v2.1.1.rst:14
+msgid "Performance Enhancements"
+msgstr "性能改善"
+
+#: ../../source/release_notes/v2.1.1.rst:16
+msgid ""
+"Improved the performance of :meth:`nlcpy.linalg.norm` if the Frobenius "
+"norm is specified."
+msgstr "フロベニウスノルムが指定されたときの :meth:`nlcpy.linalg.norm` の性能を改善しました。"
+
+#: ../../source/release_notes/v2.1.1.rst:18
+msgid ""
+"Improved the performance of some functions if the memory layout is "
+"C-contiguous or F-contiguous."
+msgstr "メモリの配置がC連続もしくはF連続のときの一部関数の性能を改善しました。"
+

@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,7 @@ from nlcpy import core
 from nlcpy.request import request
 from nlcpy.core.error import _AxisError as AxisError
 from numpy.core._exceptions import UFuncTypeError
+from nlcpy.core.internal import _compress_dims
 
 # ----------------------------------------------------------------------------
 # adding and removing elements
@@ -248,10 +249,17 @@ def delete(arr, obj, axis=None):
         new = nlcpy.empty(input_arr.shape, input_arr.dtype, order_out)
         idx = nlcpy.ones(input_arr.shape[axis], dtype=del_obj.dtype)
         obj_count = nlcpy.zeros([3], dtype='l')
+        if input_arr._c_contiguous or input_arr._f_contiguous:
+            shape, axis2 = _compress_dims(input_arr.shape, axis)
+            input_arr = input_arr.reshape(shape, order=order_out)
+            new2 = new.reshape(shape, order=order_out)
+        else:
+            new2 = new
+            axis2 = axis
         request._push_request(
             'nlcpy_delete',
             'manipulation_op',
-            (input_arr, del_obj, axis, idx, new, obj_count)
+            (input_arr, del_obj, axis2, idx, new2, obj_count)
         )
         count = obj_count.get()
         if count[1] != 0:
@@ -419,7 +427,8 @@ def insert(arr, obj, values, axis=None):
         val_shape[axis] = obj.size
         values = nlcpy.broadcast_to(values, val_shape)
 
-    out = nlcpy.empty(newshape, dtype=a.dtype)
+    order_out = 'F' if a.flags.f_contiguous and not a.flags.c_contiguous else 'C'
+    out = nlcpy.empty(newshape, dtype=a.dtype, order=order_out)
     work = nlcpy.zeros(obj.size + out.shape[axis] + 2, dtype='l')
     work[-1] = -1
     request._push_request(

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"POT-Creation-Date: 2022-02-14 15:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,8 +84,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/installation.rst:42
-msgid "required NEC C/C++ compiler version: >= 3.3.1"
-msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 3.3.1"
+msgid "required NEC C/C++ compiler version: >= 3.4.0"
+msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 3.4.0"
 
 #: ../../source/installation.rst:43
 msgid "required NLC version: >= 2.3.0"
@@ -96,8 +96,8 @@ msgid "`VEOS <https://www.hpc.nec/documentation/>`_"
 msgstr ""
 
 #: ../../source/installation.rst:47
-msgid "required version: >= 2.8.1"
-msgstr "必要なバージョン: >= 2.8.1"
+msgid "required version: >= 2.10.1"
+msgstr "必要なバージョン: >= 2.10.1"
 
 #: ../../source/installation.rst
 msgid "`Python <https://www.python.org/>`_"
@@ -148,10 +148,10 @@ msgstr "pipコマンドを使用してローカルのwheelパッケージをイ�
 #: ../../source/installation.rst:80
 msgid ""
 "The shared objects for Vector Engine, which are included in the wheel "
-"package, are compiled and tested by using NEC C/C++ Version 3.3.1 and "
-"NumPy v1.19.2."
+"package, are compiled and tested by using NEC C/C++ Compiler Version "
+"3.4.0 and NumPy v1.19.2."
 msgstr ""
-"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ バージョン3.3.1とNumPy "
+"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ コンパイラバージョン3.4.0とNumPy "
 "v1.19.2を使用してコンパイルおよびテストしています。"
 
 #: ../../source/installation.rst:84

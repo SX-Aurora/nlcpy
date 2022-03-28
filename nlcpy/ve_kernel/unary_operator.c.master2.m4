@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -91,20 +91,37 @@ uint64_t FILENAME_@DTAG1@_$1(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-            ( (x->is_c_contiguous & y->is_c_contiguous) ||
-              (x->is_f_contiguous & y->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 @#pragma _NEC ivdep
-            for (i = cnt_s; i < cnt_e; i++) {
-                @UNARY_OPERATOR@(px_s,py[i],$1)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px_s,py[i],$1)
+                }
+            } else {
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @UNARY_OPERATOR@(px_s,py[i],$1)
+                    }
+                }
             }
         } else {
 @#pragma _NEC ivdep
-            for (i = cnt_s; i < cnt_e; i++) {
-                @UNARY_OPERATOR@(px[i],py[i],$1)
+            if (w == NULL) {
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],$1)
+                }
+            } else {
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @UNARY_OPERATOR@(px[i],py[i],$1)
+                    }
+                }
             }
         }
 

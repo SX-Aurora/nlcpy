@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,14 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
         return NLCPY_ERROR_MEMORY;
     }
 
+@#ifdef _OPENMP
+    const int nt = omp_get_num_threads();
+    const int it = omp_get_thread_num();
+@#else
+    const int nt = 1;
+    const int it = 0;
+@#endif /* _OPENMP */
+
 /////////
 // 0-d //
 /////////
@@ -84,14 +92,28 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
         }
 } /* omp single */
 
+////////////////
+// Contiguous //
+////////////////
+    } else if (
+        (out->is_c_contiguous && x->is_c_contiguous &&
+         y->is_c_contiguous && condition->is_c_contiguous) ||
+        (out->is_f_contiguous && x->is_f_contiguous &&
+         y->is_f_contiguous && condition->is_f_contiguous)
+    ) {
+        const int is = it / nt * out->size;
+        const int ie = (it + 1) / nt * out->size;
+        for(int64_t i = is; i < ie; i++) {
+            if(pcond[i]) {
+                pout[i] = px[i];
+            } else {
+                pout[i] = py[i];
+            }
+        }
 /////////
 // 1-d //
 /////////
     } else if (out->ndim == 1) {
-@#ifdef _OPENMP
-@#pragma omp single
-@#endif /* _OPENMP */
-{
         int64_t i;
         const int64_t n_inner = out->ndim - 1;
         const int64_t n_outer = 0;
@@ -99,26 +121,20 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
         const uint64_t icond0 = condition->strides[n_inner] / condition->itemsize;
         const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
-        for(int64_t i = 0; i < out->size; i++) {
+        const int is = it / nt * out->size;
+        const int ie = (it + 1) / nt * out->size;
+        for(int64_t i = is; i < ie; i++) {
             if(pcond[i*icond0]) {
                 pout[i*iout0] = px[i*ix0];
             } else {
                 pout[i*iout0] = py[i*iy0];
             }
         }
-} /* omp single */
 
 /////////
 // N-d //
 /////////
     } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM) {
-@#ifdef _OPENMP
-        const int nt = omp_get_num_threads();
-        const int it = omp_get_thread_num();
-@#else
-        const int nt = 1;
-        const int it = 0;
-@#endif /* _OPENMP */
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * out->ndim);
         nlcpy__rearrange_axis(out, idx);
         int64_t *cnt_out = (int64_t*)alloca(sizeof(int64_t) * out->ndim);

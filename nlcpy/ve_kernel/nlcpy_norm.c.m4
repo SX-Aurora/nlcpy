@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -142,5 +142,6 @@ uint64_t nlcpy_norm(int64_t norm, ve_array *x, ve_array *y, ve_array *work, int3
     default:
         err = NLCPY_ERROR_DTYPE;
     }
+    retrieve_fpe_flags(psw);
     return (uint64_t)err;
 }

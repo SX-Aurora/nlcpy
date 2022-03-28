@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -303,7 +303,7 @@ inline void clip_compare_minimum_c128(double _Complex a, double _Complex amin, d
 
 
 
-uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     int32_t *pa = (int32_t *)nlcpy__get_ptr(a);
     int32_t *pout = (int32_t *)nlcpy__get_ptr(out);
@@ -312,12 +312,67 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_bool(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_bool(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_bool(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_bool(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_bool(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_bool(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -327,8 +382,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_bool(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -336,7 +389,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     clip_compare_bool(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -345,8 +398,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_bool(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -354,7 +405,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     clip_compare_minimum_bool(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -363,8 +414,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_bool(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -402,7 +451,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -420,8 +469,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_bool(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -471,7 +518,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -486,8 +533,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_bool(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -532,7 +577,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -547,8 +592,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_bool(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -602,7 +645,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
 }
 
 
-uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     int32_t *pa = (int32_t *)nlcpy__get_ptr(a);
     int32_t *pout = (int32_t *)nlcpy__get_ptr(out);
@@ -611,12 +654,67 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_i32(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_i32(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_i32(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_i32(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_i32(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_i32(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -626,8 +724,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_i32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -635,7 +731,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_i32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -644,8 +740,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_i32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -653,7 +747,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_i32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -662,8 +756,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_i32(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -701,7 +793,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -719,8 +811,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_i32(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -770,7 +860,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -785,8 +875,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_i32(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -831,7 +919,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -846,8 +934,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_i32(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -901,7 +987,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     int64_t *pa = (int64_t *)nlcpy__get_ptr(a);
     int64_t *pout = (int64_t *)nlcpy__get_ptr(out);
@@ -910,12 +996,67 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_i64(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_i64(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_i64(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_i64(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_i64(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_i64(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -925,8 +1066,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_i64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -934,7 +1073,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_i64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -943,8 +1082,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_i64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -952,7 +1089,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_i64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -961,8 +1098,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_i64(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1000,7 +1135,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -1018,8 +1153,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_i64(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1069,7 +1202,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -1084,8 +1217,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_i64(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1130,7 +1261,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -1145,8 +1276,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_i64(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1200,7 +1329,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     uint32_t *pa = (uint32_t *)nlcpy__get_ptr(a);
     uint32_t *pout = (uint32_t *)nlcpy__get_ptr(out);
@@ -1209,12 +1338,67 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_u32(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_u32(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_u32(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_u32(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_u32(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_u32(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1224,8 +1408,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_u32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1233,7 +1415,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_u32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1242,8 +1424,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_u32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1251,7 +1431,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_u32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -1260,8 +1440,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_u32(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1299,7 +1477,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -1317,8 +1495,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_u32(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1368,7 +1544,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -1383,8 +1559,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_u32(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1429,7 +1603,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -1444,8 +1618,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_u32(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1499,7 +1671,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     uint64_t *pa = (uint64_t *)nlcpy__get_ptr(a);
     uint64_t *pout = (uint64_t *)nlcpy__get_ptr(out);
@@ -1508,12 +1680,67 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_u64(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_u64(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_u64(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_u64(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_u64(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_u64(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1523,8 +1750,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_u64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1532,7 +1757,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_u64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1541,8 +1766,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_u64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1550,7 +1773,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_u64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -1559,8 +1782,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_u64(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1598,7 +1819,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -1616,8 +1837,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_u64(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1667,7 +1886,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -1682,8 +1901,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_u64(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1728,7 +1945,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -1743,8 +1960,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_u64(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1798,7 +2013,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     float *pa = (float *)nlcpy__get_ptr(a);
     float *pout = (float *)nlcpy__get_ptr(out);
@@ -1807,12 +2022,67 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_f32(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_f32(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_f32(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_f32(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_f32(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_f32(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1822,8 +2092,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_f32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1831,7 +2099,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_f32(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -1840,8 +2108,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_f32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1849,7 +2115,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_f32(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -1858,8 +2124,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_f32(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -1897,7 +2161,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -1915,8 +2179,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_f32(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -1966,7 +2228,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -1981,8 +2243,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_f32(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2027,7 +2287,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -2042,8 +2302,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_f32(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2097,7 +2355,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     double *pa = (double *)nlcpy__get_ptr(a);
     double *pout = (double *)nlcpy__get_ptr(out);
@@ -2106,12 +2364,67 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_f64(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_f64(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_f64(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_f64(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_f64(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_f64(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2121,8 +2434,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_f64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2130,7 +2441,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_f64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2139,8 +2450,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_f64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2148,7 +2457,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_f64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -2157,8 +2466,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_f64(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2196,7 +2503,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -2214,8 +2521,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_f64(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2265,7 +2570,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -2280,8 +2585,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_f64(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2326,7 +2629,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -2341,8 +2644,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_f64(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2396,7 +2697,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     float _Complex *pa = (float _Complex *)nlcpy__get_ptr(a);
     float _Complex *pout = (float _Complex *)nlcpy__get_ptr(out);
@@ -2405,12 +2706,67 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_c64(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_c64(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_c64(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_c64(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_c64(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_c64(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2420,8 +2776,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_c64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2429,7 +2783,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_c64(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2438,8 +2792,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_c64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2447,7 +2799,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     clip_compare_minimum_c64(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -2456,8 +2808,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_c64(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2495,7 +2845,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -2513,8 +2863,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_c64(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2564,7 +2912,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -2579,8 +2927,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_c64(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2625,7 +2971,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -2640,8 +2986,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_c64(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2695,7 +3039,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
 }
 
 
-uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t no_out, int32_t *psw)
+uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve_array *where, int32_t *psw)
 {
     double _Complex *pa = (double _Complex *)nlcpy__get_ptr(a);
     double _Complex *pout = (double _Complex *)nlcpy__get_ptr(out);
@@ -2704,12 +3048,67 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if (a->ndim < 2) {
+    if ((a->is_c_contiguous && out->is_c_contiguous &&
+         (amin->size == 0 || amin->is_c_contiguous) &&
+         (amax->size == 0 || amax->is_c_contiguous) &&
+         (where->size == 0 || where->is_c_contiguous)) ||
+        (a->is_f_contiguous && out->is_f_contiguous &&
+         (amin->size == 0 || amin->is_f_contiguous) &&
+         (amax->size == 0 || amax->is_f_contiguous) &&
+         (where->size == 0 || where->is_f_contiguous))
+    ) {
+#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+#else
+        const int nt = 1;
+        const int it = 0;
+#endif /* _OPENMP */
+        const int64_t is = it / nt * a->size;
+        const int64_t ie = (it + 1) / nt * a->size;
+        if (amin->size && amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_c128(pa[i], pmin[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_c128(pa[i], pmin[i], pmax[i], pout+i);
+                }
+            }
+        } else if (amin->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_minimum_c128(pa[i], pmin[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_minimum_c128(pa[i], pmin[i], pout+i);
+                }
+            }
+        } else if (amax->size) {
+            if (where->size) {
+                for (int64_t i = is; i < ie; i++) {
+                    if (pw[i]) {
+                        clip_compare_maximum_c128(pa[i], pmax[i], pout+i);
+                    }
+                }
+            } else {
+                for (int64_t i = is; i < ie; i++) {
+                    clip_compare_maximum_c128(pa[i], pmax[i], pout+i);
+                }
+            }
+        }
+    } else if (a->ndim < 2) {
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2719,8 +3118,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_c128(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2728,7 +3125,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     clip_compare_c128(pa[i*ia0], pmin[i*imin0], pmax[i*imax0], pout+i*iout0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imin0 = amin->strides[0] / amin->itemsize;
@@ -2737,8 +3134,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_minimum_c128(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2746,7 +3141,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     clip_compare_minimum_c128(pa[i*ia0], pmin[i*imin0], pout+i*iout0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             uint64_t ia0 = a->strides[0] / a->itemsize;
             uint64_t iout0 = out->strides[0] / out->itemsize;
             uint64_t imax0 = amax->strides[0] / amax->itemsize;
@@ -2755,8 +3150,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 for (int64_t i = 0; i < a->shape[0]; i++) {
                     if (pw[i*iw0]) {
                         clip_compare_maximum_c128(pa[i*ia0], pmax[i*imax0], pout+i*iout0);
-                    } else if (no_out){
-                        pout[i*iout0] = pa[i*ia0];
                     }
                 }
             } else {
@@ -2794,7 +3187,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
 
-        if (amin->size > 0 && amax->size > 0) {
+        if (amin->size && amax->size) {
             int64_t imin = 0;
             int64_t imax = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
@@ -2812,8 +3205,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_c128(pa[ia+i*ia0], pmin[imin+i*imin0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2863,7 +3254,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     } while(j > 0);
                 }
             }
-        } else if (amin->size > 0) {
+        } else if (amin->size) {
             int64_t imin = 0;
             int64_t imin0 = amin->strides[n_inner2] / amin->itemsize;
 
@@ -2878,8 +3269,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_minimum_c128(pa[ia+i*ia0], pmin[imin+i*imin0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -2924,7 +3313,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                     } while(j > 0);
                 }
             }
-        } else if (amax->size > 0) {
+        } else if (amax->size) {
             int64_t imax = 0;
             int64_t imax0 = amax->strides[n_inner2] / amax->itemsize;
 
@@ -2939,8 +3328,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                         for (i = 0; i < a->shape[n_inner2]; i++) {
                             if (pw[iw+i*iw0]) {
                                 clip_compare_maximum_c128(pa[ia+i*ia0], pmax[imax+i*imax0], pout+iout+i*iout0);
-                            } else if (no_out){
-                                pout[iout+i*iout0] = pa[ia+i*ia0];
                             }
                         }
                         for (j = n_inner - 1; j > 0; j--) {
@@ -3002,32 +3389,31 @@ uint64_t nlcpy_clip(ve_arguments *args, int32_t *psw)
     ve_array *amin = &(args->clip.amin);
     ve_array *amax = &(args->clip.amax);
     ve_array *where = &(args->clip.where);
-    int32_t no_out = (out->ve_adr == work->ve_adr);
     uint64_t err = NLCPY_ERROR_OK;
     if (out->dtype == work->dtype) {
         switch (out->dtype) {
-        case ve_i32: err = clip_i32 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_i64: err = clip_i64 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_u32: err = clip_u32 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_u64: err = clip_u64 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_f32: err = clip_f32 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_f64: err = clip_f64 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_c64: err = clip_c64 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_c128: err = clip_c128 (a, out, amin, amax, where, no_out, psw); break;
-        case ve_bool: err = clip_bool (a, out, amin, amax, where, no_out, psw); break;
+        case ve_i32: err = clip_i32 (a, out, amin, amax, where, psw); break;
+        case ve_i64: err = clip_i64 (a, out, amin, amax, where, psw); break;
+        case ve_u32: err = clip_u32 (a, out, amin, amax, where, psw); break;
+        case ve_u64: err = clip_u64 (a, out, amin, amax, where, psw); break;
+        case ve_f32: err = clip_f32 (a, out, amin, amax, where, psw); break;
+        case ve_f64: err = clip_f64 (a, out, amin, amax, where, psw); break;
+        case ve_c64: err = clip_c64 (a, out, amin, amax, where, psw); break;
+        case ve_c128: err = clip_c128 (a, out, amin, amax, where, psw); break;
+        case ve_bool: err = clip_bool (a, out, amin, amax, where, psw); break;
         default: return (uint64_t)NLCPY_ERROR_DTYPE;
         }
     } else {
         switch (work->dtype) {
-        case ve_i32: err |= clip_i32 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_i64: err |= clip_i64 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_u32: err |= clip_u32 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_u64: err |= clip_u64 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_f32: err |= clip_f32 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_f64: err |= clip_f64 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_c64: err |= clip_c64 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_c128: err |= clip_c128 (a, work, amin, amax, where, no_out, psw); break;
-        case ve_bool: err |= clip_bool (a, work, amin, amax, where, no_out, psw); break;
+        case ve_i32: err |= clip_i32 (a, work, amin, amax, where, psw); break;
+        case ve_i64: err |= clip_i64 (a, work, amin, amax, where, psw); break;
+        case ve_u32: err |= clip_u32 (a, work, amin, amax, where, psw); break;
+        case ve_u64: err |= clip_u64 (a, work, amin, amax, where, psw); break;
+        case ve_f32: err |= clip_f32 (a, work, amin, amax, where, psw); break;
+        case ve_f64: err |= clip_f64 (a, work, amin, amax, where, psw); break;
+        case ve_c64: err |= clip_c64 (a, work, amin, amax, where, psw); break;
+        case ve_c128: err |= clip_c128 (a, work, amin, amax, where, psw); break;
+        case ve_bool: err |= clip_bool (a, work, amin, amax, where, psw); break;
         default: return (uint64_t)NLCPY_ERROR_DTYPE;
         }
 

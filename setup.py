@@ -26,6 +26,8 @@ from io import open
 import os
 import os.path
 import subprocess
+import sys
+import argparse
 from Cython.Build import cythonize
 
 # get directroy where this file exists on
@@ -47,11 +49,43 @@ dirs = [os.path.join(base, f)
 dirs.sort(key=lambda s: [int(u) for u in os.path.basename(s).split('.')], reverse=True)
 NLC_PATH = dirs[0]
 
+
+#####################################################
+# parse arguments
+#####################################################
+
+compiler_directives = {
+    'embedsignature': True,
+}
+define_macros = []
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--profile', action='store_true', default=False,
+    help='enable profiling for Cython code'
+)
+parser.add_argument(
+    '--debug', action='store_true', default=False,
+    help='enable debugging for Cython code'
+)
+args, sys.argv = parser.parse_known_args(sys.argv)
+
+if args.profile:
+    compiler_directives['linetrace'] = True
+    define_macros.append(('CYTHON_TRACE', '1'))
+if args.debug:
+    compiler_directives['boundscheck'] = True
+    compiler_directives['initializedcheck'] = True
+    compiler_directives['nonecheck'] = True
+    compiler_directives['overflowcheck'] = True
+    define_macros.append(('_GLIBCXX_ASSERTIONS', None))
+    define_macros.append(('_GLIBCXX_DEBUG', None))
+
+
 #####################################################
 # make extensions
 #####################################################
 extensions = []
-
 extra_compile_args = ['-O2']
 
 ext_modules = {
@@ -109,11 +143,12 @@ ext_modules = {
 
 include_dirs = {
     'veo': [
-        'veo', '/opt/nec/ve/veos/include',
+        '/opt/nec/ve/veos/include',
         numpy.get_include(),
     ],
     'mempool': [
-        'veo', '/opt/nec/ve/veos/include',
+        '/opt/nec/ve/veos/include',
+        'nlcpy/mempool',
         numpy.get_include(),
     ],
     'random': [
@@ -125,11 +160,12 @@ include_dirs = {
         numpy.get_include(),
     ],
     'request': [
-        'veo', '/opt/nec/ve/veos/include',
+        '/opt/nec/ve/veos/include',
+        'nlcpy/mempool',
         numpy.get_include(),
     ],
     'others': [
-        'veo', '/opt/nec/ve/veos/include',
+        '/opt/nec/ve/veos/include',
         numpy.get_include(),
     ],
 }
@@ -185,6 +221,7 @@ extra_link_args = {
     ],
 }
 
+
 for key in ext_modules:
     for module in ext_modules[key]:
         src = module.replace('.', '/') + '.pyx'
@@ -196,6 +233,7 @@ for key in ext_modules:
             library_dirs=library_dirs[key],
             include_dirs=include_dirs[key],
             extra_link_args=extra_link_args[key],
+            define_macros=define_macros,
         )
         extensions.append(ext)
 
@@ -283,7 +321,7 @@ setup(
     cmdclass=cmdclass,
     ext_modules=cythonize(
         extensions,
-        compiler_directives={'embedsignature': True},
+        compiler_directives=compiler_directives,
         language_level=3
     ),
 )

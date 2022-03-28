@@ -6,7 +6,7 @@
 Advanced Topics
 ===============
 
-This section describes a detailed usage of the JIT compilation functionality.
+This section describes a advanced usage of the JIT compilation functionality.
 
 .. contents:: :local:
 
@@ -21,9 +21,10 @@ Compiling from C++ Source
 
         >>> cpp_src=r'''
         ... extern "C" {
-        ...     void ve_add(double *px, double *py, double *pz, int n) {
+        ...     int ve_add(double *px, double *py, double *pz, int n) {
         ...         #pragma omp parallel for
         ...         for (int i = 0; i  < n; i++) pz[i] = px[i] + py[i];
+        ...         return 0;
         ...     }
         ... }
         ... '''
@@ -45,7 +46,7 @@ Compiling from C++ Source
         >>> ve_add = ve_lib.get_function(
         ...     've_add',
         ...     args_type=(ve_types.uint64, ve_types.uint64, ve_types.uint64, ve_types.int32),
-        ...     ret_type=ve_types.void
+        ...     ret_type=ve_types.int32
         ... )
 
 
@@ -57,15 +58,17 @@ Compiling from Fortran Source
     ::
 
         >>> f_src = r"""
-        ... subroutine ve_add(px, py, pz, n)
+        ... integer(kind=4) function ve_add(px, py, pz, n)
         ...     integer(kind=4), value :: n
         ...     double precision :: px(n), py(n), pz(n)
         ...     !$omp parallel do
         ...     do i=1, n
         ...         pz(i) = px(i) + py(i)
         ...     end do
+        ...     ve_add = 0
         ... end
         ... """
+
 
 * **Compilation**
 
@@ -84,8 +87,19 @@ Compiling from Fortran Source
         >>> ve_add = ve_lib.get_function(
         ...     've_add_',
         ...     args_type=(ve_types.uint64, ve_types.uint64, ve_types.uint64, ve_types.int32),
-        ...     ret_type=ve_types.void
+        ...     ret_type=ve_types.int32
         ... )
+
+.. note::
+    If you want to pass a scalar value as a parameter of VE Fortran function/subroutine,
+    please define the Fortran parameter with ``VALUE`` attribute.
+
+    Alternatively, you can use ``nlcpy.veo.OnStack`` to pass a parameter as a stack.
+    In this case, you should define the Fortran parameter without ``VALUE`` attribute.
+
+    .. seealso::
+        :ref:`Transferring Buffer Data to VE <label_transferring_buffer>`.
+
 
 .. note::
 
@@ -97,6 +111,7 @@ Compiling from Fortran Source
 
     For details, please refer to the Fortran Compiler User's Guide from
     `here <https://www.hpc.nec/documentation>`_.
+
 
 Transferring Ndarray Attributes to VE
 =====================================
@@ -150,8 +165,8 @@ NLCPy provides a easy way to access :class:`nlcpy.ndarray` attributes from VE si
 
         >>> ve_lib = nlcpy.jit.CustomVELibrary(code=c_src)
 
-    If you specify ``cflags`` argument, it is necessary to add
-    the including path that can be retrieved from :func:`nlcpy.get_include`.
+    If you specify ``cflags`` argument, it is necessary to include
+    the header file path that can be retrieved from :func:`nlcpy.get_include`.
 
 * **Getting the function symbol**
 
@@ -212,8 +227,8 @@ C Interfaces
         The shapes of the array.
         An array of integers providing the shape in each dimension.
 
-        Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5))``,
-        the ``shape`` of C-structer is::
+        Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5), dtype='f8')``,
+        the shape of C-structer is::
 
             ve_array.shape[0]               : 3
             ve_array.shape[1]               : 4
@@ -225,11 +240,11 @@ C Interfaces
     .. c:member:: uint64_t strides[NLCPY_MAXNDIM]
 
         The strides of the array.
-        An array of integers providing for each dimension the number of bytes that must be
-        skipped to get to the next element in that dimension
+        An array of integers providing the number of bytes that must be
+        skipped to get to the next element in that dimension.
 
-        Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5))``,
-        the ``strides`` of C-structer is::
+        Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5), dtype='f8')``,
+        the strides of C-structer is::
 
             ve_array.strides[0]               : 160
             ve_array.strides[1]               :  40
@@ -237,8 +252,6 @@ C Interfaces
             ve_array.strides[3]               : undifiend
             ...
             ve_array.strides[NLCPY_MAXNDIM-1] : undifiend
-
-
 
     .. c:member:: uint64_t dtype
 
@@ -281,10 +294,12 @@ C Interfaces
         ``1`` means yes, ``0`` means no.
 
 
-Transferring Buffer data to VE
+.. _label_transferring_buffer:
+
+Transferring Buffer Data to VE
 ==============================
 
-Python objects that support the buffer interface can be transfered to the
+Python objects that support the buffer interface can be transferred to the
 VE arguments by using ``nlcpy.veo.OnStack``.
 
 ::

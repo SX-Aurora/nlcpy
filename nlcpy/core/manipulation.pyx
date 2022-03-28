@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,7 @@ from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport broadcast
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.core.error import _AxisError as AxisError
+from nlcpy.core.internal cimport _compress_dims
 from nlcpy.request cimport request
 
 from functools import reduce
@@ -441,8 +442,9 @@ cpdef ndarray _reduced_view(ndarray self):
 
 cdef _fill_kernel(ndarray dst, src):
     typ = numpy.dtype(dst.dtype).type
-    value_dst = nlcpy.array(typ(src))  # cast dtype
-    src = broadcast.broadcast_to(value_dst, dst.shape)
+    src = nlcpy.array(typ(src))  # cast dtype
+    if src.size > 1:
+        src = broadcast.broadcast_to(src, dst.shape)
     request._push_request(
         "nlcpy_copy",
         "creation_op",
@@ -737,18 +739,33 @@ cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
         raise TypeError("can't convert complex to int")
     if rep.ndim == 0 and rep < 0:
         raise ValueError('negative dimensions are not allowed')
+    if rep.ndim > 1:
+        raise ValueError('object too deep for desired array')
 
-    rep = nlcpy.broadcast_to(rep, a.shape[axis])
     out_shape = list(a.shape)
-    out_shape[axis] = nlcpy.sum(rep).get()
+    if rep.size > 1:
+        if rep.size != a.shape[axis]:
+            msg = 'operands could not be broadcast together with shape {} {}'
+            raise ValueError(msg.format(a.shape, rep.shape))
+        out_shape[axis] = nlcpy.sum(rep).get()
+    else:
+        out_shape[axis] *= rep.get().item(0)
 
     out = nlcpy.empty(out_shape, dtype=a.dtype)
     aind = nlcpy.empty([out_shape[axis]], dtype=a.dtype)
     info = nlcpy.array(1, dtype='l')
+    if a._c_contiguous:
+        len_axis = out_shape[axis]
+        shape, axis = _compress_dims(a.shape, axis)
+        a = a.reshape(shape)
+        shape[axis] = len_axis
+        out2 = out.reshape(shape)
+    else:
+        out2 = out
     request._push_request(
         'nlcpy_repeat',
         'manipulation_op',
-        (a, rep, <int64_t>axis, out, aind, info)
+        (a, rep, <int64_t>axis, out2, aind, info)
     )
     if rep.ndim > 0 and info == -1:
         raise ValueError('repeats may not contain negative values.')

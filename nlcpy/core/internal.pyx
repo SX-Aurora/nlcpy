@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -304,3 +304,30 @@ cpdef inline int _normalize_order(order, bint allow_k=True) except? 0:
     else:
         raise TypeError('order not understood')
     return order_char
+
+cpdef tuple _compress_dims(vector[Py_ssize_t]& shape, Py_ssize_t axis):
+    cdef Py_ssize_t ndim = shape.size()
+    cdef int thre_ndim = 2 if axis == 0 or axis == ndim - 1 else 3
+    cdef vector[Py_ssize_t] ret
+    if ndim <= thre_ndim:
+        return shape, axis
+    if axis == 0:
+        ret.push_back(shape[0])
+        ret.push_back(shape[1])
+        for i in range(2, ndim):
+            ret[1] *= shape[i]
+    elif axis == ndim - 1:
+        ret.push_back(shape[0])
+        ret.push_back(shape[ndim - 1])
+        for i in range(1, ndim - 1):
+            ret[0] *= shape[i]
+    else:
+        ret.push_back(shape[0])
+        ret.push_back(shape[axis])
+        ret.push_back(shape[axis + 1])
+        for i in range(1, axis):
+            ret[0] *= shape[i]
+        for i in range(axis + 2, ndim):
+            ret[2] *= shape[i]
+    axis = 1 if axis else 0
+    return ret, axis

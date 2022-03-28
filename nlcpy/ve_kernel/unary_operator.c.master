@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -82,9 +82,12 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     int64_t *cnt_y = NULL;
     int64_t n_inner = y->ndim - 1;
     int64_t n_outer = 0;
-    if (y->ndim == 1 || !where_flag &&
-          ( (x->is_c_contiguous & w->is_c_contiguous) ||
-            (x->is_f_contiguous & w->is_f_contiguous) ) ) {
+    if (y->ndim == 1 ||
+          ((x->is_c_contiguous & w->is_c_contiguous &
+            (!where_flag || where->is_c_contiguous)) ||
+           (x->is_f_contiguous & w->is_f_contiguous &
+            (!where_flag || where->is_f_contiguous)))
+    ) {
         len = y->size;
     } else if (y->ndim <= NLCPY_MAXNDIM) {
         cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);

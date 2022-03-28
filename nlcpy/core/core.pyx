@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -290,7 +290,7 @@ cdef class ndarray:
     property _ve_array:
         def __get__(self):
             buf = request._create_ve_array_buffer(self)
-            return veo.OnStack(numpy.array(buf, dtype='u8'))
+            return veo.OnStack(buf, inout=veo.INTENT_IN)
 
     @property
     def ndim(self):
@@ -1063,21 +1063,6 @@ cdef class ndarray:
         array([1., 1.])
 
         """
-        if isinstance(value, numpy.ndarray):
-            if value.shape != ():
-                raise ValueError("non-scalar numpy.ndarray cannot be "
-                                 "used for fill")
-            value = value.item()
-        elif isinstance(value, ndarray):
-            if value.shape != ():
-                raise ValueError("non-scalar nlcpy.ndarray cannot be "
-                                 "used for fill")
-            raise NotImplementedError("fill with nlcpy.ndarray is not "
-                                      "implemented yet.")
-            # TODO: implement nlcpy.ndarray.item()
-            # value = value.item()
-        # elif len(value) != 1:
-        #    raise ValueError('non-scalar value cannot be used for fill')
         manipulation._fill_kernel(self, value)
 
     def tobytes(self, order='C'):

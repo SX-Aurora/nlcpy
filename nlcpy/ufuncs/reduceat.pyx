@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,10 @@ import sys
 import nlcpy
 from nlcpy import veo
 from nlcpy.core cimport core
-from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
 from nlcpy.manipulation.add_remove import resize
 from nlcpy.core.error import _AxisError as AxisError
+from nlcpy.core.internal cimport _compress_dims
 from nlcpy.request.ve_kernel cimport *
 from nlcpy.request cimport request
 
@@ -337,12 +337,24 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
 
     # call reduceat function on VE
     if y.size > 0:
+        if a.flags.c_contiguous and y.flags.c_contiguous or \
+           a.flags.f_contiguous and y.flags.f_contiguous:
+            len_axis = y.shape[axis]
+            shape, axis = _compress_dims(a.shape, axis)
+            a2 = a.reshape(shape, order=order_out)
+            shape[axis] = len_axis
+            shape += y.shape[a.ndim:]
+            y2 = y.reshape(shape, order=order_out)
+            w = w.reshape(shape, order=order_out)
+        else:
+            a2 = a
+            y2 = y
         bad_index = numpy.empty(1, dtype=numpy.int32)
         fpe_flags = request._get_fpe_flag()
         args = (
-            a._ve_array,
+            a2._ve_array,
             indices._ve_array,
-            y._ve_array,
+            y2._ve_array,
             w._ve_array,
             <int32_t>axis,
             veo.OnStack(bad_index, inout=veo.INTENT_OUT),

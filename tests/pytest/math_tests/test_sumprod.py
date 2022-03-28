@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -310,3 +310,30 @@ class TestDiff(unittest.TestCase):
     def test_diff_2dim_with_scalar_append(self, xp, dtype):
         a = testing.shaped_arange((4, 5), xp, dtype)
         return xp.diff(a, prepend=1, append=0)
+
+    @testing.with_requires('numpy>=1.16')
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_allclose()
+    def test_diff_4dim(self, xp, order):
+        a = xp.asarray(testing.shaped_arange((2, 3, 4, 5), xp), order=order)
+        return xp.diff(a)
+
+    @testing.with_requires('numpy>=1.16')
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_allclose()
+    def test_diff_4dim_axis1(self, xp, order):
+        a = xp.asarray(testing.shaped_arange((2, 3, 4, 5), xp), order=order)
+        return xp.diff(a, axis=1)
+
+    @testing.with_requires('numpy>=1.16')
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_allclose()
+    def test_diff_4dim_axis2(self, xp, order):
+        a = xp.asarray(testing.shaped_arange((2, 3, 4, 5), xp), order=order)
+        return xp.diff(a, axis=3)
+
+    @testing.with_requires('numpy>=1.16')
+    @testing.numpy_nlcpy_allclose()
+    def test_diff_4dim_not_contiguous(self, xp):
+        a = xp.moveaxis(testing.shaped_arange((2, 3, 4, 5), xp), 0, 1)
+        return xp.diff(a, axis=1)

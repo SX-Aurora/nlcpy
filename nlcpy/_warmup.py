@@ -3,8 +3,9 @@ import nlcpy
 
 def _warmup():
     xx = []
-    # allocate VE memory as heap
-    for i in range(130):
-        xx.append(nlcpy.zeros(int((1 * 1e8) / 8), dtype='f8'))
+    MB = 1024 ** 2
+    # allocate VE memory from sbrk (not mmap)
+    for i in range(1000):
+        xx.append(nlcpy.zeros(10 * MB // 8, dtype='f8'))
     nlcpy.request.flush()
     xx = []

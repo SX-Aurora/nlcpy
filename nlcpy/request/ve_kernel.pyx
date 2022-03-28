@@ -3,7 +3,7 @@
 #
 #  # NLCPy License #
 #
-#      Copyright (c) 2020-2021 NEC Corporation
+#      Copyright (c) 2020 NEC Corporation
 #      All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,8 @@ cdef dict funcNumList = {
     #  linalg functions
     "nlcpy_dot": ve_funcnum.VE_FUNC_DOT,
     "nlcpy_matmul": ve_funcnum.VE_FUNC_MATMUL,
+    "nlcpy_simple_fnorm": ve_funcnum.VE_FUNC_SIMPLE_FNORM,
+    "nlcpy_fnorm": ve_funcnum.VE_FUNC_FNORM,
 
     #  reduce functions
     "nlcpy_add_reduce": ve_funcnum.VE_FUNC_ADD_REDUCE,

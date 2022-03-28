@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -95,38 +95,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],i32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],i32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i32)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],i32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],i32)
+                    }
+                }
             }
         }
 
@@ -383,38 +425,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],i64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],i64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i64)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],i64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],i64)
+                    }
+                }
             }
         }
 
@@ -671,38 +755,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],u32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],u32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u32)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],u32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],u32)
+                    }
+                }
             }
         }
 
@@ -959,38 +1085,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],u64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],u64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u64)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],u64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],u64)
+                    }
+                }
             }
         }
 
@@ -1247,38 +1415,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],f32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],f32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f32)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],f32)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f32)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],f32)
+                    }
+                }
             }
         }
 
@@ -1535,38 +1745,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],f64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],f64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f64)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],f64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],f64)
+                    }
+                }
             }
         }
 
@@ -1823,38 +2075,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],c64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],c64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c64)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],c64)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c64)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],c64)
+                    }
+                }
             }
         }
 
@@ -2111,38 +2405,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],c128)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],c128)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c128)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],c128)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c128)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],c128)
+                    }
+                }
             }
         }
 
@@ -2399,38 +2735,80 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
 ////////////////
 // contiguous //
 ////////////////
-    } else if (w == NULL &&
-               ( (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous) ||
-                 (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous) ) ) {
+    } else if (
+        (x->is_c_contiguous & y->is_c_contiguous & z->is_c_contiguous &
+         (w == NULL || w->is_c_contiguous)) ||
+        (x->is_f_contiguous & y->is_f_contiguous & z->is_f_contiguous &
+         (w == NULL || w->is_f_contiguous))
+    ) {
         int64_t i;
         if (x->size == 1 && y->size != 1) {
             @TYPE1@ px_s = px[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
+                    }
+                }
             }
         } else if (x->size != 1 && y->size == 1) {
-                @TYPE2@ py_s = py[0];
+            @TYPE2@ py_s = py[0];
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py_s,pz[i],bool)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py_s,pz[i],bool)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],bool)
+                    }
+                }
             }
         } else {
+            if (w == NULL) {
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
-            for (i = cnt_s; i < cnt_e; i++) {
-                @BINARY_OPERATOR@(px[i],py[i],pz[i],bool)
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],bool)
+                }
+            } else {
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py[i],pz[i],bool)
+                    }
+                }
             }
         }
 

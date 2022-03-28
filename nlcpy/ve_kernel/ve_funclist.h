@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -235,6 +235,8 @@ typedef uint64_t (*linalg_op)(ve_arguments *, int32_t *);
 /* function proto types */
 uint64_t nlcpy_dot(ve_arguments *, int32_t *);
 uint64_t nlcpy_matmul(ve_arguments *, int32_t *);
+uint64_t nlcpy_simple_fnorm(ve_arguments *, int32_t *);
+uint64_t nlcpy_fnorm(ve_arguments *, int32_t *);
 
 
 

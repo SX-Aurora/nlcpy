@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -147,10 +147,49 @@ class TestArrayCopyAndView(unittest.TestCase):
         return a
 
     @testing.for_all_dtypes()
-    def test_fill_with_numpy_nonscalar_ndarray(self, dtype):
-        a = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
-        with self.assertRaises(ValueError):
+    @testing.numpy_nlcpy_array_equal()
+    def test_fill_with_numpy_nonscalar_ndarray(self, xp, dtype):
+        if xp is nlcpy:
+            a = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
             a.fill(numpy.ones((1,), dtype=dtype))
+            return a
+        else:
+            return numpy.ones((2, 3, 4), dtype=dtype)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_fill_with_numpy_ndarray_larger_than_one(self, xp, dtype):
+        if xp is nlcpy:
+            a = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
+            b = testing.shaped_arange((4,), numpy, dtype)
+            a.fill(b)
+            return a
+        else:
+            a = testing.shaped_arange((4,), numpy, dtype)
+            return numpy.broadcast_to(a, (2, 3, 4))
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_fill_with_nlcpy_ndarray_larger_than_one(self, xp, dtype):
+        if xp is nlcpy:
+            a = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
+            b = testing.shaped_arange((4,), nlcpy, dtype)
+            a.fill(b)
+            return a
+        else:
+            a = testing.shaped_arange((4,), numpy, dtype)
+            return numpy.broadcast_to(a, (2, 3, 4))
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_fill_with_list(self, xp, dtype):
+        if xp is nlcpy:
+            a = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
+            a.fill([1, 2, 3, 4])
+            return a
+        else:
+            a = numpy.array([1, 2, 3, 4], dtype=dtype)
+            return numpy.broadcast_to(a, (2, 3, 4))
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()

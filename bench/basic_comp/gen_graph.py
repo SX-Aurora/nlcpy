@@ -4,28 +4,47 @@ import seaborn as sns
 import pickle
 import matplotlib
 from matplotlib import pyplot as plt
+from bench_op import modules
 
-with open('result/basic_op_result.pickle', mode='rb') as fi:
-    data = pickle.load(fi)
+def set_additional_info(datasets):
+    refs = datasets['numpy']['runtime']
+    n = len(datasets['numpy']['runtime'])
+    for m in modules:
+        datasets[m]['speedup'] = [refs[i] / datasets[m]['runtime'][i] for i in range(n)]
+        datasets[m]['module'] = [m for _ in range(n)]
 
-df = pd.DataFrame(data)
+# load picle data
+path = 'result/{}_result.pickle'
+datasets = {}
+for m in modules:
+    filepath = path.format(m)
+    with open(filepath, mode='rb') as fi:
+        datasets[m] = pickle.load(fi)
+set_additional_info(datasets)
 
-df_vp = df[df.module != 'numpy']
-df_vp1 = df_vp[df_vp.array_size == '8MB']
-df_vp2 = df_vp[df_vp.array_size == '800MB']
+# create dataframe
+dfs = []
+for m in modules:
+    dfs.append(pd.DataFrame(datasets[m]))
+df = pd.concat(dfs)
+df = df[df.module != 'numpy']
+# df = df[df.array_size == '800MB']
+
+print("df:\n", df)
 
 sns.set(style='darkgrid', font_scale=1.2)
 
 ax = sns.barplot(
     x='operations',
     y='speedup',
-    hue='array_size',
-    data=df_vp,
+    hue='module',
+    data=df,
     palette='Set1',
+    ci=None
 )
 ax.set_xlabel('opetations', fontsize=12)
 ax.set_ylabel('speedup', fontsize=14)
-ax.set_title('NLCPy speedup ratio (NumPy=1)', fontsize=18)
+ax.set_title('Speedup ratio (NumPy=1), datasize=800MB, double precision', fontsize=18)
 # ax.set_yscale('log')
 ax.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 ax.grid(which='minor', axis='y')

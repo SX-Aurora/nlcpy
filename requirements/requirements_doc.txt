@@ -1,0 +1,6 @@
+numpy >= 1.19, < 1.20
+scipy
+matplotlib
+sphinx == 4.2.0
+sphinx-intl
+sphinx_rtd_theme

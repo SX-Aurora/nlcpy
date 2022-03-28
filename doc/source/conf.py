@@ -24,7 +24,7 @@ with open('comparison_table.rst.inc', 'w') as f:
 # -- Project information -----------------------------------------------------
 
 project = 'nlcpy'
-copyright = '2020-2021, NEC Corporation'
+copyright = '2020, NEC Corporation'
 author = 'NEC'
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -114,7 +114,6 @@ intersphinx_mapping = {
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
 }
 
-tls_verify = False
 
 # -- Options for todo extension ----------------------------------------------
 

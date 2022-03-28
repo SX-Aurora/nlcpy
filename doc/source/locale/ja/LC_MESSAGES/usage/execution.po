@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-28 10:02+0900\n"
+"POT-Creation-Date: 2022-02-10 17:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/usage/execution.rst:4
 msgid "Execution"
@@ -93,15 +93,15 @@ msgstr "数学関数の最適化"
 #: ../../source/usage/execution.rst:64
 msgid ""
 "When the environment variable ``VE_NLCPY_FAST_MATH`` is set to ``yes`` or"
-" ``YES``, NLCPy uses shared objects ``nlcpy_ve_kernel_fast_math.so`` for "
-"VE. By default, ``VE_NLCPY_FAST_MATH`` is not set. The shared objects ( "
-"``nlcpy_ve_kernel_fast_math.so`` ) have been compiled with the following "
-"optimization options in NEC C/C++ compiler."
+" ``YES``, NLCPy uses shared objects ``libnlcpy_ve_kernel_fast_math.so`` "
+"for VE. By default, ``VE_NLCPY_FAST_MATH`` is not set. The shared objects"
+" ( ``libnlcpy_ve_kernel_fast_math.so`` ) have been compiled with the "
+"following optimization options in NEC C/C++ compiler."
 msgstr ""
-"環境変数 ``VE_NLCPY_FAST_MATH`` が ``yes`` または ``YES`` "
-"に設定すると、NLCPyはVE用に最適化した共有オブジェクト ``nlcpy_ve_kernel_fast_math.so`` "
+"環境変数 ``VE_NLCPY_FAST_MATH`` を ``yes`` または ``YES`` "
+"に設定すると、NLCPyはVE用に最適化した共有オブジェクト ``libnlcpy_ve_kernel_fast_math.so`` "
 "を使用します。デフォルトでは、``VE_NLCPY_FAST_MATH`` は未設定です。共有オブジェクト "
-"``nlcpy_ve_kernel_fast_math.so`` は、NEC "
+"``libnlcpy_ve_kernel_fast_math.so`` は、NEC "
 "C/C++コンパイラの以下の最適化オプションを指定してコンパイルされています。"
 
 #: ../../source/usage/execution.rst:69
@@ -174,11 +174,31 @@ msgstr "低精度のベクトル浮動小数点数除算を使用します。通
 msgid ""
 "These optimizations cause side-effects. For example, ``nan`` or ``inf`` "
 "might not be obtained correctly."
-msgstr ""
-"これらの最適化は副作用を引き起こします。 たとえば、 ``nan`` または ``inf`` "
-"が正しく取得されない場合があります。"
+msgstr "これらの最適化は副作用を引き起こします。 たとえば、 ``nan`` または ``inf`` が正しく取得されない場合があります。"
 
 #: ../../source/usage/execution.rst:97
 msgid "You can set ``VE_NLCPY_FAST_MATH`` as follows:"
 msgstr "``VE_NLCPY_FAST_MATH`` は次のように設定できます。"
+
+#: ../../source/usage/execution.rst:114
+msgid "Warming Up Threads and Memory Pre-allocation"
+msgstr "スレッドのウォーミングアップとメモリの事前確保"
+
+#: ../../source/usage/execution.rst:116
+msgid ""
+"When the environment variable ``VE_NLCPY_WARMUP`` is set to ``yes`` or "
+"``YES``, NLCPy pre-allocates memory around 10 GiB and executes some VE "
+"kernels at initialization. By default, ``VE_NLCPY_WARMUP`` is not set."
+msgstr ""
+"環境変数 ``VE_NLCPY_WARMUP`` を ``yes`` または ``YES`` "
+"に設定すると、NLCPyは初期化時に約10GiBのメモリを事前確保し、"
+"いくつかのVEカーネルを実行します。"
+"デフォルトでは、``VE_NLCPY_WARMUP`` は未設定です。"
+
+#: ../../source/usage/execution.rst:120
+msgid ""
+"In some cases, enabling this option improves performance. However, an out"
+" of memory error may be caused by memory fragmentation."
+msgstr "このオプションを有効に設定することで性能改善するケースがあります。"
+"ただし、メモリフラグメンテーションの影響でメモリ不足が発生することがあります。"
 

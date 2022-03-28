@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -283,6 +283,20 @@ typedef struct domain_mask_arguments_tag {
     ve_array out;
 } domain_mask_arguments;
 
+typedef struct simple_fnorm_arguments_tag {
+    ve_array x;
+    ve_array y;
+} simple_fnorm_arguments;
+
+typedef struct fnorm_arguments_tag {
+    ve_array x;
+    ve_array y;
+    ve_array work1;
+    ve_array work2;
+    int64_t axis1;
+    int64_t axis2;
+} fnorm_arguments;
+
 typedef union ve_arguments_tag{
     binary_op_arguments binary;
     unary_op_arguments unary;
@@ -315,6 +329,8 @@ typedef union ve_arguments_tag{
     fill_diagonal_op_arguments fill_diagonal;
     block_op_arguments block;
     domain_mask_arguments domain_mask;
+    simple_fnorm_arguments simple_fnorm;
+    fnorm_arguments fnorm;
     /* creation, manipulation, indexing, and more...  */
 } ve_arguments;
 

@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2020-2021, NEC Corporation
+# Copyright (C) 2020, NEC Corporation
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 16:53+0900\n"
+"POT-Creation-Date: 2022-02-15 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Generated-By: Babel 2.9.1\n"
 
 #: ../../source/release_notes/v2.1.0.rst:3
-msgid "What's new in Version 2.1.0 (December 31, 2021)"
-msgstr "バージョン2.1.0の更新事項(2021年12月31日)"
+msgid "What's new in Version 2.1.0 (December, 2021)"
+msgstr "バージョン2.1.0の更新事項（2021年12月）"
 
 #: ../../source/release_notes/v2.1.0.rst:7
 msgid ""
@@ -37,8 +37,7 @@ msgid ""
 "C/C++/Fortran."
 msgstr ""
 ":ref:`Just-In-Time コンパイル機能 <label_jit>` "
-"を新たに追加しました。"
-"これにより、PythonスクリプトからC/C++/Fortranで書かれたVEの関数を呼び出すことが可能になります。"
+"を新たに追加しました。これにより、PythonスクリプトからC/C++/Fortranで書かれたVEの関数を呼び出すことが可能になります。"
 
 #: ../../source/release_notes/v2.1.0.rst:16
 msgid "Newly added :ref:`Masked Array <label_ma>`."

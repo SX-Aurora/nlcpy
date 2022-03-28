@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -2209,6 +2209,12 @@ class RandomState():
         shuffle_work = x.copy()
 
         numpy.random.set_state(np_state)
+
+        if x._c_contiguous or x._f_contiguous:
+            order = 'F' if x._f_contiguous and not x._c_contiguous else 'C'
+            shape, axis = nlcpy.core.internal._compress_dims(x.shape, axis)
+            x = x.reshape(shape, order=order)
+            shuffle_work = shuffle_work.reshape(shape, order=order)
 
         request._push_request(
             "nlcpy_random_shuffle",

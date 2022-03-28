@@ -346,7 +346,8 @@ from nlcpy.error_handler.error_handler import *  # NOQA
 # Call veo initialization when nlcpy is imported
 # --------------------------------------------------
 from nlcpy.request.request import _push_and_flush_request  # NOQA
-veo._initialize(-1)  # initialize veo process
+node = int(os.environ.get('NMPI_LOCAL_RANK', '-1'))
+veo._initialize(node)  # initialize veo process
 _push_and_flush_request(
     'asl_library_initialize',
     (),
@@ -394,4 +395,6 @@ from nlcpy import jit  # NOQA
 # warm up
 # -----------------------------------------------------------------------------
 from nlcpy._warmup import _warmup  # NOQA
-_warmup()
+_is_warmup = os.environ.get('VE_NLCPY_WARMUP', 'NO')
+if _is_warmup in ('yes', 'YES'):
+    _warmup()

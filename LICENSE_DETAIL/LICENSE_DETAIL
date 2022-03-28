@@ -1,6 +1,6 @@
 
  NLCPy is available as free software under the 3-clause BSD license.
- NLCPy is derived from NumPy, CuPy, and PyVEO and numpydoc:
+ NLCPy is derived from NumPy, CuPy, PyVEO, and numpydoc:
 
    * NLCPy API and documents are based on NumPy, which is published at https://numpy.org/
      and is licensed under the 3-clause BSD license.

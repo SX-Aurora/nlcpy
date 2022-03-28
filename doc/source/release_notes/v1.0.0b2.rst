@@ -1,5 +1,5 @@
 =================================================
-What's new in Version 1.0.0b2 (December 25, 2020)
+What's new in Version 1.0.0b2 (December, 2020)
 =================================================
 
 .. currentmodule:: nlcpy

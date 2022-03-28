@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -121,8 +121,8 @@ class TestReduceat(unittest.TestCase):
     shapes = ((4, 4),)
     axes = (0,)
     indices = ((1, 3, 2),)
-    shapes2 = ((5, 4, 4, 3), (4, 5, 1, 5, 2))
-    axes2 = (0, 1, -2)
+    shapes2 = ((5, 4, 3, 4), (4, 5, 1, 2, 5))
+    axes2 = (0, 1, -1)
     indices2 = ((3, 0, 1, 3), (0, 2, 1, 0, 3))
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
@@ -220,3 +220,16 @@ class TestReduceat(unittest.TestCase):
                 raise Exception
             except TypeError:
                 pass
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_reduceat_not_contiguous(self, xp):
+        a = xp.moveaxis(xp.arange(24).reshape(2, 3, 4), 0, 1)
+        indices = [1, 0, 3, 2]
+        return xp.add.reduceat(a, indices, axis=2)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_reduceat_broadcast_not_contiguous(self, xp):
+        a = xp.moveaxis(xp.arange(24).reshape(2, 3, 4), 0, 1)
+        indices = [1, 0, 3, 2]
+        out = xp.zeros([3, 2, 4, 2])
+        return xp.add.reduceat(a, indices, axis=2, out=out)

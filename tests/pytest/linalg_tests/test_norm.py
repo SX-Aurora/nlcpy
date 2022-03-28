@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -153,6 +153,20 @@ class TestNormMatrix(unittest.TestCase):
         shape, axis = self.pat
         x = xp.asarray(testing.shaped_random(shape, xp, dtype), order=order)
         return xp.linalg.norm(x, self.ord, axis, self.keepdims)
+
+
+class TestNormMatrixNotContiguous(unittest.TestCase):
+    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
+    def test_norm_matrix_not_contiguous(self, xp):
+        x = xp.arange(3 * 4 * 5).reshape(3, 4, 5).astype('f')
+        x = xp.moveaxis(x, 0, 1)
+        return xp.linalg.norm(x, 'fro', (1, 0))
+
+    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
+    def test_norm_matrix_not_contiguous_2d(self, xp):
+        x = xp.arange(4 * 5).reshape(4, 5).astype('f')
+        x = xp.moveaxis(x, 0, 1)
+        return xp.linalg.norm(x, 'fro', (0, 1))
 
 
 @testing.parameterize(*(

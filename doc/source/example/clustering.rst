@@ -59,7 +59,7 @@ Program
         fig = plt.figure()
         ims = []
         for i in range(MAX_ITER):
-            # Estimate the distance and label for each samples
+            # Estimate the distance and label for each sample
             d = vp.linalg.norm(s[None, :, :] - c[:, None, :], axis=2)
             label_new = vp.argmin(d, axis=0)
             if vp.all(label == label_new):

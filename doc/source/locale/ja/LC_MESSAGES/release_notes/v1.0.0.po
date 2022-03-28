@@ -7,18 +7,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-18 11:19+0900\n"
+"POT-Creation-Date: 2022-02-15 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 #: ../../source/release_notes/v1.0.0.rst:3
-msgid "What's new in Version 1.0.0 (March 31, 2021)"
-msgstr "バージョン1.0.0の更新事項（2021年3月31日）"
+msgid "What's new in Version 1.0.0 (March, 2021)"
+msgstr "バージョン1.0.0の更新事項（2021年3月）"
 
 #: ../../source/release_notes/v1.0.0.rst:7
 msgid "New Features"
@@ -340,11 +340,13 @@ msgstr ""
 msgid ":meth:`nlcpy.ndarray.prod`"
 msgstr ""
 
-#: ../../source/release_notes/v1.0.0.rst:115
+#: ../../source/release_notes/v1.0.0.rst:116
 msgid "Problem Fixes"
 msgstr "不具合修正"
 
 #: ../../source/release_notes/v1.0.0.rst:118
-msgid "Fixed abnormal termination that could occur when a large amount of memory were allocated."
+msgid ""
+"Fixed abnormal termination that could occur when a large amount of memory"
+" were allocated."
 msgstr "大量のメモリを確保しようとすると異常終了する不具合を修正。"
 

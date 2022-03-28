@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core.dtype cimport get_dtype_number, get_dtype
+from nlcpy.core.internal cimport _compress_dims
 from nlcpy.request cimport request
 
 cimport numpy as cnp
@@ -526,9 +527,20 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
 
     ########################################################################
     # call accumulate function on VE
+    if input_arr.flags.c_contiguous and y.flags.c_contiguous or \
+       input_arr.flags.f_contiguous and y.flags.f_contiguous:
+        shape, axis = _compress_dims(input_arr.shape, axis)
+        input_arr2 = input_arr.reshape(shape, order=order_out)
+        shape += y.shape[input_arr.ndim:]
+        y2 = y.reshape(shape, order=order_out)
+        w2 = w.reshape(shape, order=order_out)
+    else:
+        input_arr2 = input_arr
+        y2 = y
+        w2 = w
     request._push_request(
         name,
         "accumulate_op",
-        (input_arr, y, w, axis, get_dtype_number(get_dtype(dt))),
+        (input_arr2, y2, w2, axis, get_dtype_number(get_dtype(dt))),
     )
     return y

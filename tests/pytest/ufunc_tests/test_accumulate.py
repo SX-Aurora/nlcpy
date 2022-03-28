@@ -3,7 +3,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ class TestAccumulate(unittest.TestCase):
     shapes = ((2, 2),)
     axes = (0,)
     shapes2 = ((3, 2, 1, 4), (1, 3, 5, 2, 5))
-    axes2 = (0, 1, -2)
+    axes2 = (0, 1, -1)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, order_x='C', dtype_x=all_types,
@@ -218,3 +218,14 @@ class TestAccumulate(unittest.TestCase):
                 raise Exception
             except TypeError:
                 pass
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_accumulate_not_contiguous(self, xp):
+        a = xp.moveaxis(xp.arange(24).reshape(2, 3, 4), 0, 1)
+        return xp.add.accumulate(a, axis=2)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_accumulate_broadcast_not_contiguous(self, xp):
+        a = xp.moveaxis(xp.arange(24).reshape(2, 3, 4), 0, 1)
+        out = xp.zeros([3, 2, 4, 2])
+        return xp.add.accumulate(a, axis=2, out=out)

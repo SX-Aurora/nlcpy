@@ -4,7 +4,7 @@
 #
 # # NLCPy License #
 #
-#     Copyright (c) 2020-2021 NEC Corporation
+#     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
 #
 #     Redistribution and use in source and binary forms, with or without
@@ -159,6 +159,8 @@ enum ve_funcnum {
     /* linalg functions */
     VE_FUNC_DOT              = 0x07000,
     VE_FUNC_MATMUL           = 0x07001,
+    VE_FUNC_SIMPLE_FNORM     = 0x07002,
+    VE_FUNC_FNORM            = 0x07003,
     /* reduce functions */
     VE_FUNC_ADD_REDUCE            = 0x08000,
     VE_FUNC_SUBTRACT_REDUCE       = 0x08001,

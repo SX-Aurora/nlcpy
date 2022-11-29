@@ -42,15 +42,14 @@ from nlcpy.core cimport broadcast
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.core cimport internal
 from nlcpy.core.core cimport ndarray
-from nlcpy.core cimport vememory
 from nlcpy.request cimport request
 
 import time
 
-cdef CblasRowMajor = <int64_t>101
-cdef CblasColMajor = <int64_t>102
-cdef CblasNoTrans = <int64_t>111
-cdef CblasTrans = <int64_t>112
+cdef int64_t CblasRowMajor = 101
+cdef int64_t CblasColMajor = 102
+cdef int64_t CblasNoTrans = 111
+cdef int64_t CblasTrans = 112
 
 
 cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
@@ -63,50 +62,46 @@ cpdef ndarray cblas_dot(ndarray x, ndarray y, out=None):
 
     dtype_out = numpy.result_type(x.dtype, y.dtype)
 
+    if dtype_out in (
+        numpy.int8, numpy.int16,
+        numpy.uint8, numpy.uint16, numpy.float16
+    ):
+        raise TypeError('output dtype \'%s\' is not supported' % dtype_out)
+
     if out is None:
         out = nlcpy.ndarray(shape=(), dtype=dtype_out)
     out.fill(0)
 
-    if x.dtype == numpy.float32 and y.dtype == numpy.float32:
-        request._push_request(
-            "wrapper_cblas_sdot",
-            "cblas_op",
-            (x, y, out),
+    if x.dtype == y.dtype == out.dtype and \
+       x.dtype in (numpy.float32, numpy.float64, numpy.complex64, numpy.complex128):
+        if x.dtype == numpy.float32:
+            name = "wrapper_cblas_sdot"
+        elif x.dtype == numpy.float64:
+            name = "wrapper_cblas_ddot"
+        elif x.dtype == numpy.complex64:
+            name = "wrapper_cblas_cdotu_sub"
+        elif x.dtype == numpy.complex128:
+            name = "wrapper_cblas_zdotu_sub"
+        fpe = request._get_fpe_flag()
+        request._push_and_flush_request(
+            name,
+            (x, y, out,
+             veo.OnStack(fpe, inout=veo.INTENT_OUT)),
+            callback=None,
         )
-    elif x.dtype == numpy.float64 and y.dtype == numpy.float64:
-        request._push_request(
-            "wrapper_cblas_ddot",
-            "cblas_op",
-            (x, y, out),
-        )
-    elif x.dtype == numpy.complex64 and y.dtype == numpy.complex64:
-        request._push_request(
-            "wrapper_cblas_cdotu_sub",
-            "cblas_op",
-            (x, y, out),
-        )
-    elif x.dtype == numpy.complex128 and y.dtype == numpy.complex128:
-        request._push_request(
-            "wrapper_cblas_zdotu_sub",
-            "cblas_op",
-            (x, y, out),
-        )
-    elif dtype_out not in (
-        numpy.int8, numpy.int16,
-        numpy.uint8, numpy.uint16, numpy.float16
-    ):
+    else:
         request._push_request(
             "nlcpy_dot",
             "linalg_op",
             (x, y, out),
         )
-    else:
-        raise TypeError('output dtype \'%s\' is not supported' % dtype_out)
 
     return out
 
 
 cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
+    cdef int64_t cblas_order, transA, transB, m, n, k1, k2, lda, ldb, ldc
+    cdef uint64_t x_is_c_contiguous, y_is_c_contiguous
     order_char = internal._normalize_order(order)
     if order_char == b'F':
         order_out = 'F'
@@ -123,31 +118,9 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
     else:
         raise ValueError('unknown order was detected.')
 
-    if not x._c_contiguous and not x._f_contiguous:
-        x = x.copy(order=order_out)
-    if not y._c_contiguous and not y._f_contiguous:
-        y = y.copy(order=order_out)
-
     if (max(x.ndim, y.ndim) > 2):
         raise NotImplementedError('not supported for ndim > 2.')
-    if (x.ndim == 2):
-        m = <int>x.shape[0]
-        k1= <int>x.shape[1]
-    elif (x.ndim==1):
-        m = <int>1
-        k1= <int>x.shape[0]
-    else:
-        raise ValueError("matmul: Input operand 0 does not have enough "
-                         "dimensions (has 0, gufunc core with signature"
-                         " (n?,k),(k,m?)->(n?,m?) requires 1)")
-
-    if (y.ndim == 2):
-        k2= <int>y.shape[0]
-        n = <int>y.shape[1]
-    elif (y.ndim == 1):
-        k2= <int>y.shape[0]
-        n = <int>1
-    else:
+    if (x.ndim == 0 or y.ndim == 0):
         raise ValueError("matmul: Input operand 1 does not have enough "
                          "dimensions (has 0, gufunc core with signature"
                          " (n?,k),(k,m?)->(n?,m?) requires 1)")
@@ -159,30 +132,23 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
         raise NotImplementedError("not supported for boolean arguments.")
 
     # shape check
-    if (k1!=k2):
+    if (x.shape[-1] != y.shape[0]):
+        m = x.shape[0] if x.ndim == 2 else 1
+        n = y.shape[1] if y.ndim == 2 else 1
         raise ValueError(
             'shapes ({},{}) and ({},{}) not aligned: {} (dim 1) = {} (dim 0)'
-            .format(m, k1, k2, n, k1, k2))
-
-    values = [x, y]
-    if (x._f_contiguous and not x._c_contiguous):
-        x_is_c_contiguous=<int>0
-    else:
-        x_is_c_contiguous=<int>1
-
-    if (y._f_contiguous and not y._c_contiguous):
-        y_is_c_contiguous=<int>0
-    else:
-        y_is_c_contiguous=<int>1
+            .format(m, x.shape[-1], y.shape[0], n, x.shape[-1], y.shape[0]))
 
     if (x.ndim==1 and y.ndim==1):
+        if x.size > 10000 or x.dtype.kind == 'c' and x.size > 2000:
+            return cblas_dot(x, y, out=out)
         shape = nlcpy.ndarray(()).shape
     elif (x.ndim==1):
-        shape = [n]
+        shape = y.shape[1]
     elif (y.ndim==1):
-        shape = [m]
+        shape = x.shape[0]
     else:
-        shape = [m, n]
+        shape = [x.shape[0], y.shape[1]]
 
     if out is None:
         z = ndarray(shape=shape, dtype=dtype, order=order_out)
@@ -191,379 +157,103 @@ cpdef ndarray cblas_gemm(ndarray x, ndarray y, out=None, order='K', dtype=None):
     if z.ve_adr == 0:
         raise MemoryError()
     # quick return
-    if m == 0 or n == 0:
+    if x.size == 0 or y.shape[0] == 0:
+        z.fill(0)
         return z
-    if k1 == 0:
-        return nlcpy.zeros(shape, dtype=dtype)
 
-    values = [x, y, z]
+    if x.dtype == y.dtype and (dtype is None or dtype == x.dtype) \
+       and x.dtype in (numpy.float32, numpy.float64, numpy.complex64, numpy.complex128):
+        if x.dtype == numpy.float32:
+            name = "wrapper_cblas_sgemm"
+        elif x.dtype == numpy.float64:
+            name = "wrapper_cblas_dgemm"
+        elif x.dtype == numpy.complex64:
+            name = "wrapper_cblas_cgemm"
+        elif x.dtype == numpy.complex128:
+            name = "wrapper_cblas_zgemm"
+        if (x.ndim == 2):
+            if x.strides[0] == x.strides[1]:
+                x_is_c_contiguous = 1
+                lda = x.shape[1]
+            elif x.strides[1] == x.itemsize:
+                x_is_c_contiguous = 1
+                lda = x.strides[0] / x.itemsize
+            elif x.strides[0] == x.itemsize:
+                x_is_c_contiguous = 0
+                lda = x.strides[1] / x.itemsize
+            else:
+                x = x.copy(order=order_out)
+                x_is_c_contiguous = 0 if order_out == 'F' else 1
+                lda = x.shape[1] if x_is_c_contiguous else x.shape[0]
+            m = x.shape[0]
+            k1= x.shape[1]
+        else:
+            x_is_c_contiguous = 1
+            if x.strides[0] != x.itemsize:
+                x = x.copy()
+            m = 1
+            k1= x.shape[0]
+            lda = k1
 
-    if values[0].dtype is numpy.dtype('float64') and \
-        values[1].dtype is numpy.dtype('float64') and \
-            dtype is numpy.dtype('float64'):
-        # use dgemm
-        a = x
-        b = y
-        c = z
-        alpha = numpy.float64(1.0)
-        beta = numpy.float64(0.0)
+        if (y.ndim == 2):
+            if y.strides[0] == y.strides[1]:
+                y_is_c_contiguous = 1
+                ldb = y.shape[1]
+            elif y.strides[1] == y.itemsize:
+                y_is_c_contiguous = 1
+                ldb = y.strides[0] / y.itemsize
+            elif y.strides[0] == y.itemsize:
+                y_is_c_contiguous = 0
+                ldb = y.strides[1] / y.itemsize
+            else:
+                y = y.copy(order=order_out)
+                y_is_c_contiguous = 0 if order_out == 'F' else 1
+                ldb = y.shape[1] if y_is_c_contiguous else y.shape[0]
+            k2= y.shape[0]
+            n = y.shape[1]
+        else:
+            y_is_c_contiguous = 1
+            if y.strides[0] != y.itemsize:
+                y = y.copy()
+            k2= y.shape[0]
+            n = 1
+            ldb = 1
 
         if order_out is 'C':
-            if x_is_c_contiguous == 1 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, n
-                )
-            else:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, n
-                )
+            cblas_order = CblasRowMajor
+            ldc = n
+            transA = CblasNoTrans if x_is_c_contiguous else CblasTrans
+            transB = CblasNoTrans if y_is_c_contiguous else CblasTrans
         else:
-            if x_is_c_contiguous == 0 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, m
-                )
-            else:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, m
-                )
-        request._push_request(
-            "wrapper_cblas_dgemm",
-            "cblas_op",
-            args,
+            cblas_order = CblasColMajor
+            ldc = m
+            transA = CblasTrans if x_is_c_contiguous else CblasNoTrans
+            transB = CblasTrans if y_is_c_contiguous else CblasNoTrans
+        fpe = request._get_fpe_flag()
+        args = (
+            cblas_order,
+            transA,
+            transB,
+            m,
+            n,
+            k1,
+            x,
+            lda,
+            y,
+            ldb,
+            z,
+            ldc,
+            veo.OnStack(fpe, inout=veo.INTENT_OUT),
         )
-        return z
-
-    elif values[0].dtype is numpy.dtype('float32') and \
-        values[1].dtype is numpy.dtype('float32') and \
-            dtype is numpy.dtype('float32'):
-        # use sgemm
-        a = x
-        b = y
-        c = z
-        alpha = numpy.float32(1.0)
-        beta = numpy.float32(0.0)
-
-        if order_out is 'C':
-            if x_is_c_contiguous == 1 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, n
-                )
-            else:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, n
-                )
-        else:
-            if x_is_c_contiguous == 0 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, m
-                )
-            else:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, m
-                )
-        request._push_request(
-            "wrapper_cblas_sgemm",
-            "cblas_op",
+        request._push_and_flush_request(
+            name,
             args,
-        )
-        return z
-
-    elif values[0].dtype is numpy.dtype('complex128') and \
-        values[1].dtype is numpy.dtype('complex128') and \
-            dtype is numpy.dtype('complex128'):
-        # use zgemm
-        a = x
-        b = y
-        c = z
-        alpha = numpy.complex128(1+0j)
-        beta = numpy.complex128(0+0j)
-
-        if order_out is 'C':
-            if x_is_c_contiguous == 1 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, n
-                )
-            else:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, n
-                )
-        else:
-            if x_is_c_contiguous == 0 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, m
-                )
-            else:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, m
-                )
-        request._push_request(
-            "wrapper_cblas_zgemm",
-            "cblas_op",
-            args,
-        )
-        return z
-
-    elif values[0].dtype is numpy.dtype('complex64') and \
-        values[1].dtype is numpy.dtype('complex64') and \
-            dtype is numpy.dtype('complex64'):
-        # use cgemm
-        a = x
-        b = y
-        c = z
-        alpha = numpy.complex64(1+0j)
-        beta = numpy.complex64(0+0j)
-
-        if order_out is 'C':
-            if x_is_c_contiguous == 1 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasRowMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, n
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, n
-                )
-            else:
-                args = (
-                    CblasRowMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, n
-                )
-        else:
-            if x_is_c_contiguous == 0 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, m, b, k1,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 0 and y_is_c_contiguous == 1:
-                args = (
-                    CblasColMajor,
-                    CblasNoTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, m, b, n,
-                    beta, c, m
-                )
-            elif x_is_c_contiguous == 1 and y_is_c_contiguous == 0:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasNoTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, k1,
-                    beta, c, m
-                )
-            else:
-                args = (
-                    CblasColMajor,
-                    CblasTrans,
-                    CblasTrans,
-                    m, n, k1,
-                    alpha, a, k1, b, n,
-                    beta, c, m
-                )
-        request._push_request(
-            "wrapper_cblas_cgemm",
-            "cblas_op",
-            args,
+            callback=None,
         )
         return z
 
     # == general case bellow ==
-    args = (values[0], values[1], values[2],)
+    args = (x, y, z)
     request._push_request(
         "nlcpy_matmul",
         "linalg_op",

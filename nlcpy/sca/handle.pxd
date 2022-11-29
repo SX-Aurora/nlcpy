@@ -35,7 +35,7 @@ from nlcpy.sca.description cimport description
 
 cdef class sca_handle:
     cdef:
-        readonly uint64_t hnd_adr
+        readonly ndarray hnd_adr
         readonly object dtype
         readonly description desc_i
         readonly description desc_o

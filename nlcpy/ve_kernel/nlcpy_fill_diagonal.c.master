@@ -50,7 +50,7 @@ uint64_t nlcpy_fill_diagonal(ve_arguments *args, int32_t *psw
 {
     ve_array *a = &(args->fill_diagonal.a);
     ve_array *val = &(args->fill_diagonal.val);
-    int32_t wrap = args->fill_diagonal.wrap;
+    int64_t wrap = args->fill_diagonal.wrap;
 
 #begin_switch
     @TYPE1@ *pa = (@TYPE1@ *)nlcpy__get_ptr(a);

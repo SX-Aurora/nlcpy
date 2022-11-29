@@ -405,7 +405,7 @@ def fromfile(file, dtype=float, count=-1, sep='', offset=0):
     array([0.61878546, 0.87721538, 0.92901071, 0.87754926, 0.07167856]) # random
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('fromfile is not implemented yet.')
 
 
 @numpy_wrap
@@ -492,4 +492,4 @@ def loadtxt(fname, dtype=float, comments='#', delimiter=None, converters=None,
     array([2., 4.])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('loadtxt is not implemented yet.')

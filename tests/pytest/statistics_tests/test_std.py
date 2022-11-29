@@ -32,8 +32,10 @@
 from __future__ import division, absolute_import, print_function
 import random
 
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,)
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_allclose)
 import pytest
+from nlcpy import testing
 import numpy as np
 import nlcpy as ny
 
@@ -212,14 +214,14 @@ def test_me_case_4():
     ans_ny = ny.std(ny_a)
     ans_np = np.std(np_a)
 
-    print("ans1={} ans2={}".format(ans_ny, ans_np))
     assert_array_equal(ans_np, ans_ny.get())
 
 
 def test_me_case_5():
     ny_a = ny.array([[10, ny.nan, 4], [3, 2, 1]])
     np_a = np.array([[10, np.nan, 4], [3, 2, 1]])
-    ans_ny = ny.std(ny_a, axis=1)
-    ans_np = np.std(np_a, axis=1)
 
-    print("ans1={} ans2={}".format(ans_ny, ans_np))
+    with testing.numpy_nlcpy_errstate(invalid='ignore'):
+        ans_ny = ny.std(ny_a, axis=1)
+        ans_np = np.std(np_a, axis=1)
+        assert_allclose(ans_np, ans_ny.get())

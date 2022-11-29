@@ -1,0 +1,129 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 2.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-18 17:42+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/reference/envs.rst:4
+msgid "Environment Vaiables"
+msgstr ""
+
+#: ../../source/reference/envs.rst:8
+msgid "Sets the execution VE node ids."
+msgstr ""
+
+#: ../../source/reference/envs.rst:10
+msgid "Example when using VE 0,1,2:"
+msgstr ""
+
+#: ../../source/reference/envs.rst:19
+msgid "Default: ``1G``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:21
+msgid ""
+"Sets the upper limit of memory amount that can be allocated from memory "
+"pool. You can specify the suffixes B, b, K, k, M, m, G, or g."
+msgstr ""
+
+#: ../../source/reference/envs.rst:26
+msgid "``B`` or ``b``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:26
+msgid "Bytes"
+msgstr ""
+
+#: ../../source/reference/envs.rst:27
+msgid "``K`` or ``k``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:27
+msgid "Kilobytes"
+msgstr ""
+
+#: ../../source/reference/envs.rst:28
+msgid "``M`` or ``m``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:28
+msgid "Megabytes"
+msgstr ""
+
+#: ../../source/reference/envs.rst:29
+msgid "``G`` or ``g``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:29
+msgid "Gigabytes"
+msgstr ""
+
+#: ../../source/reference/envs.rst:32
+msgid "If you don't specify any suffixes, the value is represented in Kilobytes."
+msgstr ""
+
+#: ../../source/reference/envs.rst:34
+msgid "Example that sets pool size 10 gigabytes:"
+msgstr ""
+
+#: ../../source/reference/envs.rst:42
+msgid "Default: ``NO``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:44
+msgid ""
+"If set to ``YES`` or ``yes``, NLCPy uses shared object "
+"``libnlcpy_ve_kernel_fast_math.so`` for VE. For details, please see "
+":ref:`Optimization for Mathematical Functions <label_fast_math>`"
+msgstr ""
+
+#: ../../source/reference/envs.rst:49
+msgid "Default: ``YES``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:51
+msgid ""
+"If set to ``NO`` or ``no``, NLCPy raises `Exception` when replacing NLCPy"
+" function and method to NumPy's one."
+msgstr ""
+
+#: ../../source/reference/envs.rst:56
+msgid "Default: The number of VE core."
+msgstr ""
+
+#: ../../source/reference/envs.rst:58
+msgid "The number of OpenMP parallel threads."
+msgstr ""
+
+#: ../../source/reference/envs.rst:66
+msgid "Default: ``0``"
+msgstr ""
+
+#: ../../source/reference/envs.rst:68
+msgid ""
+"The node number of VE to be executed. Note that if both "
+"``VE_NLCPY_NODELIST`` and ``VE_NODE_NUMBER`` are set, "
+"``VE_NLCPY_NODELIST`` takes precedence."
+msgstr ""
+
+#~ msgid ""
+#~ "Sets the limit of memory amount "
+#~ "that can be allocated from memory "
+#~ "pool. You can specify the suffixes "
+#~ "B, b, K, k, M, m, G, or "
+#~ "g."
+#~ msgstr ""
+

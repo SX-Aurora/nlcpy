@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-17 17:08+0900\n"
+"POT-Creation-Date: 2022-11-15 11:02+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,9 +57,7 @@ msgid ":obj:`nlcpy.identity <nlcpy.identity>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ""
-"Returns the identity array.The identity array is a square array with ones"
-" on the main diagonal."
+msgid "Returns the identity array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -246,5 +244,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "From Exixting Data"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Returns the identity array.The identity "
+#~ "array is a square array with ones"
+#~ " on the main diagonal."
 #~ msgstr ""
 

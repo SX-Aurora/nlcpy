@@ -50,19 +50,27 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
-
 import nlcpy
 from nlcpy import testing
 
 
 def astype_without_warning(x, dtype, *args, **kwargs):
-    dtype = numpy.dtype(dtype)
-    # nlcpy interpret bool as int32
-    if dtype == numpy.dtype(bool):
-        dtype = numpy.dtype('int32')
-    return x.astype(dtype, *args, **kwargs)
+    with testing.numpy_nlcpy_errstate(invalid='ignore'):
+        dtype = numpy.dtype(dtype)
+        # nlcpy interpret bool as int32
+        if dtype == numpy.dtype(bool):
+            dtype = numpy.dtype('int32')
+        if x.dtype.kind == 'c' and dtype.kind not in 'c':
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                ret = x.astype(dtype, *args, **kwargs)
+        else:
+            ret = x.astype(dtype, *args, **kwargs)
+        nlcpy.request.flush()
+    return ret
 
 
 class TestArrayCopyAndView(unittest.TestCase):
@@ -320,13 +328,15 @@ class TestArrayCopyAndView(unittest.TestCase):
                          numpy.float32, numpy.float64])
     @testing.numpy_nlcpy_array_equal()
     def test_isinstance_numpy_copy(self, xp, dtype, order):
-        data = numpy.arange(100, dtype=dtype)
-        mask = testing.shaped_random((100,), numpy, dtype=numpy.bool_)
-        fill_value = numpy.arange(1, 101)
-        a = numpy.ma.array(data, mask=mask, fill_value=fill_value)
-        a = a.reshape(10, 10, order=order)
-        b = xp.ma.array(xp.empty(a.shape), dtype=dtype, order=order)
-        b[:] = a
+        with xp.errstate(invalid='ignore'):
+            data = numpy.arange(100, dtype=dtype)
+            mask = testing.shaped_random((100,), numpy, dtype=numpy.bool_)
+            fill_value = numpy.arange(1, 101)
+            a = numpy.ma.array(data, mask=mask, fill_value=fill_value)
+            a = a.reshape(10, 10, order=order)
+            b = xp.ma.array(xp.empty(a.shape), dtype=dtype, order=order)
+            b[:] = a
+            nlcpy.request.flush()
         return b
 
 
@@ -340,15 +350,18 @@ class TestNumPyArrayCopyView(unittest.TestCase):
                          numpy.float32, numpy.float64])
     @testing.numpy_nlcpy_array_equal()
     def test_isinstance_numpy_view_copy_f(self, xp, dtype, order):
-        data = numpy.arange(100, dtype=dtype).reshape(
-            10, 10, order=self.src_order)
-        mask = testing.shaped_random((10, 10), numpy, dtype=numpy.bool_)
-        fill_value = numpy.arange(1, 101, dtype=dtype).reshape(
-            10, 10, order=self.src_order)
-        a = numpy.ma.array(data, mask=mask, fill_value=fill_value, order=self.src_order)
-        a = a[2:5, 1:8]
-        b = xp.ma.array(xp.empty(a.shape), dtype=dtype, order=order)
-        b[:] = a
+        with xp.errstate(invalid='ignore'):
+            data = numpy.arange(100, dtype=dtype).reshape(
+                10, 10, order=self.src_order)
+            mask = testing.shaped_random((10, 10), numpy, dtype=numpy.bool_)
+            fill_value = numpy.arange(1, 101, dtype=dtype).reshape(
+                10, 10, order=self.src_order)
+            a = numpy.ma.array(data, mask=mask, fill_value=fill_value,
+                               order=self.src_order)
+            a = a[2:5, 1:8]
+            b = xp.ma.array(xp.empty(a.shape), dtype=dtype, order=order)
+            b[:] = a
+            nlcpy.request.flush()
         return b
 
     @testing.for_orders('CF')

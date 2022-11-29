@@ -33,7 +33,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import pkg_resources
-
 import numpy
 import re
 
@@ -149,43 +148,44 @@ def _create_random_array(shape, order, dtype, minval, maxval):
     dtype = numpy.dtype(dtype)
     if dtype == '?':
         a = numpy.random.randint(2, size=shape)
-        return a.astype(dtype=dtype, order=order)
+        return a.astype(dtype=dtype, order=order), minval, maxval
     elif dtype.kind == 'c':
         a = numpy.random.uniform(minval, maxval, size=shape)
         b = numpy.random.uniform(minval, maxval, size=shape)
-        return numpy.asarray(a + 1j * b).astype(dtype=dtype, order=order)
+        return numpy.asarray(a + 1j * b).astype(dtype=dtype, order=order), \
+            minval, maxval
     elif dtype.kind == 'u':
         if minval < 0:
             maxval += (-minval)
             minval = 0
         a = numpy.random.uniform(minval, maxval, size=shape)
-        return a.astype(dtype=dtype, order=order)
+        return a.astype(dtype=dtype, order=order), minval, maxval
     else:
         a = numpy.random.uniform(minval, maxval, size=shape)
-        return a.astype(dtype=dtype, order=order)
+        return a.astype(dtype=dtype, order=order), minval, maxval
 
 
 def _create_random_scalar(dtype, minval, maxval):
     dtype = numpy.dtype(dtype)
     if dtype == '?':
         a = numpy.random.randint(2, size=1)
-        return bool(a)
+        return bool(a), minval, maxval
     elif dtype.kind == 'c':
         a = numpy.random.uniform(minval, maxval, size=1)
         b = numpy.random.uniform(minval, maxval, size=1)
-        return complex(a, b)
+        return complex(a, b), minval, maxval
     elif dtype.kind == 'i':
         a = numpy.random.randint(minval, maxval, size=1)
-        return int(a)
+        return int(a), minval, maxval
     elif dtype.kind == 'u':
         if minval < 0:
             maxval += (-minval)
             minval = 0
         a = numpy.random.randint(minval, maxval, size=1)
-        return int(a)
+        return int(a), minval, maxval
     else:
         a = numpy.random.uniform(minval, maxval, size=1)
-        return float(a)
+        return float(a), minval, maxval
 
 
 def _precheck_func_for_ufunc(
@@ -207,7 +207,6 @@ def _precheck_func_for_ufunc(
 
     if nlcpy_msg is not None:
         nlcpy_msg = re.sub(r'nlcpy', "numpy", nlcpy_msg)
-
     if nlcpy_error or numpy_error:
         helper._check_nlcpy_numpy_error(self, nlcpy_error, nlcpy_msg,
                                         nlcpy_tb, numpy_error, numpy_msg,
@@ -235,7 +234,6 @@ def _precheck_func_for_ufunc(
                 msg.append(' numpy.dtype: {}'.format(numpy_r.dtype))
                 msg.append(' nlcpy.dtype: {}'.format(nlcpy_r.dtype))
                 raise AssertionError('\n'.join(msg))
-
     return nlcpy_result, numpy_result
 
 
@@ -412,11 +410,11 @@ def _check_for_binary_with_create_param(
 
 def _guess_tolerance(op, worst_dtype, ufunc_name):
     if op in ('power', 'multiply') and \
-       ufunc_name in ('reduce', 'reduceat', 'accumulate'):
+            ufunc_name in ('reduce', 'reduceat', 'accumulate', 'outer'):
         return 1e-3, 1e-3
     elif op in check_close_op_set:
         if worst_dtype in (DT_BOOL, DT_I32, DT_U32, DT_F32, DT_C64):
-            if op in ('exp', 'tan'):
+            if op in ('exp', 'tan', 'remainder', 'mod', 'fmod'):
                 return TOL_SINGLE_EXCEPTION, TOL_SINGLE_EXCEPTION
             else:
                 return TOL_SINGLE, TOL_SINGLE
@@ -452,7 +450,6 @@ def _nan_inf_care(v, n):
 
 def _check_ufunc_result(op, worst_dtype, v, n, in1=None, in2=None,
                         out=None, where=None, dtype=None, ufunc_name='', n_calc=1):
-
     # nan/inf care
     if numpy.isscalar(n):
         if numpy.isinf(n) and nlcpy.isinf(v) or numpy.isnan(n) and nlcpy.isnan(v):
@@ -466,10 +463,10 @@ def _check_ufunc_result(op, worst_dtype, v, n, in1=None, in2=None,
     if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
         atol *= n_calc
         rtol *= n_calc
-        if numpy.asarray(n).dtype.char in '?ilIL' and \
-           (numpy.asarray(in1).dtype.char not in '?ilIL' or
-           numpy.dtype(dtype).char not in '?ilIL' or
-           op in ('logaddexp', 'logaddexp2', 'arctan2', 'hypot')):
+        if n_array.dtype.char in '?ilIL' and \
+                (numpy.asarray(in1).dtype.char not in '?ilIL' or
+                 numpy.dtype(dtype).char not in '?ilIL' or
+                 op in ('logaddexp', 'logaddexp2', 'arctan2', 'hypot')):
             atol = 1
 
     # prepare error message
@@ -499,13 +496,14 @@ def _check_ufunc_result(op, worst_dtype, v, n, in1=None, in2=None,
 
     # compare results
     try:
-        if v_array.dtype == DT_BOOL and n_array.dtype == DT_BOOL:
-            array.assert_array_equal(v_array, n_array, verbose=True, err_msg=msg)
-        elif atol == 0 and rtol == 0:
-            array.assert_array_equal(v_array, n_array, verbose=True, err_msg=msg)
-        else:
-            array.assert_allclose(
-                v_array, n_array, rtol, atol, verbose=True, err_msg=msg)
+        with numpy.errstate(invalid='ignore'):
+            if v_array.dtype == DT_BOOL and n_array.dtype == DT_BOOL:
+                array.assert_array_equal(v_array, n_array, verbose=True, err_msg=msg)
+            elif atol == 0 and rtol == 0:
+                array.assert_array_equal(v_array, n_array, verbose=True, err_msg=msg)
+            else:
+                array.assert_allclose(
+                    v_array, n_array, rtol, atol, verbose=True, err_msg=msg)
     except Exception:
         raise
 

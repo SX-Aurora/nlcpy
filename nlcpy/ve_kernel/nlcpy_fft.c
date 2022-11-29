@@ -55,29 +55,15 @@
 //#define DBG_PRT printf
 #define ERR_PRT printf
 
-#define C_CONTIGUOUS  0
-#define F_CONTIGUOUS  1
-#define KEEP          2
-#define OTHER         3
-
 #define FFT_DIM_2 2
 #define FFT_DIM_3 3
 
 asl_fft_t fft;
 
 
-static inline uint64_t nlcpy_get_contiguous_status(ve_array *x){
-    if (! x->is_c_contiguous && x->is_f_contiguous) {
-        return F_CONTIGUOUS;
-    } else if (! x->is_f_contiguous && x->is_c_contiguous)  {
-        return C_CONTIGUOUS;
-    } else if (x->is_f_contiguous && x->is_c_contiguous){
-        return KEEP;
-    } else {
-        return OTHER;
-    }
-}
-
+static inline uint64_t nlcpy__is_c_contiguous(ve_array *x) { return x->is_c_contiguous;}
+static inline uint64_t nlcpy__is_f_contiguous(ve_array *x) { return x->is_f_contiguous;}
+static inline uint64_t nlcpy__is_keep(ve_array *x) { return (x->is_f_contiguous && x->is_c_contiguous);}
 
 static inline uint64_t nlcpy_generate_asl_error(asl_error_t err){
     if (err == ASL_ERROR_MEMORY){
@@ -85,7 +71,6 @@ static inline uint64_t nlcpy_generate_asl_error(asl_error_t err){
     }
     return (uint64_t)NLCPY_ERROR_ASL;
 }
-
 
 static inline uint64_t nlcpy_destroy_handle() {
     asl_error_t err = ASL_ERROR_OK;
@@ -113,8 +98,6 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -123,10 +106,10 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -151,7 +134,7 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -183,7 +166,7 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -232,8 +215,6 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -242,10 +223,10 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -270,7 +251,7 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -302,7 +283,7 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -351,8 +332,6 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -361,10 +340,10 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -389,7 +368,7 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -421,7 +400,7 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -470,8 +449,6 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -480,10 +457,10 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -508,7 +485,7 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -540,7 +517,7 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -576,483 +553,6 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
         // above NLCPY_MAXNDIM
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-
-uint64_t nlcpy_internal_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    double _Complex *px = (double _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double _Complex *py = (double _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_complex_1d_d(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_complex_forward_d(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[x->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_complex_forward_d(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    double _Complex *px = (double _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double _Complex *py = (double _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_complex_1d_d(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_complex_backward_d(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[x->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_complex_backward_d(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    float _Complex *px = (float _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float _Complex *py = (float _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_complex_1d_s(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_complex_forward_s(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[x->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_complex_forward_s(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    float _Complex *px = (float _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float _Complex *py = (float _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_complex_1d_s(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_complex_backward_s(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[x->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_complex_backward_s(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -1068,7 +568,6 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -1077,11 +576,11 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -1106,7 +605,7 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -1139,7 +638,7 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -1188,7 +687,6 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -1197,11 +695,11 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -1226,7 +724,7 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -1259,7 +757,7 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -1308,7 +806,6 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -1317,11 +814,11 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -1346,7 +843,7 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -1379,7 +876,7 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -1428,7 +925,6 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
     if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -1437,11 +933,11 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
     }
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
+        if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
+            if ( nlcpy__is_keep(x) ) {
                 xs = 1;
                 ys = 1;
             } else {
@@ -1466,7 +962,7 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
         } else {
             int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
             asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
+            if (!nlcpy__is_c_contiguous(x)) {
                 x0 = x->strides[0] / x->itemsize;
                 y0 = y->strides[0] / y->itemsize;
             } else {
@@ -1499,7 +995,7 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
 
                 int64_t k;
                 // set next index
-                if ( order_f==F_CONTIGUOUS ) {
+                if (!nlcpy__is_c_contiguous(x)) {
                     for (k = y->ndim-1; k > axis; k--) {
                         if (++cnt_y[k] < y->shape[k]) {
                             ix += x->strides[k] / x->itemsize;
@@ -1540,683 +1036,6 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-
-
-uint64_t nlcpy_internal_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    double *px = (double *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double _Complex *py = (double _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_real_1d_d(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t n = n_in;
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_real_forward_d(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[y->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_real_forward_d(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    double _Complex *px = (double _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double *py = (double *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_real_1d_d(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t n = n_in;
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_real_backward_d(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[y->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_real_backward_d(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    float *px = (float *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float _Complex *py = (float _Complex *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_real_1d_s(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t n = n_in;
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_real_forward_s(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[y->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_real_forward_s(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_internal_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, const int64_t n_in, int32_t *psw)
-{
-    float _Complex *px = (float _Complex *)nlcpy__get_ptr(x);
-    if (px == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float *py = (float *)nlcpy__get_ptr(y);
-    if (py == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    asl_error_t err = ASL_ERROR_OK;
-    int64_t order_f = nlcpy_get_contiguous_status(x);
-
-    asl_fft_t _fft;
-    err = asl_fft_create_real_1d_s(&_fft, n_in);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
-        if ((order_f==KEEP && x->shape[0]==1) || (order_f==C_CONTIGUOUS && axis==x->ndim-1) || (order_f==F_CONTIGUOUS && axis==0)) {
-            asl_int_t n = n_in;
-            asl_int_t m = x->size / x->shape[axis];
-            asl_int64_t xs, ys;
-            if ( order_f==KEEP ) {
-                xs = 1;
-                ys = 1;
-            } else {
-                xs = x->strides[axis] / x->itemsize;
-                ys = y->strides[axis] / y->itemsize;
-            }
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, xs);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, ys);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x->shape[axis]*xs);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y->shape[axis]*ys);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_execute_real_backward_s(_fft, px, py);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else {
-            int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
-            asl_int64_t x0, y0;
-            if ( order_f==F_CONTIGUOUS ) {
-                x0 = x->strides[0] / x->itemsize;
-                y0 = y->strides[0] / y->itemsize;
-            } else {
-                x0 = x->strides[x->ndim-1] / x->itemsize;
-                y0 = y->strides[y->ndim-1] / y->itemsize;
-            }
-            asl_int_t n = n_in;
-            asl_int64_t m = x->strides[axis] / x->itemsize;
-            nlcpy__reset_coords(cnt_y, y->ndim);
-
-            err = asl_fft_set_spatial_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_long_stride_1d(_fft, m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_multiplicity(_fft, (asl_int_t)m);
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_frequency_multiplicity_long_stride(_fft, x0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-            err = asl_fft_set_spatial_multiplicity_long_stride(_fft, y0);
-
-            if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-            uint64_t ix = 0;
-            uint64_t iy = 0;
-            for (;;) {
-                // do FFT along axis
-                err = asl_fft_execute_real_backward_s(_fft, px + ix, py + iy);
-                if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-                int64_t k;
-                // set next index
-                if ( order_f==F_CONTIGUOUS ) {
-                    for (k = y->ndim-1; k > axis; k--) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k - 1 > axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k <= axis) break;
-                } else {
-                    for (k = 0; k < axis; k++) {
-                        if (++cnt_y[k] < y->shape[k]) {
-                            ix += x->strides[k] / x->itemsize;
-                            iy += y->strides[k] / y->itemsize;
-                            break;
-                        }
-                        cnt_y[k] = 0;
-                        if (k + 1 < axis) {
-                            ix -= (x->strides[k] / x->itemsize) * (x->shape[k] - 1);
-                            iy -= (y->strides[k] / y->itemsize) * (y->shape[k] - 1);
-                        }
-                    }
-                    if (k >= axis) break;
-                }
-
-            }
-        }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
-    }
-
-    err = asl_fft_destroy(_fft);
-    if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-    retrieve_fpe_flags(psw);
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-
-uint64_t nlcpy_recursive_fft_1d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 0) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    err = nlcpy_internal_fft_1d_c128_c128(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < axes->size; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_fft_1d_c128_c128(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_ifft_1d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 0) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    err = nlcpy_internal_ifft_1d_c128_c128(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < axes->size; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_ifft_1d_c128_c128(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_fft_1d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 0) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    err = nlcpy_internal_fft_1d_c64_c64(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < axes->size; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_fft_1d_c64_c64(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_ifft_1d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 0) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    err = nlcpy_internal_ifft_1d_c64_c64(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < axes->size; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_ifft_1d_c64_c64(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-
-uint64_t nlcpy_recursive_rfft_1d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 1) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    uint64_t idx_end = axes->size-1;
-    err = nlcpy_internal_rfft_1d_f64_c128(x, y, _axes[idx_end], _n_in[idx_end], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    ve_array *work = y;
-    err = nlcpy_internal_fft_1d_c128_c128(work, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < idx_end; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_fft_1d_c128_c128(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_irfft_1d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 1) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    uint64_t idx_end = axes->size-1;
-    err = nlcpy_internal_ifft_1d_c128_c128(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < idx_end; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_ifft_1d_c128_c128(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    ve_array *work = y;
-    err = nlcpy_internal_irfft_1d_c128_f64(work, y, _axes[idx_end], _n_in[idx_end], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_rfft_1d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 1) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    uint64_t idx_end = axes->size-1;
-    err = nlcpy_internal_rfft_1d_f32_c64(x, y, _axes[idx_end], _n_in[idx_end], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    ve_array *work = y;
-    err = nlcpy_internal_fft_1d_c64_c64(work, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < idx_end; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_fft_1d_c64_c64(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-
-    return (uint64_t)NLCPY_ERROR_OK;
-}
-
-uint64_t nlcpy_recursive_irfft_1d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int32_t *psw)
-{
-    uint64_t err = NLCPY_ERROR_OK;
-    int64_t *_axes = (int64_t *)nlcpy__get_ptr(axes);
-    if (_axes == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    int64_t *_n_in = (int64_t *)nlcpy__get_ptr(n_in);
-    if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-
-    if (axes->size <= 1) return (uint64_t)NLCPY_ERROR_NDIM;
-
-    uint64_t idx_end = axes->size-1;
-    err = nlcpy_internal_ifft_1d_c64_c64(x, y, _axes[0], _n_in[0], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    for(int idx=1; idx < idx_end; idx++){
-        ve_array *work = y;
-        err = nlcpy_internal_ifft_1d_c64_c64(work, y, _axes[idx], _n_in[idx], psw);
-        if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-    }
-    ve_array *work = y;
-    err = nlcpy_internal_irfft_1d_c64_f32(work, y, _axes[idx_end], _n_in[idx_end], psw);
-    if (err != NLCPY_ERROR_OK ) return (uint64_t)err;
-
-    return (uint64_t)NLCPY_ERROR_OK;
-}
 
 static inline uint64_t check_multiplicity_convertible_axes(int64_t *axes, uint64_t start, uint64_t end)
 {
@@ -2269,12 +1088,9 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
-
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
             for(int i=0; i < x->ndim; i++){
@@ -2291,7 +1107,7 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2310,10 +1126,8 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_complex_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -2329,7 +1143,7 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
             err = asl_fft_set_spatial_multiplicity_long_stride(fft, xs);
@@ -2341,8 +1155,7 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         }else{
-            err = nlcpy_recursive_fft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2378,12 +1191,9 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
-
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
             for(int i=0; i < x->ndim; i++){
@@ -2400,7 +1210,7 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2419,10 +1229,8 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_complex_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -2438,7 +1246,7 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
             err = asl_fft_set_spatial_multiplicity_long_stride(fft, ys);
@@ -2450,8 +1258,7 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         }else{
-            err = nlcpy_recursive_ifft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2487,12 +1294,9 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
-
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
             for(int i=0; i < x->ndim; i++){
@@ -2509,7 +1313,7 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2528,10 +1332,8 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
             err = asl_fft_execute_complex_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -2547,7 +1349,7 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
             err = asl_fft_set_spatial_multiplicity_long_stride(fft, xs);
@@ -2559,8 +1361,7 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         }else{
-            err = nlcpy_recursive_fft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2596,12 +1397,9 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
-
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
             for(int i=0; i < x->ndim; i++){
@@ -2618,7 +1416,7 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2637,10 +1435,8 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_complex_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -2656,7 +1452,7 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
             err = asl_fft_set_spatial_multiplicity_long_stride(fft, ys);
@@ -2668,8 +1464,7 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         }else{
-            err = nlcpy_recursive_ifft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2706,11 +1501,8 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -2732,7 +1524,7 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2751,8 +1543,8 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -2773,7 +1565,7 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -2785,8 +1577,7 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_rfft_1d_f64_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2822,11 +1613,8 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -2848,7 +1636,7 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2867,8 +1655,8 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -2889,7 +1677,7 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -2901,8 +1689,7 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_irfft_1d_c128_f64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -2938,11 +1725,8 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -2964,7 +1748,7 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -2983,8 +1767,8 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3005,7 +1789,7 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3017,8 +1801,7 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_rfft_1d_f32_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3054,11 +1837,8 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if((order_f==C_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==F_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
-
+        if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3080,7 +1860,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_2; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3099,8 +1879,8 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if((order_f==F_CONTIGUOUS && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
-        || (order_f==C_CONTIGUOUS && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
+        } else if((nlcpy__is_f_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
+        || (nlcpy__is_c_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_2);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3121,7 +1901,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3133,8 +1913,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_irfft_1d_c64_f32(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3144,6 +1923,7 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
+
 
 
 uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int reuse, int32_t *psw)
@@ -3173,9 +1953,7 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3193,7 +1971,7 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3212,7 +1990,7 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_complex_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3228,7 +2006,7 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3240,8 +2018,7 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_execute_complex_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_fft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3279,9 +2056,7 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3299,7 +2074,7 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3318,7 +2093,7 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_complex_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3334,7 +2109,7 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3346,8 +2121,7 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_execute_complex_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_ifft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3385,9 +2159,7 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3405,7 +2177,7 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3424,7 +2196,7 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
             err = asl_fft_execute_complex_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3440,7 +2212,7 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3452,8 +2224,7 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             err = asl_fft_execute_complex_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_fft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3491,9 +2262,7 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3511,7 +2280,7 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3530,7 +2299,7 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_complex_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 2))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             asl_int64_t ls_1[x->ndim], ls_2[x->ndim];
 #pragma _NEC novector
@@ -3546,7 +2315,7 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3558,8 +2327,7 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_execute_complex_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
         } else {
-            err = nlcpy_recursive_ifft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3598,8 +2366,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3621,7 +2388,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3640,7 +2407,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3660,7 +2427,7 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3671,10 +2438,8 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         }else{
-            err = nlcpy_recursive_rfft_1d_f64_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3712,8 +2477,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3735,7 +2499,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3754,7 +2518,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3774,7 +2538,7 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3785,10 +2549,8 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         }else{
-            err = nlcpy_recursive_irfft_1d_c128_f64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3826,8 +2588,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3849,7 +2610,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3868,7 +2629,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3888,7 +2649,7 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -3899,10 +2660,8 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         }else{
-            err = nlcpy_recursive_rfft_1d_f32_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -3940,8 +2699,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -3963,7 +2721,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
                 for(int i=0; i < FFT_DIM_3; i++){
                     xs = xs * x->shape[i];
                     ys = ys * y->shape[i];
@@ -3982,7 +2740,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, 3))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
             err = asl_fft_set_half_complex_axis(fft, ASL_AXIS_3);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -4002,7 +2760,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = ls_1[idx];
             const asl_int64_t ys = ls_2[idx];
 
@@ -4013,10 +2771,8 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         }else{
-            err = nlcpy_recursive_irfft_1d_c64_f32(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4026,6 +2782,7 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
+
 
 
 uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_array *n_in, int reuse, int32_t *psw)
@@ -4051,9 +2808,7 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4076,7 +2831,7 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim - 1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4098,7 +2853,7 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_execute_complex_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4120,7 +2875,7 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4133,8 +2888,7 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         } else {
-            err = nlcpy_recursive_fft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4168,9 +2922,7 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4193,7 +2945,7 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim - 1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4215,7 +2967,7 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_execute_complex_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4237,7 +2989,7 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4250,8 +3002,7 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         } else {
-            err = nlcpy_recursive_ifft_1d_c128_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4285,9 +3036,7 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4310,7 +3059,7 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim - 1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4332,7 +3081,7 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             err = asl_fft_execute_complex_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4354,7 +3103,7 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4367,8 +3116,7 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         } else {
-            err = nlcpy_recursive_fft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4402,9 +3150,7 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4427,7 +3173,7 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim - 1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4449,7 +3195,7 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_execute_complex_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < dim_val; i++){
@@ -4471,7 +3217,7 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             err = asl_fft_set_multiplicity(fft, m);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4484,8 +3230,7 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
         } else {
-            err = nlcpy_recursive_ifft_1d_c64_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4520,10 +3265,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4550,7 +3292,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4571,8 +3313,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4597,7 +3338,7 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4608,10 +3349,8 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_forward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         } else {
-            err = nlcpy_recursive_rfft_1d_f64_c128(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4645,10 +3384,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4675,7 +3411,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4696,8 +3432,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4722,7 +3457,7 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4733,10 +3468,8 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
 
             err = asl_fft_execute_real_backward_d(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         } else {
-            err = nlcpy_recursive_irfft_1d_c128_f64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4770,10 +3503,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4800,7 +3530,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4821,8 +3551,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4847,7 +3576,7 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4858,10 +3587,8 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
 
             err = asl_fft_execute_real_forward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         } else {
-            err = nlcpy_recursive_rfft_1d_f32_c64(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM
@@ -4895,10 +3622,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
     if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
         asl_int_t m;
-        int64_t order_f = nlcpy_get_contiguous_status(x);
-
-        if ((order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4925,7 +3649,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             asl_int64_t xs=1, ys=1;
             int idx = x->ndim-1;
-            if(order_f==F_CONTIGUOUS){
+            if(!nlcpy__is_c_contiguous(x)){
 #pragma _NEC novector
                 for(int i=0; i < dim_val; i++){
                     xs = xs * x->shape[i];
@@ -4946,8 +3670,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-        } else if ((order_f == F_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (order_f == C_CONTIGUOUS && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
-
+        } else if ((nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
 #pragma _NEC novector
             for(int i=0; i < axes->size; i++){
@@ -4972,7 +3695,7 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
 
 
-            const uint64_t idx = (order_f == F_CONTIGUOUS) ? 0 : x->ndim - 1;
+            const uint64_t idx = (!nlcpy__is_c_contiguous(x)) ? 0 : x->ndim - 1;
             const asl_int64_t xs = x->strides[idx] / x->itemsize;
             const asl_int64_t ys = y->strides[idx] / y->itemsize;
 
@@ -4983,10 +3706,8 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
 
             err = asl_fft_execute_real_backward_s(fft, px, py);
             if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
-
         } else {
-            err = nlcpy_recursive_irfft_1d_c64_f32(x, y, axes, n_in, psw);
-            return (uint64_t)err;
+            return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
     } else {
         // above NLCPY_MAXNDIM

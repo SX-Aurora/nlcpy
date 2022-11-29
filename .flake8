@@ -2,9 +2,8 @@
 max-line-length = 89
 filename = *.py,*.pyx,*.px*
 exclude =
-    build,dist,Doxygen,bench,.git,
-    *.m4,*.dox,tests/NEC_internal,doc,
-    sphinx
-ignore = W503,W504,W605
+    build,dist,,bench,.git,*.m4,
+    tests/NEC_internal,doc,sphinx
+ignore = W503,W504,W605,E262,E116
 per-file-ignores =
-    *.pyx,*.px*: E225,E226,E227,E999
+    *.pyx,*.px*: E211,E225,E226,E227,E999

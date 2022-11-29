@@ -6,6 +6,8 @@ import numpy as np  # NOQA
 
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing import (  # NOQA
+    assert_array_equal, assert_allclose)
 
 
 @testing.parameterize(*testing.product({
@@ -22,7 +24,9 @@ class TestFft(unittest.TestCase):
                                   contiguous_check=False)
     def test_fft(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)
+        tmp = a.copy()
         out = xp.fft.fft(a, n=self.n, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -37,7 +41,9 @@ class TestFft(unittest.TestCase):
     @testing.with_requires('numpy!=1.17.1')
     def test_ifft(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)
+        tmp = a.copy()
         out = xp.fft.ifft(a, n=self.n, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -137,7 +143,9 @@ class TestFftOrder(unittest.TestCase):
         a = xp.asarray(a, order=self.data_order)
         if xp == np and self.axis > a.ndim - 1:
             raise ValueError
+        tmp = a.copy()
         out = xp.fft.fft(a, axis=self.axis, n=self.n, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -151,7 +159,9 @@ class TestFftOrder(unittest.TestCase):
         a = xp.asarray(a, order=self.data_order)
         if xp == np and self.axis > a.ndim - 1:
             raise ValueError
+        tmp = a.copy()
         out = xp.fft.fft(a, norm=self.norm, n=self.n, axis=self.axis)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -165,7 +175,9 @@ class TestFftOrder(unittest.TestCase):
         a = xp.asarray(a, order=self.data_order)
         if xp == np and self.axis > a.ndim - 1:
             raise ValueError
+        tmp = a.copy()
         out = xp.fft.ifft(a, axis=self.axis, n=self.n, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -179,7 +191,9 @@ class TestFftOrder(unittest.TestCase):
         a = xp.asarray(a, order=self.data_order)
         if xp == np and self.axis > a.ndim - 1:
             raise ValueError
+        tmp = a.copy()
         out = xp.fft.ifft(a, norm=self.norm, n=self.n, axis=self.axis)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float32, np.complex64]:
             out = out.astype(np.complex64)

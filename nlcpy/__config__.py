@@ -56,7 +56,7 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import re
-import nlcpy
+from nlcpy import _path
 import subprocess
 import os
 import numpy as np
@@ -71,7 +71,7 @@ def chk_data(data):
     if data == "":
         ans = "Not Available"
     else:
-        pat = '[\d+]+[\w.]*(?:[-\s]+(?:alpha|beta|build)[\w.]*)?'
+        pat = r"[\d+]+[\w.]*(?:[-\s]+(?:alpha|beta|build)[\w.]*)?"
         mat = re.match(pat, data)
         if mat is None:
             ans = "Not Available"
@@ -190,13 +190,10 @@ def get_numpy_ver():
 
 
 def get_ncc_ver():
-    ret_out = nlcpy.__file__
-    rep = "__init__.py"
-    upd = "lib/libnlcpy_ve_kernel_common.so"
-    cnv_path = ret_out.replace(rep, upd)
+    cnv_path = _path._common_kernel_path
     get_com = "/opt/nec/ve/bin/nreadelf -dW " + cnv_path + \
         "|/usr/bin/grep \"/opt/nec/ve/ncc\" | " \
-        "/usr/bin/grep -o -E \"([0-9]+\.){1}[0-9]+(\.[0-9]+)?\" | " \
+        "/usr/bin/grep -o -E \"([0-9]+\\.){1}[0-9]+(\\.[0-9]+)?\" | " \
         "/usr/bin/head -n1"
     out = exec_cmd(get_com)
     ans = chk_data(out)

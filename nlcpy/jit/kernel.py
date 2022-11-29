@@ -30,7 +30,8 @@
 #
 
 from nlcpy import veo
-from nlcpy.request import request
+from nlcpy import jit
+from nlcpy import venode
 
 
 class CustomVEKernel:
@@ -50,10 +51,13 @@ class CustomVEKernel:
     :meth:`nlcpy.jit.CustomVELibrary.get_function`.
     """
 
-    def __init__(self, func):
+    def __init__(self, func, ve_lib):
         if type(func) is not veo.VeoFunction:
             raise TypeError('func must be given VeoFunction.')
-        self.func = func
+        if type(ve_lib) is not jit.CustomVELibrary:
+            raise TypeError('ve_lib must be given CustomVELibrary.')
+        self._func = func
+        self._ve_lib = ve_lib
 
     def __call__(self, *args, callback=None, sync=False):
         """Invokes the VE function.
@@ -78,14 +82,21 @@ class CustomVEKernel:
 
         """
 
-        res = request._push_and_flush_request_with_JIT(
-            self.func,
+        if not self._ve_lib._is_valid():
+            raise RuntimeError('the library is not active.')
+        if self._ve_lib._venode != venode.VE():
+            raise ValueError('this kernel exists on {}, '
+                             'but the current device is set {}'
+                             .format(self._ve_lib._venode, venode.VE()))
+        res = self._ve_lib._venode.request_manager._push_and_flush_request_core(
+            self._func,
             args,
             callback=callback,
-            sync=sync
+            sync=sync,
         )
         return res
 
     def __repr__(self):  # pragma: no cover
         return '<CustomVEKernel({})>'.format(
-            ''.join(['func={}'.format(self.func)]))
+            ''.join(['func={}'.format(self._func)])
+        )

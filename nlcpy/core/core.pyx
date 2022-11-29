@@ -52,16 +52,16 @@
 # distutils: language = c++
 
 import ctypes
-import atexit
 import warnings
 import time
+import atexit
 
 from libc.stdint cimport *
 from libcpp.vector cimport vector
 from cpython.object cimport *
 
 import nlcpy
-from nlcpy import veo
+from nlcpy.veo cimport _veo
 from nlcpy.core import flags
 from nlcpy.core cimport internal
 from nlcpy.core cimport vememory
@@ -71,23 +71,19 @@ from nlcpy.core cimport indexing
 from nlcpy.core cimport searching
 from nlcpy.core cimport math
 from nlcpy.core cimport dtype as _dtype
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core import error
 from nlcpy.ufuncs import operations as ufunc_op
-from nlcpy.request cimport request
-from nlcpy.request.ve_kernel cimport *
+from nlcpy.request.ve_kernel cimport NLCPY_MAXNDIM
 from nlcpy.error_handler import error_handler
 from nlcpy.statistics.order import ptp
 from nlcpy.statistics.average import mean
 from nlcpy.statistics.average import var
 from nlcpy.statistics.average import std
 from nlcpy.sca.description cimport description
+from nlcpy.venode._venode cimport VE
+from nlcpy._environment import _is_numpy_wrap_enabled
 import numpy
 cimport numpy as cnp
-
-include 'param.pxi'
-
-cdef int64_t _boundary_size = DEFAULT_BOUNDARY_SIZE
 
 
 cdef class ndarray:
@@ -173,30 +169,26 @@ cdef class ndarray:
             raise ValueError('Unsupported order \'%s\'' % order)
 
         self._is_view = False
+        self._venode = VE()
 
         # set ve_adr with allocating memory.
-        if self.size < _boundary_size:
-            # memory locates on VE and VH
-            vememory._alloc_array(self)
-            self.vh_data = numpy.empty(self._shape, dtype=self.dtype)
-            self._memloc = on_VE_VH
-        else:
-            # memory locates on VE
-            vememory._alloc_array(self)
-            self.vh_data = None
-            self._memloc = on_VE
+        self._is_pool, self.veo_hmem, self.ve_adr = vememory._alloc_mem(
+            self.nbytes, self._venode)
 
     def __dealloc__(self):
         if _exit_mode:
             return
-        if self._memloc == on_VH:
-            return
-        if self.ve_adr != 0L:
+        if self.veo_hmem != 0L:
             if self.base is None:
                 # double check to avoid double free
-                if not self._is_view:
-                    vememory._destroy_array(self.ve_adr, self.nbytes)
-        self.ve_adr = 0L
+                try:
+                    if not self._is_view and self._venode.connected:
+                        vememory._free_mem(self.veo_hmem, self._is_pool, self._venode)
+                except AttributeError:
+                    pass
+                finally:
+                    self.veo_hmem = 0L
+                    self.ve_adr = 0L
 
     # -------------------------------------------------------------------------
     # getitem / setitem methods
@@ -248,6 +240,9 @@ cdef class ndarray:
     def __index__(self):
         return self.get().__index__()
 
+    def __reduce__(self):
+        return array, (self.get(),)
+
     def __array__(self, dtype=None):
         if dtype is None or self.dtype == dtype:
             return self.get()
@@ -273,24 +268,45 @@ cdef class ndarray:
         def __get__(self):
             return tuple(self._strides)
 
-    property memloc:
-        """
-        memory location.
-        """
-        def __get__(self):
-            if self._memloc == on_VE:
-                return 'memory exists on VE'
-            elif self._memloc == on_VH:
-                return 'memory exists on VH'
-            elif self._memloc == on_VE_VH:
-                return 'memory exists on VE and VH'
-            else:
-                raise ValueError('unknown self._memloc value is detected.')
-
     property _ve_array:
         def __get__(self):
-            buf = request._create_ve_array_buffer(self)
-            return veo.OnStack(buf, inout=veo.INTENT_IN)
+            buf = self._venode.request_manager._create_ve_array_buffer(self)
+            return _veo.OnStack(buf, inout=_veo.INTENT_IN)
+
+    property venode:
+        """
+        VENode object that ndarray exists on.
+        """
+        def __get__(self):
+            return self._venode
+
+    @property
+    def __ve_array_interface__(self):
+        """
+        VE array interface for interoperating Python VE libraries.
+        """
+        _rm = self._venode.request_manager
+        _rm._flush(sync=True)
+
+        cdef dict desc = {
+            'shape': self.shape,
+            'typestr': self.dtype.str,
+            'descr': self.dtype.descr,
+        }
+        desc['typestr'] = desc['typestr'][:2] + str(self.itemsize)
+        desc['descr'] = [(desc['descr'][0][0], desc['typestr'])]
+        cdef int ver = 1
+        desc['version'] = ver
+        if self._c_contiguous:
+            desc['strides'] = None
+        else:
+            desc['strides'] = self.strides
+        if self.size > 0:
+            desc['data'] = (self.veo_hmem, False)
+        else:
+            desc['data'] = (0, False)
+        desc['veo_ctxt'] = <uint64_t>self._venode.ctx.thr_ctxt
+        return desc
 
     @property
     def ndim(self):
@@ -307,16 +323,6 @@ cdef class ndarray:
         if self.dtype is numpy.dtype('bool'):
             return self.size * numpy.dtype('i4').itemsize
         return self.size * self.itemsize
-
-    @property
-    def effective_nbytes(self):
-        """
-        Total effective number of bytes for all elements that allocated on VE.
-        """
-        if self.base is None:
-            return self.nbytes
-        else:
-            return self.base.nbytes
 
     @property
     def T(self):
@@ -611,11 +617,11 @@ cdef class ndarray:
 
         Unless *refcheck* is False:
 
-        >>> a.resize((1, 1), refcheck=False)
+        >>> a.resize((1, 2), refcheck=False)
         >>> a
-        array([[0]])
+        array([[0, 2]])
         >>> c
-        array([[0]])
+        array([[0, 2]])
         """
         return manipulation._ndarray_resize(self, new_shape, refcheck)
 
@@ -786,12 +792,19 @@ cdef class ndarray:
         array([[1, 3],
                [1, 4]])
         """
+        msg = None
         if kind is not None and kind is not 'stable':
-            raise NotImplementedError('kind only supported \'stable\'.')
+            msg = 'kind only supported \'stable\'.'
         if order is not None:
-            raise NotImplementedError('order is not implemented.')
+            msg = 'order is not implemented.'
         if self.dtype.kind in ('c',):
-            raise NotImplementedError('Unsupported dtype \'%s\'' % self.dtype)
+            msg = 'Unsupported dtype \'%s\'' % self.dtype
+        if msg is not None:
+            try:
+                f = numpy.ndarray.sort
+                return nlcpy._make_wrap_method(f, self)(axis, kind, order)
+            except NotImplementedError:
+                raise NotImplementedError(msg)
         sorting._ndarray_sort(self, axis, kind=kind, order=order)
 
     cpdef ndarray argsort(self, axis=-1, kind=None, order=None):
@@ -804,12 +817,19 @@ cdef class ndarray:
         nlcpy.argsort : Equivalent function.
 
         """
+        msg = None
         if kind is not None and kind is not 'stable':
-            raise NotImplementedError('kind only supported \'stable\'.')
+            msg = 'kind only supported \'stable\'.'
         if order is not None:
-            raise NotImplementedError('order is not implemented.')
+            msg = 'order is not implemented.'
         if self.dtype.kind in ('c',):
-            raise NotImplementedError('Unsupported dtype \'%s\'' % self.dtype)
+            msg = 'Unsupported dtype \'%s\'' % self.dtype
+        if msg is not None:
+            try:
+                f = numpy.ndarray.argsort
+                return nlcpy._make_wrap_method(f, self)(axis, kind, order)
+            except NotImplementedError:
+                raise NotImplementedError(msg)
         return sorting._ndarray_argsort(self, axis, kind=kind, order=order)
 
     # -------------------------------------------------------------------------
@@ -916,16 +936,13 @@ cdef class ndarray:
                [ 3,  4]], dtype=int32)
         """
         cdef Py_ssize_t ndim
-        cdef object vh_view = None
-        if self._memloc in {on_VH, on_VE_VH}:
-            vh_view = self.vh_data.view()
         if dtype is ndarray or dtype in ndarray.__subclasses__():
             if type is not None:
                 raise ValueError("Cannot specify output type twice.")
             type = dtype
             dtype = None
         v = self._view(self._shape, self._strides, False, False, True,
-                       vh_view=vh_view, dtype=dtype, type=type)
+                       dtype=dtype, type=type)
         return v
 
     cpdef ndarray copy(self, order='C'):
@@ -954,19 +971,17 @@ cdef class ndarray:
 
         if (order_char == b'K' or order_char == b'A') and \
                 (not self._c_contiguous and not self._f_contiguous):
-            NotImplementedError(
+            raise NotImplementedError(
                 "order %s, but ndarray is neithere C-contiguous "
-                "not F-contiguous. this case is not implemented yes."
+                "not F-contiguous. this case is not implemented yet."
             )
 
         out = ndarray(self.shape, dtype=self.dtype, order=chr(order_char))
-        request._push_request(
+        self._venode.request_manager._push_request(
             "nlcpy_copy",
             "creation_op",
             (self, out),
         )
-        if self._memloc in {on_VH, on_VE_VH}:
-            out.vh_data = self.vh_data.copy(order=chr(order_char))
         return out
 
     cpdef ndarray astype(self, dtype, order='K', casting=None, subok=None, copy=True):
@@ -1009,7 +1024,12 @@ cdef class ndarray:
 
         """
         if casting is not None:
-            raise NotImplementedError('casting is not supported yet')
+            try:
+                f = numpy.ndarray.astype
+                return nlcpy._make_wrap_method(f, self)(
+                    dtype, order, casting, False, copy)
+            except NotImplementedError:
+                raise NotImplementedError('casting is not supported yet')
         if subok is not None:
             raise NotImplementedError('subok is not supported yet')
 
@@ -1032,10 +1052,15 @@ cdef class ndarray:
         if order_char != b'K':
             newarray = ndarray(self.shape, dtype=dtype, order=chr(order_char))
 
+        if self.dtype.kind == 'c' and newarray.dtype.kind not in 'bc':
+            warnings.warn(
+                'Casting complex values to real discards the imaginary part',
+                numpy.ComplexWarning)
+
         if self.size == 0:
             pass
         else:
-            request._push_request(
+            self._venode.request_manager._push_request(
                 "nlcpy_copy",
                 "creation_op",
                 (self, newarray),
@@ -1102,7 +1127,7 @@ cdef class ndarray:
     # -------------------------------------------------------------------------
     # item selection and manipulation
     # -------------------------------------------------------------------------
-    cpdef ndarray take(self, indices, axis=None, out=None):
+    cpdef ndarray take(self, indices, axis=None, out=None, mode='wrap'):
         """Takes elements from an array along an axis.
 
         Refer to :func:`nlcpy.take` for full documentation.
@@ -1112,6 +1137,12 @@ cdef class ndarray:
         nlcpy.take : Equivalent function.
 
         """
+        if mode != 'wrap':
+            try:
+                f = numpy.ndarray.take
+                return nlcpy._make_wrap_method(f, self)(indices, axis, out, mode)
+            except NotImplementedError:
+                raise NotImplementedError('mode is not supported yet')
         return indexing._ndarray_take(self, indices, axis, out)
 
     cpdef ndarray diagonal(self, offset=0, axis1=0, axis2=1):
@@ -1375,55 +1406,117 @@ cdef class ndarray:
     # -------------------------------------------------------------------------
     # nlcpy original attributes and methods
     # -------------------------------------------------------------------------
-    cpdef get(self, order='K'):
+    cpdef get(self, order='C', out=None):
         """Returns a NumPy array on VH that copied from VE.
 
         Parameters
         ----------
-        order : {'C','F','A','K'}, optional
-            Controls the memory layout order of the result. The default is 'K'.
+        order : {'C','F','A'}, optional
+            Controls the memory layout order of the result. The default is 'C'.
+            The ``order`` will be ignored if ``out`` is specified.
 
         """
-        if (self._memloc == on_VH or
-                self._memloc == on_VE_VH):
-            return self.vh_data
-        request.flush()
-        if self.size == 0:
-            return numpy.ndarray(self._shape, dtype=self.dtype)
 
-        # check order
-        cdef int order_char = internal._normalize_order(order)
-        order_char = _update_order_char(self, order_char)
-
-        if not self._c_contiguous and self._f_contiguous:
-            order_tmp = 'F'
+        venode = self._venode
+        if out is not None:
+            if not isinstance(out, numpy.ndarray):
+                raise TypeError('Only numpy.ndarray can be obtained from '
+                                'nlcpy.ndarray')
+            if self.dtype != out.dtype:
+                raise TypeError(
+                    '{} array cannot be obtained from {} array'.format(
+                        out.dtype, self.dtype))
+            if self.shape != out.shape:
+                raise ValueError(
+                    'Shape mismatch. Expected shape: {}, '
+                    'actual shape: {}'.format(self.shape, out.shape))
+            if not (out.flags.c_contiguous and self._c_contiguous or
+                    out.flags.f_contiguous and self._f_contiguous):
+                prev_ve = VE()
+                try:
+                    venode.use()
+                    if out.flags.c_contiguous:
+                        a_ve = nlcpy.asarray(self, order='C')
+                    elif out.flags.f_contiguous:
+                        a_ve = nlcpy.asarray(self, order='F')
+                    else:
+                        raise RuntimeError(
+                            '`out` cannot be specified when copying to '
+                            'non-contiguous ndarray')
+                finally:
+                    prev_ve.use()
+            else:
+                a_ve = self
+            a_cpu = out
         else:
-            order_tmp = 'C'
+            if self.size == 0:
+                return numpy.ndarray(self._shape, dtype=self.dtype)
 
-        a_cpu = numpy.empty(self._shape, dtype=self.dtype, order=order_tmp)
+            order = order.upper()
+            if order == 'A':
+                if self._f_contiguous:
+                    order = 'F'
+                else:
+                    order = 'C'
+            if not (order == 'C' and self._c_contiguous or
+                    order == 'F' and self._f_contiguous):
+                prev_ve = VE()
+                try:
+                    venode.use()
+                    if order == 'C':
+                        a_ve = nlcpy.asarray(self, order='C')
+                    elif order == 'F':
+                        a_ve = nlcpy.asarray(self, order='F')
+                    else:
+                        raise ValueError('unsupported order: {}'.format(order))
+                finally:
+                    prev_ve.use()
+            else:
+                a_ve = self
+            a_cpu = numpy.empty(self._shape, dtype=self.dtype, order=order)
+
+        venode.request_manager._flush(sync=True)
+
         if self.dtype is numpy.dtype('bool'):
-            a_cpu = a_cpu.astype(dtype='i4')
-
-        proc = veo._get_veo_proc()
-        if self._c_contiguous or self._f_contiguous:
-            proc.read_mem(
-                a_cpu.data,
-                veo.VEMemPtr(proc, self.ve_adr, self.nbytes),
-                self.nbytes
-            )
+            a_cpu_tmp = numpy.empty_like(a_cpu, dtype='i4')
+            venode.proc.read_mem(a_cpu_tmp.data, a_ve.ve_adr, a_ve.nbytes)
+            a_cpu[...] = a_cpu_tmp.astype('bool')
         else:
-            tmp = self.copy()
-            request.flush()
-            proc.read_mem(
-                a_cpu.data,
-                veo.VEMemPtr(proc, tmp.ve_adr, tmp.nbytes),
-                tmp.nbytes
-            )
-            del tmp
+            venode.proc.read_mem(a_cpu.data, a_ve.ve_adr, a_ve.nbytes)
+        return a_cpu
 
-        if self.dtype is numpy.dtype('bool'):
-            a_cpu = a_cpu.astype(dtype='bool')
-        return numpy.asarray(a_cpu, order=chr(order_char))
+    cpdef set(self, a_cpu):
+        """Copies an array on the host memory to :class:`nlcpy.ndarray`.
+
+        Parameters
+        ----------
+        a_cpu : numpy.ndarray
+            The source array on the host memory.
+
+        """
+
+        if not isinstance(a_cpu, numpy.ndarray):
+            raise TypeError('Only numpy.ndarray can be set to nlcpy.ndarray')
+        if self.dtype != a_cpu.dtype:
+            raise TypeError('{} array cannot be set to {} array'.format(
+                a_cpu.dtype, self.dtype))
+        if self.shape != a_cpu.shape:
+            raise ValueError(
+                'Shape mismatch. Old shape: {}, new shape: {}'.format(
+                    self.shape, a_cpu.shape))
+        if self._c_contiguous:
+            a_cpu = numpy.ascontiguousarray(a_cpu)
+        elif self._f_contiguous:
+            a_cpu = numpy.asfortranarray(a_cpu)
+        else:
+            raise RuntimeError('Cannot set to non-contiguous array')
+
+        if a_cpu.dtype is numpy.dtype('bool'):
+            a_cpu = a_cpu.astype('i4')
+
+        venode = self._venode
+        venode.request_manager._flush(sync=True)
+        venode.proc.write_mem(self.ve_adr, a_cpu.data, self.nbytes)
 
     cdef ndarray _view(
             self,
@@ -1432,7 +1525,6 @@ cdef class ndarray:
             bint update_c_contiguity,
             bint update_f_contiguity,
             bint mem_check=True,
-            object vh_view=None,
             object dtype=None,
             object type=None,
             int64_t offset=0L):
@@ -1454,19 +1546,12 @@ cdef class ndarray:
         v._set_shape_and_strides(
             shape, strides, update_c_contiguity, update_f_contiguity)
         v._owndata = False
+        v._venode = self._venode
+        v.node_id = self.node_id
 
-        if self._memloc == on_VE:
-            v.ve_adr = self.ve_adr + offset
-            v.vh_data = None
-            v._memloc = on_VE
-        if self._memloc == on_VE_VH:
-            raise NotImplementedError(
-                "ndarray._view with ndarray._memloc=\'on_VE_VH\' not "
-                "yet implemented.")
-        elif self._memloc == on_VH:
-            raise NotImplementedError(
-                "ndarray._view with ndarray._memloc=\'on_VH\' not yet "
-                "implemented.")
+        v.veo_hmem = self.veo_hmem + offset
+        v.ve_adr = self.ve_adr + offset
+        v._is_pool = self._is_pool
 
         if dtype is None:
             return v
@@ -1559,6 +1644,26 @@ cdef class ndarray:
         rev_strides.assign(self._strides.rbegin(), self._strides.rend())
         self._f_contiguous = internal.get_c_contiguity(
             rev_shape, rev_strides, self.itemsize)
+
+    # -------------------------------------------------------------------------
+    # numpy wrap
+    # -------------------------------------------------------------------------
+    def __getattr__(self, attr):
+        if attr[:2] == '__' or attr == 'setflags':
+            raise AttributeError(
+                "'nlcpy.core.core.ndarray' object has no attribute '{}'.".format(attr))
+        if not type(self) is ndarray:
+            return self.__getattr__(attr)
+        try:
+            f = getattr(numpy.ndarray, attr)
+        except AttributeError as _err:
+            raise AttributeError(
+                "'nlcpy.core.core.ndarray' object has no attribute '{}'."
+                .format(attr)) from _err
+        if not callable(f):
+            raise AttributeError(
+                "'nlcpy.core.core.ndarray' object has no attribute '{}'.".format(attr))
+        return nlcpy._make_wrap_method(f, self)
 
 
 # -------------------------------------------------------------------------
@@ -1725,18 +1830,13 @@ cdef ndarray _send_object_to_ve(obj, dtype, order, Py_ssize_t ndmin):
     if a_cpu.dtype is numpy.dtype('bool'):
         a_cpu = a_cpu.astype(dtype='i4')
 
-    if a_cpu.size < _boundary_size:
-        vh_data = a_cpu
-    else:
-        vh_data = None
-
     cdef ndarray a_ve = ndarray(
         a_cpu.shape,
         dtype=a_dtype,
         strides=a_cpu.strides,
         order=order
     )
-    vememory._write_array(a_cpu, a_ve)
+    vememory._write_mem(a_cpu, a_ve.ve_adr, a_ve.nbytes, a_ve._venode)
     return a_ve
 
 
@@ -1814,14 +1914,6 @@ def may_share_memory(a, b, max_work=None):
 # -------------------------------------------------------------------------
 # nlcpy original routines
 # -------------------------------------------------------------------------
-cpdef set_boundary_size(size=DEFAULT_BOUNDARY_SIZE):
-    global _boundary_size
-    _boundary_size = size
-
-cpdef int64_t get_boundary_size():
-    global _boundary_size
-    return _boundary_size
-
 cpdef ndarray argument_conversion(x):
     if not isinstance(x, ndarray) and x is not None:
         x = array(x)
@@ -1857,11 +1949,11 @@ cpdef tuple argument_conversion2(x, y):
         return array(x), array(y), numpy.result_type(x, y)
 
 
-cpdef check_fpe_flags(fpe_flags):
+cpdef check_fpe_flags(fpe_flags, reqnames):
     if (fpe_flags | 0x00000000):
         hnd = error_handler.geterr()
         if (fpe_flags & 0x00000020) != 0:
-            mes = "divide by zero encountered in " + __name__
+            mes = "divide by zero encountered in any of (" + reqnames._uniq_str() + ")"
             f = hnd['divide']
             if (f == 'ignore'):
                 pass
@@ -1873,7 +1965,7 @@ cpdef check_fpe_flags(fpe_flags):
                 print(' RuntimeWarning: %s' % mes)
 
         if (fpe_flags & 0x00000010) != 0:
-            mes = "overflow encountered in " + __name__
+            mes = "overflow encountered in any of (" + reqnames._uniq_str() + ")"
             f = hnd['over']
             if (f == 'ignore'):
                 pass
@@ -1885,7 +1977,7 @@ cpdef check_fpe_flags(fpe_flags):
                 print(' RuntimeWarning: %s' % mes)
 
         if (fpe_flags & 0x00000008) != 0:
-            mes = "underflow encountered in " + __name__
+            mes = "underflow encountered in any of (" + reqnames._uniq_str() + ")"
             f = hnd['under']
             if (f == 'ignore'):
                 pass
@@ -1901,7 +1993,7 @@ cpdef check_fpe_flags(fpe_flags):
         #     warnings.warn(mes, RuntimeWarning)
 
         if (fpe_flags & 0x00000002) != 0:
-            mes = "invalid value encountered in " + __name__
+            mes = "invalid value encountered in any of (" + reqnames._uniq_str() + ")"
             f = hnd['invalid']
             if (f == 'ignore'):
                 pass
@@ -1912,7 +2004,6 @@ cpdef check_fpe_flags(fpe_flags):
             elif (f == 'print'):
                 print(' RuntimeWarning: %s' % mes)
 
-        fpe_flags=0  # clear
 
 cpdef determine_contiguous_property(self, order):
     cdef int order_char = (
@@ -1945,28 +2036,6 @@ cdef _exit_mode = False
 
 
 @atexit.register
-def finalize():
+def _finalize():
     global _exit_mode
     _exit_mode = True
-    # destroy handle
-    try:
-        request._push_and_flush_request(
-            'random_destroy_handle',
-            (),
-            callback=None,
-            sync=True
-        )
-        request._push_and_flush_request(
-            'nlcpy_fft_destroy_handle',
-            (),
-            callback=None,
-            sync=True
-        )
-        request._push_and_flush_request(
-            'asl_library_finalize',
-            (),
-            callback=None,
-            sync=True
-        )
-    except Exception as e:
-        pass

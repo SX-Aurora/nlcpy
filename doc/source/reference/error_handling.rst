@@ -12,3 +12,4 @@ Setting and Getting Error Handring
 
     nlcpy.seterr
     nlcpy.geterr
+    nlcpy.errstate

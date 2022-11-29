@@ -148,6 +148,7 @@ locale_dirs = ['locale/']
 
 doctest_global_setup = '''
 '''
+doctest_test_doctest_blocks = 'default'
 doctest_default_flags = 0
 
 #doctest_default_flags = (0

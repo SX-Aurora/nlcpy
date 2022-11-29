@@ -63,6 +63,7 @@ from nlcpy.request import request
 from nlcpy.core.error import _AxisError as AxisError
 from numpy.core._exceptions import UFuncTypeError
 from nlcpy.core.internal import _compress_dims
+from nlcpy.wrapper.numpy_wrap import numpy_wrap
 
 # ----------------------------------------------------------------------------
 # adding and removing elements
@@ -229,7 +230,6 @@ def delete(arr, obj, axis=None):
                 raise ValueError(
                     'boolean array argument obj to delete must be one dimensional and '
                     'match the axis length of {}'.format(input_arr.shape[axis]))
-            del_obj = del_obj.astype(nlcpy.intp)
 
         if isinstance(obj, (int, nlcpy.integer)):
             if (obj < -N or obj >= N):
@@ -238,9 +238,10 @@ def delete(arr, obj, axis=None):
                     "size %i" % (obj, axis, N))
             if (obj < 0):
                 del_obj += N
-        elif del_obj.size > 0 and del_obj.dtype != int:
+        elif del_obj.size > 0 and del_obj.dtype.kind not in 'iu':
             raise IndexError(
                 'arrays used as indices must be of integer (or boolean) type')
+        del_obj = del_obj.astype('l')
 
     if del_obj.size == 0:
         new = nlcpy.array(input_arr)
@@ -511,6 +512,7 @@ def resize(a, new_shape):
     return nlcpy.reshape(a, new_shape)
 
 
+@numpy_wrap
 def unique(ar, return_index=False, return_inverse=False, return_counts=False, axis=None):
     """Finds the unique elements of an array.
 
@@ -617,6 +619,8 @@ def unique(ar, return_index=False, return_inverse=False, return_counts=False, ax
     array([1, 2, 6, 4, 2, 3, 2])
     """
     ar = nlcpy.asanyarray(ar)
+    if ar.dtype.kind == 'c':
+        raise NotImplementedError('Unsupported dtype \'%s\'' % ar.dtype)
     if axis is not None:
         if axis < 0:
             axis = axis + ar.ndim

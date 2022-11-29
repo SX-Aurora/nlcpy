@@ -1,6 +1,6 @@
 .. module:: nlcpy.request
 
-Request Managing Routines
+Request Management Routines
 ===========================
 
 Flush

@@ -1,4 +1,5 @@
 import unittest
+import warnings
 import numpy
 from nlcpy import testing
 
@@ -28,7 +29,9 @@ class TestHistogram(unittest.TestCase):
 
         bins = xp.asarray([0, 1, 2, 3])
 
-        return xp.histogram(a, bins)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', RuntimeWarning)
+            return xp.histogram(a, bins)
 
     @testing.numpy_nlcpy_array_equal()
     def test_me_1(self, xp):

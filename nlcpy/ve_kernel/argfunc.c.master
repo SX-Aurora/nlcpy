@@ -42,7 +42,7 @@
 @#include "nlcpy.h"
 
 #if defined(argmax) || defined(argmin)
-#define_switch (x->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ z->dtype:i64)
+#define_switch (x->dtype:bool,i32,i64,u32,u64,f32,f64,c64,c128 @ z->dtype:i32,i64)
 #endif
 
 /****************************

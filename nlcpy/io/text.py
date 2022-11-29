@@ -133,4 +133,4 @@ def savetxt(fname, X, fmt='%.18e', delimiter=' ', newline='n', header='', footer
     >>> vp.savetxt('test.out', x, fmt='%1.4e')   # use exponential notation
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('savetxt is not implemented yet.')

@@ -63,7 +63,6 @@ import copy
 import nlcpy
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast
@@ -299,7 +298,11 @@ cpdef mean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     a = nlcpy.asarray(a)
 
     if isinstance(axis, (list, tuple)):
-        raise NotImplementedError('multiple axis is not implemented.')
+        try:
+            return nlcpy._make_wrap_func(numpy.mean)(
+                a, axis=axis, dtype=dtype, out=out, keepdims=keepdims)
+        except NotImplementedError:
+            raise NotImplementedError('multiple axis is not implemented.')
 
     nlcpy_chk_axis(a, axis=axis)
 
@@ -814,7 +817,7 @@ def nanmedian(a, axis=None, out=None, overwrite_input=False, keepdims=nlcpy._NoV
     >>> assert not vp.all(a==b)  # doctest: +SKIP
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('nanmedian is not implemented yet.')
 
 
 cpdef nanstd(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):

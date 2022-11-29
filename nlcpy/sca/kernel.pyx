@@ -38,9 +38,11 @@ from nlcpy.core.core cimport ndarray
 from nlcpy.sca cimport utility
 from nlcpy.sca.description cimport description
 from nlcpy.request cimport request
+from nlcpy.venode._venode cimport VE
 
 from libc.stdint cimport *
 
+import warnings
 import numpy
 cimport numpy as cnp
 
@@ -57,7 +59,7 @@ cdef class kernel:
     nlcpy.sca.destroy_kernel : Destroy a SCA kernel.
     """
 
-    def __init__(self, uint64_t code_adr, description desc_i, description desc_o):
+    def __init__(self, ndarray code_adr, description desc_i, description desc_o):
         self.code_adr = code_adr
         self.out = desc_o.elems[0].array
         self.desc_i = desc_i
@@ -79,7 +81,8 @@ cdef class kernel:
         if self.destroyed:
             raise RuntimeError('this kernel has already been destroyed.')
 
-        request._push_request(
+        # VE().request_manager._push_request(
+        self.code_adr.venode.request_manager._push_request(
             "nlcpy_sca_code_execute",
             "sca_op",
             (self.code_adr,),
@@ -95,11 +98,11 @@ cdef class kernel:
             self.code_adr,
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
-        request._push_and_flush_request(
+        self.code_adr.venode.request_manager._push_and_flush_request(
             'nlcpy_sca_code_destroy',
             args,
         )
-        self.code_adr = 0
+        self.code_adr = None
         self.out = None
         self.desc_i = None
         self.desc_o = None

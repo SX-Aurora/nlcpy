@@ -158,10 +158,9 @@ class TestArrayInvalidIndex(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_invalid_getitem(self, xp, dtype):
         a = testing.shaped_arange(self.shape, xp, dtype)
+        print(self.transpose)
         if self.transpose:
             a = a.transpose(self.transpose)
-        print("a:\n", a)
-        print("self.indexes:\n", self.indexes)
         a[self.indexes]
 
 

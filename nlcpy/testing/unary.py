@@ -51,7 +51,7 @@ float16_op = (
 )
 
 
-def _recreate_array_or_scalar(op, in1, ufunc_name=""):
+def _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name=""):
     if op == 'reciprocal':
         if isinstance(in1, numpy.ndarray):
             in1[in1 == 0] = 1
@@ -65,6 +65,12 @@ def _recreate_array_or_scalar(op, in1, ufunc_name=""):
             if isinstance(in1, complex):
                 if abs(in1.imag) > 88:
                     in1 = complex(in1.real, 88)
+    elif op == 'tan':
+        if isinstance(in1, numpy.ndarray):
+            in1 = numpy.where(in1 == 0, 1, in1)
+        else:
+            if in1 == 0:
+                in1 = 1
     elif op == 'exp':
         if isinstance(in1, numpy.ndarray):
             in1[in1 > 80] = 80
@@ -75,41 +81,66 @@ def _recreate_array_or_scalar(op, in1, ufunc_name=""):
             if in1.dtype.kind == 'b':
                 in1[...] = False
             else:
-                in1[abs(in1) >= 1] = 0.9
+                in1 = numpy.where(abs(in1) >= 1, in1 * .9 / maxval, in1)
         else:
             if isinstance(in1, bool):
                 in1 = False
             elif isinstance(in1, int):
                 in1 = 0
             elif isinstance(in1, float):
-                in1 = 0.9 if in1 >= 1 else in1
+                in1 = in1 * .9 / maxval if abs(in1) >= 1 else in1
             elif isinstance(in1, complex):
-                in1 = complex(0.9, in1.imag) if abs(in1.real) >= 0 else in1
+                in1 = complex(in1.real * .9 / maxval, 0) \
+                    if abs(in1.real) >= 1 else in1
+    elif op in ('log', 'sqrt', 'cbrt'):
+        if isinstance(in1, numpy.ndarray):
+            in1 = numpy.where(in1 <= 0, -1 * in1 + 1, in1)
+        else:
+            if isinstance(in1, complex):
+                in1 = -1 * in1.real + 1 + 1j if in1.real <= 0 else in1
+            else:
+                in1 = -1 * in1 + 1 if in1 <= 0 else in1
+    elif op in ('sinh', 'cosh'):
+        if isinstance(in1, numpy.ndarray):
+            in1 = numpy.where(abs(in1) > 10, in1 * 9 / maxval, in1)
+        else:
+            in1 = in1 * 9 / maxval if abs(in1) > 10 else in1
+    elif op in ('arcsin', 'arccos'):
+        if isinstance(in1, numpy.ndarray):
+            in1 = numpy.where(abs(in1) > 1, in1 * .9 / maxval, in1)
+        else:
+            in1 = in1 * .9 / maxval if abs(in1) > 1 else in1
+    elif op in ('arccosh'):
+        if isinstance(in1, numpy.ndarray):
+            in1 = numpy.where(in1 < 1, in1 + abs(minval) + 1, in1)
+        else:
+            if not isinstance(in1, complex):
+                in1 = in1 + abs(minval) + 1 if in1 < 1 else in1
 
     if ufunc_name in ('reduce', 'reduceat', 'accumulate'):
         if op in ('power', 'multiply', 'left_shift', 'right_shift'):
             if op == 'power':
-                maxval = 2
+                _maxval = 2
             elif op == 'multiply':
-                maxval = 10
+                _maxval = 10
             else:
-                maxval = 16
+                _maxval = 16
             if isinstance(in1, numpy.ndarray):
                 if in1.dtype.kind == 'c':
                     in1 = numpy.where(
-                        abs(in1.real) > maxval, maxval + in1.imag * 1.0j, in1)
+                        abs(in1.real) > _maxval, _maxval + in1.imag * 1.0j, in1)
                     in1 = numpy.where(
-                        abs(in1.imag) > maxval, in1.real + maxval * 1.0j, in1)
+                        abs(in1.imag) > _maxval, in1.real + _maxval * 1.0j, in1)
                 else:
-                    in1[in1 > maxval] = maxval
+                    in1[in1 > _maxval] = _maxval
             else:
                 if isinstance(in1, complex):
-                    if abs(in1.real) > maxval:
-                        in1 = complex(maxval, in1.real)
-                    if abs(in1.imag) > maxval:
-                        in1 = complex(in1.real, maxval)
+                    if abs(in1.real) > _maxval:
+                        in1 = complex(_maxval, in1.real)
+                    if abs(in1.imag) > _maxval:
+                        in1 = complex(in1.real, _maxval)
                 else:
-                    in1 = maxval
+                    in1 = _maxval
         if op in ('power', 'divide', 'true_divide', 'floor_divide',
                   'mod', 'fmod', 'remainder', 'nextafter'):
             if isinstance(in1, numpy.ndarray):
@@ -200,8 +231,9 @@ def _check_unary_no_out_no_where_no_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[2], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             worst_dtype = in1.dtype
             n_calc = _count_number_of_calculation(ufunc_name, p[0], p[3], p[4])
             if ufunc_name in ('reduce', 'accumulate', 'reduceat'):
@@ -209,8 +241,8 @@ def _check_unary_no_out_no_where_no_dtype(
                 if ufunc_name == 'reduceat':
                     kw[name_indices] = p[4]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[0], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[0], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             worst_dtype = numpy.dtype(p[0])
             n_calc = 1
 
@@ -218,15 +250,16 @@ def _check_unary_no_out_no_where_no_dtype(
             worst_dtype = ufunc._guess_worst_dtype((worst_dtype, numpy.dtype('f4')))
 
         kw[name_in1] = in1
-
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
                     op, worst_dtype, nlcpy_r, numpy_r, in1=in1,
                     ufunc_name=ufunc_name, n_calc=n_calc)
+                del nlcpy_r, numpy_r
 
 
 def _check_unary_no_out_no_where_with_dtype(
@@ -241,8 +274,9 @@ def _check_unary_no_out_no_where_with_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[2], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             dtype = numpy.dtype(p[3])
             if dtype == numpy.bool and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
@@ -254,8 +288,8 @@ def _check_unary_no_out_no_where_with_dtype(
                 if ufunc_name == 'reduceat':
                     kw[name_indices] = p[5]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[0], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[0], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             dtype = numpy.dtype(p[1])
             if dtype == numpy.bool and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
@@ -267,13 +301,15 @@ def _check_unary_no_out_no_where_with_dtype(
         kw[name_dtype] = dtype
 
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
                     op, worst_dtype, nlcpy_r, numpy_r, in1=in1, dtype=dtype,
                     ufunc_name=ufunc_name, n_calc=n_calc)
+                del nlcpy_r, numpy_r
 
 
 def _check_unary_with_out_no_where_no_dtype(
@@ -289,8 +325,9 @@ def _check_unary_with_out_no_where_no_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[3], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[2], p[4], ufunc_name, mode,
                 axis=p[5], indices=p[6], keepdims=keepdims, is_broadcast=is_broadcast)
@@ -301,8 +338,8 @@ def _check_unary_with_out_no_where_no_dtype(
                 if ufunc_name == 'reduceat':
                     kw[name_indices] = p[6]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[2], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[1], p[3], ufunc_name, mode, is_broadcast=is_broadcast)
             worst_dtype = ufunc._guess_worst_dtype(
@@ -313,13 +350,15 @@ def _check_unary_with_out_no_where_no_dtype(
         kw[name_out] = out
 
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
                 ufunc._check_ufunc_result(
                     op, worst_dtype, nlcpy_r, numpy_r, in1=in1, out=out,
                     ufunc_name=ufunc_name, n_calc=n_calc)
+                del nlcpy_r, numpy_r
 
 
 def _check_unary_with_out_no_where_with_dtype(
@@ -335,8 +374,9 @@ def _check_unary_with_out_no_where_with_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[3], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[2], p[4], ufunc_name, mode,
                 axis=p[6], indices=p[7], keepdims=keepdims)
@@ -353,8 +393,8 @@ def _check_unary_with_out_no_where_with_dtype(
                 if ufunc_name == 'reduceat':
                     kw[name_indices] = p[7]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[2], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[2], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(p[0], p[1], p[3], ufunc_name, mode)
             dtype = numpy.dtype(p[4])
             if dtype == numpy.bool and op in float16_op:
@@ -370,7 +410,8 @@ def _check_unary_with_out_no_where_with_dtype(
         kw[name_dtype] = dtype
 
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
@@ -385,6 +426,7 @@ def _check_unary_with_out_no_where_with_dtype(
                     ufunc_name=ufunc_name,
                     n_calc=n_calc
                 )
+                del nlcpy_r, numpy_r
 
 
 def _check_unary_with_out_with_where_no_dtype(
@@ -420,23 +462,24 @@ def _check_unary_with_out_with_where_no_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[4], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[4], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[2], p[5], ufunc_name, mode,
                 axis=p[6], keepdims=keepdims, is_broadcast=is_broadcast)
-            where = ufunc._create_random_array(
+            where, minval, maxval = ufunc._create_random_array(
                 p[0], p[3], ufunc.DT_BOOL, minval, maxval)
             worst_dtype = ufunc._guess_worst_dtype((in1.dtype, out.dtype))
             n_calc = _count_number_of_calculation(ufunc_name, p[0], p[6])
             if ufunc_name == 'reduce':
                 kw[name_axis] = p[6]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[3], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[1], p[4], ufunc_name, mode, is_broadcast=is_broadcast)
-            where = ufunc._create_random_array(
+            where, minval, maxval = ufunc._create_random_array(
                 p[0], p[2], ufunc.DT_BOOL, minval, maxval)
             worst_dtype = ufunc._guess_worst_dtype(
                 (numpy.dtype(p[3]), out.dtype))
@@ -451,7 +494,8 @@ def _check_unary_with_out_with_where_no_dtype(
         kw[name_where] = where
 
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
@@ -466,6 +510,7 @@ def _check_unary_with_out_with_where_no_dtype(
                     ufunc_name=ufunc_name,
                     n_calc=n_calc
                 )
+                del nlcpy_r, numpy_r
 
 
 def _check_unary_with_out_with_where_with_dtype(
@@ -490,11 +535,12 @@ def _check_unary_with_out_with_where_with_dtype(
         raise TypeError('unknown mode was detected.')
     for p in param:
         if mode == 'array':
-            in1 = ufunc._create_random_array(p[0], p[1], p[4], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_array(
+                p[0], p[1], p[4], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(
                 p[0], p[2], p[5], ufunc_name, mode, axis=p[7], keepdims=keepdims)
-            where = ufunc._create_random_array(
+            where, minval, maxval = ufunc._create_random_array(
                 p[0], p[3], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[6])
             if dtype == numpy.bool and op in float16_op:
@@ -507,10 +553,10 @@ def _check_unary_with_out_with_where_with_dtype(
             if ufunc_name == 'reduce':
                 kw[name_axis] = p[7]
         elif mode == 'scalar':
-            in1 = ufunc._create_random_scalar(p[3], minval, maxval)
-            in1 = _recreate_array_or_scalar(op, in1, ufunc_name)
+            in1, minval, maxval = ufunc._create_random_scalar(p[3], minval, maxval)
+            in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(p[0], p[1], p[4], ufunc_name, mode)
-            where = ufunc._create_random_array(
+            where, minval, maxval = ufunc._create_random_array(
                 p[0], p[2], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[5])
             if dtype == numpy.bool and op in float16_op:
@@ -527,7 +573,8 @@ def _check_unary_with_out_with_where_with_dtype(
         kw[name_dtype] = dtype
 
         nlcpy_result, numpy_result = ufunc._precheck_func_for_ufunc(
-            self, args, kw, impl, name_xp, op, True, Exception)
+            self, args, kw, impl, name_xp, op, True,
+            (TypeError, ValueError, UnboundLocalError))
         # result check
         if nlcpy_result is not None and numpy_result is not None:
             for nlcpy_r, numpy_r in zip(nlcpy_result, numpy_result):
@@ -543,3 +590,4 @@ def _check_unary_with_out_with_where_with_dtype(
                     ufunc_name=ufunc_name,
                     n_calc=n_calc
                 )
+                del nlcpy_r, numpy_r

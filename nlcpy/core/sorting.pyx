@@ -57,7 +57,6 @@ import numpy
 
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast

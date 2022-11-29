@@ -59,7 +59,6 @@ from numpy.core._exceptions import UFuncTypeError
 
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast
@@ -81,7 +80,6 @@ cdef ndarray _ndarray_real_getter(ndarray self):
             True,
             True,
             False,
-            vh_view=None,
             dtype=_dtype.get_dtype(self.dtype.char.lower()),
             type=None,
             offset=0,
@@ -121,7 +119,6 @@ cdef ndarray _ndarray_imag_getter(ndarray self):
             True,
             True,
             False,
-            vh_view=None,
             dtype=_dtype.get_dtype(self.dtype.char.lower()),
             type=None,
             offset=self.itemsize // 2,
@@ -203,7 +200,12 @@ cpdef ndarray _ndarray_clip(ndarray self, a_min, a_max,
     else:
         dtype = nlcpy.dtype(dtype)
 
-    dtypes = (dtype,) if out is None else (out.dtype, dtype)
+    if out is None:
+        dtypes = (dtype,)
+    elif not isinstance(out, ndarray):
+        raise TypeError('output must be an nlcpy.ndarray')
+    else:
+        dtypes = (out.dtype, dtype)
     for _dtype in dtypes:
         msg1 = None
         if not numpy.can_cast(self, _dtype, casting):
@@ -233,7 +235,7 @@ cpdef ndarray _ndarray_clip(ndarray self, a_min, a_max,
         a_max = nlcpy.asanyarray(a_max, dtype=dtype)
 
     if where is True:
-        where = nlcpy.array(())
+        where = nlcpy.array((), dtype='?')
         if a_min is None:
             self, a_max = nlcpy.broadcast_arrays(self, a_max)
             a_min = nlcpy.array((), dtype=dtype)
@@ -252,14 +254,16 @@ cpdef ndarray _ndarray_clip(ndarray self, a_min, a_max,
         else:
             self, a_min, a_max, where = nlcpy.broadcast_arrays(self, a_min, a_max, where)
 
+        if where.dtype.char != '?':
+            raise TypeError(
+                "Cannot cast array data from dtype('{}') to "
+                "dtype('bool') according to the rule 'safe'".format(where.dtype))
     if out is not None and self.shape != out.shape:
         raise ValueError(
             "non-broadcastable output operand with shape {} doesn't match "
             "the broadcast shape {}".format(out.shape, self.shape))
 
     self = nlcpy.asanyarray(self)
-    a_min = nlcpy.asanyarray(a_min)
-    a_max = nlcpy.asanyarray(a_max)
     where = nlcpy.asanyarray(where)
     work = nlcpy.zeros(self.shape, dtype=dtype, order=order)
     if out is None:

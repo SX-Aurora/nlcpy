@@ -18,6 +18,7 @@ Here is a list of functionalites provided by NLCPy.
 
     ndarray
     constants
+    envs
     creation
     manipulation
     ufunc
@@ -37,3 +38,5 @@ Here is a list of functionalites provided by NLCPy.
     error_handling
     miscellaneous
     profiling
+    venode
+    logging

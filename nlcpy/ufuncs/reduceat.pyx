@@ -74,13 +74,6 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
     if a.size == 0 and indices.size != 0:
         raise IndexError('index '+str(indices[0])+' out-of-bounds in '+name+' [0, 0)')
 
-    # TODO: VE-VH collaboration #############################################
-    if a._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError('reduceat on VH is not yet implemented.')
-
-    if isinstance(out, ndarray):
-        if out._memloc in {on_VH, on_VE_VH}:
-            raise NotImplementedError('reduceat on VH is not yet implemented.')
     ########################################################################
     if isinstance(axis, list):
         raise TypeError("'list' object cannot be interpreted as an integer")
@@ -132,10 +125,6 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
             elif not isinstance(out[0], nlcpy.ndarray):
                 raise TypeError("output must be an array")
             else:
-                # TODO: VE-VH collaboration
-                if out[0]._memloc in {on_VH, on_VE_VH}:
-                    raise NotImplementedError(
-                        "reduceat_core on VH is not yet implemented.")
                 out = out[0]
         if isinstance(out, nlcpy.ndarray):
             if a.ndim > out.ndim:
@@ -352,10 +341,10 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
         bad_index = numpy.empty(1, dtype=numpy.int32)
         fpe_flags = request._get_fpe_flag()
         args = (
-            a2._ve_array,
-            indices._ve_array,
-            y2._ve_array,
-            w._ve_array,
+            a2,
+            indices,
+            y2,
+            w,
             <int32_t>axis,
             veo.OnStack(bad_index, inout=veo.INTENT_OUT),
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),

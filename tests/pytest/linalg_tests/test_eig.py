@@ -159,7 +159,7 @@ class TestEigh(unittest.TestCase):
         y = numpy.array([w[i] * v[i] for i in range(a.shape[0])])
         tol = 1e-5 if a.dtype.char in 'fF' else 1e-12
         numpy.testing.assert_allclose(x, y, atol=tol, rtol=tol)
-        return ret
+        return numpy.array(ret, dtype=object)
 
 
 class TestEighFailure(unittest.TestCase):

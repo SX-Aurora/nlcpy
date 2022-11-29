@@ -841,6 +841,8 @@ class TestCustomLibraryDistDir(unittest.TestCase):
         shutil.rmtree(dist_dir)
 
     def test_dist_dir_permission_denied(self):
+        if os.getuid() == 0 and os.geteuid() == 0:
+            self.skipTest("Root user")
         dist_dir = './jit_tmp_dir/'
         if os.path.exists(dist_dir):
             shutil.rmtree(dist_dir)
@@ -925,6 +927,8 @@ class TestCustomLibraryLogStream(unittest.TestCase):
         os.remove(file_name)
 
 
+# TODO: check after modified ftrace
+@pytest.mark.skipif(True, reason='ftrace error')
 class TestCustomLibraryFtrace(unittest.TestCase):
 
     def setUp(self):
@@ -1000,5 +1004,5 @@ class TestCustomKernelFailure(unittest.TestCase):
 
     def test_invalid_type(self):
         with pytest.raises(TypeError) as ex:
-            nlcpy.jit.CustomVEKernel(0)
+            nlcpy.jit.CustomVEKernel(0, 0)
         assert ('func must be given' in str(ex.value))

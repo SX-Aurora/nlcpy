@@ -66,19 +66,42 @@ import itertools
 import time
 from nlcpy import veo, conjugate, empty, arange
 from nlcpy.request import request
-from nlcpy.request.ve_kernel cimport check_error
+from nlcpy.venode import VE
+from nlcpy.logging import _vp_logging
 from numpy.compat import integer_types
 from functools import reduce
 from math import sqrt
 from collections.abc import Sequence
 integer_types = integer_types + (numpy.integer,)
 
-_handle_info = None
+_handle_info = {}
+
+
+def _get_handle_info():
+    global _handle_info
+    try:
+        ret = _handle_info[int(VE())]
+    except KeyError:
+        ret = None
+    return ret
 
 
 def _set_handle_info(fn, size):
     global _handle_info
-    _handle_info = (fn, size)
+    _handle_info[int(VE())] = (fn, size)
+
+
+def _is_handle_reuse(reuse_key, size):
+    _is_reuse = (
+        _get_handle_info() is not None and (reuse_key, size) == _get_handle_info())
+    if _vp_logging._is_enable(_vp_logging.FFT):
+        _vp_logging.info(
+            _vp_logging.FFT,
+            'handle %s: fn=%s, size=%s, nodeid=%d',
+            'reuse' if _is_reuse else 'not reuse',
+            reuse_key, str(size), int(VE())
+        )
+    return _is_reuse
 
 
 def _get_complex_ndarray(a):
@@ -290,6 +313,9 @@ def _get_params_nd(a, s, axes, array_func=_get_complex_ndarray, invreal=False):
 
     if invreal and shapeless:
         s[-1] = (a.shape[axes[-1]] - 1) * 2
+        if s[-1] < 1:
+            raise ValueError("Invalid number of FFT data points (%d) specified."
+                             % s[-1])
 
     return (a, s, axes)
 
@@ -339,9 +365,8 @@ def _raw_fft(a, n, axis, inv_norm, is_real=False, inv=False):
         nout = n
 
     # create out param
-    t = a
+    s = list(a.shape)
     if a.shape[axis] != nin:
-        s = list(a.shape)
         if s[axis] < nin:
             index = [slice(None)]*len(s)
             index[axis] = slice(0, s[axis])
@@ -351,29 +376,26 @@ def _raw_fft(a, n, axis, inv_norm, is_real=False, inv=False):
             z[tuple(index)] = a
             a = nlcpy.asarray(z, order=_order)
         s[axis] = nout
-        t = numpy.empty(s, dtype=a.dtype, order=_order)
 
     if is_real:
-        _s = list(t.shape)
+        _s = list(s)
         _s[axis] = nout
         if inv:
             (out_shape, out_dtype) =\
-                (tuple(_s), 'float32' if t.dtype.name == 'complex64' else 'float64')
+                (tuple(_s), 'float32' if a.dtype.name == 'complex64' else 'float64')
         else:
             (out_shape, out_dtype) =\
-                (tuple(_s), 'complex64' if t.dtype.name == 'float32' else 'complex128')
+                (tuple(_s), 'complex64' if a.dtype.name == 'float32' else 'complex128')
     else:
-        (out_shape, out_dtype) = (t.shape, t.dtype)
-
+        (out_shape, out_dtype) = (s, a.dtype.name)
     out = nlcpy.ndarray(shape=out_shape, dtype=out_dtype, order=_order)
 
-    dt = numpy.dtype(a.dtype)
-    fn, reuse_key = _generate_fn_key(dt, is_real, inv, "1d")
-    is_reuse = (_handle_info is not None and (reuse_key, n) == _handle_info)
+    fn, reuse_key = _generate_fn_key(a.dtype, is_real, inv, "1d")
+    is_reuse = _is_handle_reuse(reuse_key, n)
 
     fpe = request._get_fpe_flag()
-    args = (a._ve_array,
-            out._ve_array,
+    args = (a,
+            out,
             axis,
             <int>n,
             <int>(1 if is_reuse else 0),
@@ -393,6 +415,15 @@ def _raw_fft(a, n, axis, inv_norm, is_real=False, inv=False):
     return out
 
 
+def _is_vh_recursive(n_dim, axes):
+    _axes = set(axes)
+    if len(axes) != len(_axes):
+        return True
+    fft_dim = len(_axes)
+    return not (_axes == set(range(0, fft_dim)) or
+                _axes == set(range(n_dim - fft_dim, n_dim)))
+
+
 def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
     _order = "F" if not a._c_contiguous and a._f_contiguous else "C"
 
@@ -402,7 +433,6 @@ def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
         nout[-1] = int(float(nout[-1] / 2) + 1)
 
     # in-out shaping
-    t = a
     out_shape = list(a.shape)
     in_shape = list(a.shape)
     index = [slice(None)]*len(in_shape)
@@ -423,22 +453,21 @@ def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
         z = nlcpy.zeros(in_shape, a.dtype, order=_order)
         z[index] = a[index]
         a = z
-    t = numpy.empty(out_shape, dtype=a.dtype, order=_order)
 
     _axes = nlcpy.array(axes, dtype=int)
     _size = tuple(map(lambda axis: in_shape[axis], axes))
     s_in = nlcpy.array(_size, dtype=int)
 
     if is_real:
-        _s = list(t.shape)
+        _s = list(out_shape)
         if inv:
             (out_shape, out_dtype) =\
-                (tuple(_s), 'float32' if t.dtype.name == 'complex64' else 'float64')
+                (tuple(_s), 'float32' if a.dtype.name == 'complex64' else 'float64')
         else:
             (out_shape, out_dtype) =\
-                (tuple(_s), 'complex64' if t.dtype.name == 'float32' else 'complex128')
+                (tuple(_s), 'complex64' if a.dtype.name == 'float32' else 'complex128')
     else:
-        (out_shape, out_dtype) = (t.shape, t.dtype)
+        out_dtype = a.dtype.name
     out = nlcpy.ndarray(shape=out_shape, dtype=out_dtype, order=_order)
 
     fft_dim = len(axes)
@@ -449,15 +478,14 @@ def _raw_fft_nd(a, s, axes, inv_norm, is_real=False, inv=False):
     else:
         dim_key = "nd"
 
-    dt = numpy.dtype(a.dtype)
-    fn, reuse_key = _generate_fn_key(dt, is_real, inv, dim_key)
-    is_reuse = (_handle_info is not None and (reuse_key, _size) == _handle_info)
+    fn, reuse_key = _generate_fn_key(a.dtype, is_real, inv, dim_key)
+    is_reuse = _is_handle_reuse(reuse_key, _size)
 
     fpe = request._get_fpe_flag()
-    args = (a._ve_array,
-            out._ve_array,
-            _axes._ve_array,
-            s_in._ve_array,
+    args = (a,
+            out,
+            _axes,
+            s_in,
             <int>(1 if is_reuse else 0),
             veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
@@ -514,6 +542,10 @@ def fftn(a, s=None, axes=None, norm=None):
 
     if len(axes) == 1:
         return fft(a, n=s[0], axis=axes[0], norm=norm)
+    elif _is_vh_recursive(a.ndim, axes):
+        for ii in reversed(range(0, len(axes))):
+            a = fft(a, n=s[ii], axis=axes[ii], norm=norm)
+        return a
     else:
         inv_norm=1
         if norm is not None and _unitary(norm):
@@ -530,6 +562,10 @@ def ifftn(a, s=None, axes=None, norm=None):
 
     if len(axes) == 1:
         return ifft(a, n=s[0], axis=axes[0], norm=norm)
+    elif _is_vh_recursive(a.ndim, axes):
+        for ii in reversed(range(0, len(axes))):
+            a = ifft(a, n=s[ii], axis=axes[ii], norm=norm)
+        return a
     else:
         if norm is not None and _unitary(norm):
             inv_norm = reduce(lambda x, y: x*y,
@@ -555,6 +591,10 @@ def irfft(a, n=None, axis=-1, norm=None):
 
     if n is None:
         n = (a.shape[axis] - 1) * 2
+        if n < 1:
+            raise ValueError("Invalid number of FFT data points (%d) specified."
+                             % n)
+
     inv_norm = n
 
     if norm is not None and _unitary(norm):
@@ -579,6 +619,11 @@ def rfftn(a, s=None, axes=None, norm=None):
 
     if len(axes) == 1:
         return rfft(a, n=s[0], axis=axes[0], norm=norm)
+    elif _is_vh_recursive(a.ndim, axes):
+        a = rfft(a, n=s[-1], axis=axes[-1], norm=norm)
+        for ii in (range(0, len(axes) - 1)):
+            a = fft(a, n=s[ii], axis=axes[ii], norm=norm)
+        return a
     else:
         inv_norm=1
         if norm is not None and _unitary(norm):
@@ -594,6 +639,11 @@ def irfftn(a, s=None, axes=None, norm=None):
                                   invreal=True)
     if len(axes) == 1:
         return irfft(a, n=s[0], axis=axes[0], norm=norm)
+    elif _is_vh_recursive(a.ndim, axes):
+        for ii in range(0, len(axes) - 1):
+            a = ifft(a, n=s[ii], axis=axes[ii], norm=norm)
+        a = irfft(a, n=s[-1], axis=axes[-1], norm=norm)
+        return a
     else:
         if norm is not None and _unitary(norm):
             inv_norm = reduce(lambda x, y: x*y,

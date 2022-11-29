@@ -32,7 +32,7 @@
 import numpy
 import unittest
 import pytest
-
+import gc
 import nlcpy
 from nlcpy import testing
 
@@ -98,7 +98,7 @@ def is_executable(op, dtype1=None, dtype2=None, dtype=None, dtype_out=None):
         if op in (
             'divide', 'true_divide', 'arctan2', 'hypot', 'copysign',
             'logaddexp', 'logaddexp2', 'nextafter', 'heaviside',
-            'power', 'floor_divide', 'mod', 'remainder', 'fmod', 'nextafter',
+            'power', 'floor_divide', 'mod', 'remainder', 'fmod',
             'right_shift', 'left_shift',
         ):
             return dtype != numpy.bool and \
@@ -111,11 +111,28 @@ def execute_ufunc(
     xp, op, in1, in2, out=None, dtype=None, order='K', casting='same_kind', where=True
 ):
     dtype_out = None if out is None else out.dtype
-    if not is_executable(op, in1.dtype, in2.dtype, dtype, dtype_out):
+    if isinstance(in1, numpy.ndarray):
+        dtype1 = in1.dtype
+    else:
+        dtype1 = numpy.dtype(type(in1))
+    if isinstance(in2, numpy.ndarray):
+        dtype2 = in2.dtype
+    else:
+        dtype2 = numpy.dtype(type(in2))
+    if not is_executable(op, dtype1, dtype2, dtype, dtype_out):
         return 0
     dtype = adjust_dtype(xp, op, dtype, dtype_out)
-    return getattr(xp, op).outer(
-        in1, in2, out=out, dtype=dtype, order=order, casting=casting, where=where)
+    if op in ('fmod', 'power'):
+        with xp.errstate(invalid='ignore', divide='ignore'):
+            ret = getattr(xp, op).outer(
+                in1, in2, out=out, dtype=dtype, order=order,
+                casting=casting, where=where)
+            nlcpy.request.flush()  # to capture warning
+            return ret
+    else:
+        return getattr(xp, op).outer(
+            in1, in2, out=out, dtype=dtype, order=order,
+            casting=casting, where=where)
 
 
 @pytest.mark.full
@@ -123,6 +140,10 @@ class TestOuter(unittest.TestCase):
 
     shapes = (((3, 4), (2, 3)),)
     castings = ('no', 'equiv', 'safe', 'same_kind')
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_binary_ufunc(
         ops, shapes, order_arg='CFKA', dtype_x=all_types, dtype_y=all_types,
@@ -172,6 +193,10 @@ class TestOuterArrayScalar(unittest.TestCase):
 
     shapes = ((3, 4),)
     castings = ('no', 'equiv', 'safe', 'same_kind')
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_binary_ufunc(
         ops, shapes, order_arg='CFKA', dtype_x=all_types, dtype_y=all_types,
@@ -223,6 +248,10 @@ class TestOuterScalar(unittest.TestCase):
 
     castings = ('no', 'equiv', 'safe', 'same_kind')
 
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
+
     @testing.numpy_nlcpy_check_for_binary_ufunc(
         ops, (), order_arg='CFKA',
         dtype_x=all_types, dtype_y=all_types, mode='scalar_scalar',
@@ -271,6 +300,10 @@ class TestOuterScalar(unittest.TestCase):
 
 @pytest.mark.full
 class TestOuter2(unittest.TestCase):
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     def test_outer_too_large_left_shift(self):
         for dtype in 'iI':

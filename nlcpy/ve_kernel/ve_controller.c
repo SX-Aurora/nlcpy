@@ -63,12 +63,6 @@ uint64_t call_manipulation_func(int64_t funcnum, ve_arguments *args, int32_t *ps
     return res;
 }
 
-uint64_t call_cblas_wrapper_func(int64_t funcnum, ve_arguments *args, int32_t *psw) {
-    uint64_t res;
-    res = get_cblas_wrapper_func(funcnum)(args, psw);
-    return res;
-}
-
 uint64_t call_linalg_func(int64_t funcnum, ve_arguments *args, int32_t *psw) {
     uint64_t res;
     res = get_linalg_func(funcnum)(args, psw);
@@ -159,9 +153,6 @@ uint64_t run_request(request_package *pack, int32_t *psw) {
         break;
     case MANIPULATION_OP:
         err = call_manipulation_func(pack->funcnum, &(pack->arguments), psw);
-        break;
-    case CBLAS_OP:
-        err = call_cblas_wrapper_func(pack->funcnum, &(pack->arguments), psw);
         break;
     case LINALG_OP:
         err = call_linalg_func(pack->funcnum, &(pack->arguments), psw);

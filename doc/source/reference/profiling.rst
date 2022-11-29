@@ -22,7 +22,7 @@ FTRACE is a performance analysis tool, which can obtain performance information
 such as the exclusive time and vectorization aspect on the VE.
 Please note that VE offloading overhead is included in performance information.
 For details of FTRACE, see
-`PROGINF/FTRACE User's Guide <https://www.hpc.nec/documents/sdk/pdfs/g2at03e-PROGINF_FTRACE_User_Guide_en.pdf>`_.
+`PROGINF/FTRACE User's Guide <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/pdfs/g2at03e-PROGINF_FTRACE_User_Guide_en.pdf>`_.
 
 .. note::
 

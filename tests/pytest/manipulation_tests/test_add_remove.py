@@ -50,7 +50,8 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
-
+import warnings
+import numpy
 from nlcpy import testing
 
 
@@ -127,14 +128,18 @@ class TestDelete_OBJ(unittest.TestCase):
     @testing.numpy_nlcpy_array_equal()
     def test_delete_1d(self, xp, dtype):
         a = testing.shaped_arange((5,), xp, dtype)
-        return xp.delete(a, self.obj, 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.delete(a, self.obj, 0)
 
     @testing.for_orders('CF')
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_delete_ND(self, xp, dtype, order):
         a = testing.shaped_arange((5, 5, 5, 5, 5), xp, dtype, order)
-        return xp.delete(a, self.obj, 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.delete(a, self.obj, 0)
 
 
 class TestDeleteAxisNone(unittest.TestCase):
@@ -257,7 +262,10 @@ class TestInsert(unittest.TestCase):
         obj = xp.array(self.params[1], dtype=dtype_o)
         values = testing.shaped_arange(self.params[2], xp, dtype_v, order=order_v)
         axis = self.params[3]
-        return xp.insert(arr, obj, values, axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.insert(arr, obj, values, axis)
 
 
 @testing.parameterize(*(
@@ -283,7 +291,9 @@ class TestInsertNotArrayObj(unittest.TestCase):
         obj = self.params[1]
         values = testing.shaped_arange(self.params[2], xp, dtype_v)
         axis = self.params[3]
-        return xp.insert(arr, obj, values, axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.insert(arr, obj, values, axis)
 
 
 class TestInsertNonIntegerObj(unittest.TestCase):

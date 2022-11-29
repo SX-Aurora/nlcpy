@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"POT-Creation-Date: 2022-11-15 11:02+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,44 +41,44 @@ msgstr ""
 msgid "Define source code as a Python string."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:32
+#: ../../source/reference/jit/basic_usage.rst:33
 msgid ""
 "When using the tripple quotes ``\"\"\"`` or ``'''``, always prepend them "
 "by ``r`` such that the content is interpreted as raw string. Otherwise "
 "the escaped characters will be interpreted and spoil the source code."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:37
+#: ../../source/reference/jit/basic_usage.rst:38
 msgid "Compile and Load from the Python string."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:44
+#: ../../source/reference/jit/basic_usage.rst:45
 msgid "**B. Loading From Pre-built Binary**"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:50
+#: ../../source/reference/jit/basic_usage.rst:51
 msgid "If you need complicated build rules, we recommend using case ``B``."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:53
+#: ../../source/reference/jit/basic_usage.rst:54
 msgid ":class:`nlcpy.jit.CustomVELibrary`"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:57
+#: ../../source/reference/jit/basic_usage.rst:58
 msgid "Getting a Symbol of a Function"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:59
+#: ../../source/reference/jit/basic_usage.rst:60
 msgid ""
 "You need to call :meth:`CustomVELibrary.get_function` to get a symbol of "
-"a funtion on VE."
+"a function on VE."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:70
+#: ../../source/reference/jit/basic_usage.rst:71
 msgid "``ve_add`` is the instance of :class:`CustomVEKernel` class."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:72
+#: ../../source/reference/jit/basic_usage.rst:73
 msgid ""
 "The tuple of character string element or the tuple of constant element of"
 " the ``nlcpy.ve_types`` can be passed into the argument ``args_type``. "
@@ -86,7 +86,7 @@ msgid ""
 "be passed into the argument ``ret_type``."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:77
+#: ../../source/reference/jit/basic_usage.rst:78
 msgid "The supported data-types and its corresponding notations are as follows:"
 msgstr ""
 
@@ -210,66 +210,86 @@ msgstr ""
 msgid "nlcpy.ve_types.void_p"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:93
+#: ../../source/reference/jit/basic_usage.rst:94
 msgid ""
 "For the complex data-type, it is necessary to transfer data as "
 ":class:`nlcpy.ndarray` or ``nlcpy.veo.OnStack``. Please refer to the "
 ":ref:`Advanced Topics <label_advanced_topics>`."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:98
+#: ../../source/reference/jit/basic_usage.rst:99
 msgid ":meth:`nlcpy.jit.CustomVELibrary.get_function`"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:100
+#: ../../source/reference/jit/basic_usage.rst:101
 msgid ":class:`nlcpy.jit.CustomVEKernel`"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:103
+#: ../../source/reference/jit/basic_usage.rst:104
 msgid "Execution"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:105
-msgid ""
-"Here, you can execute the instance of :class:`CustomVEKernel` as a VE "
-"function."
+#: ../../source/reference/jit/basic_usage.rst:106
+msgid "Here, you can execute the VE function."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:116
+#: ../../source/reference/jit/basic_usage.rst:119
 msgid ""
 "Just only pass the attribute ``ndarray.ve_adr`` into arguments, the VE "
 "function can get the pointer of the array."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:120
+#: ../../source/reference/jit/basic_usage.rst:123
+msgid "If you pass the argument ``sync=False``, the return value will be None."
+msgstr ""
+
+#: ../../source/reference/jit/basic_usage.rst:126
 msgid ""
 "You can invoke the VE function without recompiling by calling "
 ":meth:`CustomVEKernel.__call__` repeatedly."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:124
+#: ../../source/reference/jit/basic_usage.rst:130
 msgid ":meth:`nlcpy.jit.CustomVEKernel.__call__`"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:127
+#: ../../source/reference/jit/basic_usage.rst:133
 msgid "Finalization (Optional)"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:129
-msgid "If needed, you can unload the loaded library."
+#: ../../source/reference/jit/basic_usage.rst:135
+msgid "If needed, you can unload the shared library."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:135
+#: ../../source/reference/jit/basic_usage.rst:141
 msgid "Restriction"
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:137
+#: ../../source/reference/jit/basic_usage.rst:143
 msgid ""
 "Please avoid unloading the shared library linked with FTRACE. Otherwise, "
 "SIGSEGV may occur."
 msgstr ""
 
-#: ../../source/reference/jit/basic_usage.rst:141
-msgid ":func:`unload_library`"
+#: ../../source/reference/jit/basic_usage.rst:147
+msgid ":func:`nlcpy.jit.unload_library`"
 msgstr ""
+
+#~ msgid ""
+#~ "You need to call "
+#~ ":meth:`CustomVELibrary.get_function` to get a "
+#~ "symbol of a funtion on VE."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Here, you can execute the instance "
+#~ "of :class:`CustomVEKernel` as a VE "
+#~ "function."
+#~ msgstr ""
+
+#~ msgid "If needed, you can unload the loaded library."
+#~ msgstr ""
+
+#~ msgid ":func:`unload_library`"
+#~ msgstr ""
 

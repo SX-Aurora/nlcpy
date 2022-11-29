@@ -52,7 +52,6 @@
 
 from libc.stdint cimport *
 
-from nlcpy import veo
 from nlcpy.core.dtype cimport ve_dtype
 
 import numpy

@@ -31,9 +31,11 @@
 
 import nlcpy
 import numpy
+from nlcpy.wrapper.numpy_wrap import numpy_wrap
 
 
-def take(a, indices, axis=None, out=None, mode='raise'):
+@numpy_wrap
+def take(a, indices, axis=None, out=None, mode='wrap'):
     """Takes elements from an array along an axis.
 
     When axis is not None, this function does the same thing as "fancy" indexing
@@ -84,10 +86,10 @@ def take(a, indices, axis=None, out=None, mode='raise'):
            [5, 7]])
 
     """
-    if mode != 'raise':
+    if mode != 'wrap':
         raise NotImplementedError('mode is not supported yet')
     a = nlcpy.asarray(a)
-    return a.take(indices, axis, out)
+    return a.take(indices, axis, out, mode=mode)
 
 
 def diagonal(a, offset=0, axis1=0, axis2=1):

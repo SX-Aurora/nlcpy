@@ -45,7 +45,7 @@ from nlcpy.ufuncs import ufunc_docs
 # math_operations
 add = ufuncs.create_ufunc(
     'nlcpy_add',
-    numpy.add.types,
+    casting._add_types,
     err._add_error_check,
     doc=ufunc_docs._add_doc
 )
@@ -61,7 +61,7 @@ subtract = ufuncs.create_ufunc(
 
 multiply = ufuncs.create_ufunc(
     'nlcpy_multiply',
-    numpy.multiply.types,
+    casting._multiply_types,
     err._multiply_error_check,
     doc=ufunc_docs._multiply_doc
 )
@@ -80,7 +80,7 @@ divide = true_divide
 
 logaddexp = ufuncs.create_ufunc(
     'nlcpy_logaddexp',
-    numpy.logaddexp.types,
+    casting._logaddexp_types,
     err._logaddexp_error_check,
     doc=ufunc_docs._logaddexp_doc
 )
@@ -88,7 +88,7 @@ logaddexp = ufuncs.create_ufunc(
 
 logaddexp2 = ufuncs.create_ufunc(
     'nlcpy_logaddexp2',
-    numpy.logaddexp2.types,
+    casting._logaddexp2_types,
     err._logaddexp2_error_check,
     doc=ufunc_docs._logaddexp2_doc
 )
@@ -96,7 +96,7 @@ logaddexp2 = ufuncs.create_ufunc(
 
 floor_divide = ufuncs.create_ufunc(
     'nlcpy_floor_divide',
-    numpy.floor_divide.types,
+    casting._floor_divide_types,
     err._floor_divide_error_check,
     doc=ufunc_docs._floor_divide_doc
 )
@@ -120,7 +120,7 @@ positive = ufuncs.create_ufunc(
 
 power = ufuncs.create_ufunc(
     'nlcpy_power',
-    numpy.power.types,
+    casting._power_types,
     err._power_error_check,
     doc=ufunc_docs._power_doc
 )
@@ -134,7 +134,6 @@ remainder = ufuncs.create_ufunc(
 )
 
 
-# ufunc_operation(mod,orig_types,valid_error_check)dnl
 mod = remainder
 
 fmod = ufuncs.create_ufunc(
@@ -145,14 +144,15 @@ fmod = ufuncs.create_ufunc(
 )
 
 
-# ufunc_operation(divmod,numpy_types,valid_error_check)dnl
 absolute = ufuncs.create_ufunc(
     'nlcpy_absolute',
-    numpy.absolute.types,
+    casting._absolute_types,
     err._absolute_error_check,
     doc=ufunc_docs._absolute_doc
 )
 
+
+abs = absolute
 
 fabs = ufuncs.create_ufunc(
     'nlcpy_fabs',
@@ -164,7 +164,7 @@ fabs = ufuncs.create_ufunc(
 
 rint = ufuncs.create_ufunc(
     'nlcpy_rint',
-    numpy.rint.types,
+    casting._rint_types,
     err._rint_error_check,
     doc=ufunc_docs._rint_doc
 )
@@ -180,7 +180,7 @@ sign = ufuncs.create_ufunc(
 
 heaviside = ufuncs.create_ufunc(
     'nlcpy_heaviside',
-    numpy.heaviside.types,
+    casting._heaviside_types,
     err._heaviside_error_check,
     doc=ufunc_docs._heaviside_doc
 )
@@ -188,18 +188,17 @@ heaviside = ufuncs.create_ufunc(
 
 conjugate = ufuncs.create_ufunc(
     'nlcpy_conjugate',
-    numpy.conjugate.types,
+    casting._conjugate_types,
     err._conjugate_error_check,
     doc=ufunc_docs._conjugate_doc
 )
 
 
-# ufunc_operation(conj,numpy_types,valid_error_check)dnl
 conj = conjugate
 
 exp = ufuncs.create_ufunc(
     'nlcpy_exp',
-    numpy.exp.types,
+    casting._exp_types,
     err._exp_error_check,
     doc=ufunc_docs._exp_doc
 )
@@ -207,7 +206,7 @@ exp = ufuncs.create_ufunc(
 
 exp2 = ufuncs.create_ufunc(
     'nlcpy_exp2',
-    numpy.exp2.types,
+    casting._exp2_types,
     err._exp2_error_check,
     doc=ufunc_docs._exp2_doc
 )
@@ -215,7 +214,7 @@ exp2 = ufuncs.create_ufunc(
 
 log = ufuncs.create_ufunc(
     'nlcpy_log',
-    numpy.log.types,
+    casting._log_types,
     err._log_error_check,
     doc=ufunc_docs._log_doc
 )
@@ -223,7 +222,7 @@ log = ufuncs.create_ufunc(
 
 log2 = ufuncs.create_ufunc(
     'nlcpy_log2',
-    numpy.log2.types,
+    casting._log2_types,
     err._log2_error_check,
     doc=ufunc_docs._log2_doc
 )
@@ -231,7 +230,7 @@ log2 = ufuncs.create_ufunc(
 
 log10 = ufuncs.create_ufunc(
     'nlcpy_log10',
-    numpy.log10.types,
+    casting._log10_types,
     err._log10_error_check,
     doc=ufunc_docs._log10_doc
 )
@@ -239,7 +238,7 @@ log10 = ufuncs.create_ufunc(
 
 expm1 = ufuncs.create_ufunc(
     'nlcpy_expm1',
-    numpy.expm1.types,
+    casting._expm1_types,
     err._expm1_error_check,
     doc=ufunc_docs._expm1_doc
 )
@@ -247,7 +246,7 @@ expm1 = ufuncs.create_ufunc(
 
 log1p = ufuncs.create_ufunc(
     'nlcpy_log1p',
-    numpy.log1p.types,
+    casting._log1p_types,
     err._log1p_error_check,
     doc=ufunc_docs._log1p_doc
 )
@@ -255,7 +254,7 @@ log1p = ufuncs.create_ufunc(
 
 sqrt = ufuncs.create_ufunc(
     'nlcpy_sqrt',
-    numpy.sqrt.types,
+    casting._sqrt_types,
     err._sqrt_error_check,
     doc=ufunc_docs._sqrt_doc
 )
@@ -263,7 +262,7 @@ sqrt = ufuncs.create_ufunc(
 
 square = ufuncs.create_ufunc(
     'nlcpy_square',
-    numpy.square.types,
+    casting._square_types,
     err._square_error_check,
     doc=ufunc_docs._square_doc
 )
@@ -279,7 +278,7 @@ cbrt = ufuncs.create_ufunc(
 
 reciprocal = ufuncs.create_ufunc(
     'nlcpy_reciprocal',
-    numpy.reciprocal.types,
+    casting._reciprocal_types,
     err._reciprocal_error_check,
     doc=ufunc_docs._reciprocal_doc
 )
@@ -320,6 +319,8 @@ invert = ufuncs.create_ufunc(
 )
 
 
+bitwise_not = invert
+
 left_shift = ufuncs.create_ufunc(
     'nlcpy_left_shift',
     casting._left_shift_types,
@@ -339,7 +340,7 @@ right_shift = ufuncs.create_ufunc(
 # comparison functions
 greater = ufuncs.create_ufunc(
     'nlcpy_greater',
-    numpy.greater.types,
+    casting._greater_types,
     err._greater_error_check,
     doc=ufunc_docs._greater_doc
 )
@@ -347,7 +348,7 @@ greater = ufuncs.create_ufunc(
 
 greater_equal = ufuncs.create_ufunc(
     'nlcpy_greater_equal',
-    numpy.greater_equal.types,
+    casting._greater_equal_types,
     err._greater_equal_error_check,
     doc=ufunc_docs._greater_equal_doc
 )
@@ -355,7 +356,7 @@ greater_equal = ufuncs.create_ufunc(
 
 less = ufuncs.create_ufunc(
     'nlcpy_less',
-    numpy.less.types,
+    casting._less_types,
     err._less_error_check,
     doc=ufunc_docs._less_doc
 )
@@ -363,7 +364,7 @@ less = ufuncs.create_ufunc(
 
 less_equal = ufuncs.create_ufunc(
     'nlcpy_less_equal',
-    numpy.less_equal.types,
+    casting._less_equal_types,
     err._less_equal_error_check,
     doc=ufunc_docs._less_equal_doc
 )
@@ -371,7 +372,7 @@ less_equal = ufuncs.create_ufunc(
 
 not_equal = ufuncs.create_ufunc(
     'nlcpy_not_equal',
-    numpy.not_equal.types,
+    casting._not_equal_types,
     err._not_equal_error_check,
     doc=ufunc_docs._not_equal_doc
 )
@@ -379,7 +380,7 @@ not_equal = ufuncs.create_ufunc(
 
 equal = ufuncs.create_ufunc(
     'nlcpy_equal',
-    numpy.equal.types,
+    casting._equal_types,
     err._equal_error_check,
     doc=ufunc_docs._equal_doc
 )
@@ -387,7 +388,7 @@ equal = ufuncs.create_ufunc(
 
 logical_and = ufuncs.create_ufunc(
     'nlcpy_logical_and',
-    numpy.logical_and.types,
+    casting._logical_and_types,
     err._logical_and_error_check,
     doc=ufunc_docs._logical_and_doc
 )
@@ -395,7 +396,7 @@ logical_and = ufuncs.create_ufunc(
 
 logical_or = ufuncs.create_ufunc(
     'nlcpy_logical_or',
-    numpy.logical_or.types,
+    casting._logical_or_types,
     err._logical_or_error_check,
     doc=ufunc_docs._logical_or_doc
 )
@@ -403,7 +404,7 @@ logical_or = ufuncs.create_ufunc(
 
 logical_xor = ufuncs.create_ufunc(
     'nlcpy_logical_xor',
-    numpy.logical_xor.types,
+    casting._logical_xor_types,
     err._logical_xor_error_check,
     doc=ufunc_docs._logical_xor_doc
 )
@@ -411,7 +412,7 @@ logical_xor = ufuncs.create_ufunc(
 
 logical_not = ufuncs.create_ufunc(
     'nlcpy_logical_not',
-    numpy.logical_not.types,
+    casting._logical_not_types,
     err._logical_not_error_check,
     doc=ufunc_docs._logical_not_doc
 )
@@ -419,7 +420,7 @@ logical_not = ufuncs.create_ufunc(
 
 minimum = ufuncs.create_ufunc(
     'nlcpy_minimum',
-    numpy.minimum.types,
+    casting._minimum_types,
     err._minimum_error_check,
     doc=ufunc_docs._minimum_doc
 )
@@ -427,7 +428,7 @@ minimum = ufuncs.create_ufunc(
 
 maximum = ufuncs.create_ufunc(
     'nlcpy_maximum',
-    numpy.maximum.types,
+    casting._maximum_types,
     err._maximum_error_check,
     doc=ufunc_docs._maximum_doc
 )
@@ -435,7 +436,7 @@ maximum = ufuncs.create_ufunc(
 
 fmax = ufuncs.create_ufunc(
     'nlcpy_fmax',
-    numpy.fmax.types,
+    casting._fmax_types,
     err._fmax_error_check,
     doc=ufunc_docs._fmax_doc
 )
@@ -443,7 +444,7 @@ fmax = ufuncs.create_ufunc(
 
 fmin = ufuncs.create_ufunc(
     'nlcpy_fmin',
-    numpy.fmin.types,
+    casting._fmin_types,
     err._fmin_error_check,
     doc=ufunc_docs._fmin_doc
 )
@@ -452,7 +453,7 @@ fmin = ufuncs.create_ufunc(
 # trigonometric functions
 sin = ufuncs.create_ufunc(
     'nlcpy_sin',
-    numpy.sin.types,
+    casting._sin_types,
     err._sin_error_check,
     doc=ufunc_docs._sin_doc
 )
@@ -460,7 +461,7 @@ sin = ufuncs.create_ufunc(
 
 cos = ufuncs.create_ufunc(
     'nlcpy_cos',
-    numpy.cos.types,
+    casting._cos_types,
     err._cos_error_check,
     doc=ufunc_docs._cos_doc
 )
@@ -468,7 +469,7 @@ cos = ufuncs.create_ufunc(
 
 tan = ufuncs.create_ufunc(
     'nlcpy_tan',
-    numpy.tan.types,
+    casting._tan_types,
     err._tan_error_check,
     doc=ufunc_docs._tan_doc
 )
@@ -476,7 +477,7 @@ tan = ufuncs.create_ufunc(
 
 arcsin = ufuncs.create_ufunc(
     'nlcpy_arcsin',
-    numpy.arcsin.types,
+    casting._arcsin_types,
     err._arcsin_error_check,
     doc=ufunc_docs._arcsin_doc
 )
@@ -484,7 +485,7 @@ arcsin = ufuncs.create_ufunc(
 
 arccos = ufuncs.create_ufunc(
     'nlcpy_arccos',
-    numpy.arccos.types,
+    casting._arccos_types,
     err._arccos_error_check,
     doc=ufunc_docs._arccos_doc
 )
@@ -492,7 +493,7 @@ arccos = ufuncs.create_ufunc(
 
 arctan = ufuncs.create_ufunc(
     'nlcpy_arctan',
-    numpy.arctan.types,
+    casting._arctan_types,
     err._arctan_error_check,
     doc=ufunc_docs._arctan_doc
 )
@@ -516,7 +517,7 @@ hypot = ufuncs.create_ufunc(
 
 sinh = ufuncs.create_ufunc(
     'nlcpy_sinh',
-    numpy.sinh.types,
+    casting._sinh_types,
     err._sinh_error_check,
     doc=ufunc_docs._sinh_doc
 )
@@ -524,7 +525,7 @@ sinh = ufuncs.create_ufunc(
 
 cosh = ufuncs.create_ufunc(
     'nlcpy_cosh',
-    numpy.cosh.types,
+    casting._cosh_types,
     err._cosh_error_check,
     doc=ufunc_docs._cosh_doc
 )
@@ -532,7 +533,7 @@ cosh = ufuncs.create_ufunc(
 
 tanh = ufuncs.create_ufunc(
     'nlcpy_tanh',
-    numpy.tanh.types,
+    casting._tanh_types,
     err._tanh_error_check,
     doc=ufunc_docs._tanh_doc
 )
@@ -540,7 +541,7 @@ tanh = ufuncs.create_ufunc(
 
 arcsinh = ufuncs.create_ufunc(
     'nlcpy_arcsinh',
-    numpy.arcsinh.types,
+    casting._arcsinh_types,
     err._arcsinh_error_check,
     doc=ufunc_docs._arcsinh_doc
 )
@@ -548,7 +549,7 @@ arcsinh = ufuncs.create_ufunc(
 
 arccosh = ufuncs.create_ufunc(
     'nlcpy_arccosh',
-    numpy.arccosh.types,
+    casting._arccosh_types,
     err._arccosh_error_check,
     doc=ufunc_docs._arccosh_doc
 )
@@ -556,7 +557,7 @@ arccosh = ufuncs.create_ufunc(
 
 arctanh = ufuncs.create_ufunc(
     'nlcpy_arctanh',
-    numpy.arctanh.types,
+    casting._arctanh_types,
     err._arctanh_error_check,
     doc=ufunc_docs._arctanh_doc
 )
@@ -597,7 +598,7 @@ radians = ufuncs.create_ufunc(
 # floating functions
 isfinite = ufuncs.create_ufunc(
     'nlcpy_isfinite',
-    numpy.isfinite.types,
+    casting._isfinite_types,
     err._isfinite_error_check,
     doc=ufunc_docs._isfinite_doc
 )
@@ -605,7 +606,7 @@ isfinite = ufuncs.create_ufunc(
 
 isinf = ufuncs.create_ufunc(
     'nlcpy_isinf',
-    numpy.isinf.types,
+    casting._isinf_types,
     err._isinf_error_check,
     doc=ufunc_docs._isinf_doc
 )
@@ -613,16 +614,15 @@ isinf = ufuncs.create_ufunc(
 
 isnan = ufuncs.create_ufunc(
     'nlcpy_isnan',
-    numpy.isnan.types,
+    casting._isnan_types,
     err._isnan_error_check,
     doc=ufunc_docs._isnan_doc
 )
 
 
-# ufunc_operation(isnat,numpy_types,valid_error_check)dnl
 signbit = ufuncs.create_ufunc(
     'nlcpy_signbit',
-    numpy.signbit.types,
+    casting._signbit_types,
     err._signbit_error_check,
     doc=ufunc_docs._signbit_doc
 )
@@ -630,7 +630,7 @@ signbit = ufuncs.create_ufunc(
 
 copysign = ufuncs.create_ufunc(
     'nlcpy_copysign',
-    numpy.copysign.types,
+    casting._copysign_types,
     err._copysign_error_check,
     doc=ufunc_docs._copysign_doc
 )
@@ -638,7 +638,7 @@ copysign = ufuncs.create_ufunc(
 
 nextafter = ufuncs.create_ufunc(
     'nlcpy_nextafter',
-    numpy.nextafter.types,
+    casting._nextafter_types,
     err._nextafter_error_check,
     doc=ufunc_docs._nextafter_doc
 )
@@ -646,16 +646,15 @@ nextafter = ufuncs.create_ufunc(
 
 spacing = ufuncs.create_ufunc(
     'nlcpy_spacing',
-    numpy.spacing.types,
+    casting._spacing_types,
     err._spacing_error_check,
     doc=ufunc_docs._spacing_doc
 )
 
 
-# ufunc_operation(modf,numpy_types,valid_error_check)dnl
 ldexp = ufuncs.create_ufunc(
     'nlcpy_ldexp',
-    numpy.ldexp.types,
+    casting._ldexp_types,
     err._ldexp_error_check,
     doc=ufunc_docs._ldexp_doc
 )
@@ -680,7 +679,7 @@ ceil = ufuncs.create_ufunc(
 
 trunc = ufuncs.create_ufunc(
     'nlcpy_trunc',
-    numpy.trunc.types,
+    casting._trunc_types,
     err._trunc_error_check,
     doc=ufunc_docs._trunc_doc
 )

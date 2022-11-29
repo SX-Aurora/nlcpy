@@ -408,6 +408,9 @@ VE_CONTROLLER =\
 
 VE_BASIC_KERNEL = $(VE_BASIC_MASTER:.c.master=.c)
 
+VE_ASLUNI_KERNEL =\
+  nlcpy_asluni.c
+
 VE_RANDOM_KERNEL =\
   nlcpy_random.c\
   nlcpy_random_shuffle.c
@@ -422,7 +425,6 @@ VE_CBLAS_WRAPPER = cblas_wrapper.c
 
 VE_UTILITY = array_utility.c
 
-VE_MEMPOOL = nlcpy_mempool_ve.c
 
 OBJS = \
   $(VE_UNARY_FUNCTION:.c=.o)\
@@ -434,10 +436,10 @@ OBJS = \
 
 OBJS_COMMON = \
   $(VE_UTILITY:.c=.o)\
-  $(VE_MEMPOOL:.c=.o)\
   $(VE_COPY_FUNCTION:.c=.o)\
   $(VE_COPY_MASKED_FUNCTION:.c=.o)\
   $(VE_MATMUL_OPERATOR:.c=.o)\
+  $(VE_ASLUNI_KERNEL:.c=.o)\
   $(VE_RANDOM_KERNEL:.c=.o)\
   $(VE_FFT_KERNEL:.c=.o)\
   $(VE_SCA_KERNEL:.c=.o)\

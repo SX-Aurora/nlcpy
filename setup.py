@@ -57,6 +57,7 @@ NLC_PATH = dirs[0]
 compiler_directives = {
     'embedsignature': True,
 }
+
 define_macros = []
 
 parser = argparse.ArgumentParser()
@@ -69,9 +70,9 @@ parser.add_argument(
     help='enable debugging for Cython code'
 )
 args, sys.argv = parser.parse_known_args(sys.argv)
-
 if args.profile:
     compiler_directives['linetrace'] = True
+    define_macros.append(('CYTHON_TRACE_NOGIL', '1'))
     define_macros.append(('CYTHON_TRACE', '1'))
 if args.debug:
     compiler_directives['boundscheck'] = True
@@ -87,10 +88,19 @@ if args.debug:
 #####################################################
 extensions = []
 extra_compile_args = ['-O2']
+if args.debug:
+    extra_compile_args = extra_compile_args + ['-g']
 
 ext_modules = {
     'veo': [
         'nlcpy.veo._veo',
+        'nlcpy.veo._nlcpy_veo_hook',
+    ],
+    'veosinfo': [
+        'nlcpy.veosinfo._veosinfo',
+    ],
+    'venode': [
+        'nlcpy.venode._venode',
     ],
     'mempool': [
         'nlcpy.mempool.mempool',
@@ -146,6 +156,13 @@ include_dirs = {
         '/opt/nec/ve/veos/include',
         numpy.get_include(),
     ],
+    'veosinfo': [
+        '/opt/nec/ve/veos/include',
+    ],
+    'venode': [
+        '/opt/nec/ve/veos/include',
+        numpy.get_include(),
+    ],
     'mempool': [
         '/opt/nec/ve/veos/include',
         'nlcpy/mempool',
@@ -161,7 +178,6 @@ include_dirs = {
     ],
     'request': [
         '/opt/nec/ve/veos/include',
-        'nlcpy/mempool',
         numpy.get_include(),
     ],
     'others': [
@@ -173,6 +189,11 @@ include_dirs = {
 libraries = {
     'veo': [
         'veo',
+    ],
+    'veosinfo': [
+        'veosinfo',
+    ],
+    'venode': [
     ],
     'mempool': [
         'veo',
@@ -191,6 +212,11 @@ library_dirs = {
     'veo': [
         'veo', '/opt/nec/ve/veos/lib64',
     ],
+    'veosinfo': [
+        'veosinfo', '/opt/nec/ve/veos/lib64',
+    ],
+    'venode': [
+    ],
     'mempool': [
         'veo', '/opt/nec/ve/veos/lib64',
     ],
@@ -206,10 +232,15 @@ library_dirs = {
 
 extra_link_args = {
     'veo': [
-        '-Wl,-rpath=/opt/nec/ve/veos/lib64'
+        '-Wl,-rpath=/opt/nec/ve/veos/lib64', '-Wl,--enable-new-dtags'
+    ],
+    'veosinfo': [
+        '-Wl,-rpath=/opt/nec/ve/veos/lib64', '-Wl,--enable-new-dtags'
+    ],
+    'venode': [
     ],
     'mempool': [
-        '-Wl,-rpath=/opt/nec/ve/veos/lib64'
+        '-Wl,-rpath=/opt/nec/ve/veos/lib64', '-Wl,--enable-new-dtags'
     ],
     'random': [
     ],

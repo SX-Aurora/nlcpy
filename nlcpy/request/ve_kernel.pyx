@@ -151,16 +151,6 @@ cdef dict funcNumList = {
     "nlcpy_insert": ve_funcnum.VE_FUNC_INSERT,
     "nlcpy_roll": ve_funcnum.VE_FUNC_ROLL,
 
-    #  cblas wrapper functions
-    "wrapper_cblas_sdot": ve_funcnum.VE_FUNC_CBLAS_SDOT,
-    "wrapper_cblas_ddot": ve_funcnum.VE_FUNC_CBLAS_DDOT,
-    "wrapper_cblas_cdotu_sub": ve_funcnum.VE_FUNC_CBLAS_CDOTU_SUB,
-    "wrapper_cblas_zdotu_sub": ve_funcnum.VE_FUNC_CBLAS_ZDOTU_SUB,
-    "wrapper_cblas_sgemm": ve_funcnum.VE_FUNC_CBLAS_SGEMM,
-    "wrapper_cblas_dgemm": ve_funcnum.VE_FUNC_CBLAS_DGEMM,
-    "wrapper_cblas_cgemm": ve_funcnum.VE_FUNC_CBLAS_CGEMM,
-    "wrapper_cblas_zgemm": ve_funcnum.VE_FUNC_CBLAS_ZGEMM,
-
     #  linalg functions
     "nlcpy_dot": ve_funcnum.VE_FUNC_DOT,
     "nlcpy_matmul": ve_funcnum.VE_FUNC_MATMUL,
@@ -309,7 +299,6 @@ cdef dict funcTypeList = {
     "indexing_op": ve_functype.INDEXING_OP,
     "creation_op": ve_functype.CREATION_OP,
     "manipulation_op": ve_functype.MANIPULATION_OP,
-    "cblas_op": ve_functype.CBLAS_OP,
     "linalg_op": ve_functype.LINALG_OP,
     "reduce_op": ve_functype.REDUCE_OP,
     "reduceat_op": ve_functype.REDUCEAT_OP,

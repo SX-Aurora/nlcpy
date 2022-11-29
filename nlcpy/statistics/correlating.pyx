@@ -63,7 +63,6 @@ import copy
 import nlcpy
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast
@@ -470,4 +469,4 @@ def correlate(a, v, mode='valid'):
     array([0. +0.j , 3. +1.j , 1.5+1.5j, 1. +0.j , 0.5+0.5j])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('correlate is not implemented yet.')

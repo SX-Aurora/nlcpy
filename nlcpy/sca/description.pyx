@@ -427,10 +427,10 @@ cdef class description:
         self.nelm_total = nelm_total
 
     cdef _update_computation_size(self):
-        cdef int64_t nx = 2305843009213693952  # int64_max
-        cdef int64_t ny = 2305843009213693952  # int64_max
-        cdef int64_t nz = 2305843009213693952  # int64_max
-        cdef int64_t nw = 2305843009213693952  # int64_max
+        cdef int64_t nx = INT64_MAX  # int64_max
+        cdef int64_t ny = INT64_MAX  # int64_max
+        cdef int64_t nz = INT64_MAX  # int64_max
+        cdef int64_t nw = INT64_MAX  # int64_max
 
         for se in self.elems:
             arr = se.array

@@ -30,6 +30,7 @@
 #
 import nlcpy
 from nlcpy.core import manipulation
+from nlcpy.venode import transfer_array
 
 
 def shape(a):
@@ -99,4 +100,15 @@ def copyto(dst, src, casting='same_kind', where=True):
         raise TypeError(
             "copyto() argument 1 must be nlcpy.ndarray, not {}".format(dst_type))
 
-    return manipulation._copyto(dst, src, casting, where)
+    if isinstance(src, nlcpy.ndarray):
+        if src.venode == dst.venode:
+            return manipulation._copyto(dst, src, casting, where)
+        else:
+            return transfer_array(src, dst.venode, dst)
+    else:
+        prev_ve = nlcpy.venode.VE()
+        try:
+            dst.venode.use()
+            return manipulation._copyto(dst, src, casting, where)
+        finally:
+            prev_ve.use()

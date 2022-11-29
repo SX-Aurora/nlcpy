@@ -57,8 +57,10 @@
 #
 
 import nlcpy
+from nlcpy.wrapper.numpy_wrap import numpy_wrap
 
 
+@numpy_wrap
 def sort(a, axis=-1, kind=None, order=None):
     """Returns a sorted copy of an array.
 
@@ -128,6 +130,7 @@ def sort(a, axis=-1, kind=None, order=None):
     return ret
 
 
+@numpy_wrap
 def argsort(a, axis=-1, kind=None, order=None):
     """Returns the indices that would sort an array.
 

@@ -52,14 +52,9 @@
 from libcpp.vector cimport vector
 from libc.stdint cimport *
 
-from nlcpy.core cimport vememory
+from nlcpy.venode._venode cimport VENode
 
 cimport numpy
-
-cpdef enum MemoryLocation:
-    on_VE = 0b001
-    on_VH = 0b010
-    on_VE_VH = 0b100
 
 
 cdef class ndarray:
@@ -73,10 +68,12 @@ cdef class ndarray:
         readonly bint _owndata
         readonly object dtype
         readonly uint64_t itemsize
+        readonly uint64_t veo_hmem
         readonly uint64_t ve_adr
-        readonly numpy.ndarray vh_data
+        readonly bint _is_pool
         readonly ndarray base
-        readonly int _memloc  # this flag indicates whether memory locates in VE or VH.
+        readonly VENode _venode
+        readonly int node_id
 
     cpdef sort(self, axis=*, kind=*, order=*)
     cpdef ndarray argsort(self, axis=*, kind=*, order=*)
@@ -86,7 +83,7 @@ cdef class ndarray:
     cpdef ndarray astype(self, dtype, order=*, casting=*, subok=*, copy=*)
     cpdef fill(self, value)
 
-    cpdef ndarray take(self, indices, axis=*, out=*)
+    cpdef ndarray take(self, indices, axis=*, out=*, mode=*)
     cpdef ndarray diagonal(self, offset=*, axis1=*, axis2=*)
     cpdef ndarray argmax(self, axis=*, out=*)
     cpdef ndarray argmin(self, axis=*, out=*)
@@ -97,7 +94,8 @@ cdef class ndarray:
     cpdef ndarray max(self, axis=*, out=*, keepdims=*, initial=*, where=*)
     cpdef ndarray min(self, axis=*, out=*, keepdims=*, initial=*, where=*)
 
-    cpdef get(self, order=*)
+    cpdef get(self, order=*, out=*)
+    cpdef set(self, a_cpu)
     cpdef _set_contiguous_strides(
         self,
         int64_t itemsize,
@@ -110,7 +108,6 @@ cdef class ndarray:
         bint update_c_contiguity,
         bint update_f_contiguity,
         bint mem_check=*,
-        object vh_view=*,
         object dtype=*,
         object type=*,
         int64_t offset=*
@@ -135,9 +132,7 @@ cdef class ndarray:
 cpdef ndarray array(obj, dtype=*, bint copy=*, order=*, bint subok=*,
                     Py_ssize_t ndmin=*)
 cpdef int _update_order_char(ndarray a, int order_char)
-cpdef set_boundary_size(size=*)
-cpdef int64_t get_boundary_size()
 cpdef ndarray argument_conversion(x)
 cpdef tuple argument_conversion2(x, y)
-cpdef check_fpe_flags(fpe_flags)
+cpdef check_fpe_flags(fpe_flags, reqnames)
 cpdef determine_contiguous_property(self, order)

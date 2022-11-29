@@ -50,6 +50,8 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
+import numpy
 
 from nlcpy import testing
 
@@ -69,22 +71,26 @@ class TestFillDiagonal(unittest.TestCase):
     @testing.for_orders('CF', name='order_val')
     @testing.numpy_nlcpy_array_equal()
     def test_fill_diagonal(self, xp, dtype_a, dtype_val, order_a, order_val):
-        a = testing.shaped_arange(self.shape_a, xp, dtype=dtype_a, order=order_a)
-        val = xp.asarray(
-            testing.shaped_random(self.shape_val, xp, dtype_val), order=order_val)
-        xp.fill_diagonal(a, val=val, wrap=self.wrap)
-        return a
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            a = testing.shaped_arange(self.shape_a, xp, dtype=dtype_a, order=order_a)
+            val = xp.asarray(
+                testing.shaped_random(self.shape_val, xp, dtype_val), order=order_val)
+            xp.fill_diagonal(a, val=val, wrap=self.wrap)
+            return a
 
     @testing.for_all_dtypes(name='dtype_a')
     @testing.for_all_dtypes(name='dtype_val')
     @testing.numpy_nlcpy_array_equal()
     def test_fill_diagonal_strided(self, xp, dtype_a, dtype_val):
-        a = testing.shaped_arange(self.shape_a, xp, dtype=dtype_a)
-        a = a[[slice(0, None, 2) for _ in range(len(self.shape_a))]]
-        val = testing.shaped_random(self.shape_val, xp, dtype_val)
-        val = val[[slice(0, None, 2) for _ in range(len(self.shape_val))]]
-        xp.fill_diagonal(a, val=val, wrap=self.wrap)
-        return a
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            a = testing.shaped_arange(self.shape_a, xp, dtype=dtype_a)
+            a = a[tuple(slice(0, None, 2) for _ in range(len(self.shape_a)))]
+            val = testing.shaped_random(self.shape_val, xp, dtype_val)
+            val = val[tuple(slice(0, None, 2) for _ in range(len(self.shape_val)))]
+            xp.fill_diagonal(a, val=val, wrap=self.wrap)
+            return a
 
 
 class TestFillDiagonalFailure(unittest.TestCase):

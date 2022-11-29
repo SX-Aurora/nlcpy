@@ -52,8 +52,8 @@
 #     THE SOFTWARE.
 #
 
-
 import unittest
+import warnings
 
 import numpy
 import nlcpy
@@ -78,7 +78,9 @@ class TestCopyScalar(unittest.TestCase):
         if numpy.can_cast(self.val, dst_dtype, casting=self.casting):
             dst = xp.asanyarray(-999, dtype=dst_dtype)  # make some 0-dim array
             src = self.val
-            xp.copyto(dst, src, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                xp.copyto(dst, src, casting=self.casting)
             return dst
         else:
             return -1
@@ -91,7 +93,9 @@ class TestCopyScalar(unittest.TestCase):
             dst = xp.asanyarray(-999, dtype=dst_dtype)  # make some 0-dim array
             src = self.val
             where = xp.asanyarray(1, dtype='bool')
-            xp.copyto(dst, src, where=where, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                xp.copyto(dst, src, where=where, casting=self.casting)
             return dst
         else:
             return -1
@@ -132,7 +136,9 @@ class TestCopyNdarray(unittest.TestCase):
             dst = xp.empty(self.shape, dtype=dst_dtype, order=dst_order)
             src = xp.asarray(
                 testing.shaped_random(self.shape, xp, src_dtype), order=src_order)
-            xp.copyto(dst, src, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                xp.copyto(dst, src, casting=self.casting)
             return dst
         else:
             return -1
@@ -152,7 +158,9 @@ class TestCopyNdarray(unittest.TestCase):
                 testing.shaped_random(self.shape, xp, src_dtype), order=src_order)
             where = xp.asarray(
                 testing.shaped_random(self.shape, xp, 'bool'), order=where_order)
-            xp.copyto(dst, src, where=where, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                xp.copyto(dst, src, where=where, casting=self.casting)
             return dst
         else:
             return -1
@@ -332,7 +340,9 @@ class TestCopyOtherSrc(unittest.TestCase):
         src_dtype = numpy.asanyarray(self.src).dtype
         if numpy.can_cast(src_dtype, dst_dtype, casting=self.casting):
             dst = xp.empty(self.dst_shape, dtype=dst_dtype)
-            xp.copyto(dst, self.src, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                xp.copyto(dst, self.src, casting=self.casting)
             return dst
         else:
             return -1
@@ -403,3 +413,72 @@ class TestCopyIllegalWhere(unittest.TestCase):
         src = xp.ones((2, 3))
         where = xp.ones((2, 3), dtype="int64")  # dtype is not "bool"
         xp.copyto(dst, src, where=where)
+
+
+@testing.multi_ve(2)
+class TestCopyMultiVE(unittest.TestCase):
+
+    def setUp(self):
+        self._prev_ve = nlcpy.venode.VE(0)
+
+    def tearDown(self):
+        self._prev_ve.apply()
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_copyto_multive(self, xp, dtype):
+        with nlcpy.venode.VE(0):
+            a = testing.shaped_arange((2, 3, 4), xp, dtype)
+        with nlcpy.venode.VE(1):
+            b = xp.empty((2, 3, 4), dtype=dtype)
+        xp.copyto(b, a)
+        return b
+
+    @testing.for_all_dtypes()
+    def test_copyto_multive_noncontinguous(self, dtype):
+        with nlcpy.venode.VE(0):
+            src = testing.shaped_arange((2, 3, 4), nlcpy, dtype)
+            src = src.swapaxes(0, 1)
+        with nlcpy.venode.VE(1):
+            dst = nlcpy.empty_like(src)
+            nlcpy.copyto(dst, src)
+
+        expected = testing.shaped_arange((2, 3, 4), numpy, dtype)
+        expected = expected.swapaxes(0, 1)
+
+        testing.assert_array_equal(expected, src.get())
+        testing.assert_array_equal(expected, dst.get())
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_copyto_multive_broadcast(self, xp, dtype):
+        with nlcpy.venode.VE(0):
+            a = testing.shaped_arange((4,), xp, dtype)
+        with nlcpy.venode.VE(1):
+            b = xp.empty((2, 3, 4), dtype=dtype)
+        xp.copyto(b, a)
+        return b
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_copyto_multive_with_use(self, xp, dtype, order):
+        with nlcpy.venode.VE(0):
+            a = testing.shaped_arange((2, 3, 4), numpy, dtype, order)
+        nlcpy.venode.VE(1).use()
+        b = xp.empty((2, 3, 4), dtype=dtype, order=order)
+        xp.copyto(b, a)
+        assert nlcpy.venode.VE() == nlcpy.venode.VE(1)
+        return b
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_copyto_multive_broadcast_with_use(self, xp, dtype, order):
+        with nlcpy.venode.VE(0):
+            a = testing.shaped_arange((4,), xp, dtype, order)
+        nlcpy.venode.VE(1).use()
+        b = xp.empty((2, 3, 4), dtype=dtype, order=order)
+        xp.copyto(b, a)
+        assert nlcpy.venode.VE() == nlcpy.venode.VE(1)
+        return b

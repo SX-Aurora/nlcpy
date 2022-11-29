@@ -29,4 +29,5 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from nlcpy.mempool.mempool import * # NOQA
+from nlcpy.mempool.mempool import MemPool # NOQA
+from nlcpy.mempool.mempool import _get_default_pool_size # NOQA

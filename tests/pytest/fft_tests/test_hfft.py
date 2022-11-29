@@ -6,6 +6,8 @@ import numpy as np
 
 import nlcpy      # NOQA
 from nlcpy import testing
+from nlcpy.testing import (  # NOQA
+    assert_array_equal, assert_allclose)
 
 
 @testing.parameterize(
@@ -25,7 +27,9 @@ class TestHfft(unittest.TestCase):
     @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-7, contiguous_check=False)
     def test_hfft(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)
+        tmp = a.copy()
         out = xp.fft.hfft(a, n=self.n, axis=self.axis, norm=self.norm)
+        assert_allclose(a, tmp)
 
 #       if xp == np and dtype in [np.float16, np.float32, np.complex64]:
 #           out = out.astype(np.float32)
@@ -41,7 +45,9 @@ class TestHfft(unittest.TestCase):
     @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-7, contiguous_check=False)
     def test_ihfft(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)
+        tmp = a.copy()
         out = xp.fft.ihfft(a, n=self.n, axis=self.axis, norm=self.norm)
+        assert_allclose(a, tmp)
 
 #        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
 #            out = out.astype(np.complex64)

@@ -30,14 +30,6 @@
 #
 
 _random_kernel_list = {
-    "asl_library_initialize": {
-        "ret": "uint64_t",
-        "args": ["void"],
-    },
-    "asl_library_finalize": {
-        "ret": "uint64_t",
-        "args": ["void"],
-    },
     "asl_random_create": {
         "ret": "uint64_t",
         "args": [b"int64_t *", "int"],

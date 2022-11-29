@@ -97,7 +97,9 @@ class TestFft2(unittest.TestCase):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
         a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
         out = xp.fft.fft2(a, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -115,7 +117,9 @@ class TestFft2(unittest.TestCase):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
         a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
         out = xp.fft.ifft2(a, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -273,7 +277,9 @@ class TestFftn(unittest.TestCase):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
         a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
         out = xp.fft.fftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -291,7 +297,9 @@ class TestFftn(unittest.TestCase):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
         a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
         out = xp.fft.ifftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype in [np.float16, np.float32, np.complex64]:
             out = out.astype(np.complex64)
@@ -314,6 +322,27 @@ class TestFftn(unittest.TestCase):
     {'shape': (2, 3, 4), 's': None, 'axes': None, 'norm': 'ortho'},
     {'shape': (2, 3, 4), 's': (2, 3), 'axes': (0, 1, 2), 'norm': 'ortho'},
     {'shape': (2, 3, 4, 5), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100), 's': (1, 100), 'axes': None, 'norm': None},
+    {'shape': (100, 1), 's': (100, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100), 's': (1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1), 's': (1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1), 's': (100, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 1, 100), 's': (1, 1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100, 1), 's': (1, 1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1, 1), 's': (1, 100, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1, 1), 's': (100, 1, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (100, 1, 1), 'axes': None, 'norm': None},
 )
 @testing.with_requires('numpy>=1.10.0')
 class TestRfft2(unittest.TestCase):
@@ -330,7 +359,9 @@ class TestRfft2(unittest.TestCase):
 
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.rfft2(a, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype is np.float32:
             out = out.astype(np.complex64)
@@ -343,7 +374,9 @@ class TestRfft2(unittest.TestCase):
     def test_irfft2(self, xp, dtype, order):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.irfft2(a, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype is np.float32:
             out = out.astype(np.float64)
@@ -380,6 +413,27 @@ class TestRfft2(unittest.TestCase):
     {'shape': (2, 3, 4, 5, 6), 's': None, 'axes': (1, 2, 3, 4), 'norm': None},
     {'shape': (2, 3, 4, 5, 6), 's': None, 'axes': (0, 2, 1, 3), 'norm': None},
     {'shape': (2, 3, 4, 5, 6), 's': None, 'axes': (4, 2, 3, 1), 'norm': None},
+    {'shape': (1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 1, 100), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1, 1), 's': None, 'axes': None, 'norm': None},
+    {'shape': (1, 100), 's': (1, 100), 'axes': None, 'norm': None},
+    {'shape': (100, 1), 's': (100, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100), 's': (1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1), 's': (1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1), 's': (100, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 1, 100), 's': (1, 1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (1, 1, 100, 1), 's': (1, 1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (1, 100, 1, 1), 's': (1, 100, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (100, 1, 1, 1), 's': (100, 1, 1, 1), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (1, 1, 100), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (1, 100, 1), 'axes': None, 'norm': None},
+    {'shape': (20, 30, 40), 's': (100, 1, 1), 'axes': None, 'norm': None},
 )
 @testing.with_requires('numpy>=1.10.0')
 class TestRfftn(unittest.TestCase):
@@ -391,7 +445,9 @@ class TestRfftn(unittest.TestCase):
     def test_rfftn(self, xp, dtype, order):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype is np.float32:
             out = out.astype(np.complex64)
@@ -404,7 +460,10 @@ class TestRfftn(unittest.TestCase):
     def test_irfftn(self, xp, dtype, order):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
         if xp == np and dtype is np.complex64:
             out = out.astype(np.float32)
         elif xp == np and dtype is not np.complex64:
@@ -429,7 +488,9 @@ class TestRfftn_sub(unittest.TestCase):
     def test_rfftn(self, xp, dtype, order):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
 
         if xp == np and dtype is np.float32:
             out = out.astype(np.complex64)
@@ -443,7 +504,341 @@ class TestRfftn_sub(unittest.TestCase):
     def test_irfftn(self, xp, dtype, order):
         a = testing.shaped_random(self.shape, xp, dtype)
         a = xp.asarray(a, order=order)
+        tmp = a.copy()
         out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.complex64:
+            out = out.astype(np.float32)
+        elif xp == np and dtype is not np.complex64:
+            out = out.astype(np.float64)
+        return out
+
+
+@testing.parameterize(*testing.product({
+    'shape': [(3, 3), (3, 3, 3), (3, 3, 3, 3)],
+    's': [None] + [(i, j) for i in [2, 3, 4] for j in [2, 3, 4]],
+    'axes': [(i, j) for i in (-2, -1) for j in (-2, -1)],
+    'norm': [None, 'ortho']
+}))
+@testing.with_requires('numpy>=1.10.0')
+class TestFft2DAxes_s(unittest.TestCase):
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_fft_2d_axes_s(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.fftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-6, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_ifft_2d_axes_s(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.ifftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-7, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_rfft_2d_axes_s(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.float32:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.with_requires('numpy>=1.18.0')
+    @testing.for_dtypes('DF')
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-7, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_irfft_2d_axes_s(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.complex64:
+            out = out.astype(np.float32)
+        elif xp == np and dtype is not np.complex64:
+            out = out.astype(np.float64)
+        return out
+
+
+@testing.parameterize(*testing.product({
+    'shape': [(3, 3, 3), ],
+    's': [None, ] +
+         [(i, j, k) for i in [2, 3, 4] for j in [2, 3, 4] for k in [2, 3, 4]],
+    'axes': [(i, j, k) for i in (0, 1, 2) for j in (0, 1, 2) for k in (0, 1, 2)],
+    'norm': [None, 'ortho']
+}))
+@testing.with_requires('numpy>=1.10.0')
+class TestFft3DAxes_s(unittest.TestCase):
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_fft_3d_axes_s(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.fftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_ifft_3d_axes_s(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.ifftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_rfft_3d_axes_s(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.float32:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.with_requires('numpy>=1.18.0')
+    @testing.for_dtypes('DF')
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_irfft_3d_axes_s(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.complex64:
+            out = out.astype(np.float32)
+        elif xp == np and dtype is not np.complex64:
+            out = out.astype(np.float64)
+        return out
+
+
+@testing.parameterize(*testing.product({
+    'shape': [(10, 10, 10, 10), ],
+    's': [None, ] +
+         [(i, j, k) for i in [5, 10, 15] for j in [5, 10, 15] for k in [5, 10, 15]],
+    'axes': [(i, j, k) for i in (0, 1, 2, 3)
+             for j in (0, 1, 2, 3)
+             for k in (0, 1, 2, 3)],
+    'norm': [None, 'ortho']
+}))
+@testing.with_requires('numpy>=1.10.0')
+class TestFft3DAxes_s_4d(unittest.TestCase):
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-3, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_fft_3d_axes_s_4d(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.fftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_ifft_3d_axes_s_4d(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.ifftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-3, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_rfft_3d_axes_s_4d(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.float32:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.with_requires('numpy>=1.18.0')
+    @testing.for_dtypes('DF')
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-4, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_irfft_3d_axes_s_4d(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.complex64:
+            out = out.astype(np.float32)
+        elif xp == np and dtype is not np.complex64:
+            out = out.astype(np.float64)
+        return out
+
+
+@testing.parameterize(*testing.product({
+    'shape': [(10, 10, 10, 10), ],
+    's': [None, ],
+    'axes': [(i, j, k, h) for i in (0, 1, 2, 3)
+             for j in (0, 1, 2, 3)
+             for k in (0, 1, 2, 3)
+             for h in (0, 1, 2, 3)],
+    'norm': [None, 'ortho']
+}))
+@testing.with_requires('numpy>=1.10.0')
+class TestFft4DAxes(unittest.TestCase):
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-3, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_fft_4d_axes(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.fftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @nd_planning_states()
+    @testing.for_all_dtypes()
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-5, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_ifft_4d_axes(self, xp, dtype, order, enable_nd):
+        global enable_nd_planning
+        assert enable_nd_planning == enable_nd
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        a = _numpy_fftn_correct_dtype(xp, a)
+        tmp = a.copy()
+        out = xp.fft.ifftn(a, axes=self.axes, s=self.s, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype in [np.float16, np.float32, np.complex64]:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-3, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_rfft_4d_axes(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.rfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
+        if xp == np and dtype is np.float32:
+            out = out.astype(np.complex64)
+        return out
+
+    @testing.with_requires('numpy>=1.18.0')
+    @testing.for_dtypes('DF')
+    @testing.for_orders("CF")
+    @testing.numpy_nlcpy_allclose(rtol=1e-4, atol=1e-4, accept_error=ValueError,
+                                  contiguous_check=False)
+    def test_irfft_4d_axes(self, xp, dtype, order):
+        a = testing.shaped_random(self.shape, xp, dtype)
+        a = xp.asarray(a, order=order)
+        tmp = a.copy()
+        out = xp.fft.irfftn(a, s=self.s, axes=self.axes, norm=self.norm)
+        assert_allclose(a, tmp)
+
         if xp == np and dtype is np.complex64:
             out = out.astype(np.float32)
         elif xp == np and dtype is not np.complex64:

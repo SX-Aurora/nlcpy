@@ -135,15 +135,13 @@ def _check_numpy_nlcpy_error_compatible(nlcpy_error, numpy_error):
 
 def _check_nlcpy_numpy_error(self, nlcpy_error, nlcpy_msg, nlcpy_tb,
                              numpy_error, numpy_msg, numpy_tb,
-                             accept_error=False, check_msg=False):
+                             accept_error=None, check_msg=False):
     # skip error check if nlcpy raise NotImplementedError
     if isinstance(nlcpy_error, NotImplementedError):
         return
 
     # For backward compatibility
-    if accept_error is True:
-        accept_error = Exception
-    elif not accept_error:
+    if accept_error is None:
         accept_error = ()
 
     if nlcpy_error is None and numpy_error is None:
@@ -190,6 +188,8 @@ numpy
 %s
 ''' % (nlcpy_tb, numpy_tb)
         self.fail(msg)
+
+    nlcpy.venode.synchronize_all_ve()
 
 
 def _make_positive_mask(self, impl, args, kw):
@@ -696,7 +696,6 @@ def numpy_nlcpy_raises(name='xp', sp_name=None, scipy_name=None,
                 nlcpy_error = e
                 nlcpy_msg = str(e)
                 nlcpy_tb = traceback.format_exc()
-
             if sp_name:
                 import scipy.sparse
                 kw[sp_name] = scipy.sparse
@@ -719,6 +718,7 @@ def numpy_nlcpy_raises(name='xp', sp_name=None, scipy_name=None,
             _check_nlcpy_numpy_error(self, nlcpy_error, nlcpy_msg,
                                      nlcpy_tb, numpy_error, numpy_msg,
                                      numpy_tb, accept_error=accept_error)
+            del nlcpy_error, numpy_error
         return test_func
     return decorator
 
@@ -1285,19 +1285,19 @@ def shaped_arange(shape, xp=nlcpy, dtype=numpy.float32, order='C'):
          ``True`` (resp. ``False``).
 
     """
-    dtype = numpy.dtype(dtype)
+    dtype = xp.dtype(dtype)
     if type(shape) is int:
-        a = numpy.array(shape)
+        a = xp.array(shape)
     else:
-        a = numpy.arange(1, internal.prod(shape) + 1, 1)
+        a = xp.arange(1, internal.prod(shape) + 1, 1)
     if dtype == '?':
         a = a % 2 == 0
     elif dtype.kind == 'c':
         a = a + a * 1j
     if a.size > 1:
-        return xp.array(a.astype(dtype).reshape(shape), order=order)
+        return xp.asarray(a.astype(dtype).reshape(shape), order=order)
     else:
-        return xp.array(a.astype(dtype), order=order)
+        return xp.asarray(a.astype(dtype), order=order)
 
 
 def shaped_rearrange_for_broadcast(shapes):
@@ -1513,30 +1513,20 @@ def numpy_nlcpy_check_for_binary_ufunc(
     return decorator
 
 
-class NumpyError(object):
+class numpy_nlcpy_errstate(object):
 
     def __init__(self, **kw):
         self.kw = kw
 
     def __enter__(self):
-        self.err = numpy.geterr()
+        self.np_err = numpy.geterr()
+        self.vp_err = nlcpy.geterr()
         numpy.seterr(**self.kw)
-
-    def __exit__(self, *_):
-        numpy.seterr(**self.err)
-
-
-class NlcpyError(object):
-
-    def __init__(self, **kw):
-        self.kw = kw
-
-    def __enter__(self):
-        self.err = nlcpy.geterr()
         nlcpy.seterr(**self.kw)
 
     def __exit__(self, *_):
-        nlcpy.seterr(**self.err)
+        numpy.seterr(**self.np_err)
+        nlcpy.seterr(**self.vp_err)
 
 
 @contextlib.contextmanager
@@ -1592,7 +1582,7 @@ class NumpyAliasValuesTestBase(NumpyAliasTestBase):
         assert self.nlcpy_func(*self.args) == self.numpy_func(*self.args)
 
 
-def asnumpy(a, order='K'):
+def asnumpy(a, order='C'):
     if isinstance(a, ndarray):
         return a.get(order=order)
     else:

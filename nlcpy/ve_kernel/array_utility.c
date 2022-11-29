@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,7 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 */
+#include <math.h>
 #include "nlcpy.h"
 
 uint64_t nlcpy__get_scalar(ve_array *val) {
@@ -102,7 +103,7 @@ void nlcpy__argnsort(ve_array *a, int64_t *idx, int64_t n) {
                 wk_idx[i] = wk_idx[j];
                 wk_idx[j] = tmp;
             }
-        } 
+        }
     }
 #pragma _NEC novector
     for (i = 0; i < n; i++) idx[i] = wk_idx[i];
@@ -148,7 +149,7 @@ void nlcpy__rearrange_axis(ve_array *a, int64_t *idx) {
 
 void nlcpy__exchange_shape_and_strides(ve_array *a) {
     int64_t i, j, sh, st, smax1, smax2, max1_idx, max2_idx, n_inner, n_outer;
-    
+
     smax1 = 0;
     smax2 = 0;
     n_inner = a->ndim - 1;
@@ -167,7 +168,7 @@ void nlcpy__exchange_shape_and_strides(ve_array *a) {
         } else if (smax2 < sh) {
             smax2 = sh;
             max2_idx = i;
-        } 
+        }
     }
     // exchange shape and strides
     if (max1_idx != n_inner) {
@@ -216,7 +217,7 @@ uint64_t nlcpy__array_rnext(ve_array *a, uint64_t curr_adr, int64_t *coords) {
     int64_t i, ndim_m1;
     ndim_m1 = a->ndim - 1;
 #pragma _NEC novector
-    for (i = 0; i <= ndim_m1; i++) { 
+    for (i = 0; i <= ndim_m1; i++) {
         if (coords[i] < a->shape[i] - 1) {
             coords[i]++;
             return curr_adr + a->strides[i];
@@ -252,7 +253,7 @@ uint64_t nlcpy__array_reduce_rnext(ve_array *a, uint64_t curr_adr, int64_t *coor
     int64_t i, ndim_m1;
     ndim_m1 = b->ndim - 1;
 #pragma _NEC novector
-    for (i = 0; i <= ndim_m1; i++) { 
+    for (i = 0; i <= ndim_m1; i++) {
         if (coords[i] < b->shape[i] - 1) {
             coords[i]++;
             if (a->shape[i]==b->shape[i]) curr_adr += a->strides[i];
@@ -270,4 +271,10 @@ void nlcpy_memcpy(uint64_t *dst, uint64_t *src, uint64_t nbytes) {
     return;
 }
 
-
+uint64_t nlcpy_set_constant() {
+    extern float  nlcpy_g_nanf;
+    extern double nlcpy_g_nan;
+    nlcpy_g_nanf = nanf("n");
+    nlcpy_g_nan = nan("n");
+    return NLCPY_ERROR_OK;
+}

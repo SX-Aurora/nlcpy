@@ -51,6 +51,7 @@
 
 import unittest
 
+import nlcpy
 import numpy
 from nlcpy import testing
 
@@ -84,7 +85,13 @@ class TestNormVector(unittest.TestCase):
             args["axis"] = axis
         if self.keepdims:
             args["keepdims"] = self.keepdims
-        return xp.linalg.norm(**args)
+        if self.ord in (-1, -2, -4):
+            with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+                ret = xp.linalg.norm(**args)
+                nlcpy.request.flush()
+                return ret
+        else:
+            return xp.linalg.norm(**args)
 
     @testing.for_dtypes("fF")
     @testing.for_orders("CF")
@@ -92,7 +99,13 @@ class TestNormVector(unittest.TestCase):
     def test_norm_vector_single(self, xp, dtype, order):
         shape, axis = self.pat
         x = xp.asarray(testing.shaped_random(shape, xp, dtype), order=order)
-        return xp.linalg.norm(x, self.ord, axis, self.keepdims)
+        if self.ord in (-1, -2, -4):
+            with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+                ret = xp.linalg.norm(x, self.ord, axis, self.keepdims)
+                nlcpy.request.flush()
+                return ret
+        else:
+            return xp.linalg.norm(x, self.ord, axis, self.keepdims)
 
 
 @testing.parameterize(*(
@@ -112,7 +125,13 @@ class TestNormVectorZeroSizeArray(unittest.TestCase):
     def test_norm_vector_zero_size_array(self, xp, dtype, order):
         shape, axis = self.pat
         x = xp.asarray(testing.shaped_random(shape, xp, dtype), order=order)
-        return xp.linalg.norm(x, self.ord, axis, self.keepdims)
+        if self.ord in (-1, -2, -4):
+            with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+                ret = xp.linalg.norm(x, self.ord, axis, self.keepdims)
+                nlcpy.request.flush()
+                return ret
+        else:
+            return xp.linalg.norm(x, self.ord, axis, self.keepdims)
 
     @testing.for_dtypes("fF")
     @testing.for_orders("CF")
@@ -120,7 +139,13 @@ class TestNormVectorZeroSizeArray(unittest.TestCase):
     def test_norm_vector_zero_size_array_single(self, xp, dtype, order):
         shape, axis = self.pat
         x = xp.asarray(testing.shaped_random(shape, xp, dtype), order=order)
-        return xp.linalg.norm(x, self.ord, axis, self.keepdims)
+        if self.ord in (-1, -2, -4):
+            with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+                ret = xp.linalg.norm(x, self.ord, axis, self.keepdims)
+                nlcpy.request.flush()
+                return ret
+        else:
+            return xp.linalg.norm(x, self.ord, axis, self.keepdims)
 
 
 @testing.parameterize(*(

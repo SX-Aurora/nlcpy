@@ -151,6 +151,9 @@ def amax(a, axis=None, out=None, keepdims=nlcpy._NoValue,
     return nlcpy.maximum.reduce(a, axis=axis, out=out, **args)
 
 
+max = amax
+
+
 def amin(a, axis=None, out=None, keepdims=nlcpy._NoValue,
          initial=nlcpy._NoValue, where=nlcpy._NoValue):
     """Returns the minimum of an array or minimum along an axis.
@@ -241,6 +244,9 @@ def amin(a, axis=None, out=None, keepdims=nlcpy._NoValue,
     if where is not nlcpy._NoValue:
         args["where"] = where
     return nlcpy.minimum.reduce(a, axis=axis, out=out, **args)
+
+
+min = amin
 
 
 def nanmax(a, axis=None, out=None, keepdims=nlcpy._NoValue):
@@ -475,7 +481,7 @@ def ptp(a, axis=None, out=None, keepdims=nlcpy._NoValue):
     array([126, 127, 128, 129], dtype=uint32)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('ptp is not implemented yet.')
 
 
 @numpy_wrap
@@ -572,7 +578,7 @@ def percentile(a, q, axis=None, out=None, overwrite_input=False,
     array([7., 2.])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('percentile is not implemented yet.')
 
 
 @numpy_wrap
@@ -678,7 +684,7 @@ def nanpercentile(a, q, axis=None, out=None, overwrite_input=False,
     >>> assert not vp.all(a==b)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('nanpercentile is not implemented yet.')
 
 
 @numpy_wrap
@@ -778,7 +784,7 @@ def quantile(a, q, axis=None, out=None, overwrite_input=False,
     array([7., 2.])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('quantile is not implemented yet.')
 
 
 @numpy_wrap
@@ -872,4 +878,4 @@ def nanquantile(a, q, axis=None, out=None, overwrite_input=False,
     >>> assert not vp.all(a==b)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('nanquantile is not implemented yet.')

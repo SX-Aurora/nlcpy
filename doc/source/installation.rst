@@ -16,7 +16,7 @@ This page describes installation of NLCPy.
 
     .. seealso::
         `SX-Aurora TSUBASA Installation Guide
-        <https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf>`_
+        <https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_
 
     - The libraries of NLCPy are located in the following directory after NEC SDK
       is installed or updated::
@@ -37,14 +37,27 @@ Requirements
 Before the installation of NLCPy, the following components are required to be
 installed on your x86 Node of SX-Aurora TSUBASA.
 
-* | `NEC SDK <https://www.hpc.nec/documents/guide/pdfs/InstallationGuide_E.pdf>`_
+* | `NEC SDK <https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_
 
-    - required NEC C/C++ compiler version: >= 3.4.0
+    - required NEC C/C++ compiler version: >= 3.5.1
     - required NLC version: >= 2.3.0
 
-* | `VEOS <https://www.hpc.nec/documentation/>`_
+* | `Alternative VE Offloading (AVEO) <https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_
 
-    - required version: >= 2.10.1
+    - required version: >= 2.13.0
+
+    - If you install NLCPy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
+
+      ::
+
+        # yum install veoffload-aveo veoffload-aveorun
+
+    - If you install NLCPy from source, the development packages of Alternative VE Offloading(AVEO) are required.
+
+      ::
+
+        # yum install veoffload-aveo-devel veoffload-aveorun-devel
+
 
 * | `Python <https://www.python.org/>`_
 

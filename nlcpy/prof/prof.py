@@ -37,7 +37,6 @@ import numpy
 import nlcpy
 from nlcpy import veo
 
-
 # profiling status
 NOT_PROFILING = 0
 UNDER_PROFILING = 1
@@ -400,25 +399,6 @@ def get_run_stats():
     return _prof.get_stats()
 
 
-_lib_prof = None
-
-
-def _load_library():
-    proc = veo._get_veo_proc()
-    lib = proc.load_library(
-        (nlcpy._path._here + "/lib/libnlcpy_profiling.so").encode('utf-8'))
-    if lib is None:
-        raise RuntimeError("cannot detect profiling kernel")
-    return lib
-
-
-def _get_lib():
-    global _lib_prof
-    if _lib_prof is None:
-        _lib_prof = _load_library()
-    return _lib_prof
-
-
 def ftrace_region_begin(message):
     """Begins an ftrace region.
 
@@ -452,15 +432,12 @@ def ftrace_region_begin(message):
     """
 
     nlcpy.request.flush()
-    ctx = veo._get_veo_ctx()
-    lib = _get_lib()
-    f = lib.find_function("nlcpy_profiling_region_begin".encode('utf-8'))
-    f.args_type(b"void *")
-    f.ret_type("void")
+    venode = nlcpy.venode.VE()
     if type(message) is not bytes:
         message = message.encode('utf-8')
     buff = numpy.frombuffer(message, dtype=numpy.uint8)
-    req = f(ctx, veo.OnStack(buff))
+    req = venode.lib_prof.func[b"nlcpy_profiling_region_begin"](
+        venode.ctx, veo.OnStack(buff))
     req.wait_result()
 
 
@@ -497,15 +474,12 @@ def ftrace_region_end(message):
     """
 
     nlcpy.request.flush()
-    ctx = veo._get_veo_ctx()
-    lib = _get_lib()
-    f = lib.find_function("nlcpy_profiling_region_end".encode('utf-8'))
-    f.args_type(b"void *")
-    f.ret_type("void")
+    venode = nlcpy.venode.VE()
     if type(message) is not bytes:
         message = message.encode('utf-8')
     buff = numpy.frombuffer(message, dtype=numpy.uint8)
-    req = f(ctx, veo.OnStack(buff))
+    req = venode.lib_prof.func[b"nlcpy_profiling_region_end"](
+        venode.ctx, veo.OnStack(buff))
     req.wait_result()
 
 

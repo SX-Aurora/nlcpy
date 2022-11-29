@@ -133,6 +133,9 @@ inline Bint isnan_f32(float x) {
     return ( Isnan ) ? (Bint)1 : (Bint)0;
 }
 
+float  nlcpy_g_nanf;
+double nlcpy_g_nan;
+
 #ifdef __cplusplus
 }
 #endif

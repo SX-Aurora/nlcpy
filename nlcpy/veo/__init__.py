@@ -31,8 +31,3 @@
 
 from nlcpy.veo._veo import *  # NOQA
 from nlcpy.veo.vebuild import *  # NOQA
-from nlcpy.veo._veo import _get_veo_proc  # NOQA
-from nlcpy.veo._veo import _get_veo_lib  # NOQA
-from nlcpy.veo._veo import _get_veo_ctx  # NOQA
-from nlcpy.veo._veo import _get_veo_pool  # NOQA
-from nlcpy.veo._veo import _initialize  # NOQA

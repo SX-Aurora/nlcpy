@@ -39,9 +39,9 @@ numba_cpu = [
 TARGS = (
     nlcpy_sca,
     # pystencils_gpu,
-    # cupy_fusion,
+    cupy_fusion,
     # numba_cuda,
-    pystencils_cpu,
+    # pystencils_cpu,
     # numba_cpu,
 )
 PALETTES = tuple([_targ[1] for _targ in TARGS])

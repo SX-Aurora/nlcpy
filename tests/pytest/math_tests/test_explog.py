@@ -92,15 +92,15 @@ class TestExplog(unittest.TestCase):
         self.check_unary('exp2', no_complex=True)
 
     def test_log(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_unary('log')
 
     def test_log10(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_unary('log10', no_complex=True)
 
     def test_log2(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_unary('log2', no_complex=True)
 
     def test_log1p(self):

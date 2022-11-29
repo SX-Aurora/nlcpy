@@ -161,7 +161,7 @@ def load(file, mmap_mode=None, allow_pickle=False, fix_imports=True, encoding='A
 
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('load is not implemented yet.')
 
 
 @numpy_wrap
@@ -214,7 +214,7 @@ def save(file, arr, allow_pickle=True, fix_imports=True):
     array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('save is not implemented yet.')
 
 
 @numpy_wrap
@@ -319,7 +319,7 @@ def savetxt(fname, X, fmt='%.18e', delimiter=' ', newline='n', header='', footer
     >>> vp.savetxt('test.out', x, fmt='%1.4e')   # use exponential notation
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('savetxt is not implemented yet.')
 
 
 @numpy_wrap
@@ -394,7 +394,7 @@ def savez(file, *args, **kwds):
     array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('savez is not implemented yet.')
 
 
 @numpy_wrap
@@ -451,4 +451,4 @@ def savez_compressed(file, *args, **kwds):
     >>> vp.testing.assert_array_equal(test_vector, loaded['b'])
     """
     # use numpy_wrap
-    raise NotImplementedError
+    raise NotImplementedError('savez_compressed is not implemented yet.')

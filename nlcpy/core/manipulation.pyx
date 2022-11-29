@@ -57,17 +57,16 @@ import sys
 import numpy
 import warnings
 import operator
-from nlcpy import veo
 
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport core
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport broadcast
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core.internal cimport _compress_dims
-from nlcpy.request cimport request
+from nlcpy.core cimport vememory
+from nlcpy.venode._venode cimport VE
 
 from functools import reduce
 
@@ -166,14 +165,15 @@ cpdef _copyto(ndarray dst, src, casting, where):
                 "could not broadcast where mask from shape {} into shape {}"
                 .format(str(where.shape), str(dst.shape)))
 
+    ve = VE()
     if use_where:
-        request._push_request(
+        ve.request_manager._push_request(
             "nlcpy_copy_masked",
             "creation_op",
             (src, dst, where),
         )
     else:
-        request._push_request(
+        ve.request_manager._push_request(
             "nlcpy_copy",
             "creation_op",
             (src, dst),
@@ -210,7 +210,6 @@ cpdef ndarray _reshape(ndarray self,
                        const vector[Py_ssize_t] &shape_spec):
     cdef vector[Py_ssize_t] shape, strides
     cdef ndarray newarray
-    vh_view = None
     # infer unknown shape, when detected negative value from shape
     # e.g.)
     #   >>> x = nlcpy.arange(10)
@@ -222,9 +221,7 @@ cpdef ndarray _reshape(ndarray self,
     # estimate newarray's strides
     _get_strides_for_nocopy_reshape(self, shape, strides)
     if strides.size() == shape.size():
-        if self._memloc in {MemoryLocation.on_VH, MemoryLocation.on_VE_VH}:
-            vh_view = self.vh_data.reshape(shape)
-        return self._view(shape, strides, False, True, True, vh_view=vh_view)
+        return self._view(shape, strides, False, True, True)
 
     #  reshape from not contiguous strides array, need to create copy
     newarray = self.copy()
@@ -273,10 +270,13 @@ cpdef _resize(ndarray self,
                                  'refcheck=False.')
 
         # /* Reallocate space if needed - allocating 0 is forbidden */
-        new_data = _realloc_kernel(self, newnbytes if newnbytes!=0 else itemsize)
-        if new_data == 0:
+        is_pool, veo_hmem, ve_adr = _realloc_kernel(
+            self, newnbytes if newnbytes!=0 else itemsize)
+        if veo_hmem == 0:
             raise MemoryError('cannot allocate memory for array')
-        self.ve_adr = new_data
+        self._is_pool = is_pool
+        self.veo_hmem = veo_hmem
+        self.ve_adr = ve_adr
 
     new_nd = shape.size()
     if new_nd > 0:
@@ -445,7 +445,7 @@ cdef _fill_kernel(ndarray dst, src):
     src = nlcpy.array(typ(src))  # cast dtype
     if src.size > 1:
         src = broadcast.broadcast_to(src, dst.shape)
-    request._push_request(
+    VE().request_manager._push_request(
         "nlcpy_copy",
         "creation_op",
         (src, dst),
@@ -544,7 +544,7 @@ cdef ndarray _concatenate_arrays(n, arrays, int32_t axis, ret):
     for i in range(n):
         src = arrays[i]
         dst = dsts[i]
-        request._push_request(
+        VE().request_manager._push_request(
             "nlcpy_copy",
             "creation_op",
             (src, dst),
@@ -580,7 +580,7 @@ cdef ndarray _concatenate_flattened_arrays(n, arrays, order, ret):
     for i in range(n):
         src = arrays[i]
         dst = dsts[i]
-        request._push_request(
+        VE().request_manager._push_request(
             "nlcpy_copy",
             "creation_op",
             (src.ravel(), dst),
@@ -590,10 +590,12 @@ cdef ndarray _concatenate_flattened_arrays(n, arrays, order, ret):
 
 
 cdef _realloc_kernel(ndarray src, nbytes):
-    proc = veo._get_veo_proc()
-    dst = proc.realloc_mem(
-        veo.VEMemPtr(proc, src.ve_adr, nbytes), nbytes)
-    return dst.addr
+    is_pool, veo_hmem, ve_adr = vememory._alloc_mem(nbytes, src._venode)
+    src._venode.request_manager._flush(sync=True)
+    vememory._hmemcpy(veo_hmem, src.veo_hmem,
+                      src.nbytes if src.nbytes > nbytes else nbytes)
+    vememory._free_mem(src.veo_hmem, src._is_pool, src._venode)
+    return is_pool, veo_hmem, ve_adr
 
 
 cdef ndarray _ndarray_flatten(ndarray self, order):
@@ -610,8 +612,12 @@ cdef ndarray _ndarray_flatten(ndarray self, order):
     if order_char == b'C':
         return _reshape(self, shape).copy()
     elif order_char == b'F':
-        raise NotImplementedError(
-            'ravel with order=\'F\' not yet implemented.')
+        try:
+            f = numpy.ndarray.flatten
+            return nlcpy._make_wrap_method(f, self)(order)
+        except NotImplementedError:
+            raise NotImplementedError(
+                'ravel with order=\'F\' not yet implemented.')
 
 
 cpdef ndarray _moveaxis(ndarray a, source, destination):
@@ -752,7 +758,7 @@ cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
         out_shape[axis] *= rep.get().item(0)
 
     out = nlcpy.empty(out_shape, dtype=a.dtype)
-    aind = nlcpy.empty([out_shape[axis]], dtype=a.dtype)
+    aind = nlcpy.empty([out_shape[axis]], dtype='l')
     info = nlcpy.array(1, dtype='l')
     if a._c_contiguous:
         len_axis = out_shape[axis]
@@ -762,7 +768,7 @@ cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
         out2 = out.reshape(shape)
     else:
         out2 = out
-    request._push_request(
+    VE().request_manager._push_request(
         'nlcpy_repeat',
         'manipulation_op',
         (a, rep, <int64_t>axis, out2, aind, info)
@@ -795,10 +801,12 @@ cpdef _block(arrays):
         for the_slice, arr in zip(offsets, arrays):
             result[(Ellipsis,) + the_slice] = arr
     else:
-        ve_arr = [request._create_ve_array_buffer(arr) for arr in arrays]
+        reqm = VE().request_manager
+        ve_arr = [reqm._create_ve_array_buffer(arr) for arr in arrays]
         ve_arr = nlcpy.array(ve_arr, dtype='L')
         offsets = nlcpy.array(offsets, dtype='L')
-        request._push_request(
+        reqm.keep_refs(arrays)
+        reqm._push_request(
             'nlcpy_block',
             'manipulation_op',
             (ve_arr, result, offsets)

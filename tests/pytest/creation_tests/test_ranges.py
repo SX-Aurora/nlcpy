@@ -53,6 +53,7 @@ import numpy
 import math
 import sys
 import unittest
+import warnings
 
 import nlcpy
 from nlcpy import testing
@@ -331,7 +332,10 @@ class TestLogspace2(unittest.TestCase):
 
     @testing.numpy_nlcpy_allclose()
     def test_logspace_base_is_zero(self, xp):
-        return xp.logspace(2, 5, 50, True, 0)
+        with xp.errstate(divide='ignore'):
+            ret = xp.logspace(2, 5, 50, True, 0)
+            nlcpy.request.flush()
+            return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_logspace_cast_to_bool(self, xp):
@@ -340,17 +344,23 @@ class TestLogspace2(unittest.TestCase):
     @testing.for_dtypes('ilIL', name='dtype')
     @testing.numpy_nlcpy_allclose(atol=1, rtol=1e-12)
     def test_logspace_cast_to_int(self, xp, dtype):
-        return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
 
     @testing.for_dtypes('fF', name='dtype')
     @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
     def test_logspace_cast_to_single(self, xp, dtype):
-        return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
 
     @testing.for_dtypes('dD', name='dtype')
     @testing.numpy_nlcpy_allclose(atol=1e-12, rtol=1e-12)
     def test_logspace_cast_to_double(self, xp, dtype):
-        return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.logspace(1.4 + 1.2j, 2.3 - 3.5j, dtype=dtype)
 
     @testing.for_dtypes('?ilILdD', name='dtype_s')
     @testing.for_dtypes('?ilILdD', name='dtype_e')

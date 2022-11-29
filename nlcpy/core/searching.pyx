@@ -138,14 +138,13 @@ cpdef argmax(a, axis=None, out=None):
     # convert to nlcpy.ndarray
     arr = core.argument_conversion(a)
 
-    ########################################################################
-    # TODO: VE-VH collaboration
-    if arr._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError("argmax on VH is not yet implemented.")
-
     if out is not None:
-        if out._memloc in {on_VH, on_VE_VH}:
-            raise NotImplementedError("argmax on VH is not yet implemented.")
+        if not isinstance(out, ndarray):
+            raise TypeError("output must be an nlcpy.ndarray.")
+        if out.dtype.char not in ('il'):
+            raise TypeError(
+                "Cannot cast array data from dtype('{}') to "
+                "dtype('int64') according to the rule 'safe'".format(out.dtype))
 
     ########################################################################
     # axis
@@ -325,14 +324,13 @@ cpdef argmin(a, axis=None, out=None):
     # convert to nlcpy.ndarray
     arr = core.argument_conversion(a)
 
-    ########################################################################
-    # TODO: VE-VH collaboration
-    if arr._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError("argmin on VH is not yet implemented.")
-
     if out is not None:
-        if out._memloc in {on_VH, on_VE_VH}:
-            raise NotImplementedError("argmin on VH is not yet implemented.")
+        if not isinstance(out, ndarray):
+            raise TypeError("output must be an nlcpy.ndarray.")
+        if out.dtype.char not in ('il'):
+            raise TypeError(
+                "Cannot cast array data from dtype('{}') to "
+                "dtype('int64') according to the rule 'safe'".format(out.dtype))
 
     ########################################################################
     # axis
@@ -533,11 +531,6 @@ cpdef nonzero(a):
         return tuple(ret)
 
     ########################################################################
-    # TODO: VE-VH collaboration
-    if arr._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError("nonzero on VH is not yet implemented.")
-
-    ########################################################################
     # check order
     if arr._f_contiguous and not arr._c_contiguous:
         order_out = 'F'
@@ -645,11 +638,6 @@ cpdef ndarray argwhere(a):
 
     if errcnt != 0:
         return core.array([], dtype=numpy.int64).reshape(shape)
-
-    ########################################################################
-    # TODO: VE-VH collaboration
-    if arr._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError("argwhere on VH is not yet implemented.")
 
     ########################################################################
     # check order

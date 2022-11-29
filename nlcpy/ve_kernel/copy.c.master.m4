@@ -188,7 +188,8 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t *psw)
         return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
-    retrieve_fpe_flags(psw);
+    int32_t dummy_psw;
+    retrieve_fpe_flags(&dummy_psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
 

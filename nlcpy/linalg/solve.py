@@ -160,8 +160,8 @@ def solve(a, b):
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
-        b._ve_array,
+        a,
+        b,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
@@ -307,9 +307,9 @@ def lstsq(a, b, rcond='warn'):
             if b_complex:
                 br = nlcpy.asarray(b.real, dtype='d')
                 bi = nlcpy.asarray(b.imag, dtype='d')
-                square_b = nlcpy.power(br, 2) + nlcpy.power(bi, 2)
+                square_b = nlcpy.multiply(br, br) + nlcpy.multiply(bi, bi)
             else:
-                square_b = nlcpy.power(b, 2, dtype='d')
+                square_b = nlcpy.multiply(b, b, dtype='d')
             residuals = nlcpy.add.reduce(square_b, dtype=f_dtype)
         return (x, residuals, 0, nlcpy.array([], dtype=f_dtype))
 
@@ -333,7 +333,7 @@ def lstsq(a, b, rcond='warn'):
     mnthr = int(minmn * 1.6)
     mm = m
     lwork = 1
-    if a_complex:
+    if a_complex or b_complex:
         _tmp = 2
         wlalsd = minmn * k
         lrwork = 10 * maxmn + 2 * maxmn * 25 + 8 * maxmn * nlvl + 3 * 25 * k \
@@ -367,19 +367,19 @@ def lstsq(a, b, rcond='warn'):
                         3 * m + 32 * k)
 
     liwork = minmn * (11 + 3 * nlvl)
-    work = nlcpy.empty(lwork)
+    work = nlcpy.empty(lwork, dtype=f_dtype)
     iwork = nlcpy.empty(liwork, dtype='l')
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
-        b._ve_array,
-        s._ve_array,
-        work._ve_array,
-        iwork._ve_array,
-        rwork._ve_array,
-        rcond._ve_array,
+        a,
+        b,
+        s,
+        work,
+        rwork,
+        iwork,
+        rcond,
         veo.OnStack(rank, inout=veo.INTENT_OUT),
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
@@ -396,7 +396,7 @@ def lstsq(a, b, rcond='warn'):
         residuals = nlcpy.array([], dtype=f_dtype)
     else:
         _b = b[n:]
-        square_b = nlcpy.power(_b.real, 2) + nlcpy.power(_b.imag, 2)
+        square_b = nlcpy.multiply(_b.real, _b.real) + nlcpy.multiply(_b.imag, _b.imag)
         residuals = nlcpy.add.reduce(square_b, dtype=f_dtype)
     if k_extend:
         x = b[..., :0]
@@ -473,14 +473,14 @@ def inv(a):
     if a.size == 0:
         return nlcpy.asarray(a, dtype=ainv_dtype)
     a = nlcpy.array(nlcpy.moveaxis(a, (-1, -2), (1, 0)), dtype=dtype, order='F')
-    ipiv = nlcpy.empty(a.shape[-1])
+    ipiv = nlcpy.empty(a.shape[-1], dtype='l')
     work = nlcpy.empty(a.shape[-1] * 256)
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
-        ipiv._ve_array,
-        work._ve_array,
+        a,
+        ipiv,
+        work,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )

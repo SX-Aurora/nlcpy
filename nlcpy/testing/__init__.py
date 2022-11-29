@@ -93,8 +93,7 @@ from nlcpy.testing.helper import numpy_nlcpy_raises  # NOQA
 from nlcpy.testing.helper import numpy_satisfies  # NOQA
 from nlcpy.testing.helper import NumpyAliasBasicTestBase  # NOQA
 from nlcpy.testing.helper import NumpyAliasValuesTestBase  # NOQA
-from nlcpy.testing.helper import NumpyError  # NOQA
-from nlcpy.testing.helper import NlcpyError  # NOQA
+from nlcpy.testing.helper import numpy_nlcpy_errstate  # NOQA
 from nlcpy.testing.helper import shaped_arange  # NOQA
 from nlcpy.testing.helper import shaped_rearrange_for_broadcast  # NOQA
 from nlcpy.testing.helper import create_shape_and_axis_set  # NOQA
@@ -102,6 +101,7 @@ from nlcpy.testing.helper import shaped_random  # NOQA
 from nlcpy.testing.helper import shaped_reverse_arange  # NOQA
 from nlcpy.testing.helper import with_requires  # NOQA
 from nlcpy.testing.helper import asnumpy  # NOQA
+from nlcpy.testing.device import multi_ve  # NOQA
 from nlcpy.testing.parameterized import parameterize  # NOQA
 from nlcpy.testing.parameterized import product  # NOQA
 from nlcpy.testing.random import fix_random  # NOQA

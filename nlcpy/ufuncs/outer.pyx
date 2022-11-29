@@ -504,15 +504,6 @@ cpdef outer_core(name, A, B, out=None, where=True,
     x = A if get_contiguity(A) else A.copy(order='K')
     y = B if get_contiguity(B) else B.copy(order='K')
 
-    #######################################################################
-    # TODO: VE-VH collaboration
-    if A._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError('amax on VH is not yet implemented.')
-
-    if out is not None:
-        if out._memloc in {on_VH, on_VE_VH}:
-            raise NotImplementedError('amax on VH is not yet implemented.')
-
     if flag_bcast:
         bcast_src = nlcpy.empty(work_shape, order='C', dtype=out_dtype)
     else:

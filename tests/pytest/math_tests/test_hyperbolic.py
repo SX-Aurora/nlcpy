@@ -88,5 +88,5 @@ class TestHyperbolic(unittest.TestCase):
     @testing.for_dtypes(['f', 'd'])
     @testing.numpy_nlcpy_allclose(atol=1e-5)
     def test_arctanh(self, xp, dtype):
-        a = testing.shaped_arange(self.shape, xp, dtype)
+        a = testing.shaped_random(self.shape, xp, dtype, scale=1)
         return xp.arctanh(a)

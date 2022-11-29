@@ -32,9 +32,7 @@
 from __future__ import division, absolute_import, print_function
 import random
 
-from numpy.testing import (
-    assert_equal, assert_array_equal,
-)
+from numpy.testing import assert_allclose
 
 import pytest
 import numpy as np
@@ -172,7 +170,7 @@ def test_run2(k, v):
     ans1, ans2 = eval(l_v[0])(l_v[1:])
 
     print("ans1={} ans2={}".format(ans1, ans2))
-    assert_equal(ans1, ans2.get())
+    assert_allclose(ans1, ans2.get(), atol=1e-12, rtol=1e-12)
 
 
 def test_me_case_2():
@@ -182,7 +180,7 @@ def test_me_case_2():
     ans_np = np.mean(np_a)
 
     print("ans1={} ans2={}".format(ans_ny, ans_np))
-    assert_array_equal(ans_np, ans_ny.get())
+    assert_allclose(ans_np, ans_ny.get(), atol=1e-12, rtol=1e-12)
 
 
 def test_me_case_3():
@@ -192,4 +190,4 @@ def test_me_case_3():
     ans_np = np.mean(np_a, axis=1)
 
     print("ans1={} ans2={}".format(ans_ny, ans_np))
-    assert_array_equal(ans_np, ans_ny.get())
+    assert_allclose(ans_np, ans_ny.get(), atol=1e-12, rtol=1e-12)

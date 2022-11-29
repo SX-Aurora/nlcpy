@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
 from numpy.core._exceptions import UFuncTypeError
@@ -288,7 +289,9 @@ class TestClipDtype(unittest.TestCase):
         amin = xp.array(3, dtype=dt_amin)
         amax = xp.array(10, dtype=dt_amax)
         try:
-            return xp.clip(a, amin, amax, dtype=dtype, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                return xp.clip(a, amin, amax, dtype=dtype, casting=self.casting)
         except UFuncTypeError:
             return 0
 
@@ -303,7 +306,9 @@ class TestClipDtype(unittest.TestCase):
         amax = xp.array(10, dtype=dt_amax)
         out = xp.zeros(a.shape, dtype=dt_out)
         try:
-            return xp.clip(a, amin, amax, out=out, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                return xp.clip(a, amin, amax, out=out, casting=self.casting)
         except UFuncTypeError:
             return 0
 
@@ -319,7 +324,9 @@ class TestClipDtype(unittest.TestCase):
         amax = xp.array(10, dtype=dt_amax)
         out = xp.zeros(a.shape, dtype=dt_out)
         try:
-            return xp.clip(a, amin, amax, out=out, dtype=dtype, casting=self.casting)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', numpy.ComplexWarning)
+                return xp.clip(a, amin, amax, out=out, dtype=dtype, casting=self.casting)
         except UFuncTypeError:
             return 0
 
@@ -339,7 +346,9 @@ class TestClipDtypeFailure(unittest.TestCase):
         a = testing.shaped_arange([3, 4], xp, dtype=dt_a)
         amin = xp.array(3, dtype=dt_amin)
         amax = xp.array(10, dtype=dt_amax)
-        xp.clip(a, amin, amax, casting=self.casting)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            xp.clip(a, amin, amax, casting=self.casting)
         raise Exception  # to avoid normal case
 
     @testing.for_all_dtypes(name='dt_a')
@@ -351,7 +360,9 @@ class TestClipDtypeFailure(unittest.TestCase):
         a = testing.shaped_arange([3, 4], xp, dtype=dt_a)
         amin = xp.array(3, dtype=dt_amin)
         amax = xp.array(10, dtype=dt_amax)
-        xp.clip(a, amin, amax, dtype=dtype, casting=self.casting)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            xp.clip(a, amin, amax, dtype=dtype, casting=self.casting)
         raise Exception
 
     @testing.for_all_dtypes(name='dt_a')
@@ -364,7 +375,9 @@ class TestClipDtypeFailure(unittest.TestCase):
         amin = xp.array(3, dtype=dt_amin)
         amax = xp.array(10, dtype=dt_amax)
         out = xp.zeros(a.shape, dtype=dt_out)
-        xp.clip(a, amin, amax, out=out, casting=self.casting)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            xp.clip(a, amin, amax, out=out, casting=self.casting)
         raise Exception
 
     @testing.for_all_dtypes(name='dt_a')
@@ -378,5 +391,7 @@ class TestClipDtypeFailure(unittest.TestCase):
         amin = xp.array(3, dtype=dt_amin)
         amax = xp.array(10, dtype=dt_amax)
         out = xp.zeros(a.shape, dtype=dt_out)
-        xp.clip(a, amin, amax, out=out, dtype=dtype, casting=self.casting)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            xp.clip(a, amin, amax, out=out, dtype=dtype, casting=self.casting)
         raise Exception

@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
 import nlcpy
@@ -221,7 +222,9 @@ class TestLstsq(unittest.TestCase):
         args["b"] = b
         if self.rcond != 'warn':
             args["rcond"] = self.rcond
-        return xp.linalg.lstsq(**args)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.linalg.lstsq(**args)
 
     @testing.for_dtypes("fF", name='dt_a')
     @testing.for_dtypes("fF", name='dt_b')
@@ -233,10 +236,12 @@ class TestLstsq(unittest.TestCase):
             testing.shaped_random(self.shape[0], xp, dt_a), order=order_a)
         b = xp.asarray(
             testing.shaped_random(self.shape[1], xp, dt_b), order=order_b)
-        if self.rcond != 'warn':
-            return xp.linalg.lstsq(a, b, self.rcond)
-        else:
-            return xp.linalg.lstsq(a, b)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            if self.rcond != 'warn':
+                return xp.linalg.lstsq(a, b, self.rcond)
+            else:
+                return xp.linalg.lstsq(a, b)
 
     @testing.for_dtypes("fF", name='dt_a')
     @testing.for_dtypes("?ilILdD", name='dt_b')
@@ -248,7 +253,9 @@ class TestLstsq(unittest.TestCase):
             testing.shaped_random(self.shape[0], xp, dt_a), order=order_a)
         b = xp.asarray(
             testing.shaped_random(self.shape[1], xp, dt_b), order=order_b)
-        return xp.linalg.lstsq(a, b, self.rcond)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.linalg.lstsq(a, b, self.rcond)
 
     @testing.for_dtypes("?ilILdD", name='dt_a')
     @testing.for_dtypes("fF", name='dt_b')
@@ -260,7 +267,9 @@ class TestLstsq(unittest.TestCase):
             testing.shaped_random(self.shape[0], xp, dt_a), order=order_a)
         b = xp.asarray(
             testing.shaped_random(self.shape[1], xp, dt_b), order=order_b)
-        return xp.linalg.lstsq(a, b, rcond=self.rcond)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', FutureWarning)
+            return xp.linalg.lstsq(a, b, rcond=self.rcond)
 
 
 class TestLstsqFailure(unittest.TestCase):

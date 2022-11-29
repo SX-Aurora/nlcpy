@@ -29,7 +29,47 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import numpy
+import threading
+import contextlib
+
+
+_ERR_IGNORE = 0
+_ERR_WARN = 1
+_ERR_RAISE = 2
+_ERR_CALL = 3
+_ERR_PRINT = 4
+_ERR_LOG = 5
+_ERR_DEFAULT = 521
+
+_SHIFT_DIVIDEBYZERO = 0
+_SHIFT_OVERFLOW = 3
+_SHIFT_UNDERFLOW = 6
+_SHIFT_INVALID = 9
+
+_errdict = {"ignore": _ERR_IGNORE,
+            "warn": _ERR_WARN,
+            "raise": _ERR_RAISE,
+            "print": _ERR_PRINT}
+_errdict_rev = {value: key for key, value in _errdict.items()}
+_thread_local = threading.local()
+
+
+class _ErrState:
+
+    def __init__(self):
+        self._errstate = _ERR_DEFAULT
+
+    @staticmethod
+    def get():
+        try:
+            errstate = _thread_local._errstate
+        except AttributeError:
+            errstate = _ErrState()
+            _thread_local._errstate = errstate
+        return errstate
+
+    def set(self, state):
+        self._errstate = state
 
 
 # ----------------------------------------------------------------------------
@@ -69,11 +109,10 @@ def seterr(all=None, divide=None, over=None, under=None, invalid=None):
     Restriction
     -----------
     - If the 'call' mode or the 'log' mode is specified for each parameter,
-      *NotImplementedError* occurs.
+      *KeyError* occurs.
 
     Note
     ----
-    - This function is the wrapper function to utilize :func:`numpy.seterr`.
     - The floating-point exceptions are defined in the IEEE 754 standard:
 
         - Division by zero: infinite result obtained from finite numbers.
@@ -85,6 +124,7 @@ def seterr(all=None, divide=None, over=None, under=None, invalid=None):
     See Also
     --------
     geterr : Gets the current way of handling floating-point errors.
+    errstate : Context manager for floating-point error handling.
 
     Examples
     --------
@@ -96,19 +136,25 @@ def seterr(all=None, divide=None, over=None, under=None, invalid=None):
     {'divide': 'ignore', 'over': 'raise', 'under': 'ignore', 'invalid': 'ignore'}
 
     """
-    if all in ('call', 'log'):
-        raise NotImplementedError('all=%s in seterr is not implemented yet.' % all)
-    if divide in ('call', 'log'):
-        raise NotImplementedError('divide=%s in seterr is not implemented yet.' % divide)
-    if over in ('call', 'log'):
-        raise NotImplementedError('over=%s in seterr is not implemented yet.' % over)
-    if under in ('call', 'log'):
-        raise NotImplementedError('under=%s in seterr is not implemented yet.' % under)
-    if invalid in ('call', 'log'):
-        raise NotImplementedError(
-            'invalid=%s in seterr is not implemented yet.' % invalid)
 
-    return numpy.seterr(all=all, divide=divide, over=over, under=under, invalid=invalid)
+    old = geterr()
+
+    if divide is None:
+        divide = all or old['divide']
+    if over is None:
+        over = all or old['over']
+    if under is None:
+        under = all or old['under']
+    if invalid is None:
+        invalid = all or old['invalid']
+
+    maskvalue = ((_errdict[divide] << _SHIFT_DIVIDEBYZERO) +
+                 (_errdict[over] << _SHIFT_OVERFLOW) +
+                 (_errdict[under] << _SHIFT_UNDERFLOW) +
+                 (_errdict[invalid] << _SHIFT_INVALID))
+
+    _ErrState.get().set(maskvalue)
+    return old
 
 
 # ----------------------------------------------------------------------------
@@ -134,11 +180,11 @@ def geterr():
     ----
     - For complete documentation of the types of floating-point exceptions and treatment
       options, see :func:`nlcpy.seterr`.
-    - This function is the wrapper function to utilize :func:`numpy.geterr`.
 
     See Also
     --------
     seterr : Sets how floating-point errors are handled.
+    errstate : Context manager for floating-point error handling.
 
     Examples
     --------
@@ -150,4 +196,73 @@ def geterr():
     array([nan,  1.,  1.])
 
     """
-    return numpy.geterr()
+    maskvalue = _ErrState.get()._errstate
+    mask = 7
+    res = {}
+    val = (maskvalue >> _SHIFT_DIVIDEBYZERO) & mask
+    res['divide'] = _errdict_rev[val]
+    val = (maskvalue >> _SHIFT_OVERFLOW) & mask
+    res['over'] = _errdict_rev[val]
+    val = (maskvalue >> _SHIFT_UNDERFLOW) & mask
+    res['under'] = _errdict_rev[val]
+    val = (maskvalue >> _SHIFT_INVALID) & mask
+    res['invalid'] = _errdict_rev[val]
+    return res
+
+
+class errstate(contextlib.ContextDecorator):
+    """Context manager for floating-point error handling.
+
+    Using an instance of `errstate` as a context manager allows statements in
+    that context to execute with a known error handling behavior. Upon entering
+    the context the error handling is set with `seterr`, and upon exiting it is
+    reset to what it was before.
+
+    Parameters
+    ----------
+    kwargs : {divide, over, under, invalid}
+        Keyword arguments. The valid keywords are the possible floating-point
+        exceptions. Each keyword should have a string value that defines the
+        treatment for the particular error. Possible values are
+        {'ignore', 'warn', 'raise', 'print'}.
+
+    See Also
+    --------
+    seterr : Sets how floating-point errors are handled.
+    geterr : Gets the current way of handling floating-point errors.
+
+    Examples
+    --------
+    >>> import nlcpy as vp
+    >>> olderr = vp.seterr(all='ignore')  # Set error handling to known state.
+
+    >>> vp.arange(3) / 0.
+    array([nan, inf, inf])
+    >>> with vp.errstate(divide='warn'):
+    ...     vp.arange(3) / 0.  # doctest: +SKIP
+    <stdin>:2: RuntimeWarning: divide by zero encountered \
+in any of (nlcpy_arange, nlcpy_true_divide)
+    array([nan, inf, inf])
+    >>> vp.sqrt(-1)
+    array(nan)
+    >>> with vp.errstate(invalid='raise'):  # doctest: +SKIP
+    ...     vp.sqrt(-1)
+    Traceback (most recent call last):
+    ...
+    FloatingPointError: invalid value encountered in (nlcpy_sqrt)
+
+    Outside the context the error handling behavior has not changed:
+
+    >>> vp.geterr()
+    {'divide': 'ignore', 'over': 'ignore', 'under': 'ignore', 'invalid': 'ignore'}
+    >>> _ = vp.seterr(**olderr)
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        self.oldstate = seterr(**self.kwargs)
+
+    def __exit__(self, *exc_info):
+        seterr(**self.oldstate)

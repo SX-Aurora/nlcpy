@@ -4,8 +4,15 @@ include make.inc
 
 .PHONY: all nlcpy_ve_common nlcpy_ve_no_fast_math nlcpy_ve_fast_math FORCE
 
+ifeq ($(JOBS),)
 JOBS:=$(shell grep -c ^processor /proc/cpuinfo 2>/dev/null)
 JOBS:=$(shell if [ $(JOBS) -le 16 ]; then echo "8"; elif [ $(JOBS) -le 32 ]; then echo "16"; else echo "32"; fi)
+endif
+
+ifeq ($(FTRACE),yes)
+else
+FTRACE=no
+endif
 
 all: make.dep nlcpy_ve_common nlcpy_ve_no_fast_math nlcpy_ve_fast_math
 	cp $(SRCDIR)/*.h $(BASEDIR)/nlcpy/include/
@@ -17,13 +24,11 @@ make.dep: $(OBJDIR_COMMON) $(OBJDIR_NO_FAST_MATH) $(OBJDIR_FAST_MATH)
 
 nlcpy_ve_common:
 	cd $(OBJDIR_COMMON) && make -f Makefile perl
-	cd $(OBJDIR_COMMON) && make -j$(JOBS) -f Makefile COMMON=yes
-#	cd $(OBJDIR_COMMON) && make -j$(JOBS) -f Makefile COMMON=yes FTRACE=yes
+	cd $(OBJDIR_COMMON) && make -j$(JOBS) -f Makefile COMMON=yes FTRACE=$(FTRACE)
 
 nlcpy_ve_no_fast_math: nlcpy_ve_common
 	cd $(OBJDIR_NO_FAST_MATH) && make -f Makefile perl
-	cd $(OBJDIR_NO_FAST_MATH) && make -j$(JOBS) -f Makefile
-#	cd $(OBJDIR_NO_FAST_MATH) && make -j$(JOBS) -f Makefile FTRACE=yes
+	cd $(OBJDIR_NO_FAST_MATH) && make -j$(JOBS) -f Makefile FTRACE=$(FTRACE)
 
 nlcpy_ve_fast_math: nlcpy_ve_common
 	cd $(OBJDIR_FAST_MATH) && make -f Makefile FAST_MATH=yes perl

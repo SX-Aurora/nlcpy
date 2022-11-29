@@ -232,8 +232,8 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
             vt = nlcpy.empty((min_mn, n) + a.shape[2:], dtype=dtype, order='F')
             job = 'S'
     else:
-        u = nlcpy.empty(1)
-        vt = nlcpy.empty(1)
+        u = nlcpy.empty(1, dtype=dtype)
+        vt = nlcpy.empty(1, dtype=dtype)
         job = 'N'
 
     if a_complex:
@@ -293,24 +293,24 @@ def svd(a, full_matrices=True, compute_uv=True, hermitian=False):
     work = nlcpy.empty(lwork, dtype=dtype)
     if a_complex:
         if job == 'N':
-            lrwork = 5 * min_mn
+            lrwork = 7 * n * m
         else:
             lrwork = min_mn * max(5 * min_mn + 7, 2 * max(m, n) + 2 * min_mn + 1)
     else:
         lrwork = 1
     rwork = nlcpy.empty(lrwork, dtype=f_dtype)
-    iwork = nlcpy.empty(8 * min_mn, dtype=f_dtype)
+    iwork = nlcpy.empty(8 * min_mn, dtype='l')
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
         ord(job),
-        a._ve_array,
-        s._ve_array,
-        u._ve_array,
-        vt._ve_array,
-        work._ve_array,
-        rwork._ve_array,
-        iwork._ve_array,
+        a,
+        s,
+        u,
+        vt,
+        work,
+        rwork,
+        iwork,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
@@ -407,7 +407,7 @@ def cholesky(a):
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
+        a,
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
@@ -571,10 +571,10 @@ def qr(a, mode='reduced'):
     fpe = request._get_fpe_flag()
     args = (
         m, n, jobq,
-        a._ve_array,
-        tau._ve_array,
-        r._ve_array,
-        work._ve_array,
+        a,
+        tau,
+        r,
+        work,
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
 

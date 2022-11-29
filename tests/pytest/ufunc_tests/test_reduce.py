@@ -29,9 +29,11 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import warnings
 import numpy
 import unittest
-
+import pytest
+import gc
 import nlcpy
 from nlcpy import testing
 
@@ -105,37 +107,6 @@ def is_executable(op, initial=0, where=True, dtype_in=None, dtype=None, dtype_ou
         return False
     return True
 
-    if where is not True:
-        if initial is numpy._NoValue:
-            initial = getattr(numpy, op).identity
-        if initial is None:
-            return False
-
-    # NumPy returns incorrect value.
-    if op == 'logaddexp' and \
-       dtype_out is not None and numpy.dtype(dtype_out).char == 'L':
-        return False
-
-    if dtype is None:
-        dtype = dtype_in if dtype_out is None else dtype_out
-    if dtype is not None:
-        dtype = numpy.dtype(dtype)
-        if op in ('power', 'subtract', 'floor_divide'):
-            return dtype.char in 'ilILfdFD'
-        if op in ('divide', 'true_divide'):
-            return dtype.char in 'fdFD'
-        if op in ('mod', 'remainder', 'fmod'):
-            return dtype.char in 'ilILfd'
-        if op in ('bitwise_and', 'bitwise_or', 'bitwise_xor'):
-            return dtype.char in '?ilIL'
-        if op in ('left_shift', 'right_shift'):
-            return dtype.char in 'ilIL'
-        if op in ('arctan2', 'hypot', 'logaddexp', 'logaddexp2', 'heaviside', 'copysign',
-                  'nextafter'):
-            return dtype.char in 'fd'
-
-    return True
-
 
 def execute_ufunc(op, xp, in1, out=None, dtype=None,
                   axis=0, initial=numpy._NoValue, where=True, keepdims=False):
@@ -143,17 +114,28 @@ def execute_ufunc(op, xp, in1, out=None, dtype=None,
     if not is_executable(op, initial, where, in1.dtype, dtype, dtype_out):
         return 0
     initial = convert_initial(initial, op, in1.dtype, dtype, dtype_out)
-    return getattr(xp, op).reduce(
-        in1, out=out, dtype=dtype, axis=axis,
-        initial=initial, where=where, keepdims=keepdims)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', numpy.ComplexWarning)
+        if op in ('power'):
+            with xp.errstate(invalid='ignore', divide='ignore'):
+                ret = getattr(xp, op).reduce(
+                    in1, out=out, dtype=dtype, axis=axis,
+                    initial=initial, where=where, keepdims=keepdims)
+                nlcpy.request.flush()
+    return ret
 
 
 @testing.parameterize(*testing.product({
     'initial': (numpy._NoValue, None, 0, 2, -2.63, -3.2 + 0.3j),
 }))
+@pytest.mark.no_fast_math
 class TestReduceDtype(unittest.TestCase):
 
     shape = ((3, 2), )
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shape, order_x='C', dtype_x=all_types,
@@ -202,9 +184,14 @@ class TestReduceDtype(unittest.TestCase):
 @testing.parameterize(*testing.product({
     'initial': (numpy._NoValue, None, 1.1),
 }))
+@pytest.mark.no_fast_math
 class TestReduceShape(unittest.TestCase):
 
     axes = (0, 1, -2, (0, 2), None)
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, ((2, 4, 3),), order_x='C', order_out='C',
@@ -228,7 +215,12 @@ class TestReduceShape(unittest.TestCase):
             out=out, where=where, keepdims=True)
 
 
+@pytest.mark.no_fast_math
 class TestReduce(unittest.TestCase):
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, (), order_x='C', order_out='C', dtype_x=all_types, dtype_out=all_types,
@@ -276,10 +268,15 @@ class TestReduce(unittest.TestCase):
             numpy.testing.assert_array_equal(x, y)
 
 
+@pytest.mark.no_fast_math
 class TestReduceKeepdims(unittest.TestCase):
 
     shape = ((3, 4), )
     axes = (0, 1, -1, (0, 1), None)
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shape, dtype_x=(numpy.float64,), dtype_arg=(numpy.float64,),

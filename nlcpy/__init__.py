@@ -1,38 +1,18 @@
 import numpy  # NOQA
 from numpy import _NoValue  # NOQA
-import os  # NOQA
-from distutils.version import StrictVersion  # NOQA
 from nlcpy.__config__ import show_config  # NOQA
+from nlcpy import _path
 
 # -----------------------------------------------------------------------------
 # set environment variable
 # -----------------------------------------------------------------------------
-ve_num_threads = os.environ.get('VE_OMP_NUM_THREADS', '8')
-os.environ['VE_OMP_NUM_THREADS'] = ve_num_threads
-from nlcpy import _path  # NOQA
-_here = _path._here
-_ve_ld_library_path = os.environ.get('VE_LD_LIBRARY_PATH', '')
-os.environ['VE_LD_LIBRARY_PATH'] = _here + '/lib:' + _ve_ld_library_path
-
-# XXX: This is a temporary workaround
-# find NCC directory and set VE_LD_PRELOAD
-base = '/opt/nec/ve/ncc'
-files = os.listdir(base)
-dirs = [os.path.join(base, f)
-        for f in files
-        if os.path.isdir(os.path.join(base, f))]
-dirs.sort(key=lambda s: [int(u) for u in os.path.basename(s).split('.')], reverse=True)
-NCC_PATH = dirs[0]
-NCC_COMP_VER = '3.0.7'
-if StrictVersion(os.path.basename(NCC_PATH)) >= StrictVersion(NCC_COMP_VER):
-    _ve_ld_preload = os.environ.get('VE_LD_PRELOAD', '')
-    os.environ['VE_LD_PRELOAD'] = NCC_PATH + '/lib/libncc.so.2:' + _ve_ld_preload
+from nlcpy import _environment
+_environment._set_ve_ld_library_path()
+_environment._set_ve_ld_preload()
 
 # --------------------------------------------------
 # parameter
 # --------------------------------------------------
-from nlcpy.core import set_boundary_size  # NOQA
-from nlcpy.core import get_boundary_size  # NOQA
 from nlcpy import _version  # NOQA
 __version__ = _version.__version__
 
@@ -133,7 +113,9 @@ from nlcpy.math.math import *  # NOQA
 # statistics
 # --------------------------------------------------
 from nlcpy.statistics.order import amax  # NOQA
+from nlcpy.statistics.order import max  # NOQA
 from nlcpy.statistics.order import amin  # NOQA
+from nlcpy.statistics.order import min  # NOQA
 from nlcpy.statistics.order import nanmax  # NOQA
 from nlcpy.statistics.order import nanmin  # NOQA
 from nlcpy.statistics.order import ptp # NOQA
@@ -239,7 +221,6 @@ from numpy import unsignedinteger  # NOQA
 # -----------------------------------------------------------------------------
 # Booleans
 # -----------------------------------------------------------------------------
-from numpy import bool  # NOQA
 from numpy import bool_  # NOQA
 from numpy import bool8  # NOQA
 
@@ -256,7 +237,6 @@ from numpy import int8  # NOQA
 from numpy import int16  # NOQA
 from numpy import int32  # NOQA
 from numpy import int64  # NOQA
-from numpy import int  # NOQA
 
 # -----------------------------------------------------------------------------
 # Unsigned integers
@@ -283,7 +263,6 @@ from numpy import longfloat  # NOQA
 from numpy import float16  # NOQA
 from numpy import float32  # NOQA
 from numpy import float64  # NOQA
-from numpy import float  # NOQA
 
 # from numpy import float96
 # from numpy import float128
@@ -292,7 +271,6 @@ from numpy import float  # NOQA
 # Complex floating-point numbers
 # -----------------------------------------------------------------------------
 from numpy import csingle  # NOQA
-from numpy import complex  # NOQA
 from numpy import complex_  # NOQA
 from numpy import complex64  # NOQA
 from numpy import complex128  # NOQA
@@ -343,18 +321,10 @@ from numpy import get_printoptions  # NOQA
 from nlcpy.error_handler.error_handler import *  # NOQA
 
 # --------------------------------------------------
-# Call veo initialization when nlcpy is imported
+# create VE process and initialize
 # --------------------------------------------------
-from nlcpy.request.request import _push_and_flush_request  # NOQA
-node = int(os.environ.get('NMPI_LOCAL_RANK', '-1'))
-veo._initialize(node)  # initialize veo process
-_push_and_flush_request(
-    'asl_library_initialize',
-    (),
-    callback=None,
-    sync=True
-)
-del _push_and_flush_request
+from nlcpy.venode._venode import _create_venode_pool  # NOQA
+_create_venode_pool()  # create veo process on VE node.
 
 
 # -----------------------------------------------------------------------------
@@ -364,8 +334,7 @@ def get_include():
     """Returns the directory path that contains the NLCPy \\*.h header files.
 
     """
-
-    return _here + '/include'
+    return _path._include_path
 
 # -----------------------------------------------------------------------------
 # random
@@ -384,6 +353,7 @@ from nlcpy import sca  # NOQA
 # -----------------------------------------------------------------------------
 from nlcpy import fft # NOQA
 
+
 # --------------------------------------------------
 # JIT
 # --------------------------------------------------
@@ -391,10 +361,43 @@ from nlcpy import fft # NOQA
 from nlcpy import ve_types  # NOQA
 from nlcpy import jit  # NOQA
 
+
 # -----------------------------------------------------------------------------
-# warm up
+# numpy wrap
 # -----------------------------------------------------------------------------
-from nlcpy._warmup import _warmup  # NOQA
-_is_warmup = os.environ.get('VE_NLCPY_WARMUP', 'NO')
-if _is_warmup in ('yes', 'YES'):
-    _warmup()
+from nlcpy.wrapper.numpy_wrap import _make_wrap_func  # NOQA
+from nlcpy.wrapper.numpy_wrap import _make_wrap_method  # NOQA
+
+
+def __getattr__(attr):
+    if attr in (
+            'asmatrix',
+            'byte_bounds',
+            'get_array_wrap',
+            'getbufsize',
+            'geterrcall',
+            'mafromtxt',
+            'maximum_sctype',
+            'memmap',
+            'min_scalar_type',
+            'mintypecode',
+            'nditer',
+            'nested_iters',
+            'set_numeric_ops',
+            'setbufsize',
+            'seterrcall',
+            'shares_memory',
+            'test',
+            'trim_zeros',
+            'vectorize',
+            'who'
+    ):
+        raise AttributeError("module 'nlcpy' has no attribute '{}'.".format(attr))
+    try:
+        f = getattr(numpy, attr)
+    except AttributeError as _err:
+        raise AttributeError(
+            "module 'nlcpy' has no attribute '{}'.".format(attr)) from _err
+    if not callable(f):
+        raise AttributeError("module 'nlcpy' has no attribute '{}'.".format(attr))
+    return _make_wrap_func(f)

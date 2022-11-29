@@ -80,17 +80,17 @@ def _geev(a, jobvr):
     n = a.shape[0]
     work = nlcpy.empty(
         65 * n if a_complex else 66 * n, dtype=dtype, order='F')
-    rwork = nlcpy.empty(2 * n if a_complex else 1, dtype=f_dtype, order='F')
+    rwork = nlcpy.empty(2 * n if a_complex else 1, dtype='d', order='F')
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
-        wr._ve_array,
-        wi._ve_array,
-        vr._ve_array,
-        vc._ve_array,
-        work._ve_array,
-        rwork._ve_array,
+        a,
+        wr,
+        wi,
+        vr,
+        vc,
+        work,
+        rwork,
         ord('V') if jobvr else ord('N'),
         veo.OnStack(info, inout=veo.INTENT_OUT),
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
@@ -195,11 +195,11 @@ def _syevd(a, jobz, UPLO):
     info = numpy.empty(1, dtype='l')
     fpe = request._get_fpe_flag()
     args = (
-        a._ve_array,
-        w._ve_array,
-        work._ve_array,
-        rwork._ve_array,
-        iwork._ve_array,
+        a,
+        w,
+        work,
+        rwork,
+        iwork,
         ord('V') if jobz else ord('N'),
         ord(UPLO),
         veo.OnStack(info, inout=veo.INTENT_OUT),

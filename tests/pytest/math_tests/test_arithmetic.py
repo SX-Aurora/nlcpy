@@ -52,6 +52,7 @@
 import itertools
 import numpy
 import unittest
+import pytest
 
 import nlcpy
 from nlcpy import testing
@@ -227,6 +228,7 @@ class TestComplex(unittest.TestCase):
 class TestArithmeticBinary(unittest.TestCase):
 
     @testing.numpy_nlcpy_allclose(atol=1e-4)
+    @pytest.mark.no_fast_math
     def test_binary(self, xp):
         arg1 = self.arg1
         arg2 = self.arg2
@@ -256,10 +258,9 @@ class TestArithmeticBinary(unittest.TestCase):
                 return xp.array(True)
 
         func = getattr(xp, self.name)
-        with testing.NumpyError(divide='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.filterwarnings('ignore')
-                y = func(arg1, arg2)
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+            y = func(arg1, arg2)
+            nlcpy.request.flush()
 
         # NumPy returns different values (nan/inf) on division by zero
         # depending on the architecture.
@@ -268,7 +269,50 @@ class TestArithmeticBinary(unittest.TestCase):
         if self.name in ('floor_divide', 'remainder'):
             if y.dtype in (float_types + complex_types) and (np2 == 0).any():
                 y = xp.asarray(y)
-                y[y == numpy.inf] = numpy.nan
-                y[y == -numpy.inf] = numpy.nan
+                with testing.numpy_nlcpy_errstate(invalid='ignore'):
+                    y[y == numpy.inf] = numpy.nan
+                    y[y == -numpy.inf] = numpy.nan
+                    nlcpy.request.flush()
 
         return y
+
+
+class TestArithmeticBinaryNanCheck(unittest.TestCase):
+
+    @testing.for_complex_dtypes()
+    @pytest.mark.no_fast_math
+    def test_power_nan_check1(self, dtype):
+        in1 = nlcpy.zeros(10, dtype=dtype)
+        in2 = nlcpy.full(10, 0 + 0j, dtype=dtype)
+        actual = nlcpy.power(in1, in2)
+        desired = numpy.full(10, numpy.nan, dtype=dtype)
+        desired.imag = numpy.nan
+        assert numpy.array_equal(actual, desired, equal_nan=True)
+
+    @testing.for_complex_dtypes()
+    @pytest.mark.no_fast_math
+    def test_power_nan_check2(self, dtype):
+        in1 = nlcpy.zeros(10, dtype=dtype)
+        in2 = nlcpy.full(10, 1 + 1j, dtype=dtype)
+        actual = nlcpy.power(in1, in2)
+        desired = numpy.full(10, numpy.nan, dtype=dtype)
+        desired.imag = numpy.nan
+        assert numpy.array_equal(actual, desired, equal_nan=True)
+
+    @testing.for_complex_dtypes()
+    def test_power_nan_check3(self, dtype):
+        in1 = nlcpy.zeros(10, dtype=dtype)
+        in2 = nlcpy.full(10, 0 + 1j, dtype=dtype)
+        actual = nlcpy.power(in1, in2)
+        desired = numpy.full(10, numpy.nan, dtype=dtype)
+        desired.imag = numpy.nan
+        assert numpy.array_equal(actual, desired, equal_nan=True)
+
+    @testing.for_dtypes(float_types + complex_types)
+    def test_floor_divide_nan_check_float_types(self, dtype):
+        in1 = nlcpy.ones(10, dtype=dtype)
+        in2 = nlcpy.zeros(10, dtype=dtype)
+        with nlcpy.errstate(divide='ignore', invalid='ignore'):
+            actual = nlcpy.floor_divide(in1, in2)
+            desired = numpy.full(10, numpy.nan, dtype=dtype)
+            assert numpy.array_equal(actual, desired, equal_nan=True)

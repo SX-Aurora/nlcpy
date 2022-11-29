@@ -71,6 +71,7 @@ from nlcpy import testing
             ((3, 0), (0,)),
             ((2,), (2,)),
             ((0,), (0,)),
+            ((10001,), (10001,)),
             # matmul test
             ((5, 3, 2), (5, 2, 4)),
             ((0, 3, 2), (0, 2, 4)),
@@ -170,11 +171,44 @@ class TestMatmulDtypeAndOrder(unittest.TestCase):
     @testing.for_all_dtypes(no_float16=True, no_bool=True)
     @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
     def test_matmul_from_view(self, xp, dtype, order_x, order_y, order_out):
-        x = testing.shaped_random((2, 2), xp, dtype)
+        x = testing.shaped_random((4, 4), xp, dtype)
         y = testing.shaped_random((4, 4), xp, dtype)
         x = xp.asarray(x, order=order_x)
         y = xp.asarray(y, order=order_y)
+        x = x[::2, ::2]
         y = y[::2, ::2]
+        return xp.matmul(x, y, order=order_out, dtype=dtype)
+
+    @testing.for_orders('CF', name='order_x')
+    @testing.for_orders('CF', name='order_y')
+    @testing.for_orders('CF', name='order_out')
+    @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    def test_matmul_stride1(self, xp, dtype, order_x, order_y, order_out):
+        x = testing.shaped_random((3, 1), xp, dtype)
+        y = testing.shaped_random((1, 4), xp, dtype)
+        return xp.matmul(x, y, order=order_out, dtype=dtype)
+
+    @testing.for_orders('CF', name='order_x')
+    @testing.for_orders('CF', name='order_y')
+    @testing.for_orders('CF', name='order_out')
+    @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    def test_matmul_stride2(self, xp, dtype, order_x, order_y, order_out):
+        x = testing.shaped_random((1, 3), xp, dtype)
+        y = testing.shaped_random((3, 1), xp, dtype)
+        return xp.matmul(x, y, order=order_out, dtype=dtype)
+
+    @testing.for_orders('CF', name='order_x')
+    @testing.for_orders('CF', name='order_y')
+    @testing.for_orders('CF', name='order_out')
+    @testing.for_all_dtypes(no_float16=True, no_bool=True)
+    @testing.numpy_nlcpy_allclose(rtol=1e-3, atol=1e-3)
+    def test_matmul_stride3(self, xp, dtype, order_x, order_y, order_out):
+        x = testing.shaped_random((5, 6), xp, dtype)
+        y = testing.shaped_random((7, 8), xp, dtype)
+        x = xp.asarray(x, order=order_x)[:4, :4]
+        y = xp.asarray(y, order=order_y)[:4, :4]
         return xp.matmul(x, y, order=order_out, dtype=dtype)
 
     # TODO

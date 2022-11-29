@@ -1,0 +1,18 @@
+===============================================
+What's new in Version 2.2.0 (November, 2022)
+===============================================
+
+
+New Features
+------------
+
+* Newly added :ref:`VE device management <label_venode>` routines, which enable you to select execution VE device from Python script. For details, please refer to the :ref:`Using Multiple VEs <label_multiple_ves>`.
+
+* Newly added environment variable ``VE_NLCPY_MEMPOOL_SIZE`` which controls amount of memory pool. For details, please refer to the :ref:`Memory Pool Management <label_mempool>` and :ref:`Environment Variables <label_envs>`. According to adding this variable, an environment variable ``VE_NLCPY_WARMUP`` is abolished.
+
+* Newly supports a feature that NLCPy automatically replaces almost functions and methods that implemented not yet to the NumPy's one. For details, please refer to the :ref:`Auto Replacing to NumPy <label_auto_replace>`
+
+Performance Enhancements
+------------------------
+
+* Improved the performance of :func:`nlcpy.power` and :func:`nlcpy.floor_divide` when input data types are complex.

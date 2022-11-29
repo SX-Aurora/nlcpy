@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-10 17:22+0900\n"
+"POT-Creation-Date: 2022-11-18 17:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid "Examples are shown below."
 msgstr "例を以下に示します。"
 
 #: ../../source/usage/execution.rst:19 ../../source/usage/execution.rst:39
-#: ../../source/usage/execution.rst:99
+#: ../../source/usage/execution.rst:160
 msgid "Interactive mode:"
 msgstr "対話モード:"
 
@@ -52,7 +52,7 @@ msgid "Subsequent computations will be performed by 4 parallel threads on a VE."
 msgstr "後続の計算は、VE上の4つの並列スレッドによって実行されます。"
 
 #: ../../source/usage/execution.rst:28 ../../source/usage/execution.rst:48
-#: ../../source/usage/execution.rst:106
+#: ../../source/usage/execution.rst:167
 msgid "Non-interactive mode:"
 msgstr "非対話モード:"
 
@@ -86,14 +86,104 @@ msgid ""
 "occurs. In such a case, the performance becomes significantly slower."
 msgstr "1つのVEに対して2つ以上のNLCPyプログラムを実行すると、コンテキストスイッチが発生します。 このような場合、パフォーマンスは大幅に低下します。"
 
-#: ../../source/usage/execution.rst:62
+#: ../../source/usage/execution.rst:64
+msgid "Using Multiple VEs"
+msgstr "複数VEの利用"
+
+#: ../../source/usage/execution.rst:66
+msgid "NLCPy provides two ways to use multiple VEs."
+msgstr "NLCPyは複数VEを利用するための方法をを2種類提供しています。"
+
+#: ../../source/usage/execution.rst:68
+msgid "`mpi4py-ve <https://github.com/SX-Aurora/mpi4py-ve>`_"
+msgstr ""
+
+#: ../../source/usage/execution.rst:70
+msgid ""
+"mpi4py-ve is a Message Passing Interface (MPI) Python library for SX-"
+"Aurora TSUBASA. It provides point-to-point and collective communication "
+"operations among processes. The available objects for MPI communication "
+"are `numpy.ndarray` and `nlcpy.ndarray`. Note that mpi4py-ve requires NEC"
+" MPI runtime packages."
+msgstr ""
+"mpi4py-veは、SX-Aurora TSUBASA用に、Message Passing Interface "
+"(MPI)を利用して、プロセス間の通信を実装したPythonライブラリです。MPI通信に利用可能なオブジェクトは "
+"``numpy.ndarray`` と ``nlcpy.ndarray`` です。mpi4py-veの利用には、NEC "
+"MPIのランタイムパッケージが必要な点にご注意ください。"
+
+#: ../../source/usage/execution.rst:75
+msgid ""
+"For details, please refer to the `mpi4py-ve project <https://github.com"
+"/SX-Aurora/mpi4py-ve>`_"
+msgstr ""
+"詳細は、 `mpi4py-ve project <https://github.com/SX-Aurora/mpi4py-ve>`_ "
+"をご参照ください。"
+
+#: ../../source/usage/execution.rst:77
+msgid ":ref:`VE Device Management <label_venode>`"
+msgstr ":ref:`VE デバイス管理 <label_venode>`"
+
+#: ../../source/usage/execution.rst:79
+msgid ""
+"You can select execution VE device in a Python script by using \"with\" "
+"context manager."
+msgstr "Pythonスクリプトから \"with\" コンテキストマネージャーを利用することで、実行するVEデバイスを選択することが可能です。"
+
+#: ../../source/usage/execution.rst:96
+msgid ""
+"Note that :func:`nlcpy.venode.transfer_array` cannot yet transfer data "
+"directly between VEs, in other words, the data transfer between VEs has "
+"to go through VH. If you need to transfer large data, we recommend using "
+"mpi4py-ve."
+msgstr ""
+":func:`nlcpy.venode.transfer_array` "
+"は現時点ではVE間の直接転送に対応していない点にご注意ください。言い換えると、VE間のデータ転送はVHを経由する必要があります。もし、大規模なデータを転送する必要がある場合は"
+"、mpi4py-veのご利用を推奨します。"
+
+#: ../../source/usage/execution.rst:99
+msgid ""
+"By default, NLCPy creates a VE process on only physical VE#0 when "
+"executing ``import nlcpy``. Other VE processes will be created at first "
+"call of :meth:`nlcpy.venode.VENode.__enter__`, "
+":meth:`nlcpy.venode.VENode.use`, or :meth:`nlcpy.venode.VENode.apply`. "
+"Please note that creation of VE process takes few seconds. If you want to"
+" create processes on some VEs at ``import nlcpy``, you can set an "
+"environment variable ``VE_NLCPY_NODELIST=0,1,...``. NLCPy creates "
+"processes at ``import nlcpy`` for the physical VEs corresponding to the "
+"IDs set by ``VE_NLCPY_NODELIST``."
+msgstr ""
+"デフォルトでは、NLCPyは ``import nlcpy`` "
+"が実行されたときに物理VE#0にのみVEプロセスを生成します。他のVEプロセスに関しては、 "
+":func:`nlcpy.venode.VENode.__enter__`, :func:`nlcpy.venode.VENode.use`, "
+":func:`nlcpy.venode.VENode.apply` "
+"のいずれかが初めて呼び出されたときに生成されます。ここで、VEプロセスの生成には数秒かかる点にご注意ください。もし、 ``import "
+"nlcpy`` が実行されるときに複数のVEプロセスを生成したい場合は、環境変数 ``VE_NLCPY_NODELIST=0,1,...`` "
+"を指定することができます。NLCPyは ``import nlcpy`` 実行時に環境変数 ``VE_NLCPY_NODELIST`` "
+"に指定されたIDに対応する物理VEに対してプロセスを生成します。"
+
+#: ../../source/usage/execution.rst:105
+msgid ""
+"When environment variable ``VE_NLCPY_NODELIST`` is set, it may be "
+"different from the argument id of :func:`nlcpy.venode.VE` to the physical"
+" VE id."
+msgstr ""
+"環境変数 ``VE_NLCPY_NODELIST`` が設定されているとき、 :func:`nlcpy.venode.VE` "
+"の引数に指定するIDと物理VEのIDは異なる場合があります。"
+
+#: ../../source/usage/execution.rst:108
+msgid ""
+"Example of VE device mapping when environment variable is set by "
+"``VE_NLCPY_NODELIST=1,2`` is the following:"
+msgstr "環境変数 ``VE_NLCPY_NODELIST=1,2`` を設定した場合のVEデバイスマッピングの例は以下の通りです:"
+
+#: ../../source/usage/execution.rst:123
 msgid "Optimization for Mathematical Functions"
 msgstr "数学関数の最適化"
 
-#: ../../source/usage/execution.rst:64
+#: ../../source/usage/execution.rst:125
 msgid ""
 "When the environment variable ``VE_NLCPY_FAST_MATH`` is set to ``yes`` or"
-" ``YES``, NLCPy uses shared objects ``libnlcpy_ve_kernel_fast_math.so`` "
+" ``YES``, NLCPy uses shared object ``libnlcpy_ve_kernel_fast_math.so`` "
 "for VE. By default, ``VE_NLCPY_FAST_MATH`` is not set. The shared objects"
 " ( ``libnlcpy_ve_kernel_fast_math.so`` ) have been compiled with the "
 "following optimization options in NEC C/C++ compiler."
@@ -104,17 +194,17 @@ msgstr ""
 "``libnlcpy_ve_kernel_fast_math.so`` は、NEC "
 "C/C++コンパイラの以下の最適化オプションを指定してコンパイルされています。"
 
-#: ../../source/usage/execution.rst:69
+#: ../../source/usage/execution.rst:130
 msgid "*-ffast-math*"
 msgstr ""
 
-#: ../../source/usage/execution.rst:71
+#: ../../source/usage/execution.rst:132
 msgid ""
 "Uses fast scalar version mathematical functions outside of vectorized "
 "loops."
 msgstr "ベクトル化ループ外でスカラ高速バージョンの数学関数を使用します。"
 
-#: ../../source/usage/execution.rst:73
+#: ../../source/usage/execution.rst:134
 msgid "*-mno-vector-intrinsic-check*"
 msgstr ""
 
@@ -136,19 +226,19 @@ msgid ""
 "``tanh``"
 msgstr ""
 
-#: ../../source/usage/execution.rst:79
+#: ../../source/usage/execution.rst:140
 msgid "*-freciprocal-math*"
 msgstr ""
 
-#: ../../source/usage/execution.rst:81
+#: ../../source/usage/execution.rst:142
 msgid "Allows change an expression ``x/y`` to ``x * (1/y)``."
 msgstr "式 ``x/y`` を ``x * (1/y)`` に変更します。"
 
-#: ../../source/usage/execution.rst:83
+#: ../../source/usage/execution.rst:144
 msgid "*-mvector-power-to-explog*"
 msgstr ""
 
-#: ../../source/usage/execution.rst:85
+#: ../../source/usage/execution.rst:146
 msgid ""
 "Allows to replace ``pow(R1,R2)`` in a vectorized loop with "
 "``exp(R2*log(R1))``. ``powf()`` is replaced, too. By the replacement, the"
@@ -159,46 +249,51 @@ msgstr ""
 "の呼び出しに置き換えることを許可します。 ``powf()`` に対しても同様の最適化が適用されます。``pow`` 、 ``powf`` "
 "で計算した場合に比べて実行時間は短縮されますが、計算結果が誤差レベルで変わることがあります。"
 
-#: ../../source/usage/execution.rst:89
+#: ../../source/usage/execution.rst:150
 msgid "*-mvector-low-precise-divide-function*"
 msgstr ""
 
-#: ../../source/usage/execution.rst:91
+#: ../../source/usage/execution.rst:152
 msgid ""
 "Allows to use low precise version for vector floating divide operation. "
 "It is faster than the normal precise version but the result may include "
 "at most one bit numerical error in mantissa."
 msgstr "低精度のベクトル浮動小数点数除算を使用します。通常精度版と比較して高速に処理されますが、除算結果の仮数部に最大1ビットの誤差が含まれることがあります。"
 
-#: ../../source/usage/execution.rst:94
+#: ../../source/usage/execution.rst:155
 msgid ""
 "These optimizations cause side-effects. For example, ``nan`` or ``inf`` "
 "might not be obtained correctly."
 msgstr "これらの最適化は副作用を引き起こします。 たとえば、 ``nan`` または ``inf`` が正しく取得されない場合があります。"
 
-#: ../../source/usage/execution.rst:97
+#: ../../source/usage/execution.rst:158
 msgid "You can set ``VE_NLCPY_FAST_MATH`` as follows:"
 msgstr "``VE_NLCPY_FAST_MATH`` は次のように設定できます。"
 
-#: ../../source/usage/execution.rst:114
-msgid "Warming Up Threads and Memory Pre-allocation"
-msgstr "スレッドのウォーミングアップとメモリの事前確保"
+#: ../../source/usage/execution.rst:177
+msgid "Memory Pool Management"
+msgstr "メモリプールの管理"
 
-#: ../../source/usage/execution.rst:116
+#: ../../source/usage/execution.rst:179
 msgid ""
-"When the environment variable ``VE_NLCPY_WARMUP`` is set to ``yes`` or "
-"``YES``, NLCPy pre-allocates memory around 10 GiB and executes some VE "
-"kernels at initialization. By default, ``VE_NLCPY_WARMUP`` is not set."
+"NLCPy reduces overhead of VE memory allocation by reusing pre-allocated "
+"memory (memory pool) without calling malloc and free. You can control "
+"amount of memory pool by an environment variable "
+"``VE_NLCPY_MEMPOOL_SIZE``. The default value is set 1 GB. For usage of "
+"this variable, please refer to the :ref:`Environment Variables "
+"<label_envs>`"
 msgstr ""
-"環境変数 ``VE_NLCPY_WARMUP`` を ``yes`` または ``YES`` "
-"に設定すると、NLCPyは初期化時に約10GiBのメモリを事前確保し、"
-"いくつかのVEカーネルを実行します。"
-"デフォルトでは、``VE_NLCPY_WARMUP`` は未設定です。"
+"NLCPyは、事前に確保されたメモリ (メモリプール) "
+"を再利用してmallocとfreeの呼び出しを省略することで、VEメモリ確保のオーバーヘッドを削減しています。環境変数 "
+"``VE_NLCPY_MEMPOOL_SIZE`` を設定することで、メモリプールの容量を管理することが可能です。デフォルトの値は1 GB "
+"に設定されています。この環境変数の利用方法は、 :ref:`環境変数 <label_envs>` をご参照ください。"
 
-#: ../../source/usage/execution.rst:120
+#: ../../source/usage/execution.rst:184
 msgid ""
-"In some cases, enabling this option improves performance. However, an out"
-" of memory error may be caused by memory fragmentation."
-msgstr "このオプションを有効に設定することで性能改善するケースがあります。"
-"ただし、メモリフラグメンテーションの影響でメモリ不足が発生することがあります。"
+"In some cases, setting this variable to larger value than 1 GB may "
+"improve performance. However, an out of memory error may be caused by "
+"memory fragmentation."
+msgstr ""
+"この環境変数に1 "
+"GB以上の値を設定することで性能改善するケースがあります。ただし、メモリフラグメンテーションの影響でメモリ不足が発生することがあります。"
 

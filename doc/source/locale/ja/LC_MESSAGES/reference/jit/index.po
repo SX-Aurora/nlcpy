@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"POT-Creation-Date: 2022-11-15 11:02+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,110 +17,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: ../../source/reference/jit/index.rst:6
+#: ../../source/reference/jit/index.rst:7
 msgid "Just-In-Time Compilation"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:9
+#: ../../source/reference/jit/index.rst:10
 msgid "Overview"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:10
+#: ../../source/reference/jit/index.rst:11
 msgid ""
 "NLCPy provides a Just-In-Time(JIT) compilation functionality. By using "
 "this, you can customize your C/C++/Fortran kernel directly on your Python"
 " program."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:13
+#: ../../source/reference/jit/index.rst:14
 msgid "Here is a simple example."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:43
+#: ../../source/reference/jit/index.rst:47
 msgid "To compile and execute the VE function from raw source code:"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:45
+#: ../../source/reference/jit/index.rst:49
 msgid "Define source code in Python code as a string."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:46
+#: ../../source/reference/jit/index.rst:50
 msgid ""
 "Pass the string source into ``code`` argument of "
 ":class:`nlcpy.jit.CustomVELibrary`."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:47
+#: ../../source/reference/jit/index.rst:51
 msgid "Call :meth:`CustomVELibrary.get_function` to get a function symbol."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:48
+#: ../../source/reference/jit/index.rst:52
 msgid ""
 "Execute the object that is returned from "
 ":meth:`CustomVELibrary.get_function` as a function."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:49
-msgid "Unload the loaded library if needed."
+#: ../../source/reference/jit/index.rst:53
+msgid "Unload the shared library if needed."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:52
+#: ../../source/reference/jit/index.rst:56
 msgid "Coding Guide"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:63
+#: ../../source/reference/jit/index.rst:67
 msgid "APIs"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:66
+#: ../../source/reference/jit/index.rst:70
 msgid "Customize VE Library and Kernel"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+#: ../../source/reference/jit/index.rst:77:<autosummary>:1
 msgid ":obj:`nlcpy.jit.CustomVELibrary <nlcpy.jit.CustomVELibrary>`"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+#: ../../source/reference/jit/index.rst:77:<autosummary>:1
 msgid "Custom VE library class."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+#: ../../source/reference/jit/index.rst:77:<autosummary>:1
 msgid ":obj:`nlcpy.jit.CustomVEKernel <nlcpy.jit.CustomVEKernel>`"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:73:<autosummary>:1
+#: ../../source/reference/jit/index.rst:77:<autosummary>:1
 msgid "Custom VE kernel class."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:75
+#: ../../source/reference/jit/index.rst:79
 msgid "Helper Routines"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
 msgid ":obj:`nlcpy.jit.get_default_cflags <nlcpy.jit.get_default_cflags>`"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
 msgid "Gets default compiler flags."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
 msgid ":obj:`nlcpy.jit.get_default_ldflags <nlcpy.jit.get_default_ldflags>`"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
 msgid "Gets default linker flags."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
 msgid ":obj:`nlcpy.jit.unload_library <nlcpy.jit.unload_library>`"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:83:<autosummary>:1
-msgid "Unloads the loaded library."
+#: ../../source/reference/jit/index.rst:87:<autosummary>:1
+msgid "Unloads the shared library."
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:87
+#: ../../source/reference/jit/index.rst:91
 msgid "Constants"
 msgstr ""
 
@@ -128,39 +128,45 @@ msgstr ""
 msgid "Returns"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:93
+#: ../../source/reference/jit/index.rst:97
 msgid "**'void'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:99
+#: ../../source/reference/jit/index.rst:103
 msgid "**'char'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:106
+#: ../../source/reference/jit/index.rst:110
 msgid "**'int32_t'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:112
+#: ../../source/reference/jit/index.rst:116
 msgid "**'int64_t'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:118
+#: ../../source/reference/jit/index.rst:122
 msgid "**'uint32_t'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:124
+#: ../../source/reference/jit/index.rst:128
 msgid "**'uint64_t'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:130
+#: ../../source/reference/jit/index.rst:134
 msgid "**'float'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:136
+#: ../../source/reference/jit/index.rst:140
 msgid "**'double'** : string"
 msgstr ""
 
-#: ../../source/reference/jit/index.rst:142
+#: ../../source/reference/jit/index.rst:146
 msgid "**'void *'** : string"
 msgstr ""
+
+#~ msgid "Unload the loaded library if needed."
+#~ msgstr ""
+
+#~ msgid "Unloads the loaded library."
+#~ msgstr ""
 

@@ -31,8 +31,10 @@
 
 from __future__ import division, absolute_import, print_function
 
+import warnings
 import random
 from numpy.testing import assert_array_equal
+from nlcpy import testing
 
 import pytest
 import numpy as np
@@ -82,7 +84,9 @@ def ca2(arg):
     a = arg[2]
 
     na = np.array(d, dtype=t)
-    src = np.nanmean(na, axis=a)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        src = np.nanmean(na, axis=a)
     np.save(fil, src)
 
     ok = np.load(fil)
@@ -174,5 +178,5 @@ def test_run2(k, v):
     l_v = tuple(v)
     ans1, ans2 = eval(l_v[0])(l_v[1:])
 
-    print("ans1={} ans2={}".format(ans1, ans2))
-    assert_array_equal(ans1, ans2.get())
+    with testing.numpy_nlcpy_errstate(invalid='ignore', divide='ignore'):
+        assert_array_equal(ans1, ans2.get())

@@ -147,15 +147,6 @@ enum ve_funcnum {
     VE_FUNC_REPEAT           = 0x05003,
     VE_FUNC_ROLL             = 0x05004,
     VE_FUNC_BLOCK            = 0x05005,
-    /* cblas wrapper functions */
-    VE_FUNC_CBLAS_SDOT       = 0x06000,
-    VE_FUNC_CBLAS_DDOT       = 0x06001,
-    VE_FUNC_CBLAS_CDOTU_SUB  = 0x06002,
-    VE_FUNC_CBLAS_ZDOTU_SUB  = 0x06003,
-    VE_FUNC_CBLAS_SGEMM      = 0x06004,
-    VE_FUNC_CBLAS_DGEMM      = 0x06005,
-    VE_FUNC_CBLAS_CGEMM      = 0x06006,
-    VE_FUNC_CBLAS_ZGEMM      = 0x06007,
     /* linalg functions */
     VE_FUNC_DOT              = 0x07000,
     VE_FUNC_MATMUL           = 0x07001,

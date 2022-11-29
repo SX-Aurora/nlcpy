@@ -30,8 +30,8 @@
 #
 
 _cblas_kernel_list = {
-    "cblas_sgemm": {
-        "ret": "void",
+    "wrapper_cblas_sgemm": {
+        "ret": "uint64_t",
         "args":
             [
                 "int64_t",
@@ -40,19 +40,18 @@ _cblas_kernel_list = {
                 "int64_t",
                 "int64_t",
                 "int64_t",
-                "float",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "float",
-                "uint64_t",
+                b"void *",
                 "int64_t",
+                b"int32_t *",
             ],
     },
 
-    "cblas_dgemm": {
-        "ret": "void",
+    "wrapper_cblas_dgemm": {
+        "ret": "uint64_t",
         "args":
             [
                 "int64_t",
@@ -61,19 +60,18 @@ _cblas_kernel_list = {
                 "int64_t",
                 "int64_t",
                 "int64_t",
-                "double",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "double",
-                "uint64_t",
+                b"void *",
                 "int64_t",
+                b"int32_t *",
             ],
     },
 
-    "cblas_cgemm": {
-        "ret": "void",
+    "wrapper_cblas_cgemm": {
+        "ret": "uint64_t",
         "args":
             [
                 "int64_t",
@@ -82,19 +80,18 @@ _cblas_kernel_list = {
                 "int64_t",
                 "int64_t",
                 "int64_t",
-                b"void*",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                b"void*",
-                "uint64_t",
+                b"void *",
                 "int64_t",
+                b"int32_t *",
             ],
     },
 
-    "cblas_zgemm": {
-        "ret": "void",
+    "wrapper_cblas_zgemm": {
+        "ret": "uint64_t",
         "args":
             [
                 "int64_t",
@@ -103,14 +100,13 @@ _cblas_kernel_list = {
                 "int64_t",
                 "int64_t",
                 "int64_t",
-                b"void*",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                "uint64_t",
+                b"void *",
                 "int64_t",
-                b"void*",
-                "uint64_t",
+                b"void *",
                 "int64_t",
+                b"int32_t *",
             ],
     },
 
@@ -157,15 +153,5 @@ _cblas_kernel_list = {
                 b"int32_t *",
             ],
     },
-
-    "wrapper_cblas_dgemm": {
-        "ret": "uint64_t",
-        "args":
-            [
-                b"void *",
-                b"int32_t *",
-            ],
-    },
-
 
 }

@@ -32,7 +32,7 @@
 import numpy
 import unittest
 import pytest
-
+import gc
 import nlcpy
 from nlcpy import testing
 
@@ -113,6 +113,10 @@ cnt = 0
 
 class TestBinaryCast(unittest.TestCase):
 
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
+
     ################################
     # *** testing parameter ***
     # input is array_array
@@ -133,13 +137,12 @@ class TestBinaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         in2 = xp.array(in2)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, order=order_op)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, order=order_op)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -160,13 +163,12 @@ class TestBinaryCast(unittest.TestCase):
     def test_binary_cast_array_scalar(self, xp, op, in1, in2):
         in1 = xp.array(in1)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -185,13 +187,12 @@ class TestBinaryCast(unittest.TestCase):
         is_out=False, is_where=False, is_dtype=False, seed=0
     )
     def test_binary_cast_scalar_scalar(self, xp, op, in1, in2):
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -213,13 +214,12 @@ class TestBinaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         in2 = xp.array(in2)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -241,13 +241,12 @@ class TestBinaryCast(unittest.TestCase):
             self, xp, op, in1, in2, dtype):
         in1 = xp.array(in1)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -267,13 +266,12 @@ class TestBinaryCast(unittest.TestCase):
     )
     def test_binary_cast_scalar_scalar_with_dtype(
             self, xp, op, in1, in2, dtype):
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -296,18 +294,17 @@ class TestBinaryCast(unittest.TestCase):
         in2 = xp.array(in2)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out)
-                if xp is numpy and op in float16_op_set:
-                    if in1.dtype == numpy.dtype('bool') and \
-                            in2.dtype == numpy.dtype('bool'):
-                        y = func(in1, in2, out=out, dtype='f4')
-                        return y
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out)
+            if xp is numpy and op in float16_op_set:
+                if in1.dtype == numpy.dtype('bool') and \
+                        in2.dtype == numpy.dtype('bool'):
+                    y = func(in1, in2, out=out, dtype='f4')
+                    return y
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -329,18 +326,17 @@ class TestBinaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out)
-                if xp is numpy and op in float16_op_set:
-                    if in1.dtype == numpy.dtype('bool') and \
-                            isinstance(in2, bool):
-                        y = func(in1, in2, out=out, dtype='f4')
-                        return y
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out)
+            if xp is numpy and op in float16_op_set:
+                if in1.dtype == numpy.dtype('bool') and \
+                        isinstance(in2, bool):
+                    y = func(in1, in2, out=out, dtype='f4')
+                    return y
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -361,18 +357,17 @@ class TestBinaryCast(unittest.TestCase):
     def test_binary_cast_scalar_scalar_with_out(self, xp, op, in1, in2, out):
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out)
-                if xp is numpy and op in float16_op_set:
-                    if isinstance(in1, bool) and \
-                            isinstance(in2, bool):
-                        y = func(in1, in2, out=out, dtype='f4')
-                        return y
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out)
+            if xp is numpy and op in float16_op_set:
+                if isinstance(in1, bool) and \
+                        isinstance(in2, bool):
+                    y = func(in1, in2, out=out, dtype='f4')
+                    return y
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -397,18 +392,17 @@ class TestBinaryCast(unittest.TestCase):
         in2 = xp.array(in2)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out)
-                if xp is numpy and op in float16_op_set:
-                    if in1.dtype == numpy.dtype('bool') and \
-                            in2.dtype == numpy.dtype('bool'):
-                        y = func(in1, in2, out=out, dtype='f4')
-                        return y
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out)
+            if xp is numpy and op in float16_op_set:
+                if in1.dtype == numpy.dtype('bool') and \
+                        in2.dtype == numpy.dtype('bool'):
+                    y = func(in1, in2, out=out, dtype='f4')
+                    return y
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -433,13 +427,12 @@ class TestBinaryCast(unittest.TestCase):
         in2 = xp.array(in2)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -463,13 +456,12 @@ class TestBinaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -492,13 +484,12 @@ class TestBinaryCast(unittest.TestCase):
             self, xp, op, in1, in2, out, dtype):
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out, dtype=dtype)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out, dtype=dtype)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -523,21 +514,20 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where)
-                    if xp is numpy and op in float16_op_set:
-                        if in1.dtype == numpy.dtype('bool') and \
-                                in2.dtype == numpy.dtype('bool'):
-                            y = func(in1, in2, out=out, where=where, dtype='f4')
-                            return y
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where)
+                if xp is numpy and op in float16_op_set:
+                    if in1.dtype == numpy.dtype('bool') and \
+                            in2.dtype == numpy.dtype('bool'):
+                        y = func(in1, in2, out=out, where=where, dtype='f4')
+                        return y
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -561,21 +551,20 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where)
-                    if xp is numpy and op in float16_op_set:
-                        if in1.dtype == numpy.dtype('bool') and \
-                                isinstance(in2, bool):
-                            y = func(in1, in2, out=out, where=where, dtype='f4')
-                            return y
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where)
+                if xp is numpy and op in float16_op_set:
+                    if in1.dtype == numpy.dtype('bool') and \
+                            isinstance(in2, bool):
+                        y = func(in1, in2, out=out, where=where, dtype='f4')
+                        return y
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -598,21 +587,20 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where)
-                    if xp is numpy and op in float16_op_set:
-                        if isinstance(in1, bool) and \
-                                isinstance(in2, bool):
-                            y = func(in1, in2, out=out, where=where, dtype='f4')
-                            return y
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where)
+                if xp is numpy and op in float16_op_set:
+                    if isinstance(in1, bool) and \
+                            isinstance(in2, bool):
+                        y = func(in1, in2, out=out, where=where, dtype='f4')
+                        return y
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -638,21 +626,20 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where)
-                    if xp is numpy and op in float16_op_set:
-                        if in1.dtype == numpy.dtype('bool') and \
-                                in2.dtype == numpy.dtype('bool'):
-                            y = func(in1, in2, out=out, where=where, dtype='f4')
-                            return y
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where)
+                if xp is numpy and op in float16_op_set:
+                    if in1.dtype == numpy.dtype('bool') and \
+                            in2.dtype == numpy.dtype('bool'):
+                        y = func(in1, in2, out=out, where=where, dtype='f4')
+                        return y
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -678,16 +665,15 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where, dtype=dtype)
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where, dtype=dtype)
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -712,16 +698,15 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where, dtype=dtype)
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where, dtype=dtype)
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
     ################################
@@ -745,16 +730,15 @@ class TestBinaryCast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                with numpy.warnings.catch_warnings():
-                    numpy.warnings.simplefilter(
-                        'ignore', numpy.ComplexWarning)
-                    func = getattr(xp, op)
-                    y = func(in1, in2, out=out, where=where, dtype=dtype)
-                    if xp is nlcpy:
-                        nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            with numpy.warnings.catch_warnings():
+                numpy.warnings.simplefilter(
+                    'ignore', numpy.ComplexWarning)
+                func = getattr(xp, op)
+                y = func(in1, in2, out=out, where=where, dtype=dtype)
+                if xp is nlcpy:
+                    nlcpy.request.flush()
         return y
 
 
@@ -771,6 +755,10 @@ b_shapes = testing.shaped_rearrange_for_broadcast(shapes_base)
 
 
 class TestBinaryBroadcast(unittest.TestCase):
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     ################################
     # *** testing parameter ***
@@ -791,13 +779,12 @@ class TestBinaryBroadcast(unittest.TestCase):
         in1 = xp.array(in1)
         in2 = xp.array(in2)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -818,13 +805,12 @@ class TestBinaryBroadcast(unittest.TestCase):
     def test_binary_broadcast_array_scalar(self, xp, op, in1, in2):
         in1 = xp.array(in1)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -848,18 +834,17 @@ class TestBinaryBroadcast(unittest.TestCase):
         in2 = xp.array(in2)
         out = xp.array(out)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out)
-                if xp is numpy and op in float16_op_set:
-                    if in1.dtype == numpy.dtype('bool') and \
-                            in2.dtype == numpy.dtype('bool'):
-                        y = func(in1, in2, out=out, dtype='f4')
-                        return y
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out)
+            if xp is numpy and op in float16_op_set:
+                if in1.dtype == numpy.dtype('bool') and \
+                        in2.dtype == numpy.dtype('bool'):
+                    y = func(in1, in2, out=out, dtype='f4')
+                    return y
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y
 
     ################################
@@ -884,11 +869,10 @@ class TestBinaryBroadcast(unittest.TestCase):
         out = xp.array(out)
         where = xp.array(where)
 
-        with testing.NumpyError(divide='ignore'):
-            with testing.NlcpyError(
-                    divide='ignore', over='ignore', invalid='ignore'):
-                func = getattr(xp, op)
-                y = func(in1, in2, out=out, where=where)
-                if xp is nlcpy:
-                    nlcpy.request.flush()
+        with testing.numpy_nlcpy_errstate(
+                divide='ignore', over='ignore', invalid='ignore'):
+            func = getattr(xp, op)
+            y = func(in1, in2, out=out, where=where)
+            if xp is nlcpy:
+                nlcpy.request.flush()
         return y

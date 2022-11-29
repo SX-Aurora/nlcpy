@@ -53,7 +53,6 @@ import operator
 import unittest
 
 import numpy
-
 import nlcpy
 from nlcpy import testing
 
@@ -89,7 +88,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_scalar_op(operator.mul)
 
     def test_truediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_array_scalar_op(operator.truediv)
 
     def test_radd_scalar(self):
@@ -102,7 +101,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_scalar_op(operator.mul, swap=True)
 
     def test_rtruediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_array_scalar_op(operator.truediv, swap=True)
 
     def test_iadd_scalar(self):
@@ -124,7 +123,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_scalar_op(operator.imul, nomask=True)
 
     def test_itruediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_array_scalar_op(operator.itruediv)
 
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
@@ -196,7 +195,8 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_reversed_op(operator.mul)
 
     def test_array_reversed_div(self):
-        self.check_array_reversed_op(operator.truediv)
+        with nlcpy.errstate(divide='ignore', over='ignore'):
+            self.check_array_reversed_op(operator.truediv)
 
     @testing.for_all_dtypes(no_bool=True)
     def check_typecast(self, val, dtype):
@@ -209,9 +209,11 @@ class TestArrayElementwiseOp(unittest.TestCase):
         nval = numpy.ma.array(nval, mask=mask)
         vval = nlcpy.ma.array(vval, mask=mask)
         for op in operators:
-            with testing.NumpyError(divide='ignore', invalid='ignore'):
+            with testing.numpy_nlcpy_errstate(
+                    divide='ignore', invalid='ignore', over='ignore'):
                 a = op(val, nval)
-            b = op(val, vval)
+                b = op(val, vval)
+                nlcpy.request.flush()
             self.assertEqual(a.dtype, b.dtype)
 
     def test_typecast_bool1(self):
@@ -251,27 +253,39 @@ class TestArrayElementwiseOp(unittest.TestCase):
     def test_divide_inf_mask(self, xp):
         a = xp.ma.array([3, 1, -1, 0])
         b = xp.ma.array([1, 0, 0, 0])
-        return xp.ma.divide(a, b)
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+            ret = xp.ma.divide(a, b)
+            nlcpy.request.flush()
+            return ret
 
     @testing.numpy_nlcpy_allclose()
     def test_divide_domain_mask(self, xp):
         x = 3 / numpy.finfo(float).tiny
         a = xp.ma.array([3, 1, -1, 0, x])
         b = xp.ma.array([1, 0, 0, 0, 2])
-        return xp.ma.divide(a, b)
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+            ret = xp.ma.divide(a, b)
+            nlcpy.request.flush()
+            return ret
 
     @testing.numpy_nlcpy_allclose()
     def test_true_divide_inf_mask(self, xp):
         a = xp.ma.array([3, 1, -1, 0])
         b = xp.ma.array([1, 0, 0, 0])
-        return xp.ma.true_divide(a, b)
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+            ret = xp.ma.true_divide(a, b)
+            nlcpy.request.flush()
+            return ret
 
     @testing.numpy_nlcpy_allclose()
     def test_true_divide_domain_mask(self, xp):
         x = 3 / numpy.finfo(float).tiny
         a = xp.ma.array([3, 1, -1, 0, x])
         b = xp.ma.array([1, 0, 0, 0, 2])
-        return xp.ma.true_divide(a, b)
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
+            ret = xp.ma.true_divide(a, b)
+            nlcpy.request.flush()
+            return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_binary_op_both_nomask(self, xp):
@@ -325,11 +339,11 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_ma_ma_op('__mul__')
 
     def test_div_ma(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ma_op('__div__')
 
     def test_truediv_ma(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ma_op('__truediv__')
 
     def test_iadd_ma(self):
@@ -351,7 +365,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_ma_ma_op('__imul__', nomask=True)
 
     def test_itruediv_ma(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ma_op('__itruediv__')
 
     @testing.for_orders('CF', name='order_in')
@@ -374,6 +388,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
             res = op(a)
         else:
             res = op(b)
+        nlcpy.request.flush()
         return res
 
     def test_add_array(self):
@@ -395,15 +410,16 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_ma_ndarray_op('__mul__', swap=True)
 
     def test_div_array(self):
-        with testing.NumpyError(divide='ignore'):
+        # with testing.numpy_nlcpy_errstate(divide='ignore'):
+        with nlcpy.errstate(over='ignore'):
             self.check_ma_ndarray_op('__div__')
 
     def test_truediv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ndarray_op('__truediv__')
 
     def test_rtruediv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ndarray_op('__truediv__', swap=True)
 
     def test_iadd_array(self):
@@ -422,7 +438,7 @@ class TestArrayElementwiseOp(unittest.TestCase):
         getattr(a, '__idiv__')(b)
 
     def test_itruediv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', over='ignore'):
             self.check_ma_ndarray_op('__itruediv__')
 
     @testing.numpy_nlcpy_raises()

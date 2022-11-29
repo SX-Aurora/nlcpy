@@ -32,8 +32,12 @@
 from libc.stdint cimport *
 from nlcpy.veo.libveo cimport *
 from nlcpy.veo._veo cimport *
+from nlcpy.venode._venode cimport VENode
+cimport cython
 
-cdef extern from 'nlcpy_mempool.h':
+cdef extern from '../mempool/nlcpy_mempool.h':
+
+    const size_t DEFAULT_POOL_SIZE
 
     const int NLCPY_RESULT_OK = 0
     const int NLCPY_OUT_OF_MEMORY = -1
@@ -64,13 +68,13 @@ cdef extern from 'nlcpy_mempool.h':
 
     ctypedef struct mempool_mng_t:
         veo_proc_handle *hnd
-        uint64_t         lib
-        veo_thr_ctxt *ctx
         uint64_t         base
         size_t           tot_memsize
         uint64_t         p
         uint64_t         maxp
         size_t           capa
+        size_t           used
+        size_t           remainder
         uint64_t         id
         uint64_t         maxid
         uint64_t *ptrs
@@ -84,19 +88,26 @@ cdef extern from 'nlcpy_mempool.h':
 
     ctypedef struct mempool_t:
         veo_proc_handle *hnd
-        uint64_t         lib
         uint64_t         base
-        veo_thr_ctxt *ctx
-        mempool_mng_t *small
-        mempool_mng_t *large
+        mempool_mng_t *mng
         hash_t *hash
 
-    mempool_t *nlcpy_mempool_alloc(veo_proc_handle *hnd, uint64_t lib, veo_thr_ctxt *ctx)
+    mempool_t *nlcpy_mempool_alloc(veo_proc_handle *hnd, size_t tot_memsize)
     int  nlcpy_mempool_reserve(mempool_t *pool, const size_t size, uint64_t *ve_adr)
     int  nlcpy_mempool_release(mempool_t *pool, const uint64_t ve_adr)
     void nlcpy_mempool_free(mempool_t *pool)
     bint nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
+    void nlcpy_mempool_set_size(const size_t pool_size)
+    void nlcpy_mempool_set_hooked_veo_sym(const void * const _hooked_veo_alloc_hmem,
+                                          const void * const _hooked_veo_free_hmem)
+    mempool_mng_t *nlcpy_mempool_get_mng(const mempool_t * const pool)
 
+
+@cython.no_gc
 cdef class MemPool(object):
     cdef mempool_t *_pool
-    cdef veo_proc_handle *_hnd
+    cdef mempool_mng_t *_mng
+    cdef VENode _venode
+
+
+cpdef _get_default_pool_size()

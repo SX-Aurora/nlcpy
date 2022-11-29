@@ -3,10 +3,10 @@
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +17,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -255,7 +255,7 @@ sub preprocess {
                 }
                 @buff = (); # reset
                 close($fh);
-                # genarete codes between begin_switch and end_switch   
+                # genarete codes between begin_switch and end_switch
                 print OUTFILE "uint64_t passed = 0;\n";
                 if ($#vars+1==1) {
                     for (my $i=0; $i<=$#cases; $i++){
@@ -382,7 +382,7 @@ sub preprocess {
                     $d =~ s/\s//g;
                     $d =~ s/,,/,/g; # delete empty
                     if ($d =~ /(.+):(.+)/) {
-                         # ex.) x->dtype:i32,i64  --> $1=x->dtype, $2=i32,i64 
+                         # ex.) x->dtype:i32,i64  --> $1=x->dtype, $2=i32,i64
                          push(@vars,$1);
                          push(@cases,$2);
                     }elsif ($d =~ /(.+)/) {
@@ -411,7 +411,7 @@ sub preprocess {
                 $d =~ s/\s//g;
                 push(@cases, split(/@/,$d));
 
-            
+
             } else {
         	# <--
                 macro();
@@ -579,7 +579,7 @@ sub cast_operator{
    #
    my $src_dtype = tag_to_Dtype($src_dtag);
    my $tar_dtype = tag_to_Atype($tar_dtag);
-   
+
    my $bdy;
    if (/(\@cast_Bint\d\@)(\(\s*[^,)]*\)+?)/) {
      my $cast = $1;
@@ -646,7 +646,7 @@ sub unary_operator{
              $bdy .= "\@op1\@);";
          }
       }
-           
+
    } else {
       die "Unknown unary operator is specified. ( = $op )\n";
    }
@@ -745,7 +745,7 @@ sub binary_operator{
       } else {
           $bdy .= "\@op2\@);";
       }
-       
+
    } else {
       die "Unknown binary operator is specified. ( = $op )\n";
    }
@@ -844,7 +844,7 @@ sub get_unary_intrinsic_name {
       $fn = "c" . "$fn" . "f" if $ari_dtype eq "float _Complex";
    }
    return $fn;
-} 
+}
 
 sub get_binary_intrinsic_name {
    my $op        = $_[0];
@@ -875,7 +875,7 @@ sub get_binary_intrinsic_name {
       $fn = "c" . "$fn" . "f" if $ari_dtype eq "float _Complex";
    }
    return $fn;
-} 
+}
 
 sub tag_to_Dtype {
    my $dtag  = $_[0];
@@ -1331,27 +1331,27 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
     'out' => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'maximum' => { 
+'maximum' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
     'out' => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'minimum' => { 
+'minimum' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
     'out' => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'fmax' => { 
+'fmax' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
     'out' => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'fmin' => { 
+'fmin' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
     'out' => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'argmax' => { 
+'argmax' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$i64"],
     'out' => ["$i64"],
 },
-'argmin' => { 
+'argmin' => {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$i64"],
     'out' => ["$i64"],
 },
@@ -1382,7 +1382,7 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
     'dtype'=> ["$f32, $f64"],
     'out'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
 },
-'nextafter'=> { 
+'nextafter'=> {
     'in'   => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64", "$bool, $i32, $i64, $u32, $u64, $f32, $f64"],
     'dtype'=> ["$i32, $i64, $u32, $u64, $f32, $f64"],
     'out'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
@@ -1392,16 +1392,16 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
     'dtype'=> ["$f32, $f64"],
     'out'  => ["$f32, $f64, $c64, $c128"],
 },
-'modf'=> { 
+'modf'=> {
     'in'  => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
     'out' => ["$f32, $f64, $u32, $u64, $f32, $f64, $c64, $c128"],
 },
-'ldexp'=> { 
+'ldexp'=> {
     'in'   => ["$bool, $i32, $i64, $u32, $u64, $f32, $f64", "$bool, $i32, $i64, $u32, $u64"],
     'dtype'=> ["$f32, $f64"],
     'out'  => ["$f32, $f64, $c64, $c128"],
 },
-'frexp'=> { 
+'frexp'=> {
     'in'   => ["$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128", "$i32, $i64, $u32, $u64, $f32, $f64, $c64, $c128"],
     'dtype'=> ["$f32, $f64, $u32, $u64, $f32, $f64, $c64, $c128"],
     'out'  => ["$f32, $f64, $u32, $u64, $f32, $f64, $c64, $c128, $bool"],
@@ -1486,7 +1486,7 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
 'rad2deg'    => '@op2@ = (@op1@) * (@ari_dtype@)57.29577951308232087679e0;',
 'deg2rad'    => '@op2@ = (@op1@) * (@ari_dtype@)1.7453292519943295769e-02;',
 'radians'    => '@op2@ = (@op1@) * (@ari_dtype@)1.7453292519943295769e-02;',
-'sign'=> { 
+'sign'=> {
      'float _Complex'  => '@op2@ = (crealf(@op1@)>0) ? 1 : ( (crealf(@op1@)<0) ? -1 : ((crealf(@op1@)==0) ? 0 : crealf(@op1@)) );',
      'double _Complex' => '@op2@ = (creal (@op1@)>0) ? 1 : ( (creal (@op1@)<0) ? -1 : ((creal (@op1@)==0) ? 0 : creal (@op1@)) );',
      'float'           => '@op2@ = ((@ari_dtype@)(@op1@)>0) ? 1 : ( ((@ari_dtype@)(@op1@)<0) ? -1 : (((@ari_dtype@)(@op1@)==0) ? 0 : @op1@) );',
@@ -1496,19 +1496,19 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
      'uint32_t'        => '@op2@ = ((@ari_dtype@)(@op1@)==0) ? 0 : 1;',
      'uint64_t'        => '@op2@ = ((@ari_dtype@)(@op1@)==0) ? 0 : 1;',
 },
-'cast'=> { 
+'cast'=> {
      'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
      'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
 },
-'add'=> { 
+'add'=> {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) + (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @op1@ || @op2@;',
 },
-'subtract'=> { 
+'subtract'=> {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) - (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @op1@ && !@op2@ || !@op1@ && @op2@;',
 },
-'multiply'    => { 
+'multiply'    => {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) * (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @op1@ && @op2@;',
 },
@@ -1521,29 +1521,29 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
 },
 'true_divide' => '@op3@ = (@ari_dtype@)(@op1@) / (@ari_dtype@)(@op2@);',
 'floor_divide'=> {
-     'float'           => '@op3@ = floorf((float)(@op1@)/(float)(@op2@)); if ((float)@op2@==0) @op3@ = nanf("n");',
-     'double'          => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = nan("n");',
-     'float _Complex'  => '@op3@ = floorf(crealf((float _Complex)(@op1@)/(float _Complex)(@op2@))); if (cabsf((float _Complex)@op2@)==0) @op3@ = nanf("n");',
-     'double _Complex' => '@op3@ = floor (creal((double _Complex)(@op1@)/(double _Complex)(@op2@))); if (cabsf((double _Complex)@op2@)==0) @op3@ = nan("n");',
+     'float'           => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = nlcpy_g_nanf;',
+     'double'          => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = nlcpy_g_nan;',
+     'float _Complex'  => '@op3@ = floorf(crealf((float _Complex)(@op1@)/(float _Complex)(@op2@))); if (cabsf((float _Complex)@op2@)==0) @op3@ = nlcpy_g_nanf;',
+     'double _Complex' => '@op3@ = floor (creal((double _Complex)(@op1@)/(double _Complex)(@op2@))); if (cabsf((double _Complex)@op2@)==0) @op3@ = nlcpy_g_nan;',
      'others'          => << 'EOS'
                           const @ari_dtype@ l = (@op2@!=0) ? ((@ari_dtype@)@op1@ / (@ari_dtype@)@op2@) * (@ari_dtype@)@op2@ : @op1@;
                           @op3@ = (( ((double)((@ari_dtype@)@op1@) * (double)@op2@)>=0 || l == @op1@) ? l : l - (@ari_dtype@)@op2@)/(@ari_dtype@)(@op2@);
 EOS
 ,
 },
-'power'       => { 
+'power'       => {
      'float'           => '@op3@ = powf ((@ari_dtype@)(@op1@), (@ari_dtype@)(@op2@));',
      'double'          => '@op3@ = pow  ((@ari_dtype@)(@op1@), (@ari_dtype@)(@op2@));',
-     'float _Complex'  => '@op3@ = (crealf((float _Complex)@op1@)==0&&cimagf((float _Complex)@op1@)==0&&cimagf((float _Complex)@op2@)!=0) ? nanf("n")+nanf("n")*I : cpowf((float _Complex)@op1@, (float _Complex)@op2@);',
-     'double _Complex' => '@op3@ = (creal((double _Complex)@op1@)==0&&cimag((double _Complex)@op1@)==0&&cimag((double _Complex)@op2@)!=0) ? nan("n")+nan("n")*I : cpow((double _Complex)@op1@, (double _Complex)@op2@);',
+     'float _Complex'  => '@op3@ = (crealf((float _Complex)@op1@)==0&&cimagf((float _Complex)@op1@)==0&&(crealf((float _Complex)@op2@)==0||cimagf((float _Complex)@op2@)!=0)) ? nlcpy_g_nanf+nlcpy_g_nanf*I : cpowf((float _Complex)@op1@, (float _Complex)@op2@);',
+     'double _Complex' => '@op3@ = (creal((double _Complex)@op1@)==0&&cimag((double _Complex)@op1@)==0&&(creal((double _Complex)@op2@)==0||cimag((double _Complex)@op2@)!=0)) ? nlcpy_g_nan+nlcpy_g_nan*I : cpow((double _Complex)@op1@, (double _Complex)@op2@);',
      'others'          => << 'EOS'
                   double t = pow((double)(@op1@), (double)(@op2@));
                   @op3@ = (t>=0) ? (@ari_dtype@) (t+0.5) : (@ari_dtype@) (t-0.5);
 EOS
 ,
 },
-'mod'        => { 
-     'float'           => '@op3@ = (float)(@op1@) - floorf((float)(@op1@) / (float)(@op2@)) * (float)@op2@;',
+'mod'        => {
+     'float'           => '@op3@ = (double)(@op1@) - floor((double)(@op1@) / (double)(@op2@)) * (double)@op2@;',
      'double'          => '@op3@ = (double)(@op1@) - floor((double)(@op1@) / (double)(@op2@)) * (double)@op2@;',
      'others'          => << 'EOS'
                           const @ari_dtype@ l = (@op2@!=0) ? ((@ari_dtype@)@op1@ / (@ari_dtype@)@op2@) * (@ari_dtype@)@op2@ : @op1@;
@@ -1551,8 +1551,8 @@ EOS
 EOS
 ,
 },
-'remainder'        => { 
-     'float'           => '@op3@ = (float)(@op1@) - floorf((float)(@op1@) / (float)(@op2@)) * (float)@op2@;',
+'remainder'        => {
+     'float'           => '@op3@ = (double)(@op1@) - floor((double)(@op1@) / (double)(@op2@)) * (double)@op2@;',
      'double'          => '@op3@ = (double)(@op1@) - floor((double)(@op1@) / (double)(@op2@)) * (double)@op2@;',
      'others'          => << 'EOS'
                           const @ari_dtype@ l = (@op2@!=0) ? ((@ari_dtype@)@op1@ / (@ari_dtype@)@op2@) * (@ari_dtype@)@op2@ : @op1@;
@@ -1560,38 +1560,38 @@ EOS
 EOS
 ,
 },
-'fmod'       => { 
-     'float'           => '@op3@ = fmodf((float)(@op1@),(float)(@op2@));',
+'fmod'       => {
+     'float'           => '@op3@ = fmod((double)(@op1@),(double)(@op2@));',
      'double'          => '@op3@ = fmod((double)(@op1@),(double)(@op2@));',
      'others'          => '@op3@ = (@op2@) ? (@ari_dtype@)(@op1@)%(@ari_dtype@)(@op2@) : 0;',
 },
-'spacing'       => { 
+'spacing'       => {
      'float'           => '@op2@ = (@op1@>0) ? nextafterf((float)@op1@,(float)FLT_MAX)-@op1@ : nextafterf((float)@op1@,-(float)FLT_MAX)-@op1@;',
      'double'          => '@op2@ = (@op1@>0) ? nextafter((double)@op1@,(double)FLT_MAX)-@op1@ : nextafter((double)@op1@,-(double)FLT_MAX)-@op1@;',
 },
-'bitwise_and'  => { 
+'bitwise_and'  => {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) & (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @cast_Bint1@(@op1@) & @cast_Bint2@(@op2@);',
 },
-'bitwise_xor'  => { 
+'bitwise_xor'  => {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) ^ (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @cast_Bint1@(@op1@) ^ @cast_Bint2@(@op2@);',
 },
-'bitwise_or'   => { 
+'bitwise_or'   => {
      'others'          => '@op3@ = (@ari_dtype@)(@op1@) | (@ari_dtype@)(@op2@);',
      'bool'            => '@op3@ = @cast_Bint1@(@op1@) | @cast_Bint2@(@op2@);',
 },
 'logical_and'  => '@op3@ = (@cast_Bint1@(@op1@) && @cast_Bint2@(@op2@));',
 'logical_or'   => '@op3@ = (@cast_Bint1@(@op1@) || @cast_Bint2@(@op2@));',
 'logical_xor'  => '@op3@ = (@cast_Bint1@(@op1@) != @cast_Bint2@(@op2@));',
-'left_shift'=> { 
+'left_shift'=> {
      'bool'            => '@op3@ = (@op2@>31) ? 0 : (@ari_dtype@)(@op1@) << (@ari_dtype@)(@op2@);',
      'int32_t'         => '@op3@ = (@op2@>31) ? 0 : (@ari_dtype@)(@op1@) << (@ari_dtype@)(@op2@);',
      'int64_t'         => '@op3@ = (@op2@>63) ? 0 : (@ari_dtype@)(@op1@) << (@ari_dtype@)(@op2@);',
      'uint32_t'        => '@op3@ = (@op2@>31) ? 0 : (@ari_dtype@)(@op1@) << (@ari_dtype@)(@op2@);',
      'uint64_t'        => '@op3@ = (@op2@>63) ? 0 : (@ari_dtype@)(@op1@) << (@ari_dtype@)(@op2@);',
 },
-'right_shift'=> { 
+'right_shift'=> {
      'bool'            => '@op3@ = (@op2@>31) ? 0 : (@ari_dtype@)(@op1@) >> (@ari_dtype@)(@op2@);',
      'int32_t'         => '@op3@ = (@op2@>31) ? 0 : (@ari_dtype@)(@op1@) >> (@ari_dtype@)(@op2@);',
      'int64_t'         => '@op3@ = (@op2@>63) ? 0 : (@ari_dtype@)(@op1@) >> (@ari_dtype@)(@op2@);',
@@ -1670,7 +1670,7 @@ EOS
 ,
      'bool'    => '@op3@ = @op1@ && @op2@;',
 },
-'heaviside'=> { 
+'heaviside'=> {
      'float'           => '@op3@ = ((@ari_dtype@)(@op1@)<0) ? 0 : (((@ari_dtype@)(@op1@==0)) ? @op2@ : 1);',
      'double'          => '@op3@ = ((@ari_dtype@)(@op1@)<0) ? 0 : (((@ari_dtype@)(@op1@==0)) ? @op2@ : 1);',
      'int32_t'         => '@op3@ = ((@ari_dtype@)(@op1@)<0) ? 0 : (((@ari_dtype@)(@op1@==0)) ? @op2@ : 1);',
@@ -1679,33 +1679,33 @@ EOS
      'uint64_t'        => '@op3@ = ((@ari_dtype@)(@op1@==0)) ? @op2@ : 1;',
 },
 'dot'         => '@op3@ += (@ari_dtype@)(@op1@) * (@ari_dtype@)(@op2@);',
-'copy'=> { 
+'copy'=> {
      'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
      'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
 },
-'copy_masked'=> { 
+'copy_masked'=> {
      'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
      'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
 },
-'isinf'=> { 
+'isinf'=> {
      'others'          => '@op2@ = @ISINF1@(@op1@);',
 },
-'isnan'=> { 
+'isnan'=> {
      'others'          => '@op2@ = @ISNAN1@(@op1@);',
 },
-'arccos'       => { 
+'arccos'       => {
      'float _Complex'  => '@op2@ = cacosf((float _Complex)@op1@);',
      'double _Complex' => '@op2@ = cacos ((double _Complex)@op1@);',
      'float'           => '@op2@ =  acosf((float)(@op1@));',
      'others'          => '@op2@ =  acos ((double)(@op1@));',
 },
-'arctanh'       => { 
+'arctanh'       => {
      'float _Complex'  => '@op2@ = catanhf((float _Complex)@op1@);',
      'double _Complex' => '@op2@ = catanh ((double _Complex)@op1@);',
      'float'           => '@op2@ =  atanhf((float)(@op1@));',
      'others'          => '@op2@ =  atanh ((double)(@op1@));',
 },
-'ldexp'       => { 
+'ldexp'       => {
      'float'  => {
          # operand 1
          'uint32_t'  => {
@@ -1777,11 +1777,11 @@ EOS
          },
      },
 },
-'copysign'       => { 
+'copysign'       => {
      'float'  => '@op3@=copysign((double)@op1@,(double)@op2@);',
      'double' => '@op3@=copysign((double)@op1@,(double)@op2@);',
 },
-'absolute'=> { 
+'absolute'=> {
      'others'          => {
         'float'           => '@op2@ = fabsf(@op1@);',
         'double'          => '@op2@ = fabs(@op1@);',
@@ -1794,7 +1794,7 @@ EOS
         'bool'            => '@op2@ = @op1@;',
      },
 },
-'fabs'=> { 
+'fabs'=> {
      'others'          => {
         'float'           => '@op2@ = fabsf(@op1@);',
         'double'          => '@op2@ = fabs(@op1@);',
@@ -1807,7 +1807,7 @@ EOS
         'bool'            => '@op2@ = @op1@;',
      },
 },
-'signbit'=> { 
+'signbit'=> {
      'others'          => {
         'float'           => '@op2@ = (*(uint32_t*)(&(@op1@)))>>31;',
         'double'          => '@op2@ = (*(uint64_t*)(&(@op1@)))>>63;',
@@ -1826,39 +1826,39 @@ EOS
 #'power'  => 'pow',
 'rint'   => 'round',
 'arctan2' => 'atan2',
-'conj'=> { 
+'conj'=> {
      'float'           => 'conjf',
      'float _Complex'  => 'conjf',
      'others'          => 'conj',
 },
-'conjugate'=> { 
+'conjugate'=> {
      'float'           => 'conjf',
      'float _Complex'  => 'conjf',
      'others'          => 'conj',
 },
-#'signbit'=> { 
+#'signbit'=> {
 #     'others'          => 'signbit',
 #},
-'isfinite'=> { 
+'isfinite'=> {
      'others'          => 'isfinite',
 },
-#'isinf'=> { 
+#'isinf'=> {
 #     'others'         => 'isinf',
 #},
-#'isnan'=> { 
+#'isnan'=> {
 #     'others'         => 'isnan',
 #},
-#'real'=> { 
+#'real'=> {
 #     'float'           => 'crealf',
 #     'float _Complex'  => 'crealf',
 #     'others'          => 'creal',
 #},
-#'imag'=> { 
+#'imag'=> {
 #     'float'           => 'cimagf',
 #     'float _Complex'  => 'cimagf',
 #     'others'          => 'cimag',
 #},
-'angle'=> { 
+'angle'=> {
      'float'           => 'cargf',
      'float _Complex'  => 'cargf',
      'others'          => 'carg',
@@ -1866,7 +1866,7 @@ EOS
 );
 
 %c_intrinsic_types_table = (
-# name         in, out 
+# name         in, out
 'abs'      => [$i32_t, $i32_t],
 'labs'     => [$i64_t, $i64_t],
 # math.h
@@ -2009,4 +2009,4 @@ EOS
 'crealf'  => [$c64_t, $f32_t],
 'creal'   => [$c128_t, $f64_t],
 );
-} 
+}

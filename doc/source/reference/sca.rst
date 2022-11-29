@@ -9,7 +9,7 @@ Stencil Code Accelerator Interface
 Coding Guide
 ==========================
 The Stencil Code Accelerator (SCA) interface accelerates stencil computations, a processing pattern frequently used in image processing, scientific or engineering simulations, deep learning, and so on.
-The SCA interface enables Python scripts to call functions provided by `SCA <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/sca/c/en/index.html>`_ of `NEC Numeric Library Collection <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_, which is highly optimized for Vector Engine of SX-Aurora TSUBASA.
+The SCA interface enables Python scripts to call functions provided by `SCA <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/sca/c/en/index.html>`_ of `NEC Numeric Library Collection <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_, which is highly optimized for Vector Engine of SX-Aurora TSUBASA.
 
 .. toctree::
    :maxdepth: 1

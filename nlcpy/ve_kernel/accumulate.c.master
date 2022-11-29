@@ -54,7 +54,6 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     ve_array *y = &(args->accumulate.y);
     ve_array *w = &(args->accumulate.w);
     int32_t axis = args->accumulate.axis;
-    int32_t dtype = args->accumulate.dtype;
 
     uint64_t err = NLCPY_ERROR_OK;
 #begin_switch

@@ -9,7 +9,7 @@ Basic Usage
 Preparation
 -----------
 
-NLCPy uses the functions of `NEC Numeric Library collection (NLC) <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_. 
+NLCPy uses the functions of `NEC Numeric Library collection (NLC) <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_. 
 Before importing this package, you need to execute the environment setup script ``nlcvars.sh``
 or ``nlcvars.csh`` once in advance.
 

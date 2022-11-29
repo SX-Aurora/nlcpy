@@ -33,66 +33,44 @@
 
 #include "nlcpy_mempool.h"
 
+static size_t POOL_SIZE = DEFAULT_POOL_SIZE;
+static int (*hooked_veo_alloc_hmem)(struct veo_proc_handle *, void **, const size_t);
+static int (*hooked_veo_free_hmem)(void *);
+
 // *************************************************************************
 //  Entry Functions
 // *************************************************************************
-mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct veo_thr_ctxt *ctx)
+mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, size_t tot_memsize)
 {
 #if defined(DEBUG)
-    fprintf(stderr,"mempool_alloc\n");
+    fprintf(stderr,"mempool_alloc: hnd=%p, tot_memsize=%ld\n", hnd, tot_memsize);
 #endif
     mempool_t *pool    = (mempool_t *)malloc(sizeof(mempool_t));
     if (pool==NULL) return NULL;
     // initialize
     pool->base          = 0;
-    pool->small         = NULL;
-    pool->large         = NULL;
+    pool->mng           = NULL;
     pool->hash          = NULL;
     pool->hnd           = hnd;
-    pool->lib           = lib;
-    pool->ctx           = ctx;
 
-    // allocate mng on VE
+    // allocate pool
     int iret;
-    uint64_t ireq;
-    struct veo_args *args = veo_args_alloc();
-    size_t poolsize = SMALL_POOL_SIZE + LARGE_POOL_SIZE;
-    iret = veo_args_set_u64(args, 0, poolsize);
+    void *vemem;
+    iret = hooked_veo_alloc_hmem(hnd, &vemem, POOL_SIZE);
     if (iret != VEO_COMMAND_OK) return NULL;
-    ireq = veo_call_async_by_name(ctx, lib, "nlcpy__mempool_alloc_ve", args);
-    if (ireq == VEO_REQUEST_ID_INVALID) return NULL;
-    iret = veo_call_wait_result(ctx, ireq, &pool->base);
-    if (iret != VEO_COMMAND_OK) return NULL;
-    veo_args_free(args);
+    pool->base = (uint64_t)vemem;
 
     //
-    size_t tot_memsize;
-    args = veo_args_alloc();
-    ireq = veo_call_async_by_name(ctx, lib, "nlcpy__mempool_get_memsize_ve", args);
-    if (ireq == VEO_REQUEST_ID_INVALID) return NULL;
-    iret = veo_call_wait_result(ctx, ireq, &tot_memsize);
-    if (iret != VEO_COMMAND_OK) return NULL;
-    veo_args_free(args);
-
-    //
-    mempool_mng_t *small;
-     pool->small = nlcpy__mempool_alloc_mng(hnd, lib, ctx, pool->base, (uint64_t)0, (size_t)SMALL_POOL_SIZE, tot_memsize);
-    if (pool->small==NULL) {
+    mempool_mng_t *mng;
+    pool->mng = nlcpy__mempool_alloc_mng(hnd, pool->base, (uint64_t)0, (size_t)POOL_SIZE, tot_memsize);
+    if (pool->mng == NULL) {
         nlcpy_mempool_free(pool);
         return NULL;
     }
-    small = pool->small;
-    //
-    mempool_mng_t *large;
-    pool->large = nlcpy__mempool_alloc_mng(hnd, lib, ctx, pool->base, (uint64_t)SMALL_POOL_SIZE, (size_t)LARGE_POOL_SIZE, tot_memsize);
-    if (pool->large==NULL) {
-        nlcpy_mempool_free(pool);
-        return NULL;
-    }
-    large = pool->large;
+    mng = pool->mng;
 
     // create a dictionary (hash table) to get a block id from VE address
-    const uint64_t maxid = small->maxid + large->maxid;
+    const uint64_t maxid = mng->maxid;
     pool->hash = nlcpy__mempool_create_hash(maxid);
     if (pool->hash == NULL) {
         nlcpy_mempool_free(pool);
@@ -103,13 +81,12 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, uint64_t lib, struct
 }
 
 
-int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
+int nlcpy_mempool_reserve(mempool_t *pool, const size_t size, uint64_t *ve_adr)
 {
 #if defined(DEBUG)
     fprintf(stderr,"mempool_reserve\n");
 #endif
-    mempool_mng_t *small = pool->small;
-    mempool_mng_t *large = pool->large;
+    mempool_mng_t *mng = pool->mng;
     int iret;
     uint64_t lid, gid;
 
@@ -117,16 +94,10 @@ int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
     size_t asize = size;
     if(size==0) asize=8;
 
-    if (asize<=POOL_THREASHOLD) {
-        iret = nlcpy__mempool_reserve(small, asize, &lid, ve_adr);
-        gid= 2*lid;     // even
-    } else {
-        iret = nlcpy__mempool_reserve(large, asize, &lid, ve_adr);
-        gid= 2*lid + 1; // odd
-    }
+    iret = nlcpy__mempool_reserve(mng, asize, &lid, ve_adr);
+    gid = lid;
 #if defined(DEBUG)
-    uint64_t maxmax = ( small->maxp > large->maxp ) ? small->maxp : large->maxp;
-    fprintf(stderr,"  %s: ve_adr=%lx size=%ld, base=%lx, endptr=%lx, gid=%ld, lid=%ld\n", (gid%2==0)?"SMALL":"LARGE", *ve_adr, asize, pool->base,maxmax, gid, lid);
+    fprintf(stderr,"  ve_adr=%lx size=%ld, base=%lx, endptr=%lx, gid=%ld, lid=%ld\n", *ve_adr, asize, pool->base, mng->maxp, gid, lid);
 #endif
     if (iret!=NLCPY_RESULT_OK && iret!=NLCPY_POOL_NOT_USED) return iret;
 
@@ -135,9 +106,6 @@ int nlcpy_mempool_reserve(mempool_t *pool, const size_t size,  uint64_t *ve_adr)
         iret = nlcpy__mempool_append_to_hash(*ve_adr, gid, pool->hash);
     } else {
         // overflow
-        iret = veo_alloc_mem(pool->hnd, ve_adr, asize);
-        if (iret == -1) return NLCPY_OUT_OF_MEMORY;
-        if (iret == -2) return NLCPY_INTERNAL_ERROR;
         iret = NLCPY_POOL_NOT_USED;
     }
 
@@ -150,22 +118,16 @@ int nlcpy_mempool_release(mempool_t *pool, const int64_t ve_adr)
 #if defined(DEBUG)
     fprintf(stderr,"mempool_release\n");
 #endif
-    mempool_mng_t *small = pool->small;
-    mempool_mng_t *large = pool->large;
+    mempool_mng_t *mng = pool->mng;
     uint64_t gid, lid;
 
     int iret = nlcpy__mempool_remove_from_hash(ve_adr, pool, &gid);
     if (iret) return iret;
 
-    if (gid%2==0) {
-        lid=gid/2;
-        iret = nlcpy__mempool_release(small, lid); if (iret) return iret;
-    } else {
-        lid= (gid-1)/2;
-        iret = nlcpy__mempool_release(large, lid); if (iret) return iret;
-    }
+    lid = gid;
+    iret = nlcpy__mempool_release(mng, lid); if (iret) return iret;
 #if defined(DEBUG)
-    fprintf(stderr,"  %s: ve_adr=%lx gid=%ld, lid=%ld\n", (gid%2==0)?"SMALL":"LARGE",ve_adr ,gid, lid);
+    fprintf(stderr,"  ve_adr=%lx gid=%ld, lid=%ld\n", ve_adr, gid, lid);
 #endif
     return NLCPY_RESULT_OK;
 }
@@ -178,24 +140,8 @@ void nlcpy_mempool_free(mempool_t *pool)
 #endif
     // The memory pool is allocated in heap area.
     // So, nothing to do on VE side.
-/*
-    if (pool->base != 0) {
-        //free pool
-        int iret;
-        uint64_t ireq, retval;
-        struct veo_args *args = veo_args_alloc();
-        iret = veo_args_set_u64(args, 0, pool->base);
-        if (iret != VEO_COMMAND_OK) return;
-        ireq = veo_call_async_by_name(pool->ctx, pool->lib, "nlcpy__mempool_free_ve", args);
-        if (ireq == VEO_REQUEST_ID_INVALID) return;
-        iret = veo_call_wait_result(pool->ctx, ireq, &retval);
-        if (iret != VEO_COMMAND_OK) return;
-        veo_args_free(args);
-    }
-*/
 
-    nlcpy__mempool_free_mng(pool->small);
-    nlcpy__mempool_free_mng(pool->large);
+    nlcpy__mempool_free_mng(pool->mng);
     nlcpy__mempool_free_hash(pool->hash);
     //
     FREE(pool);
@@ -205,11 +151,7 @@ void nlcpy_mempool_free(mempool_t *pool)
 bool nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
 {
     mempool_mng_t *mng;
-    if (size<=POOL_THREASHOLD) {
-        mng = pool->small;
-    } else {
-        mng = pool->large;
-    }
+    mng = pool->mng;
 #if defined(DEBUG)
     bool iret = nlcpy__mempool_is_available(mng, size);
 //    size_t capa = nlcpy__mempool_get_capasity(mng);
@@ -218,29 +160,51 @@ bool nlcpy_mempool_is_available(const mempool_t *pool, const size_t size)
 #endif
     return nlcpy__mempool_is_available(mng, size);
 }
+
+
+void nlcpy_mempool_set_size(const size_t pool_size) {
+#if defined(DEBUG)
+    printf("set pool size: %lu\n", pool_size);
+#endif
+    POOL_SIZE = pool_size;
+}
+
+
+void nlcpy_mempool_set_hooked_veo_sym(const void * const _hooked_veo_alloc_hmem,
+                                      const void * const _hooked_veo_free_hmem) {
+    hooked_veo_alloc_hmem = _hooked_veo_alloc_hmem;
+    hooked_veo_free_hmem  = _hooked_veo_free_hmem;
+}
+
+
+mempool_mng_t *nlcpy_mempool_get_mng(const mempool_t * const pool) {
+    return pool->mng;
+}
+
+
 // *************************************************************************
 //  Driver Functions
 // *************************************************************************
-mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, uint64_t lib, struct veo_thr_ctxt *ctx, const uint64_t base, const uint64_t offset, const size_t default_poolsize, const size_t tot_memsize)
+mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, const uint64_t base, const uint64_t offset, const size_t default_poolsize, const size_t tot_memsize)
 {
     mempool_mng_t *mng     = (mempool_mng_t *)malloc(sizeof(mempool_mng_t));
     if (mng==NULL) return mng;
     //
     mng->hnd         = hnd;
-    mng->lib         = lib;
-    mng->ctx         = ctx;
     mng->base        = base;
     mng->p           = base + offset;
     mng->id          = 0;
     mng->tot_memsize = tot_memsize;
     mng->maxp        = mng->p + default_poolsize;
     mng->capa        = default_poolsize;
+    mng->used        = 0;
+    mng->remainder   = mng->capa;
     mng->maxid       = DEFAULT_MAXID;
     // initialization for the deallocation
     mng->buff        = NULL;
     mng->blocks      = NULL;
     mng->sort        = NULL;
-    mng->dora        = NULL;
+    mng->alive       = NULL;
     mng->merged      = true;
 
     //
@@ -279,13 +243,13 @@ mempool_mng_t *nlcpy__mempool_alloc_mng(struct veo_proc_handle *hnd, uint64_t li
         return NULL;
     }
     //
-    mng->dora        = (bool*)malloc(sizeof(bool)*mng->maxid);
-    if (mng->dora == NULL) {
+    mng->alive        = (bool*)malloc(sizeof(bool)*mng->maxid);
+    if (mng->alive == NULL) {
         nlcpy__mempool_free_mng(mng);
         return NULL;
     }
     uint64_t i;
-    for (i=0; i< mng->maxid; i++) mng->dora[i] = false;
+    for (i=0; i< mng->maxid; i++) mng->alive[i] = false;
     //
     return mng;
 }
@@ -320,7 +284,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
 #if defined(POOL_EXTENTON)
         mng->esegs[new_id] = mng->maxp;
 #endif
-        mng->dora[new_id]  = true; // the id-th block is newly assigned.
+        mng->alive[new_id]  = true; // the id-th block is newly assigned.
 
         *id     = new_id;
         *ve_adr = (uint64_t)mng->p;
@@ -329,24 +293,13 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
         mng->p = new_p;
 
     } else {
-#if 0
-        //
-        // We have to look for a block whose size is enough.
-        // First, merge dead blocks
-        if (!mng->merged) {
-            iret = nlcpy__mempool_merge_dead_blocks(mng);
-            if (iret) return iret;
-            mng->merged = true; // merged sort blocks
-        }
-#endif
-
         // Next, check the size of sort blocks
         if (sort->num>0 && sort->bytes[0] >= asize) {
             // Fortunately, we found a room whose size is enough.
             // The room can be reused.
             *id        = sort->ids[0];
             uint64_t s = sort->bytes[0];
-            if (mng->dora[*id]) {
+            if (mng->alive[*id]) {
                 fprintf(stderr,"NLCPy internal error: the %ld-th block has already been reserved.\n",*id);
                 return NLCPY_INTERNAL_ERROR;
             }
@@ -367,7 +320,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
                 mng->bytes[*id]    = asize;
                 // register as a new block
                 mng->ptrs[new_id]  = mng->ptrs[*id] + asize;
-                mng->dora[new_id]  = false;
+                mng->alive[new_id]  = false;
 #if defined(POOL_EXTENTON)
                 mng->esegs[new_id] = mng->esegs[*id];
 #endif
@@ -375,7 +328,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
                 iret = nlcpy__mempool_register_to_sort(new_id, mng->bytes[new_id], mng->sort); if (iret) return iret;
             }
             *ve_adr = mng->ptrs[*id];
-            mng->dora[*id] = true; // revive the id-th blocks
+            mng->alive[*id] = true; // revive the id-th blocks
 
         } else {
             new_p = mng->p + asize;
@@ -416,7 +369,7 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
 #if defined(POOL_EXTENTON)
             mng->esegs[new_id] = mng->maxp;
 #endif
-            mng->dora[new_id]  = true; // the id-th block is newly assigned.
+            mng->alive[new_id]  = true; // the id-th block is newly assigned.
 
             *id     = new_id;
             *ve_adr = mng->p;
@@ -425,6 +378,8 @@ int nlcpy__mempool_reserve(mempool_mng_t *mng, const size_t size, uint64_t *id, 
             mng->p = new_p;
         }
     }
+    mng->used += asize;
+    mng->remainder -= asize;
     return NLCPY_RESULT_OK;
 }
 
@@ -437,7 +392,7 @@ int nlcpy__mempool_release(mempool_mng_t *mng, const uint64_t id)
         fprintf(stderr,"NLCPy internal error: Invalid ID is detected. ( ID = %ld )\n",id);
         return NLCPY_INTERNAL_ERROR;
     }
-    if ( !mng->dora[id] ) {
+    if ( !mng->alive[id] ) {
         fprintf(stderr,"NLCPy internal error: the %ld-th block is not reserved.\n",id);
         return NLCPY_INTERNAL_ERROR;
     }
@@ -445,22 +400,15 @@ int nlcpy__mempool_release(mempool_mng_t *mng, const uint64_t id)
     int iret = nlcpy__mempool_register_to_sort(id, size, mng->sort);
     if (iret) return iret;
 
-    mng->dora[id] = false; // the id-th block is died.
+    mng->alive[id] = false; // the id-th block is died.
 
     const uint64_t *next = mng->blocks->next;
     const uint64_t *prev = mng->blocks->prev;
-#if 1
-    if ( next[id]!=END && !mng->dora[next[id]] ) mng->merged = false; // it is possible to merge dead blocks.
-    if ( prev[id]!=END && !mng->dora[prev[id]] ) mng->merged = false; // it is possible to merge dead blocks.
+    if ( next[id]!=END && !mng->alive[next[id]] ) mng->merged = false; // it is possible to merge dead blocks.
+    if ( prev[id]!=END && !mng->alive[prev[id]] ) mng->merged = false; // it is possible to merge dead blocks.
 
-#else
-    // Merge dead blocks
-    if (!mng->merged) {
-        iret = nlcpy__mempool_merge_dead_blocks(mng);
-        if (iret) return iret;
-        mng->merged = true; // sort blocks are merged
-    }
-#endif
+    mng->used -= size;
+    mng->remainder += size;
     return iret;
 }
 
@@ -469,7 +417,7 @@ void nlcpy__mempool_free_mng(mempool_mng_t *mng)
 {
     //
     FREE(mng->buff);
-    FREE(mng->dora);
+    FREE(mng->alive);
     FREE(mng->blocks);
     //
     nlcpy__mempool_free_sort(mng->sort);
@@ -485,7 +433,7 @@ void nlcpy__mempool_free_mng(mempool_mng_t *mng)
 // *************************************************************************
 sort_t *nlcpy__mempool_create_sort(const size_t n)
 {
-    sort_t *st = (sort_t *)    malloc(sizeof(sort_t));
+    sort_t *st = (sort_t *)malloc(sizeof(sort_t));
     if (st == NULL) {
         return NULL;
     }
@@ -540,11 +488,7 @@ int nlcpy__mempool_extend_pool(const size_t n, mempool_mng_t *mng)
     uint64_t ireq, retval;
     struct veo_args *args = veo_args_alloc();
 
-    iret = veo_args_set_u64(args, 0, (uint64_t)n);
-    if (iret != VEO_COMMAND_OK) return NLCPY_INTERNAL_ERROR;
-    ireq = veo_call_async_by_name(mng->ctx, mng->lib, "nlcpy__mempool_extend_ve", args);
-    if (ireq == VEO_REQUEST_ID_INVALID) return NLCPY_INTERNAL_ERROR;
-    iret = veo_call_wait_result(mng->ctx, ireq, &retval);
+    iret = veo_alloc_hmem(mng->hnd, &retval, n);
     if (iret != VEO_COMMAND_OK) return NLCPY_INTERNAL_ERROR;
 
     if (retval==0) return NLCPY_OUT_OF_MEMORY;
@@ -588,8 +532,8 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
     if (buff == NULL) {
         return NLCPY_OUT_OF_MEMORY;
     }
-    bool *dora = (bool*)malloc(sizeof(bool)*n);
-    if (dora == NULL) {
+    bool *alive = (bool*)malloc(sizeof(bool)*n);
+    if (alive == NULL) {
         return NLCPY_OUT_OF_MEMORY;
     }
 
@@ -612,9 +556,9 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
 #endif
     memcpy(next,  ll->next,   sizeof(uint64_t)*(size_t)mng->maxid);
     memcpy(prev,  ll->prev,   sizeof(uint64_t)*(size_t)mng->maxid);
-    memcpy(dora, mng->dora, sizeof(bool)*(size_t)mng->maxid);
+    memcpy(alive, mng->alive, sizeof(bool)*(size_t)mng->maxid);
     uint64_t i;
-    for (i=mng->maxid; i<n; i++) dora[i] = false; //initialization
+    for (i=mng->maxid; i<n; i++) alive[i] = false; //initialization
 
     FREE(mng->buff);
     mng->buff  = buff;
@@ -626,8 +570,8 @@ int nlcpy__mempool_extend_mnglist(const size_t n, mempool_mng_t *mng)
     ll->next   = next;
     ll->prev   = prev;
 
-    FREE(mng->dora);
-    mng->dora  = dora;
+    FREE(mng->alive);
+    mng->alive  = alive;
 
     mng->maxid = n;
 
@@ -713,6 +657,7 @@ int nlcpy__mempool_append_to_link(const uint64_t id, link_t *ll)
     uint64_t *next = ll->next;
     uint64_t *head = &(ll->head);
     uint64_t *tail = &(ll->tail);
+
     //
     if ( *tail != END )
         next[*tail] = id;
@@ -722,6 +667,10 @@ int nlcpy__mempool_append_to_link(const uint64_t id, link_t *ll)
     prev[id] = *tail;
     next[id] = END;
     *tail = id;
+#if defined(DEBUG)
+    fprintf(stderr, "nlcpy__mempool_append_to_link: id=%lu, prev=%lu, next=%lu, head=%ld, tail=%lu\n",
+            id, prev[id], next[id], *head, *tail);
+#endif
     return NLCPY_RESULT_OK;
 }
 
@@ -849,6 +798,11 @@ int nlcpy__mempool_append_to_hash(const uint64_t ve_adr, const uint64_t gid, has
     uint64_t  h    = HASH(ve_adr);
     //
 
+#ifdef DEBUG
+    fprintf(stderr, "nlcpy__mempool_append_to_hash: ve_adr=%lu, gid=%lu, h=%lu, head[h]=%lu\n",
+            ve_adr, gid, h, head[h]);
+#endif
+
     if ( head[h] != tail ) {
         next[gid] = head[h];
         prev[head[h]] = gid;
@@ -876,17 +830,15 @@ int nlcpy__mempool_remove_from_hash(const uint64_t ve_adr, mempool_t *pool, uint
     uint64_t  tail = hash->tail;
     uint64_t  h    = HASH(ve_adr);
     uint64_t  id   = head[h];
+#if defined(DEBUG)
+    fprintf(stderr, "nlcpy__mempool_remove_from_hash: prev=%lu, next=%lu, head=%lu, tail=%lu, h=%lu, id=%lu\n",
+            *prev, *next, *head, tail, h, id);
+#endif
     //
     while ( id != tail ) {
-        uint64_t  lid;
+        uint64_t  lid = id;
         mempool_mng_t *mng;
-        if ( id%2==0 ) {
-           lid= id/2;
-           mng = pool->small;
-        } else {
-           lid= (id-1)/2;
-           mng = pool->large;
-        }
+        mng = pool->mng;
         if ( ve_adr==mng->ptrs[lid] ) {
             // found the-id corresponding to ve_adr
             if ( head[h] != id ){
@@ -909,13 +861,8 @@ int nlcpy__mempool_remove_from_hash(const uint64_t ve_adr, mempool_t *pool, uint
         id = next[id];
     }
     if ( id == tail ) {
-        // not found. the case may be allocated by veo_alloc_mem.
-        int iret = veo_free_mem(pool->hnd, ve_adr);
-        if (iret == -1) {
-            fprintf(stderr,"NLCPy: not allocated on VE (ve_adr=%lx, id=%ld)\n",ve_adr,id);
-            return NLCPY_INTERNAL_ERROR;
-        }
-        return NLCPY_POOL_NOT_USED;
+        // not found. the case may be allocated by veo_alloc_hmem.
+        return NLCPY_INTERNAL_ERROR;
     }
     *gid = id; // return
     return NLCPY_RESULT_OK;
@@ -932,7 +879,7 @@ int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
     link_t *blocks = mng->blocks;
     uint64_t id = blocks->head;
     while ( id != blocks->tail ) {
-        if ( !mng->dora[id] ) {
+        if ( !mng->alive[id] ) {
             // found sort blocks
             const uint64_t id0 = id;  // head of the sort blocks
 #if defined(POOL_EXTENTON)
@@ -941,7 +888,7 @@ int nlcpy__mempool_merge_dead_blocks(mempool_mng_t *mng)
 #endif
             uint64_t size = mng->bytes[id];
             id = blocks->next[id];
-            while ( id != END && !mng->dora[id] ) {
+            while ( id != END && !mng->alive[id] ) {
                 const uint64_t s = size+mng->bytes[id];
 #if defined(POOL_EXTENTON)
                 if ( p0+s > e0 ) break;
@@ -1007,7 +954,7 @@ size_t nlcpy__mempool_get_capasity(const mempool_mng_t *mng)
     uint64_t id = mng->blocks->head;
     size_t acapa=0;
     while ( id != END ) {
-        if ( mng->dora[id] ) {
+        if ( mng->alive[id] ) {
             acapa+=mng->bytes[id];
         }
         id = mng->blocks->next[id];  // go to next blocks

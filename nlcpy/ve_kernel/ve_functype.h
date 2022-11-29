@@ -39,7 +39,6 @@ enum ve_functype {
     INDEXING_OP           = 0x0002,
     CREATION_OP           = 0x0004,
     MANIPULATION_OP       = 0x0005,
-    CBLAS_OP              = 0x0006,
     LINALG_OP             = 0x0007,
     REDUCE_OP             = 0x0008,
     REDUCEAT_OP           = 0x0009,

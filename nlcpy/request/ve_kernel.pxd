@@ -151,16 +151,6 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
         VE_FUNC_ROLL
         VE_FUNC_BLOCK
 
-        # cblas wrapper functions
-        VE_FUNC_CBLAS_SDOT
-        VE_FUNC_CBLAS_DDOT
-        VE_FUNC_CBLAS_CDOTU_SUB
-        VE_FUNC_CBLAS_ZDOTU_SUB
-        VE_FUNC_CBLAS_SGEMM
-        VE_FUNC_CBLAS_DGEMM
-        VE_FUNC_CBLAS_CGEMM
-        VE_FUNC_CBLAS_ZGEMM
-
         # linalg functions
         VE_FUNC_DOT
         VE_FUNC_MATMUL
@@ -317,7 +307,6 @@ cdef extern from "../ve_kernel/ve_functype.h":
         INDEXING_OP
         CREATION_OP
         MANIPULATION_OP
-        CBLAS_OP
         LINALG_OP
         REDUCE_OP
         REDUCEAT_OP

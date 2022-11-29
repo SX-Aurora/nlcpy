@@ -110,7 +110,7 @@ Compiling from Fortran Source
       ``'-ffixed-form'`` option into the ``cflags``.
 
     For details, please refer to the Fortran Compiler User's Guide from
-    `here <https://www.hpc.nec/documentation>`_.
+    `here <https://sxauroratsubasa.sakura.ne.jp/documentation>`_.
 
 
 Transferring Ndarray Attributes to VE
@@ -403,7 +403,7 @@ You can also use NLC routines just by enabling  the ``use_nlc`` argument.
 
 .. seealso::
     For the notices of compiler options, please refer to the
-    `aveo documentation <https://www.hpc.nec/documents/veos/en/aveo/index.html>`_.
+    `aveo documentation <https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_.
 
 
 .. _label_callback:

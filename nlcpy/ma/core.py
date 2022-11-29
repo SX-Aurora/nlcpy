@@ -310,6 +310,12 @@ class MaskedArray(ndarray):
                 else:
                     self._mask = nlcpy.logical_or(mask, self._mask)
                     self._sharedmask = False
+        if isinstance(self._mask, nlcpy.ndarray):
+            if self.venode != self._mask.venode:
+                raise ValueError(
+                    'Mask and data exist different VE node: mask on {}, data on {}'
+                    .format(self._mask.venode, self.venode)
+                )
         if fill_value is None:
             fill_value = getattr(data, '_fill_value', None)
         if fill_value is not None:
@@ -1336,7 +1342,7 @@ class MaskedArray(ndarray):
     # -------------------------------------------------------------------------
     # nlcpy original attributes and methods
     # -------------------------------------------------------------------------
-    def get(self, order='K'):
+    def get(self, order='C'):
         data = self._data.get(order)
         mask = self._mask
         fill_value = self._fill_value
@@ -1347,6 +1353,10 @@ class MaskedArray(ndarray):
         hardmask = self._hardmask
         return numpy.ma.array(
             data, mask=mask, fill_value=fill_value, hard_mask=hardmask)
+
+    def __getattr__(self, attr):
+        raise AttributeError(
+            "'nlcpy.ma.MaskedArray' object has no attribute '{}'.".format(attr))
 
 
 masked_array = MaskedArray

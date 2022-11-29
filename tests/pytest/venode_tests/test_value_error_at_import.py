@@ -1,12 +1,11 @@
-/*
 #
 # * The source code in this file is developed independently by NEC Corporation.
 #
 # # NLCPy License #
-# 
+#
 #     Copyright (c) 2020 NEC Corporation
 #     All rights reserved.
-#     
+#
 #     Redistribution and use in source and binary forms, with or without
 #     modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright notice,
@@ -17,7 +16,7 @@
 #     * Neither NEC Corporation nor the names of its contributors may be
 #       used to endorse or promote products derived from this software
 #       without specific prior written permission.
-#     
+#
 #     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 #     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 #     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,35 +28,14 @@
 #     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-*/
 
-#include "nlcpy_mempool.h"
-
-uint64_t nlcpy__mempool_alloc_ve(const uint64_t size)
-{
-    void* base = sbrk((intptr_t)size);
-    return ((uint64_t)base!=-1) ? (uint64_t)base : (uint64_t)0;
-}
-
-uint64_t nlcpy__mempool_get_memsize_ve(void)
-{
-    struct sysinfo info;
-    sysinfo(&info);
-    return (uint64_t)info.totalram;
-}
+import unittest
+import pytest
 
 
-uint64_t nlcpy__mempool_extend_ve(const uint64_t size)
-{
-    // extend heap
-    void* base = sbrk((intptr_t)size);
-    return ((uint64_t)base!=-1) ? (uint64_t)base : (uint64_t)0;
-}
+class TestMPIValuErrorAtImport(unittest.TestCase):
 
-/*
-uint64_t nlcpy__mempool_free_ve(const uint64_t base)
-{
-    //brk((void*)base);
-    return (uint64_t)0;
-}
-*/
+    @pytest.mark.import_err
+    def test_mpi_value_error_at_import(self):
+        with pytest.raises(ValueError):
+            import nlcpy  # NOQA

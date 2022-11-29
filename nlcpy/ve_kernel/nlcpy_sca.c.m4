@@ -63,8 +63,9 @@ include(macros.m4)dnl
 #include <inc_i64/sca.h>
 
 define(<--@macro_sca_stencil_create@-->,<--@
-uint64_t nlcpy_sca_stencil_create_$1(uint64_t *hnd_adr, int32_t *psw)
+uint64_t nlcpy_sca_stencil_create_$1(ve_array *_sten, int32_t *psw)
 {
+    assert(_sten->dtype == ve_u64);
 #ifdef SCA_LOGGING
     sca_library_set_logging_level(SCA_LOGLEVEL_INFO);
 #endif
@@ -74,7 +75,8 @@ uint64_t nlcpy_sca_stencil_create_$1(uint64_t *hnd_adr, int32_t *psw)
     if (err != SCA_ERROR_OK) {
        return NLCPY_ERROR_SCA;
     }
-    *hnd_adr = (uint64_t)sten;
+    uint64_t *psten = (uint64_t *)_sten->ve_adr;
+    psten[0] = (uint64_t)sten;
     retrieve_fpe_flags(psw);
     return NLCPY_ERROR_OK;
 }
@@ -83,8 +85,10 @@ macro_sca_stencil_create(s)dnl
 macro_sca_stencil_create(d)dnl
 
 
-uint64_t nlcpy_sca_stencil_reset_elements(sca_stencil_t *sten, int32_t *psw)
+uint64_t nlcpy_sca_stencil_reset_elements(ve_array *_sten, int32_t *psw)
 {
+    assert(_sten->dtype == ve_u64);
+    sca_stencil_t *sten = (sca_stencil_t *)(((uint64_t *)_sten->ve_adr)[0]);
     sca_error_t err;
     sca_int_t nelm;
     err = sca_stencil_get_element_count(*sten, &nelm);
@@ -100,8 +104,10 @@ uint64_t nlcpy_sca_stencil_reset_elements(sca_stencil_t *sten, int32_t *psw)
 }
 
 
-uint64_t nlcpy_sca_stencil_destroy(sca_stencil_t *sten, int32_t *psw)
+uint64_t nlcpy_sca_stencil_destroy(ve_array *_sten, int32_t *psw)
 {
+    assert(_sten->dtype == ve_u64);
+    sca_stencil_t *sten = (sca_stencil_t *)(((uint64_t *)_sten->ve_adr)[0]);
     sca_error_t err;
     if (sten == NULL) return NLCPY_ERROR_MEMORY;
     err = sca_stencil_destroy(*sten);
@@ -114,8 +120,10 @@ uint64_t nlcpy_sca_stencil_destroy(sca_stencil_t *sten, int32_t *psw)
 }
 
 
-uint64_t nlcpy_sca_code_destroy(sca_code_t *code, int32_t *psw)
+uint64_t nlcpy_sca_code_destroy(ve_array *_code, int32_t *psw)
 {
+    assert(_code->dtype == ve_u64);
+    sca_code_t *code = (sca_code_t *)(((uint64_t *)_code->ve_adr)[0]);
     sca_error_t err;
     if (code == NULL) return NLCPY_ERROR_MEMORY;
     err = sca_code_destroy(*code);
@@ -159,22 +167,26 @@ macro_sca_utility_optimize_leading(d)dnl
 
 
 uint64_t nlcpy_sca_code_create(
-    uint64_t *code_adr, sca_stencil_t *sten, sca_int_t nx, sca_int_t ny,
+    ve_array *_code, ve_array *_sten, sca_int_t nx, sca_int_t ny,
     sca_int_t nz, sca_int_t nw, int32_t *psw)
 {
+    assert(_code->dtype == ve_u64);
+    assert(_sten->dtype == ve_u64);
     DBG_PRT_FUNC_NAME;
     DBG_PRT_I(nx);
     DBG_PRT_I(ny);
     DBG_PRT_I(nz);
     DBG_PRT_I(nw);
 
+    sca_stencil_t *sten = (sca_stencil_t *)(((uint64_t *)_sten->ve_adr)[0]);
     sca_error_t err;
     sca_code_t *code = (sca_code_t *)malloc(sizeof(sca_code_t));
     err = sca_code_create(code, *sten, nx, ny, nz, nw);
     if (err != SCA_ERROR_OK) {
         return NLCPY_ERROR_SCA;
     }
-    *code_adr = (uint64_t)code;
+    uint64_t *pcode = (uint64_t *)_code->ve_adr;
+    pcode[0] = (uint64_t)code;
     retrieve_fpe_flags(psw);
     return NLCPY_ERROR_OK;
 }
@@ -196,7 +208,7 @@ uint64_t nlcpy_sca_code_execute(sca_code_t *code, int32_t *psw)
 
 uint64_t nlcpy_sca_code_execute(ve_arguments *args, int32_t *psw)
 {
-    sca_code_t *code = (sca_code_t *)(args->sca.code);
+    sca_code_t *code = (sca_code_t *)(((uint64_t *)args->sca.code.ve_adr)[0]);
     sca_error_t err;
     err = sca_code_execute(*code);
     if (err != SCA_ERROR_OK) {
@@ -223,7 +235,7 @@ uint64_t nlcpy_sca_batch_run(uint64_t *codes, int64_t iteration, int64_t n_code)
 
 define(<--@macro_sca_set_elements@-->,<--@
 uint64_t nlcpy_sca_set_elements_$1(
-    sca_stencil_t *sten,
+    ve_array *_sten,
     ve_array *a_in,
     ve_array *a_loc,
     ve_array *a_fact,
@@ -240,6 +252,7 @@ uint64_t nlcpy_sca_set_elements_$1(
     int32_t *psw
 )
 {
+    assert(_sten->dtype == ve_u64);
     assert(a_loc->ndim == 2);
     assert(a_fact->ndim == 1);
     assert(a_coef->size == a_coef_idx->size);
@@ -256,6 +269,7 @@ uint64_t nlcpy_sca_set_elements_$1(
     DBG_PRT_I(my_i);
     DBG_PRT_I(mz_i);
 
+    sca_stencil_t *sten = (sca_stencil_t *)(((uint64_t *)_sten->ve_adr)[0]);
     sca_error_t err;
     const $2 *d_in = (const $2 *)a_in->ve_adr;
     const sca_int_t *d_loc = (const sca_int_t *)a_loc->ve_adr;
@@ -349,7 +363,7 @@ macro_sca_set_elements(d, double)dnl
 
 define(<--@macro_sca_set_output_array@-->,<--@
 uint64_t nlcpy_sca_set_output_array_$1(
-    sca_stencil_t *sten,
+    ve_array *_sten,
     ve_array *a_out,
     sca_int_t sx_o,
     sca_int_t mx_o,
@@ -359,6 +373,8 @@ uint64_t nlcpy_sca_set_output_array_$1(
     int32_t *psw
 )
 {
+    assert(_sten->dtype == ve_u64);
+
     DBG_PRT_FUNC_NAME;
     DBG_PRT_I(offset);
     DBG_PRT_I(sx_o);
@@ -366,6 +382,7 @@ uint64_t nlcpy_sca_set_output_array_$1(
     DBG_PRT_I(my_o);
     DBG_PRT_I(mz_o);
 
+    sca_stencil_t *sten = (sca_stencil_t *)(((uint64_t *)_sten->ve_adr)[0]);
     sca_error_t err;
 
     $2 *d_out = ($2 *)a_out->ve_adr;

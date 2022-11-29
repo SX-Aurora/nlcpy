@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
 import nlcpy
@@ -88,7 +89,7 @@ class TestSvd(unittest.TestCase):
              ) for i in (u, s, vh)
         ]
         if a.size == 0:
-            return ret
+            return numpy.array(ret, dtype=object)
         if self.full_matrices:
             min_mn = min(self.shape[-1], self.shape[-2])
             u = u[..., :self.shape[-2], :min_mn]
@@ -100,7 +101,7 @@ class TestSvd(unittest.TestCase):
         x = numpy.matmul((u * s[..., None, :]), vh)
         tol = 1e-5 if a.dtype.char in 'fF' else 1e-12
         numpy.testing.assert_allclose(a, x, atol=tol, rtol=tol)
-        return ret
+        return numpy.array(ret, dtype=object)
 
     @testing.for_orders('CF')
     @testing.for_dtypes('fF')
@@ -161,7 +162,7 @@ class TestSvdHermitian(unittest.TestCase):
         x = numpy.matmul((u * s[..., None, :]), vh)
         tol = 1e-5 if a.dtype.char in 'fF' else 1e-12
         numpy.testing.assert_allclose(a, x, atol=tol, rtol=tol)
-        return ret
+        return numpy.array(ret, dtype=object)
 
     @testing.for_orders('CF')
     @testing.for_dtypes('fF')
@@ -280,14 +281,21 @@ class TestQr(unittest.TestCase):
         if self.mode is not None:
             args["mode"] = self.mode
         if self.mode == 'complete':
-            q, r = xp.linalg.qr(**args)
+            with xp.errstate(over='ignore'):
+                q, r = xp.linalg.qr(**args)
+                nlcpy.request.flush()
             m, n = a.shape
             k = min(m, n)
             q[:, k:m] = 0
             r[k:m] = 0
             return q, r
         else:
-            return xp.linalg.qr(**args)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', DeprecationWarning)
+                with xp.errstate(over='ignore'):
+                    ret = xp.linalg.qr(**args)
+                    nlcpy.request.flush()
+            return ret
 
     @testing.for_orders('CF')
     @testing.for_dtypes('?ilILdD')
@@ -302,7 +310,9 @@ class TestQr(unittest.TestCase):
             r[k:m] = 0
             return q, r
         elif self.mode is not None:
-            return xp.linalg.qr(a, mode=self.mode)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', DeprecationWarning)
+                return xp.linalg.qr(a, mode=self.mode)
         else:
             return xp.linalg.qr(a)
 

@@ -45,7 +45,6 @@ unary_op  get_unary_func(int64_t func_num);
 indexing_op get_indexing_func(int64_t func_num);
 creation_op get_creation_func(int64_t func_num);
 manipulation_op get_manipulation_func(int64_t func_num);
-cblas_wrapper_op get_cblas_wrapper_func(int64_t func_num);
 linalg_op get_linalg_func(int64_t func_num);
 reduce_op get_reduce_func(int64_t func_num);
 reduceat_op get_reduceat_func(int64_t func_num);

@@ -7,7 +7,7 @@ New Features
 ------------
 
 * Newly added :ref:`SCA Interface <label_sca_top>`, which enables Python scripts to call SCA functions of
-  `NEC Numeric Library Collection <https://www.hpc.nec/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_.
+  `NEC Numeric Library Collection <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/index.html>`_.
 
 * Newly added the :ref:`profiling routines with FTRACE <label_profiling_ftrace>`.
 

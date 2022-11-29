@@ -51,7 +51,6 @@
 
 
 import nlcpy
-from nlcpy import veo
 from nlcpy.jit import kernel
 from nlcpy.__config__ import get_nlc_ver
 
@@ -59,6 +58,8 @@ import os
 import datetime
 import subprocess
 import tempfile
+
+from nlcpy.venode import VE
 
 
 class nccException(Exception):
@@ -270,53 +271,55 @@ class CustomVELibrary:
                 raise TypeError('path must be given str or bytes.')
             elif type(path) is bytes:
                 path = path.decode()
-        self.code = code
-        self.path = path
+        self._code = code
+        self._path = path
 
-        self.src_path = None
-        self.obj_path = None
-        self.lib_path = None
+        self._src_path = None
+        self._obj_path = None
+        self._lib_path = None
 
         if path is None:
-            self.id = get_id()
+            self._id = get_id()
         else:
-            self.id = None
+            self._id = None
         if type(cflags) in (tuple, list):
-            self.cflags = tuple(cflags)
+            self._cflags = tuple(cflags)
         elif cflags is None:
-            self.cflags = get_default_cflags()
+            self._cflags = get_default_cflags()
         else:
             raise TypeError('cflags must be given tuple or list.')
 
         if type(ldflags) in (tuple, list):
-            self.ldflags = tuple(ldflags)
+            self._ldflags = tuple(ldflags)
         elif ldflags is None:
-            self.ldflags = get_default_ldflags()
+            self._ldflags = get_default_ldflags()
         else:
             raise TypeError('ldflags must be given tuple or list.')
 
-        self.log_stream = log_stream
+        self._log_stream = log_stream
 
         if type(compiler) is not str:
             raise TypeError('compiler must be given str.')
         if 'ncc' in os.path.basename(compiler):
-            self.suffix = '.c'
+            self._suffix = '.c'
         elif 'nfort' in os.path.basename(compiler):
-            self.suffix = '.f03'
+            self._suffix = '.f03'
         elif 'nc++' in os.path.basename(compiler):
-            self.suffix = '.cpp'
+            self._suffix = '.cpp'
         else:
             raise ValueError('unknown compiler command: `{}`'.format(compiler))
-        self.compiler = compiler
-        self.use_nlc = use_nlc
-        self.ftrace = ftrace
+        self._compiler = compiler
+        self._use_nlc = use_nlc
+        self._ftrace = ftrace
 
         if dist_dir is not None or path is not None:
-            self._load_lib(dist_dir, self.id)
+            self._load_lib(dist_dir, self._id)
         else:
             # make tempdir
             with tempfile.TemporaryDirectory() as dist_dir:
-                self._load_lib(dist_dir, self.id)
+                self._load_lib(dist_dir, self._id)
+
+        self._valid = True
 
     def get_function(self, func_name, args_type=(),
                      ret_type=nlcpy.ve_types.void):
@@ -350,40 +353,40 @@ class CustomVELibrary:
 
         if type(func_name) is str:
             func_name = func_name.encode('utf-8')
-        func = self.lib.find_function(func_name)
+        func = self._lib.find_function(func_name)
         func.args_type(*args_type)
         func.ret_type(ret_type)
-        return kernel.CustomVEKernel(func)
+        return kernel.CustomVEKernel(func, self)
 
     def _check_dist(self, dirc, name):
         dist_dir = os.path.abspath(dirc)
         dist_path = os.path.join(dist_dir, name)
         if not os.path.isdir(dist_dir):
             os.makedirs(dist_dir, exist_ok=True)
-        self.src_path = dist_path + self.suffix
-        self.obj_path = dist_path + '.o'
-        self.lib_path = dist_path + '.so'
+        self._src_path = dist_path + self._suffix
+        self._obj_path = dist_path + '.o'
+        self._lib_path = dist_path + '.so'
 
     def _make_src(self):
-        with open(self.src_path, 'w') as src:
-            src.write(self.code)
+        with open(self._src_path, 'w') as src:
+            src.write(self._code)
 
     def _make_obj(self):
-        cmd = (self.compiler, self.src_path) + self.cflags + ('-o', self.obj_path)
-        if self.use_nlc:
+        cmd = (self._compiler, self._src_path) + self._cflags + ('-o', self._obj_path)
+        if self._use_nlc:
             nlc_ver = get_nlc_ver()
-            if 'ncc' in os.path.basename(self.compiler) or \
-                    'nc++' in os.path.basename(self.compiler):
+            if 'ncc' in os.path.basename(self._compiler) or \
+                    'nc++' in os.path.basename(self._compiler):
                 cmd += ('-I/opt/nec/ve/nlc/{}/include/inc_i64/'.format(nlc_ver),)
-            if 'nfort' in os.path.basename(self.compiler):
+            if 'nfort' in os.path.basename(self._compiler):
                 cmd += ('-I/opt/nec/ve/nlc/{}/include/mod_i64/'.format(nlc_ver),)
-        if self.ftrace:
+        if self._ftrace:
             cmd += ('-ftrace',)
-        _ = _exec_cmd(cmd, log_stream=self.log_stream)
+        _ = _exec_cmd(cmd, log_stream=self._log_stream)
 
     def _make_so(self):
-        cmd = (self.compiler, self.obj_path) + self.ldflags + ('-o', self.lib_path)
-        if self.use_nlc:
+        cmd = (self._compiler, self._obj_path) + self._ldflags + ('-o', self._lib_path)
+        if self._use_nlc:
             cmd += (
                 '-lasl_openmp_i64',
                 '-laslfftw3_i64',
@@ -394,13 +397,13 @@ class CustomVELibrary:
                 '-lsblas_openmp_i64',
                 '-lcblas_i64',
             )
-        if self.ftrace:
+        if self._ftrace:
             cmd += ('-ftrace', '-lveftrace_p')
-            # if '-fopenmp' in self.cflags:
+            # if '-fopenmp' in self._cflags:
             #     cmd += ('-ftrace', '-lveftrace_p')
             # else:
             #     cmd += ('-ftrace', '-lveftrace_t')
-        _ = _exec_cmd(cmd, log_stream=self.log_stream)
+        _ = _exec_cmd(cmd, log_stream=self._log_stream)
 
     def _src2so(self):
         self._make_src()
@@ -408,32 +411,44 @@ class CustomVELibrary:
         self._make_so()
 
     def _load_lib(self, dist_dir, file_name):
-        if self.path is None:
+        if self._path is None:
             self._check_dist(dist_dir, file_name)
             self._src2so()
         else:
-            self.lib_path = self.path
-        self.lib = veo._get_veo_proc().load_library(
-            self.lib_path.encode('utf-8'))
+            self._lib_path = self._path
+        self._venode = VE()
+        self._lib = self._venode.proc.load_library(
+            self._lib_path.encode('utf-8'))
+
+    def _is_valid(self):
+        return self._valid
+
+    def _deactivate(self):
+        self._valid = False
+
+    @property
+    def id(self):
+        return self._id
 
     def __repr__(self):  # pragma: no cover
         return '<CustomVELibrary({}\n)>'.format(
             '\n'.join([
-                '\n* code:\n{}'.format(self.code),
-                '* path: {}'.format(self.path),
+                '\n* code:\n{}'.format(self._code),
+                '* path: {}'.format(self._path),
                 '* cflags: {}'.format(
-                    ''.join([' {}'.format(s) for s in self.cflags])),
+                    ''.join([' {}'.format(s) for s in self._cflags])),
                 '* ldflags: {}'.format(
-                    ''.join([' {}'.format(s) for s in self.ldflags])),
-                '* log_stream: {}'.format(self.log_stream),
-                '* compiler: {}'.format(self.compiler),
-                '* use_nlc: {}'.format(self.use_nlc),
-                '* ftrace: {}'.format(self.ftrace),
-                '* ID: {}'.format(self.id),
-                '* src_path: {}'.format(self.src_path),
-                '* obj_path: {}'.format(self.obj_path),
-                '* lib_path: {}'.format(self.lib_path),
-                '* lib: {}'.format(self.lib),
+                    ''.join([' {}'.format(s) for s in self._ldflags])),
+                '* log_stream: {}'.format(self._log_stream),
+                '* compiler: {}'.format(self._compiler),
+                '* use_nlc: {}'.format(self._use_nlc),
+                '* ftrace: {}'.format(self._ftrace),
+                '* ID: {}'.format(self._id),
+                '* src_path: {}'.format(self._src_path),
+                '* obj_path: {}'.format(self._obj_path),
+                '* lib_path: {}'.format(self._lib_path),
+                '* lib: {}'.format(self._lib),
+                '* venode: {}'.format(self._venode),
             ]))
 
 
@@ -454,4 +469,6 @@ def unload_library(ve_lib):
     if type(ve_lib) is not CustomVELibrary:
         raise TypeError('unrecognized input type: `{}`'.format(type(ve_lib)))
     nlcpy.request.flush()
-    veo._get_veo_proc().unload_library(ve_lib.lib)
+    if ve_lib._is_valid():
+        ve_lib._venode.proc.unload_library(ve_lib._lib)
+    ve_lib._deactivate()

@@ -65,7 +65,6 @@ from libc.stdint cimport *
 from nlcpy import veo
 from nlcpy.core cimport core
 from nlcpy.core cimport broadcast
-from nlcpy.core cimport vememory
 from nlcpy.core cimport dtype as _dtype
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
@@ -77,7 +76,7 @@ from nlcpy.ufuncs cimport reduceat as _reduceat
 from nlcpy.ufuncs cimport accumulate as _accumulate
 from nlcpy.linalg cimport cblas_wrapper
 from nlcpy.core.error import _AxisError as AxisError
-from nlcpy.core.core cimport on_VH, on_VE_VH
+
 
 cdef _ufunc_boolean_name_set = (
     'greater',
@@ -421,8 +420,16 @@ cdef class ufunc:
         args = convert_args_to_ndarray(args)
 
         if self.name is 'nlcpy_matmul':
-            return cblas_wrapper.cblas_gemm(args[0], args[1], out=out_args,
-                                            order=order, dtype=dtype_out)
+            try:
+                return cblas_wrapper.cblas_gemm(args[0], args[1], out=out_args,
+                                                order=order, dtype=dtype_out)
+            except NotImplementedError as e:
+                try:
+                    return nlcpy._make_wrap_func(numpy.matmul)(
+                        args[0], args[1], out=out_args, order=order,
+                        casting=casting, dtype=dtype)
+                except NotImplementedError:
+                    raise e
 
         order = guess_out_order(order, args)
 
@@ -589,9 +596,6 @@ cdef class ufunc:
             elif not isinstance(out[0], nlcpy.ndarray):
                 raise TypeError("output must be an array")
             else:
-                if out[0]._memloc in {on_VH, on_VE_VH}:
-                    raise NotImplementedError(
-                        "reduce_core on VH is not yet implemented.")
                 out = out[0]
 
         axis_chk = axis
@@ -728,9 +732,18 @@ cdef class ufunc:
         else:
             raise TypeError("output must be an array")
 
-        return _reduce.reduce_core(self.name + '_reduce', array, axis=axis,
-                                   dtype=dtype, out=out,
-                                   keepdims=keepdims, initial=initial, where=where)
+        try:
+            return _reduce.reduce_core(self.name + '_reduce', array, axis=axis,
+                                       dtype=dtype, out=out,
+                                       keepdims=keepdims, initial=initial, where=where)
+        except NotImplementedError as e:
+            try:
+                f = getattr(getattr(numpy, self.name[6:]), 'reduce')
+                return nlcpy._make_wrap_func(f)(
+                    array, axis=axis, dtype=dtype, out=out, keepdims=keepdims,
+                    initial=initial, where=where)
+            except NotImplementedError:
+                raise e
 
     def reduceat(self, array, indices, axis=0, dtype=None, out=None):
         """Performs a (local) reduce with specified slices over a single axis.
@@ -969,11 +982,28 @@ cdef class ufunc:
         if kwargs:
             raise TypeError('Wrong arguments %s' % kwargs)
 
-        return _outer.outer_core(self.name + '_outer', A, B, out=out, where=where,
-                                 casting=casting, order=order, dtype=dtype, subok=subok)
+        try:
+            return _outer.outer_core(
+                self.name + '_outer', A, B, out=out, where=where,
+                casting=casting, order=order, dtype=dtype, subok=subok)
+        except NotImplementedError as e:
+            try:
+                f = getattr(getattr(numpy, self.name[6:]), 'outer')
+                return nlcpy._make_wrap_func(f)(
+                    A, B, out=out, where=where, casting=casting,
+                    order=order, dtype=dtype)
+            except NotImplementedError:
+                raise e
 
-    def at(a, indices, b=None):
-        raise NotImplementedError
+    def at(self, a, indices, b=None):
+        op_name = self.name[6:]
+        f = getattr(numpy, op_name)
+        nargs = f.nargs
+        f = getattr(f, 'at')
+        if nargs == 2:
+            return nlcpy._make_wrap_func(f)(a, indices)
+        else:
+            return nlcpy._make_wrap_func(f)(a, indices, b)
 
 
 cpdef convert_args_to_ndarray(list args):

@@ -32,44 +32,78 @@
 # distutils: language = c++
 
 from libc.stdint cimport *
-from nlcpy import veo
+from nlcpy.veo cimport _veo
 from nlcpy.core.core cimport ndarray
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport dtype as _dtype
-from nlcpy.request.ve_kernel cimport *
-from nlcpy.request import request
+from nlcpy.venode._venode cimport VENode
+from nlcpy.venode._venode cimport VE
 
-from libcpp.vector cimport vector
-
-import numpy
-cimport numpy as cnp
+import gc
 
 
-cdef _write_array(a_cpu, ndarray a_ve):
-    # TODO: check asynchronous request timing
-    proc = veo._get_veo_proc()
-    ctx = veo._get_veo_ctx()
-    rm = request._get_request_manager()
-    # rm._flush(sync=False)
+cdef _alloc_mem_core(size_t nbytes, VENode venode):
+    cdef uint64_t veo_hmem
+    cdef bint is_pool = True
+    if not venode.connected:
+        raise ValueError('VE process is not created on {}'.format(venode))
+    veo_hmem = venode.pool.reserve(nbytes)
+    if veo_hmem == 0LU:
+        veo_hmem = venode.proc.alloc_hmem(nbytes)
+        is_pool = False
+    return (is_pool, veo_hmem)
+
+
+cpdef _alloc_mem(size_t nbytes, VENode venode):
+    cdef bint retry = False
+    cdef uint64_t veo_hmem = 0
+    cdef uint64_t ve_adr = 0
+    cdef bint is_pool = True
+    if not venode.connected:
+        raise ValueError('VE process is not created on {}'.format(venode))
+    try:
+        is_pool, veo_hmem = _alloc_mem_core(nbytes, venode)
+    except MemoryError:
+        retry = True
+    if retry:
+        venode.request_manager._flush(sync=True)
+        gc.collect()
+        is_pool, veo_hmem = _alloc_mem_core(nbytes, venode)
+    ve_adr = _veo.VEO_HMEM.get_hmem_addr(veo_hmem)
+
+    return is_pool, veo_hmem, ve_adr
+
+
+cpdef _write_mem(a_cpu, uint64_t ve_adr, size_t nbytes, VENode venode):
+    assert ve_adr != 0
+    if not venode.connected:
+        raise ValueError('VE process is not created on {}'.format(venode))
+    proc = venode.proc
+    ctx = venode.ctx
+    rm = venode.request_manager
     if rm.timing == 'on-the-fly':
         proc.write_mem(
-            veo.VEMemPtr(proc, a_ve.ve_adr, a_ve.nbytes),
+            ve_adr,
             a_cpu.data,
-            a_cpu.nbytes
+            nbytes
         )
     else:
         req = ctx.async_write_mem(
-            veo.VEMemPtr(proc, a_ve.ve_adr, a_ve.nbytes),
+            ve_adr,
             a_cpu.data,
-            a_cpu.nbytes
+            nbytes
         )
-        vr = request._get_veo_requests()
-        vr._push_req(req, callback='nothing')
+        venode.request_manager.veo_reqs._push_req(req, callback='nothing')
 
-cdef _destroy_array(uint64_t ve_adr, uint64_t nbytes):
-    proc = veo._get_veo_proc()
-    proc.free_mem(veo.VEMemPtr(proc, ve_adr, nbytes))
 
-cdef _alloc_array(ndarray a):
-    proc = veo._get_veo_proc()
-    a.ve_adr = proc.alloc_mem(a.nbytes).addr
+cpdef _free_mem(uint64_t veo_hmem, bint is_pool, VENode venode):
+    assert veo_hmem != 0
+    if not venode.connected:
+        raise ValueError('VE process is not created on {}'.format(venode))
+    if is_pool:
+        venode.pool.release(veo_hmem)
+    else:
+        venode.proc.free_hmem(veo_hmem)
+
+
+cpdef _hmemcpy(uint64_t dst, uint64_t src, size_t size):
+    _veo.VEO_HMEM.hmemcpy(dst, src, size)

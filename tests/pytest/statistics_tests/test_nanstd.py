@@ -34,6 +34,7 @@ import random
 
 from numpy.testing import assert_array_almost_equal
 
+import warnings
 import pytest
 import numpy as np
 import nlcpy as ny
@@ -172,10 +173,10 @@ def ca5(arg):
 @pytest.mark.parametrize('k,v', typedata.items())
 def test_run2(k, v):
     l_v = tuple(v)
-    ans1, ans2 = eval(l_v[0])(l_v[1:])
-
-    print("numpy={} nlcpy={}".format(ans1, ans2))
-    assert_array_almost_equal(ans1, ans2.get())
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', RuntimeWarning)
+        ans1, ans2 = eval(l_v[0])(l_v[1:])
+        assert_array_almost_equal(ans1, ans2.get())
 
 
 def test_me_case_1():

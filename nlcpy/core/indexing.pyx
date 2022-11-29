@@ -56,7 +56,6 @@ from libc.stdint cimport *
 
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast
@@ -134,6 +133,8 @@ cdef ndarray _take(ndarray a, indices, int li, int ri, ndarray out=None):
         ri %= ndim
         assert 0 <= li <= ri
 
+    casting = 'safe'
+
     if numpy.isscalar(indices):
         if type(indices) is not int:
             indices = int(indices)
@@ -141,8 +142,11 @@ cdef ndarray _take(ndarray a, indices, int li, int ri, ndarray out=None):
         cdim = 1
     else:
         if not isinstance(indices, ndarray):
-            indices = core.array(indices, dtype=int)
-        indices = indices.astype(dtype=int, copy=False)
+            indices = core.array(indices, dtype='l')
+        # XXX: NumPy raises casting error, but NLCPy does not raise because the
+        #      default mode is different.
+        #      NumPy: 'raise', NLCPy: 'wrap'
+        indices = indices.astype(dtype='l', copy=False)
         indices_shape = indices.shape
         cdim = indices.size
 
@@ -166,8 +170,6 @@ cdef ndarray _take(ndarray a, indices, int li, int ri, ndarray out=None):
     if out is None:
         out = ndarray(out_shape, dtype=a.dtype)
     else:
-        if out.dtype != a.dtype:
-            raise TypeError('Output dtype mismatch')
         if out.shape != out_shape:
             raise ValueError('Output shape mismatch')
     if a.size == 0 and out.size != 0:
@@ -256,7 +258,7 @@ cpdef tuple _prepare_slice_list(slices, Py_ssize_t ndim):
     mask_exists = False
     for i, s in enumerate(slice_list):
         to_ve = True
-        if isinstance(s, list):
+        if isinstance(s, list) or isinstance(s, tuple):
             # handle the case when s is an empty list
             # s = numpy.array(s, dtype='i8')
             s = numpy.array(s)
@@ -453,7 +455,7 @@ cdef ndarray _simple_getitem(ndarray a, list slice_list):
             raise TypeError('Invalid index type: %s' % type(slice_list[i]))
 
     v = a._view(shape, strides, True, True, True,
-                vh_view=None, dtype=None, type=None, offset=offset)
+                dtype=None, type=None, offset=offset)
     return v
 
 cdef Py_ssize_t _get_mask_index(list slice_list) except *:
@@ -602,8 +604,8 @@ cdef _scatter_op_single(
         raise ValueError('provided op is not supported')
 
 
-cdef int64_t _count_n_true_kernel(ndarray mask):
-    args = (mask._ve_array,)
+cdef int64_t _count_n_true_kernel(ndarray mask) except *:
+    args = (mask,)
     n_true = request._push_and_flush_request(
         'nlcpy_count_n_true',
         args,

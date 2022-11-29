@@ -35,6 +35,7 @@ import numpy
 
 from nlcpy import veo
 from nlcpy.request import request
+from nlcpy.venode._venode cimport VE
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
 from nlcpy.core cimport core
@@ -278,7 +279,7 @@ cpdef ndarray convert_optimized_array(a, dtype=None):
         veo.OnStack(mz, inout=veo.INTENT_OUT),
         veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
     )
-    request._push_and_flush_request(
+    VE().request_manager._push_and_flush_request(
         func_name,
         args,
         sync=True
@@ -400,7 +401,7 @@ cpdef ndarray create_optimized_array(shape, dtype='float64'):
         veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
     )
 
-    request._push_and_flush_request(
+    VE().request_manager._push_and_flush_request(
         func_name,
         args,
         sync=True
@@ -457,7 +458,7 @@ cpdef batch_run(kernels, int iteration):
         <int64_t>n_code
     )
 
-    request._push_and_flush_request(
+    VE().request_manager._push_and_flush_request(
         'nlcpy_sca_batch_run',
         args
     )

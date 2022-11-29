@@ -62,7 +62,6 @@ import nlcpy
 import numpy
 
 from nlcpy import veo
-from nlcpy.core cimport vememory
 from nlcpy.core cimport core
 from nlcpy.core.core import ndarray
 from nlcpy.ufuncs import operations as ufunc_op
@@ -238,11 +237,6 @@ def cumsum(a, axis=None, dtype=None, out=None):
         a = a.reshape(1)
 
     ########################################################################
-    # TODO: VE-VH collaboration
-    if a._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError("cumsum on VH is not yet impremented")
-
-    ########################################################################
     # check order
     if a._f_contiguous and not a._c_contiguous:
         order_out = 'F'
@@ -307,10 +301,6 @@ def cumsum(a, axis=None, dtype=None, out=None):
                                              + "->" + str(a.shape).replace(" ", "")
                                              + " ")
 
-                        # TODO: VE-VH collaboration
-                        if out._memloc in {on_VH, on_VE_VH}:
-                            raise NotImplementedError(
-                                "cumsum on VH is not yet implemented.")
                     y = out
                 else:
                     raise ValueError("Iterator input op_axes[0]["
@@ -518,8 +508,8 @@ def angle(z, deg=False):
 
     fpe_flags = request._get_fpe_flag()
     args = (
-        x._ve_array,
-        out._ve_array,
+        x,
+        out,
         veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),)
 
     request._push_and_flush_request(
@@ -727,6 +717,16 @@ def prod(a, axis=None, dtype=None, out=None, keepdims=False,
                                 out=out, keepdims=keepdims, initial=initial, where=where)
 
     return ret
+
+
+def product(*args, **kwargs):
+    """Return the product of array elements over a given axis.
+
+    See Also
+    --------
+    prod : equivalent function; see for details.
+    """
+    return prod(*args, **kwargs)
 
 
 def clip(a, a_min, a_max, out=None, **kwargs):

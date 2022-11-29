@@ -74,7 +74,10 @@ class TestArrayElementwiseOp(unittest.TestCase):
         if swap:
             return op(y_type(3), a)
         else:
-            return op(a, y_type(3))
+            if y_type is numpy.bool_:
+                return op(a, bool(3))
+            else:
+                return op(a, y_type(3))
 
     def test_add_scalar(self):
         self.check_array_scalar_op(operator.add)
@@ -107,30 +110,30 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_scalar_op(operator.imul)
 
     def test_truediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.truediv)
 
     def test_rtruediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.truediv, swap=True)
 
     @testing.with_requires('numpy>=1.10')
     def test_itruediv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.itruediv)
 
     def test_floordiv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.floordiv, no_complex=True)
 
     def test_rfloordiv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.floordiv, swap=True,
                                        no_complex=True)
 
     @testing.with_requires('numpy>=1.10')
     def test_ifloordiv_scalar(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_scalar_op(operator.ifloordiv, no_complex=True)
 
     def test_pow_scalar(self):
@@ -143,7 +146,10 @@ class TestArrayElementwiseOp(unittest.TestCase):
     @testing.numpy_nlcpy_allclose(atol=1.0, accept_error=TypeError)
     def check_ipow_scalar(self, xp, x_type, y_type):
         a = xp.array([[1, 2, 3], [4, 5, 6]], x_type)
-        return operator.ipow(a, y_type(3))
+        if y_type is numpy.bool_:
+            return operator.ipow(a, bool(3))
+        else:
+            return operator.ipow(a, y_type(3))
 
     @testing.with_requires('numpy>=1.10')
     def test_ipow_scalar(self):
@@ -204,23 +210,23 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_array_op(operator.imul)
 
     def test_truediv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_array_op(operator.truediv)
 
     @testing.with_requires('numpy>=1.10')
     def test_itruediv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_array_op(operator.itruediv)
 
     def test_floordiv_array(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_array_op(operator.floordiv, no_complex=True)
 
     @testing.with_requires('numpy>=1.10')
     def test_ifloordiv_array(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_array_op(operator.ifloordiv, no_complex=True)
 
     def test_pow_array(self):
@@ -291,23 +297,23 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_broadcasted_op(operator.imul)
 
     def test_broadcasted_truediv(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_broadcasted_op(operator.truediv)
 
     @testing.with_requires('numpy>=1.10')
     def test_broadcasted_itruediv(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_broadcasted_op(operator.itruediv)
 
     def test_broadcasted_floordiv(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_broadcasted_op(operator.floordiv, no_complex=True)
 
     @testing.with_requires('numpy>=1.10')
     def test_broadcasted_ifloordiv(self):
         if '1.16.1' <= numpy.lib.NumpyVersion(numpy.__version__) < '1.18.0':
             self.skipTest("NumPy Issue #12927")
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_broadcasted_op(operator.ifloordiv,
                                             no_complex=True)
 
@@ -368,11 +374,11 @@ class TestArrayElementwiseOp(unittest.TestCase):
         self.check_array_doubly_broadcasted_op(operator.mul)
 
     def test_doubly_broadcasted_truediv(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_doubly_broadcasted_op(operator.truediv)
 
     def test_doubly_broadcasted_floordiv(self):
-        with testing.NumpyError(divide='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore'):
             self.check_array_doubly_broadcasted_op(operator.floordiv,
                                                    no_complex=True)
 
@@ -421,10 +427,11 @@ class TestArrayElementwiseOp(unittest.TestCase):
             operator.add, operator.sub, operator.mul, operator.truediv]
 
         for op in operators:
-            with testing.NumpyError(divide='ignore', invalid='ignore'):
+            with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
                 a = op(val, (testing.shaped_arange((5,), numpy, dtype) - 2))
-            b = op(val, (testing.shaped_arange((5,), nlcpy, dtype) - 2))
-            self.assertEqual(a.dtype, b.dtype)
+                b = op(val, (testing.shaped_arange((5,), nlcpy, dtype) - 2))
+                b.get()
+                self.assertEqual(a.dtype, b.dtype)
 
     def test_typecast_bool1(self):
         self.check_typecast(True)
@@ -502,11 +509,11 @@ class TestArrayIntElementwiseOp(unittest.TestCase):
         self.check_array_scalar_op(operator.xor, swap=True)
 
     def test_mod_scalar(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_scalar_op(operator.mod)
 
     def test_rmod_scalar(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_scalar_op(operator.mod, swap=True)
 
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
@@ -549,11 +556,11 @@ class TestArrayIntElementwiseOp(unittest.TestCase):
         self.check_array_scalarzero_op(operator.xor, swap=True)
 
     def test_mod_scalarzero(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_scalarzero_op(operator.mod)
 
     def test_rmod_scalarzero(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_scalarzero_op(operator.mod, swap=True)
 
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
@@ -599,12 +606,12 @@ class TestArrayIntElementwiseOp(unittest.TestCase):
         self.check_array_array_op(operator.ixor)
 
     def test_mod_array(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_array_op(operator.mod)
 
     @testing.with_requires('numpy>=1.10')
     def test_imod_array(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_array_op(operator.imod)
 
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
@@ -650,12 +657,12 @@ class TestArrayIntElementwiseOp(unittest.TestCase):
         self.check_array_broadcasted_op(operator.ixor)
 
     def test_broadcasted_mod(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_broadcasted_op(operator.mod)
 
     @testing.with_requires('numpy>=1.10')
     def test_broadcasted_imod(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_broadcasted_op(operator.imod)
 
     @testing.for_all_dtypes_combination(names=['x_type', 'y_type'])
@@ -681,5 +688,5 @@ class TestArrayIntElementwiseOp(unittest.TestCase):
         self.check_array_doubly_broadcasted_op(operator.xor)
 
     def test_doubly_broadcasted_mod(self):
-        with testing.NumpyError(divide='ignore', invalid='ignore'):
+        with testing.numpy_nlcpy_errstate(divide='ignore', invalid='ignore'):
             self.check_array_doubly_broadcasted_op(operator.mod)

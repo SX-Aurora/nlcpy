@@ -82,3 +82,102 @@ class TestArrayGet(unittest.TestCase):
         def non_contiguous_array(xp):
             return testing.shaped_arange((3, 3), xp, dtype, order)[0::2, 0::2]
         self.check_get(non_contiguous_array, order)
+
+    @testing.multi_ve(2)
+    @testing.for_orders('CFA')
+    @testing.for_all_dtypes()
+    def test_get_multive(self, dtype, order):
+        with nlcpy.venode.VE(1):
+            src = testing.shaped_arange((2, 3), nlcpy, dtype, order)
+            src = nlcpy.asarray(src, order='F')
+        with nlcpy.venode.VE(0):
+            dst = src.get()
+        expected = testing.shaped_arange((2, 3), numpy, dtype, order)
+        np_testing.assert_array_equal(dst, expected)
+
+
+class TestArrayGetWithOut(unittest.TestCase):
+
+    def setUp(self):
+        self._prev_ve = nlcpy.venode.VE(0)
+
+    def tearDown(self):
+        self._prev_ve.apply()
+
+    def check_get(self, f, out):
+        a_ve = f(nlcpy)
+        a_cpu = a_ve.get(out=out)
+        b_cpu = f(numpy)
+        assert a_cpu is out
+        np_testing.assert_array_equal(a_cpu, b_cpu)
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_contiguous_array(self, dtype, order):
+        def contiguous_array(xp):
+            return testing.shaped_arange((3,), xp, dtype, order)
+        out = numpy.empty((3,), dtype, order)
+        self.check_get(contiguous_array, out)
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_contiguous_array_cross(self, dtype, order):
+        def contiguous_array(xp):
+            return testing.shaped_arange((3,), xp, dtype, order)
+        out_order = 'C' if order == 'F' else 'F'
+        out = numpy.empty((3,), dtype, out_order)
+        self.check_get(contiguous_array, out)
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_contiguous_array_with_error(self, dtype, order):
+        out = numpy.empty((3, 3), dtype)[0:2, 0:2]
+        with self.assertRaises(RuntimeError):
+            a_ve = testing.shaped_arange((3, 3), nlcpy, dtype, order)[0:2, 0:2]
+            a_ve.get(out=out)
+
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_non_contiguous_array(self, dtype, order):
+        def non_contiguous_array(xp):
+            return testing.shaped_arange((3, 3), xp, dtype, order)[0::2, 0::2]
+        out = numpy.empty((2, 2), dtype, order)
+        self.check_get(non_contiguous_array, out)
+
+    @testing.multi_ve(2)
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_get_multive(self, dtype, order):
+        with nlcpy.venode.VE(1):
+            src = testing.shaped_arange((2, 3), nlcpy, dtype, order)
+            src = nlcpy.asarray(src, order='F')
+        with nlcpy.venode.VE(0):
+            dst = numpy.empty((2, 3), dtype, order)
+            src.get(out=dst)
+        expected = testing.shaped_arange((2, 3), numpy, dtype, order)
+        np_testing.assert_array_equal(dst, expected)
+
+    @testing.multi_ve(2)
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_get_multive_with_use(self, dtype, order):
+        with nlcpy.venode.VE(0):
+            src = testing.shaped_arange((10,), nlcpy, dtype, order)
+        nlcpy.venode.VE(1).use()
+        dst = src[::2].get()
+        expected = testing.shaped_arange((10,), numpy, dtype, order)[::2]
+        assert nlcpy.venode.VE() == nlcpy.venode.VE(1)
+        np_testing.assert_array_equal(dst, expected)
+
+    @testing.multi_ve(2)
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_get_multive_with_out_with_use(self, dtype, order):
+        with nlcpy.venode.VE(0):
+            src = testing.shaped_arange((10,), nlcpy, dtype, order)
+        dst = numpy.empty(10, dtype, order=('F' if order == 'C' else 'C'))
+        nlcpy.venode.VE(1).use()
+        src.get(out=dst)
+        expected = testing.shaped_arange((10,), numpy, dtype, order)
+        assert nlcpy.venode.VE() == nlcpy.venode.VE(1)
+        np_testing.assert_array_equal(dst, expected)

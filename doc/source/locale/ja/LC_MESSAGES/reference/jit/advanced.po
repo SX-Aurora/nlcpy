@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"POT-Creation-Date: 2022-11-15 14:44+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +22,7 @@ msgstr ""
 
 #: ../../source/reference/jit/advanced.rst:9
 msgid ""
-"This section describes a detailed usage of the JIT compilation "
+"This section describes a advanced usage of the JIT compilation "
 "functionality."
 msgstr ""
 
@@ -32,8 +31,8 @@ msgid "Compiling from C++ Source"
 msgstr ""
 
 #: ../../source/reference/jit/advanced.rst:16
-#: ../../source/reference/jit/advanced.rst:55
-#: ../../source/reference/jit/advanced.rst:110
+#: ../../source/reference/jit/advanced.rst:56
+#: ../../source/reference/jit/advanced.rst:125
 msgid "**Definition of the source**"
 msgstr ""
 
@@ -41,311 +40,329 @@ msgstr ""
 msgid "The entry routine should be defined with ``extern \"C\"``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:31
-#: ../../source/reference/jit/advanced.rst:70
-#: ../../source/reference/jit/advanced.rst:145
+#: ../../source/reference/jit/advanced.rst:32
+#: ../../source/reference/jit/advanced.rst:73
+#: ../../source/reference/jit/advanced.rst:160
 msgid "**Compilation**"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:33
+#: ../../source/reference/jit/advanced.rst:34
 msgid ""
 "Pass ``'nc++'`` or ``'/opt/nec/ve/bin/nc++'`` into the ``compiler`` "
 "argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:39
-#: ../../source/reference/jit/advanced.rst:156
+#: ../../source/reference/jit/advanced.rst:40
+#: ../../source/reference/jit/advanced.rst:171
 msgid "**Getting the function symbol**"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:41
+#: ../../source/reference/jit/advanced.rst:42
 msgid "This is the same procedure as the case that compile from C source."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:53
+#: ../../source/reference/jit/advanced.rst:54
 msgid "Compiling from Fortran Source"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:72
+#: ../../source/reference/jit/advanced.rst:75
 msgid ""
 "Pass ``'nfort'`` or ``'/opt/nec/ve/bin/nfort'`` into the ``compiler`` "
 "argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:78
+#: ../../source/reference/jit/advanced.rst:81
 msgid "**Getting the subroutine or function symbol**"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:80
+#: ../../source/reference/jit/advanced.rst:83
 msgid "You should add ``_`` to the end of the function name."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:92
+#: ../../source/reference/jit/advanced.rst:94
+msgid ""
+"If you want to pass a scalar value as a parameter of VE Fortran "
+"function/subroutine, please define the Fortran parameter with ``VALUE`` "
+"attribute."
+msgstr ""
+
+#: ../../source/reference/jit/advanced.rst:97
+msgid ""
+"Alternatively, you can use ``nlcpy.veo.OnStack`` to pass a parameter as a"
+" stack. In this case, you should define the Fortran parameter without "
+"``VALUE`` attribute."
+msgstr ""
+
+#: ../../source/reference/jit/advanced.rst:101
+msgid ":ref:`Transferring Buffer Data to VE <label_transferring_buffer>`."
+msgstr ""
+
+#: ../../source/reference/jit/advanced.rst:106
 msgid "The Fortran source code is generated internally with the suffix ``.f03``"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:94
+#: ../../source/reference/jit/advanced.rst:108
 msgid ""
 "To preprocess before the compilation, please specify ``'-fpp'`` option "
 "into the ``cflags``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:95
+#: ../../source/reference/jit/advanced.rst:109
 msgid ""
 "To enable source code to be described in fixed form, please specify "
 "``'-ffixed-form'`` option into the ``cflags``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:98
+#: ../../source/reference/jit/advanced.rst:112
 msgid ""
 "For details, please refer to the Fortran Compiler User's Guide from `here"
-" <https://www.hpc.nec/documentation>`_."
+" <https://sxauroratsubasa.sakura.ne.jp/documentation>`_."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:102
+#: ../../source/reference/jit/advanced.rst:117
 msgid "Transferring Ndarray Attributes to VE"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:104
+#: ../../source/reference/jit/advanced.rst:119
 msgid ""
 "NLCPy provides a easy way to access :class:`nlcpy.ndarray` attributes "
 "from VE side."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:106
+#: ../../source/reference/jit/advanced.rst:121
 msgid "Restriction"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:108
+#: ../../source/reference/jit/advanced.rst:123
 msgid ""
 "Accessing :class:`nlcpy.ndarray` attributes from Fortran has not "
 "supported yet."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:112
+#: ../../source/reference/jit/advanced.rst:127
 msgid ""
 "You should include ``nlcpy.h`` in C/C++ source and use ``ve_array`` "
 "structure."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:114
+#: ../../source/reference/jit/advanced.rst:129
 msgid "Here is a example of 2-D element-wise addition."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:143
+#: ../../source/reference/jit/advanced.rst:158
 msgid ""
 "For details of the C-structure, please refer to the :ref:`C Interfaces "
 "<label_c_interface>`."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:147
+#: ../../source/reference/jit/advanced.rst:162
 msgid "By default, only pass source code into the ``code`` argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:153
+#: ../../source/reference/jit/advanced.rst:168
 msgid ""
-"If you specify ``cflags`` argument, it is necessary to add the including "
-"path that can be retrieved from :func:`nlcpy.get_include`."
+"If you specify ``cflags`` argument, it is necessary to include the header"
+" file path that can be retrieved from :func:`nlcpy.get_include`."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:158
+#: ../../source/reference/jit/advanced.rst:173
 msgid ""
 "Pass ``'void *'`` or ``ve_types.void_p`` into the ``args_type`` elements "
 "that corresponding to the ``ve_array`` structure in the VE side argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:169
+#: ../../source/reference/jit/advanced.rst:184
 msgid "**Execution**"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:171
+#: ../../source/reference/jit/advanced.rst:186
 msgid ""
 "Pass a :class:`nlcpy.ndarray` object into the argument of the "
 ":meth:`CustomVEKernel.__call__`."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:189
+#: ../../source/reference/jit/advanced.rst:204
 msgid "C Interfaces"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:193
+#: ../../source/reference/jit/advanced.rst:208
 msgid ""
 "The ``ve_array`` C-structure contains the required information for a "
 ":class:`nlcpy.ndarray`. All instances of a :class:`nlcpy.ndarray` will "
 "have this structure."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:196
+#: ../../source/reference/jit/advanced.rst:211
 msgid "The members of the ``ve_array`` are as follows:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:200
+#: ../../source/reference/jit/advanced.rst:215
 msgid "The address point to the first element of the array."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:204
+#: ../../source/reference/jit/advanced.rst:219
 msgid "The number of dimensions in the array."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:208
+#: ../../source/reference/jit/advanced.rst:223
 msgid "The total size of the array."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:212
+#: ../../source/reference/jit/advanced.rst:227
 msgid ""
 "The shapes of the array. An array of integers providing the shape in each"
 " dimension."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:215
+#: ../../source/reference/jit/advanced.rst:230
 msgid ""
-"Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5))``, the "
-"``shape`` of C-structer is::"
+"Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5), "
+"dtype='f8')``, the shape of C-structer is::"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:227
+#: ../../source/reference/jit/advanced.rst:242
 msgid ""
-"The strides of the array. An array of integers providing for each "
-"dimension the number of bytes that must be skipped to get to the next "
-"element in that dimension"
+"The strides of the array. An array of integers providing the number of "
+"bytes that must be skipped to get to the next element in that dimension."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:231
+#: ../../source/reference/jit/advanced.rst:246
 msgid ""
-"Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5))``, the "
-"``strides`` of C-structer is::"
+"Given a :class:`nlcpy.ndarray` from ``nlcpy.empty((3, 4, 5), "
+"dtype='f8')``, the strides of C-structer is::"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:245
+#: ../../source/reference/jit/advanced.rst:258
 msgid "The data type of the array. The correspondence values is below:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:267
+#: ../../source/reference/jit/advanced.rst:280
 msgid "This enum data can be defined by ``nlcpy.h``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:271
+#: ../../source/reference/jit/advanced.rst:284
 msgid "The number of bytes for one element of the array."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:275
+#: ../../source/reference/jit/advanced.rst:288
 msgid ""
 "Whether the array is C-style contiguous order or not. ``1`` means yes, "
 "``0`` means no."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:280
+#: ../../source/reference/jit/advanced.rst:293
 msgid ""
 "Whether the array is Fortran-style contiguous order or not. ``1`` means "
 "yes, ``0`` means no."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:285
-msgid "Transferring Buffer data to VE"
+#: ../../source/reference/jit/advanced.rst:300
+msgid "Transferring Buffer Data to VE"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:287
+#: ../../source/reference/jit/advanced.rst:302
 msgid ""
-"Python objects that support the buffer interface can be transfered to the"
-" VE arguments by using ``nlcpy.veo.OnStack``."
+"Python objects that support the buffer interface can be transferred to "
+"the VE arguments by using ``nlcpy.veo.OnStack``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:319
+#: ../../source/reference/jit/advanced.rst:334
 msgid ""
 "For details of ``OnStack``, please refer to the `py-veo project "
 "<https://github.com/SX-Aurora/py-veo>`_."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:323
+#: ../../source/reference/jit/advanced.rst:338
 msgid "Customizing Compiler Options"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:325
+#: ../../source/reference/jit/advanced.rst:340
 msgid "Cflags and ldflags can be customized from a tuple of string elements."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:335
+#: ../../source/reference/jit/advanced.rst:350
 msgid "FTRACE can be enabled from the ``ftrace`` argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:344
+#: ../../source/reference/jit/advanced.rst:359
 msgid "You can also use NLC routines just by enabling  the ``use_nlc`` argument."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:361
+#: ../../source/reference/jit/advanced.rst:376
 msgid ""
 "When enabling the ``use_nlc`` flag, the following libraries will be "
 "linked internally:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:363
+#: ../../source/reference/jit/advanced.rst:378
 msgid "libasl_openmp_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:364
+#: ../../source/reference/jit/advanced.rst:379
 msgid "libaslfftw3_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:365
+#: ../../source/reference/jit/advanced.rst:380
 msgid "liblapack_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:366
+#: ../../source/reference/jit/advanced.rst:381
 msgid "libblas_openmp_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:367
+#: ../../source/reference/jit/advanced.rst:382
 msgid "libsca_openmp_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:368
+#: ../../source/reference/jit/advanced.rst:383
 msgid "libheterosolver_openmp_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:369
+#: ../../source/reference/jit/advanced.rst:384
 msgid "libsblas_openmp_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:370
+#: ../../source/reference/jit/advanced.rst:385
 msgid "libcblas_i64"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:374
+#: ../../source/reference/jit/advanced.rst:389
 msgid "Only the OpenMP & 64bit integer version of the NLC can be used."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:378
+#: ../../source/reference/jit/advanced.rst:393
 msgid ""
 "If you enable the ``use_nlc`` flag with Fortran source, you should add "
 "the option ``'-fdefault-integer=8'`` to the ``cflags``."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:383
+#: ../../source/reference/jit/advanced.rst:398
 msgid ""
 "If you use ASL Unified Interface, you should not call following functions"
 " because there will be internally called at the beginning/end of the "
 "NLCPy process."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:386
+#: ../../source/reference/jit/advanced.rst:401
 msgid "``asl_library_initialize()``"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:387
+#: ../../source/reference/jit/advanced.rst:402
 msgid "``asl_library_finalize()``"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:390
+#: ../../source/reference/jit/advanced.rst:405
 msgid ""
 "For the notices of compiler options, please refer to the `aveo "
-"documentation <https://www.hpc.nec/documents/veos/en/aveo/index.html>`_."
+"documentation "
+"<https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:397
+#: ../../source/reference/jit/advanced.rst:412
 msgid "Callback Setting"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:399
+#: ../../source/reference/jit/advanced.rst:414
 msgid ""
 "The Python function set into the ``callback`` argument will be executed "
 "when the result of the VE function will be retrieved. The callback "
@@ -353,41 +370,40 @@ msgid ""
 "value of the VE function."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:411
+#: ../../source/reference/jit/advanced.rst:426
 msgid "Here, we show a simple example that uses a callback function."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:413
+#: ../../source/reference/jit/advanced.rst:428
 msgid "The following code will be used for the example:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:456
+#: ../../source/reference/jit/advanced.rst:471
 msgid "Prepare the executable object:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:467
+#: ../../source/reference/jit/advanced.rst:482
 msgid "Define the callback function:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:479
+#: ../../source/reference/jit/advanced.rst:494
 msgid "Execute some patterns with the callback function:"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:505
+#: ../../source/reference/jit/advanced.rst:520
 msgid ""
 "When you enable ``sync`` flag, the return value of the VE function can be"
 " retrieved from the return value of :meth:`CustomVEKernel.__call__`."
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:516
+#: ../../source/reference/jit/advanced.rst:531
 msgid "Logging Compiler Output"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:518
+#: ../../source/reference/jit/advanced.rst:533
 msgid "**Logging to standard output**"
 msgstr ""
 
-#: ../../source/reference/jit/advanced.rst:525
+#: ../../source/reference/jit/advanced.rst:540
 msgid "**Logging to file stream**"
 msgstr ""
-

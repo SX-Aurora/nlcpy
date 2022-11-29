@@ -207,23 +207,6 @@ uint64_t nlcpy_roll(ve_arguments *, int32_t *);
 uint64_t nlcpy_tile(ve_arguments *, int32_t *);
 
 
-/****************************
- *
- *       CBLAS WRAPPER OPERATOR
- *
- * **************************/
-/* function pointer */
-typedef uint64_t (*cblas_wrapper_op)(ve_arguments *, int32_t *);
-/* function proto types */
-uint64_t wrapper_cblas_sdot(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_ddot(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_cdotu_sub(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_zdotu_sub(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_sgemm(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_dgemm(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_cgemm(ve_arguments *, int32_t *);
-uint64_t wrapper_cblas_zgemm(ve_arguments *, int32_t *);
-
 
 /****************************
  *

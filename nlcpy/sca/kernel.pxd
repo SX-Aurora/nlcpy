@@ -35,7 +35,7 @@ from nlcpy.sca.description cimport description
 
 cdef class kernel:
     cdef:
-        readonly uint64_t code_adr
+        readonly ndarray code_adr
         readonly ndarray out
         readonly description desc_i
         readonly description desc_o

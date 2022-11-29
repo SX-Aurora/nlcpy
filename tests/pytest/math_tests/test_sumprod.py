@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+from unittest.mock import patch
 
 import numpy
 
@@ -183,7 +184,8 @@ class TestSumprod2(unittest.TestCase):
         a = testing.shaped_arange((2, 3, 4))
         b = nlcpy.empty((2, 3))
         with self.assertRaises(NotImplementedError):
-            nlcpy.sum(a, axis=1, out=b)
+            with patch.dict('os.environ', {'VE_NLCPY_ENABLE_NUMPY_WRAP': 'no'}):
+                nlcpy.sum(a, axis=1, out=b)
 
 
 axes = [0, 1, 2]

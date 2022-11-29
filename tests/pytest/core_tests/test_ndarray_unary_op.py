@@ -62,7 +62,8 @@ class TestArrayBoolOp(unittest.TestCase):
 
     @testing.for_all_dtypes()
     def test_bool_empty(self, dtype):
-        self.assertFalse(bool(nlcpy.array((), dtype=dtype)))
+        with testing.assert_warns(DeprecationWarning):
+            self.assertFalse(bool(nlcpy.array((), dtype=dtype)))
 
     def test_bool_scalar_bool(self):
         self.assertTrue(bool(nlcpy.array(True, dtype=numpy.bool)))

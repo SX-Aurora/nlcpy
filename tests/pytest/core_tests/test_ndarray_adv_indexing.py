@@ -96,11 +96,11 @@ class TestArrayAdvancedIndexingGetitemPerm(unittest.TestCase):
 
 @testing.parameterize(
     {'shape': (2, 3, 4), 'indexes': numpy.array(-1)},
-    {'shape': (2, 3, 4), 'indexes': (None, [1, 0], [0, 2], slice(None))},
-    {'shape': (2, 3, 4), 'indexes': (None, [0, 1], None, [2, 1], slice(None))},
+    {'shape': (2, 3, 4), 'indexes': (None, (1, 0), (0, 2), slice(None))},
+    {'shape': (2, 3, 4), 'indexes': (None, (0, 1), None, (2, 1), slice(None))},
     {'shape': (2, 3, 4), 'indexes': numpy.array([1, 0])},
     {'shape': (2, 3, 4), 'indexes': [1, -1]},
-    {'shape': (2, 3, 4), 'indexes': ([0, 1], slice(None), [[2, 1], [3, 1]])},
+    {'shape': (2, 3, 4), 'indexes': ((0, 1), slice(None), ((2, 1), (3, 1)))},
     # mask
     {'shape': (10,), 'indexes': (numpy.random.choice([False, True], (10,)),)},
     {'shape': (2, 3, 4),
@@ -117,15 +117,15 @@ class TestArrayAdvancedIndexingGetitemPerm(unittest.TestCase):
     # empty arrays
     {'shape': (2, 3, 4), 'indexes': []},
     {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.int32)},
-    {'shape': (2, 3, 4), 'indexes': [[]]},
+    {'shape': (2, 3, 4), 'indexes': (())},
     {'shape': (2, 3, 4), 'indexes': numpy.array([[]], dtype=numpy.int32)},
-    {'shape': (2, 3, 4), 'indexes': [[[]]]},
-    {'shape': (2, 3, 4), 'indexes': [[[[]]]]},
-    {'shape': (2, 3, 4, 5), 'indexes': [[[[]]]]},
-    {'shape': (2, 3, 4, 5), 'indexes': [[[[[]]]]]},
-    {'shape': (2, 3, 4), 'indexes': (slice(None), [])},
-    {'shape': (2, 3, 4), 'indexes': ([], [])},
-    {'shape': (2, 3, 4), 'indexes': ([[]],)},
+    {'shape': (2, 3, 4), 'indexes': ((()))},
+    {'shape': (2, 3, 4), 'indexes': (((())))},
+    {'shape': (2, 3, 4, 5), 'indexes': (((())))},
+    {'shape': (2, 3, 4, 5), 'indexes': ((((()))))},
+    {'shape': (2, 3, 4), 'indexes': (slice(None), ())},
+    {'shape': (2, 3, 4), 'indexes': ((), ())},
+    {'shape': (2, 3, 4), 'indexes': ((()),)},
     {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool)},
     {'shape': (2, 3, 4),
      'indexes': (slice(None), numpy.array([], dtype=numpy.bool))},
@@ -133,12 +133,12 @@ class TestArrayAdvancedIndexingGetitemPerm(unittest.TestCase):
     # list indexes
     {'shape': (2, 3, 4), 'indexes': [1]},
     {'shape': (2, 3, 4), 'indexes': [1, 1]},
-    {'shape': (2, 3, 4), 'indexes': [[1]]},
-    {'shape': (2, 3, 4), 'indexes': [[1, 1]]},
-    {'shape': (2, 3, 4), 'indexes': [[1], [1]]},
-    {'shape': (2, 3, 4), 'indexes': [[1, 1], 1]},
-    {'shape': (2, 3, 4), 'indexes': [[1], slice(1, 2)]},
-    {'shape': (2, 3, 4), 'indexes': [[[1]], slice(1, 2)]},
+    {'shape': (2, 3, 4), 'indexes': ((1))},
+    {'shape': (2, 3, 4), 'indexes': ((1, 1))},
+    {'shape': (2, 3, 4), 'indexes': ((1), (1))},
+    {'shape': (2, 3, 4), 'indexes': ((1, 1), 1)},
+    {'shape': (2, 3, 4), 'indexes': ((1), slice(1, 2))},
+    {'shape': (2, 3, 4), 'indexes': (((1)), slice(1, 2))},
     # TODO: pass the following commented out tests
     # {'shape': (2, 3, 4), 'indexes': (True, [True, False])},
     # {'shape': (2, 3, 4), 'indexes': (False, [True, False])},
@@ -361,18 +361,8 @@ class TestArrayInvalidValueAdvGetitem(unittest.TestCase):
     @testing.numpy_nlcpy_raises(accept_error=IndexError)
     def test_invalid_adv_getitem(self, xp):
         a = testing.shaped_arange(self.shape, xp)
-        a[self.indexes]
-
-
-@testing.parameterize(
-    {'shape': (2, 3, 4), 'indexes': [1, [1, [1]]]},
-)
-class TestArrayInvalidValueAdvGetitemForOldVersion(unittest.TestCase):
-
-    @testing.numpy_nlcpy_raises()
-    def test_invalid_adv_getitem(self, xp):
-        a = testing.shaped_arange(self.shape, xp)
-        a[self.indexes]
+        with testing.assert_warns(FutureWarning):
+            a[self.indexes]
 
 
 @testing.parameterize(
@@ -382,12 +372,12 @@ class TestArrayInvalidValueAdvGetitemForOldVersion(unittest.TestCase):
     {'shape': (2, 3, 4), 'indexes': [1, -1], 'value': 1},
     {'shape': (2, 3, 4), 'indexes': (slice(None), [1, 2]), 'value': 1},
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), [[1, 2], [0, -1]],), 'value': 1},
+     'indexes': (slice(None), ((1, 2), (0, -1)),), 'value': 1},
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), slice(None), [[1, 2], [0, -1]]), 'value': 1},
+     'indexes': (slice(None), slice(None), ((1, 2), (0, -1))), 'value': 1},
     # slice and array
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), slice(1, 2), [[1, 2], [0, -1]]), 'value': 1},
+     'indexes': (slice(None), slice(1, 2), ((1, 2), (0, -1))), 'value': 1},
     # None and array
     {'shape': (2, 3, 4),
      'indexes': (None, [1, -1]), 'value': 1},
@@ -419,29 +409,29 @@ class TestArrayInvalidValueAdvGetitemForOldVersion(unittest.TestCase):
     {'shape': (2, 3, 4),
      'indexes': (numpy.random.choice([False, True], (2, 3, 4)),), 'value': 1},
     # multiple arrays
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], [1, -1]), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), (1, -1)), 'value': 1},
     {'shape': (2, 3, 4),
-     'indexes': ([0, -1], [1, -1], [2, 1]), 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], 1), 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], slice(None), [1, -1]),
+     'indexes': ((0, -1), (1, -1), (2, 1)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), 1), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), slice(None), [1, -1]),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], 1, 2), 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([1, 0], slice(None), [[2, 0], [3, 1]]),
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), 1, 2), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1, 0), slice(None), ((2, 0), (3, 1))),
      'value': 1},
     # multiple arrays and basic indexing
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], None, [1, 0]), 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], slice(0, 2), [1, 0]),
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), None, (1, 0)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), slice(0, 2), (1, 0)),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([0, -1], None, slice(0, 2), [1, 0]),
-     'value': 1},
-    {'shape': (1, 1, 2, 3, 4),
-     'indexes': (None, slice(None), slice(None), [1, 0], [2, -1], 1),
+    {'shape': (2, 3, 4), 'indexes': ((0, -1), None, slice(0, 2), (1, 0)),
      'value': 1},
     {'shape': (1, 1, 2, 3, 4),
-     'indexes': (None, slice(None), 0, [1, 0], slice(0, 2, 2), [2, -1]),
+     'indexes': (None, slice(None), slice(None), (1, 0), (2, -1), 1),
+     'value': 1},
+    {'shape': (1, 1, 2, 3, 4),
+     'indexes': (None, slice(None), 0, (1, 0), slice(0, 2, 2), (2, -1)),
      'value': 1},
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), [0, -1], [[1, 0], [0, 1], [-1, 1]]), 'value': 1},
+     'indexes': (slice(None), (0, -1), ((1, 0), (0, 1), (-1, 1))), 'value': 1},
     # empty arrays
     {'shape': (2, 3, 4), 'indexes': [], 'value': 1},
     {'shape': (2, 3, 4), 'indexes': [],
@@ -450,21 +440,21 @@ class TestArrayInvalidValueAdvGetitemForOldVersion(unittest.TestCase):
      'value': numpy.random.uniform(size=(3, 4))},
     {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.int32),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[]],
+    {'shape': (2, 3, 4), 'indexes': (()),
      'value': 1},
     {'shape': (2, 3, 4), 'indexes': numpy.array([[]], dtype=numpy.int32),
      'value': numpy.random.uniform(size=(3, 4))},
-    {'shape': (2, 3, 4), 'indexes': [[[]]],
+    {'shape': (2, 3, 4), 'indexes': ((())),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[[[]]]],
+    {'shape': (2, 3, 4), 'indexes': (((()))),
      'value': 1},
-    {'shape': (2, 3, 4, 5), 'indexes': [[[[]]]],
+    {'shape': (2, 3, 4, 5), 'indexes': (((()))),
      'value': 1},
-    {'shape': (2, 3, 4, 5), 'indexes': [[[[[]]]]],
+    {'shape': (2, 3, 4, 5), 'indexes': ((((())))),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': (slice(None), []),
+    {'shape': (2, 3, 4), 'indexes': (slice(None), ()),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': ([], []),
+    {'shape': (2, 3, 4), 'indexes': ((), ()),
      'value': 1},
     {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool),
      'value': 1},
@@ -475,12 +465,12 @@ class TestArrayInvalidValueAdvGetitemForOldVersion(unittest.TestCase):
      'value': numpy.random.uniform(size=(4,))},
     # list indexes
     {'shape': (2, 3, 4), 'indexes': [1, 0], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[1]], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[1, 0]], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[1], [0]], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[1, 0], 2], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[1], slice(1, 2)], 'value': 1},
-    {'shape': (2, 3, 4), 'indexes': [[[1]], slice(1, 2)], 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1, 0)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1), (0)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1, 0), 2), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': ((1), slice(1, 2)), 'value': 1},
+    {'shape': (2, 3, 4), 'indexes': (((1)), slice(1, 2)), 'value': 1},
     # zero-dim and zero-sized arrays
     {'shape': (), 'indexes': Ellipsis, 'value': 1},
     {'shape': (), 'indexes': (), 'value': 1},
@@ -590,12 +580,6 @@ class TestArrayAdvancedIndexingVectorValue(unittest.TestCase):
     def test_adv_setitem(self, xp, dtype):
         a = xp.zeros(self.shape, dtype=dtype)
         a[self.indexes] = self.value.astype(a.dtype)
-        print("a:\n", a)
-        print("self.value:\n", self.value.astype(a.dtype))
-        print("self.indexes:\n", self.indexes)
-        if type(self.indexes) is numpy.ndarray:
-            print("self.indexes.shape:", self.indexes.shape)
-            print("self.indexes.dtype:", self.indexes.dtype)
         return a
 
 

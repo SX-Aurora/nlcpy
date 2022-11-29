@@ -70,8 +70,6 @@ cpdef bint vector_equal(
     const vector[Py_ssize_t]& y)
 
 
-cpdef tuple check_all_arrays_memloc(arrays)
-
 cpdef vector[Py_ssize_t] infer_unknown_dimension(
     const vector[Py_ssize_t]& shape,
     Py_ssize_t size) except *

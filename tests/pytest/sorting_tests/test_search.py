@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
 
@@ -281,7 +282,9 @@ class TestNonzeroZeroDimension(unittest.TestCase):
     @testing.numpy_nlcpy_array_list_equal()
     def test_nonzero(self, xp, dtype):
         array = xp.array(self.array, dtype=dtype)
-        return xp.nonzero(array)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            return xp.nonzero(array)
 
 
 @testing.parameterize(

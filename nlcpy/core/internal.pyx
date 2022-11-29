@@ -128,23 +128,6 @@ cpdef bint vector_equal(
     return True
 
 
-cpdef tuple check_all_arrays_memloc(arrays):
-    cdef:
-        int64_t max_size
-        int flag
-    # find maximum size and memloc flag
-    # if all array's memory exist in VE, flag = MemoryLocation.on_VE
-    # if all array's memory exist in VH, flag = MemoryLocation.on_VH
-    max_size = 0
-    flag = 0b111
-    for x in list(arrays):
-        if not isinstance(x, ndarray):
-            continue
-        max_size = max(max_size, x.size)
-        flag = flag & x._memloc
-    return max_size, flag
-
-
 cpdef vector[Py_ssize_t] infer_unknown_dimension(
         const vector[Py_ssize_t]& shape,
         Py_ssize_t size) except *:

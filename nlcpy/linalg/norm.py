@@ -90,16 +90,16 @@ def _lange(x, norm, axis):
         norm = 'I'
     else:
         norm = '1'
-    lwork = x.shape[0] if norm == 'I' else 1
     x = nlcpy.asarray(nlcpy.moveaxis(x, (axis[0], axis[1]), (0, 1)), order='F')
     y = nlcpy.empty(x.shape[2:], dtype=dtype, order='F')
+    lwork = x.shape[0] if norm == 'I' else 1
     work = nlcpy.empty(lwork, dtype=dtype)
     fpe = request._get_fpe_flag()
     args = (
         ord(norm),
-        x._ve_array,
-        y._ve_array,
-        work._ve_array,
+        x,
+        y,
+        work,
         veo.OnStack(fpe, inout=veo.INTENT_OUT),
     )
 
@@ -150,16 +150,16 @@ def norm(x, ord=None, axis=None, keepdims=False):
         :header: ord, norm for matrices, norm for vectors
 
         None, Frobenius norm, 2-norm
-        'fro', Frobenius norm, \-
-        'nuc', nuclear norm, \-
+        'fro', Frobenius norm, \\-
+        'nuc', nuclear norm, \\-
         inf, "max(sum(abs(x), axis=1))", max(abs(x))
         -inf, "min(sum(abs(x), axis=1))", min(abs(x))
-        0, \-, sum(x != 0)
+        0, \\-, sum(x != 0)
         1, "max(sum(abs(x), axis=0))", as below
         -1, "min(sum(abs(x), axis=0))", as below
         2, 2-norm (largest sing. value), as below
         -2, smallest singular value, as below
-        other, \-, sum(abs(x)**ord)**(1./ord)
+        other, \\-, sum(abs(x)**ord)**(1./ord)
 
     The Frobenius norm is given by :math:`|A|_F = [\\sum_{i,j}abs(a_{i,j})^2]^{1/2}`
 

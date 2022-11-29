@@ -29,11 +29,12 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import os
 import nlcpy
 from nlcpy import _path
+from nlcpy import _environment
 
 include "basic_kernel_list.pxi"
+include "asluni_kernel_list.pxi"
 include "math_kernel_list.pxi"
 include "indexing_kernel_list.pxi"
 include "creation_kernel_list.pxi"
@@ -45,22 +46,23 @@ include "random_kernel_list.pxi"
 include "fft_kernel_list.pxi"
 include "reduceat_kernel_list.pxi"
 include "sca_kernel_list.pxi"
-
-_here = _path._here
+include "profiling_kernel_list.pxi"
 
 
 def _register_ve_kernel(p):
-    fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')
-    if fast_math in ('yes', 'YES'):
-        lib = p.load_library(
-            (_here + "/lib/libnlcpy_ve_kernel_fast_math.so").encode('utf-8'))
+    lib = None
+    lib_prof = None
+    fast_math = _environment._is_fast_math()
+    if fast_math:
+        lib = p.load_library(_path._fast_math_kernel_path.encode('utf-8'))
     else:
-        lib = p.load_library(
-            (_here + "/lib/libnlcpy_ve_kernel_no_fast_math.so").encode('utf-8'))
-    if lib is None:
-        raise RuntimeError("cannot detect ve kernel")
+        lib = p.load_library(_path._no_fast_math_kernel_path.encode('utf-8'))
+    lib_prof = p.load_library(_path._profiling_kernel_path.encode('utf-8'))
+    if lib is None or lib_prof is None:
+        raise RuntimeError("failed to load ve kernel")
     all_kernel_list = {
         **_basic_kernel_list,
+        **_asluni_kernel_list,
         **_indexing_kernel_list,
         **_creation_kernel_list,
         **_manipulation_kernel_list,
@@ -82,3 +84,16 @@ def _register_ve_kernel(p):
             fargs = v["args"]
             f.args_type(*fargs)
             f.ret_type(v["ret"])
+
+    profiling_kernel_list = {**_profiling_kernel_list}
+    for k, v in profiling_kernel_list.items():
+        try:
+            f = lib_prof.find_function(k.encode('utf-8'))
+        except RuntimeError:
+            continue
+        if f is not None:
+            fargs = v["args"]
+            f.args_type(*fargs)
+            f.ret_type(v["ret"])
+
+    return lib, lib_prof

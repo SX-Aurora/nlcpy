@@ -98,8 +98,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
 
     if a is not None:
         a = nlcpy.asarray(a)
-    if a._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError('reduce on VH is not yet implemented.')
 
     axis_save = axis
     if isinstance(axis, int):
@@ -184,10 +182,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         raise ValueError("reduction operation '{}' does not have an identity,"
                          " so to use a where mask one has to specify "
                          "'initial'".format(op_name))
-
-    if out is not None:
-        if out._memloc in {on_VH, on_VE_VH}:
-            raise NotImplementedError('reduce on VH is not yet implemented.')
 
     if type(keepdims) is not int and (numpy.asarray(keepdims).dtype.char not in '?iIlL'):
         raise TypeError("an integer is required (got type " +

@@ -29,7 +29,9 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import numpy
 from numpy.linalg import LinAlgError  # NOQA
+from nlcpy.wrapper.numpy_wrap import _make_wrap_func # NOQA
 
 # override numpy documentation
 LinAlgError.__doc__ = '''
@@ -65,3 +67,16 @@ from nlcpy.linalg.norm import norm  # NOQA
 from nlcpy.linalg.decomposition import svd  # NOQA
 from nlcpy.linalg.decomposition import cholesky  # NOQA
 from nlcpy.linalg.decomposition import qr  # NOQA
+
+
+def __getattr__(attr):
+    try:
+        f = getattr(numpy.linalg, attr)
+    except AttributeError as _err:
+        raise AttributeError(
+            "module 'nlcpy.linalg' has no attribute '{}'."
+            .format(attr)) from _err
+    if not callable(f):
+        raise AttributeError(
+            "module 'nlcpy.linalg' has no attribute '{}'.".format(attr))
+    return _make_wrap_func(f)

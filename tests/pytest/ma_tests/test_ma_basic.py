@@ -50,9 +50,9 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
-
 import nlcpy
 from nlcpy import testing
 
@@ -65,7 +65,9 @@ class TestMaskedArray(unittest.TestCase):
         data = testing.shaped_random([10], xp, dtype=dt1)
         mask = testing.shaped_arange([10], xp, dtype=dt2)
         fill_value = testing.shaped_random([10], xp, dtype=dt3)
-        a = xp.ma.array(data, mask=mask, fill_value=fill_value, dtype=dt4)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            a = xp.ma.array(data, mask=mask, fill_value=fill_value, dtype=dt4)
         data[:] = 1
         return a
 
@@ -522,7 +524,9 @@ class TestMaskedArray(unittest.TestCase):
         data = testing.shaped_random([6], xp)
         mask = xp.array([0, 1, 0, 1, 0, 1])
         a = xp.ma.array(data, mask=mask)
-        a.fill_value = xp.arange(6)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            a.fill_value = xp.arange(6)
         return a
 
     def test_baseclass(self):

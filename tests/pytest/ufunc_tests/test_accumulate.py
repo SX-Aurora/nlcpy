@@ -31,7 +31,9 @@
 
 import numpy
 import unittest
-
+import pytest
+import warnings
+import gc
 import nlcpy
 from nlcpy import testing
 
@@ -100,7 +102,7 @@ def is_executable(op, dtype_in=None, dtype=None, dtype_out=None):
         if op in (
             'divide', 'true_divide', 'arctan2', 'hypot', 'copysign',
             'logaddexp', 'logaddexp2', 'nextafter', 'heaviside',
-            'power', 'floor_divide', 'mod', 'remainder', 'fmod', 'nextafter',
+            'power', 'floor_divide', 'mod', 'remainder', 'fmod',
             'right_shift', 'left_shift', 'subtract'
         ):
             return dtype != numpy.bool and not (dtype is None and dtype_in == numpy.bool)
@@ -113,15 +115,21 @@ def execute_ufunc(xp, op, in1, out=None, dtype=None, axis=0):
     if not is_executable(op, in1.dtype, dtype, dtype_out):
         return 0
     dtype = adjust_dtype(xp, op, in1.dtype, dtype, dtype_out)
-    return getattr(xp, op).accumulate(in1, out=out, dtype=dtype, axis=axis)
+    ret = getattr(xp, op).accumulate(in1, out=out, dtype=dtype, axis=axis)
+    return ret
 
 
+@pytest.mark.no_fast_math
 class TestAccumulate(unittest.TestCase):
 
     shapes = ((2, 2),)
     axes = (0,)
     shapes2 = ((3, 2, 1, 4), (1, 3, 5, 2, 5))
     axes2 = (0, 1, -1)
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, order_x='C', dtype_x=all_types,
@@ -135,7 +143,9 @@ class TestAccumulate(unittest.TestCase):
         is_dtype=True, ufunc_name='accumulate', axes=axes, seed=0
     )
     def test_accumulate_with_dtype(self, xp, op, in1, dtype, axis):
-        return execute_ufunc(xp, op, in1, axis=axis, dtype=dtype)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, axis=axis, dtype=dtype)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, order_x='C', order_out='C', dtype_x=all_types, dtype_out=all_types,
@@ -143,7 +153,9 @@ class TestAccumulate(unittest.TestCase):
     )
     def test_accumulate_with_out(self, xp, op, in1, out, axis):
         out = xp.asarray(out)
-        return execute_ufunc(xp, op, in1, out=out, axis=axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, out=out, axis=axis)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, order_x='C', order_out='C', dtype_x=all_types, dtype_out=all_types,
@@ -151,7 +163,9 @@ class TestAccumulate(unittest.TestCase):
     )
     def test_accumulate_with_out_broadcast(self, xp, op, in1, out, axis):
         out = xp.asarray(out)
-        return execute_ufunc(xp, op, in1, out=out, axis=axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, out=out, axis=axis)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, order_x='C', order_out='C', dtype_x=all_types,
@@ -160,7 +174,9 @@ class TestAccumulate(unittest.TestCase):
     )
     def test_accumulate_with_dtype_and_out(self, xp, op, in1, dtype, out, axis):
         out = xp.asarray(out)
-        return execute_ufunc(xp, op, in1, dtype=dtype, out=out, axis=axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, dtype=dtype, out=out, axis=axis)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes2, order_x='C', dtype_x=all_types, dtype_out=all_types,
@@ -168,7 +184,9 @@ class TestAccumulate(unittest.TestCase):
     )
     def test_accumulate_shape(self, xp, op, in1, out, axis):
         out = xp.asarray(out)
-        return execute_ufunc(xp, op, in1, out=out, axis=axis)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, out=out, axis=axis)
 
     def test_accumulate_too_large_left_shift(self):
         for dtype in 'iI':

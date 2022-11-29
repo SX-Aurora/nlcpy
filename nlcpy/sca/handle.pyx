@@ -39,6 +39,7 @@ from nlcpy.core cimport core
 from nlcpy.sca cimport kernel
 from nlcpy.sca cimport internal as sca_internal
 from nlcpy.sca.description cimport description
+from nlcpy.venode._venode cimport VE
 
 from libc.stdint cimport *
 
@@ -50,11 +51,11 @@ cdef class sca_handle:
     def __init__(self, dtype='float64'):
         self.destroyed = False
 
-        dt = numpy.dtype(dtype)
-        ve_adr = numpy.empty(1, dtype='u8')
+        dt = nlcpy.dtype(dtype)
+        hnd_adr = nlcpy.empty(1, dtype='u8')
         fpe_flags = request._get_fpe_flag()
         args = (
-            veo.OnStack(ve_adr, inout=veo.INTENT_OUT),
+            hnd_adr,
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
         if dt == numpy.dtype('float32'):
@@ -65,13 +66,12 @@ cdef class sca_handle:
             raise TypeError('dtype is only acceptable `float32` or `float64`')
         self.dtype = dt
 
-        request._push_and_flush_request(
+        VE().request_manager._push_and_flush_request(
             func_name,
             args,
             sync=True
         )
-
-        self.hnd_adr = <uint64_t>ve_adr
+        self.hnd_adr = hnd_adr
 
     def set_elements(self, description desc_i, description desc_o):
         cdef int64_t offset = 0
@@ -107,6 +107,9 @@ cdef class sca_handle:
                 c_tmp = []
                 c_leading_tmp = []
                 for c in elem.coef:
+                    if c[1].venode != VE():
+                        raise ValueError('coefficient ndarray does not exist on {}'
+                                         .format(VE()))
                     c_idx_tmp.append(c[0])
                     c_tmp.append(c[1].ve_adr)
                     if c[1].size > 1:
@@ -137,12 +140,12 @@ cdef class sca_handle:
             factor = nlcpy.array(elem.factor, dtype=self.dtype)
             args = (
                 self.hnd_adr,
-                arr._ve_array,
-                location._ve_array,
-                factor._ve_array,
-                coef._ve_array,
-                coef_idx._ve_array,
-                coef_leading._ve_array,
+                arr,
+                location,
+                factor,
+                coef,
+                coef_idx,
+                coef_leading,
                 <int64_t>elem.offset,
                 <int64_t>len(elem.factor),
                 <int64_t>elem_offset,
@@ -172,7 +175,7 @@ cdef class sca_handle:
         mx, my, mz = sca_internal._get_leading_dimensions(out)
         args = (
             self.hnd_adr,
-            out._ve_array,
+            out,
             <int64_t>(out.strides[-1] / out.itemsize),
             <int64_t>mx,
             <int64_t>my,
@@ -193,12 +196,11 @@ cdef class sca_handle:
         cdef int64_t ny = self.desc_o.ny
         cdef int64_t nz = self.desc_o.nz
         cdef int64_t nw = self.desc_o.nw
-        cdef ndarray data_o = self.desc_o.elems[0].array
 
-        ve_adr = numpy.empty(1, dtype='u8')
+        code_adr = nlcpy.empty(1, dtype='u8')
         fpe_flags = request._get_fpe_flag()
         args = (
-            veo.OnStack(ve_adr, inout=veo.INTENT_OUT),
+            code_adr,
             self.hnd_adr,
             nx,
             ny,
@@ -206,12 +208,12 @@ cdef class sca_handle:
             nw,
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
-        request._push_and_flush_request(
+        VE().request_manager._push_and_flush_request(
             'nlcpy_sca_code_create',
             args,
             sync=True
         )
-        return kernel.kernel(<uint64_t>ve_adr, self.desc_i, self.desc_o)
+        return kernel.kernel(code_adr, self.desc_i, self.desc_o)
 
     def reset_stencil_elements(self):
         if self.destroyed:
@@ -222,7 +224,7 @@ cdef class sca_handle:
             self.hnd_adr,
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
-        request._push_and_flush_request(
+        VE().request_manager._push_and_flush_request(
             name,
             args
         )
@@ -235,11 +237,11 @@ cdef class sca_handle:
             self.hnd_adr,
             veo.OnStack(fpe_flags, inout=veo.INTENT_OUT),
         )
-        request._push_and_flush_request(
+        VE().request_manager._push_and_flush_request(
             'nlcpy_sca_stencil_destroy',
             args
         )
-        self.hnd_adr = 0
+        self.hnd_adr = None
         self.dtype = None
         self.desc_i = None
         self.desc_o = None

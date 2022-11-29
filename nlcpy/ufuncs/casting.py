@@ -48,6 +48,12 @@
 # D ... complex128
 
 
+_add_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'Mm->M', 'mm->m', 'mM->M', 'OO->O'
+)
+
 _subtract_types = (
     '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I',
     'll->l', 'LL->L', 'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d',
@@ -55,6 +61,11 @@ _subtract_types = (
     'OO->O'
 )
 
+_multiply_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'mq->m', 'qm->m', 'md->m', 'dm->m', 'OO->O'
+)
 
 _divide_types = (
     'bb->d', 'BB->d', 'hh->d', 'HH->d', 'ii->d', 'II->d', 'll->d',
@@ -62,11 +73,18 @@ _divide_types = (
     'DD->D'
 )
 
-
 _true_divide_types = (
     'bb->d', 'BB->d', 'hh->d', 'HH->d', 'ii->d', 'II->d', 'll->d',
     'LL->d', 'qq->d', 'QQ->d', 'ee->e', 'ff->f', 'dd->d', 'FF->F',
     'DD->D'
+)
+
+_logaddexp_types = (
+    'ee->e', 'ff->f', 'dd->d', 'gg->g'
+)
+
+_logaddexp2_types = (
+    'ee->e', 'ff->f', 'dd->d', 'gg->g'
 )
 
 _bitwise_and_types = (
@@ -94,6 +112,144 @@ _left_shift_types = (
     'LL->L', 'qq->q', 'QQ->Q'
 )
 
+_greater_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_greater_equal_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_less_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_less_equal_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_not_equal_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_equal_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->?', 'mm->?', 'MM->?',
+    'OO->O', 'OO->?'
+)
+
+_logical_and_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->O', 'OO->?'
+)
+
+_logical_or_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->O', 'OO->?'
+)
+
+_logical_xor_types = (
+    '??->?', 'bb->?', 'BB->?', 'hh->?', 'HH->?', 'ii->?', 'II->?',
+    'll->?', 'LL->?', 'qq->?', 'QQ->?', 'ee->?', 'ff->?', 'dd->?',
+    'gg->?', 'FF->?', 'DD->?', 'GG->?', 'OO->O'
+)
+
+_logical_not_types = (
+    '?->?', 'b->?', 'B->?', 'h->?', 'H->?', 'i->?', 'I->?', 'l->?',
+    'L->?', 'q->?', 'Q->?', 'e->?', 'f->?', 'd->?', 'g->?', 'F->?',
+    'D->?', 'G->?', 'O->O', 'O->?'
+)
+
+_minimum_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'mm->m', 'MM->M', 'OO->O'
+)
+
+_maximum_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'mm->m', 'MM->M', 'OO->O'
+)
+
+_fmax_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'mm->m', 'MM->M', 'OO->O'
+)
+
+_fmin_types = (
+    '??->?', 'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D', 'GG->G',
+    'mm->m', 'MM->M', 'OO->O'
+)
+
+_sin_types = (
+    'e->e', 'f->f', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_cos_types = (
+    'e->e', 'f->f', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_tan_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arcsin_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arccos_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arctan_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_sinh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_cosh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_tanh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arcsinh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arccosh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_arctanh_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
 _negative_types = (
     '?->?', 'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I',
     'l->l', 'L->L', 'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d',
@@ -104,6 +260,12 @@ _positive_types = (
     '?->?', 'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I',
     'l->l', 'L->L', 'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d',
     'F->F', 'D->D'
+)
+
+_power_types = (
+    'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D',
+    'GG->G', 'OO->O'
 )
 
 _remainder_types = (
@@ -122,12 +284,18 @@ _fmod_types = (
 )
 
 _absolute_types = (
-    '?->?', 'b->b', 'i->i', 'q->q', 'e->e', 'f->f', 'd->d',
-    'F->f', 'D->d',
+    '?->?', 'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I', 'l->l', 'L->L',
+    'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d', 'g->g', 'm->m', 'F->f', 'D->d',
+    'G->g', 'O->O'
 )
 
 _fabs_types = (
     'e->e', 'f->f', 'd->d',
+)
+
+_rint_types = (
+    'e->e', 'f->f', 'd->d', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
 )
 
 _sign_types = (
@@ -136,8 +304,64 @@ _sign_types = (
     'D->D',
 )
 
+_heaviside_types = (
+    'ee->e', 'ff->f', 'dd->d', 'gg->g'
+)
+
+_conjugate_types = (
+    'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I', 'l->l', 'L->L',
+    'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
+)
+
+_exp_types = (
+    'e->e', 'f->f', 'd->d', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
+)
+
+_exp2_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_log_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_log2_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_log10_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_expm1_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_log1p_types = (
+    'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D', 'G->G', 'O->O'
+)
+
+_sqrt_types = (
+    'e->e', 'f->f', 'd->d', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
+)
+
+_square_types = (
+    'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I', 'l->l', 'L->L',
+    'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
+)
+
 _cbrt_types = (
     'e->e', 'f->f', 'd->d',
+)
+
+_reciprocal_types = (
+    'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I', 'l->l', 'L->L',
+    'q->q', 'Q->Q', 'e->e', 'f->f', 'd->d', 'g->g', 'F->F', 'D->D',
+    'G->G', 'O->O'
 )
 
 _deg2rad_types = (
@@ -156,6 +380,44 @@ _radians_types = (
     'e->e', 'f->f', 'd->d',
 )
 
+_isfinite_types = (
+    '?->?', 'b->?', 'B->?', 'h->?', 'H->?', 'i->?', 'I->?', 'l->?', 'L->?',
+    'q->?', 'Q->?', 'e->?', 'f->?', 'd->?', 'g->?', 'F->?', 'D->?', 'G->?',
+    'm->?', 'M->?'
+)
+
+_isinf_types = (
+    '?->?', 'b->?', 'B->?', 'h->?', 'H->?', 'i->?', 'I->?', 'l->?', 'L->?',
+    'q->?', 'Q->?', 'e->?', 'f->?', 'd->?', 'g->?', 'F->?', 'D->?', 'G->?',
+    'm->?', 'M->?'
+)
+
+_isnan_types = (
+    '?->?', 'b->?', 'B->?', 'h->?', 'H->?', 'i->?', 'I->?', 'l->?', 'L->?',
+    'q->?', 'Q->?', 'e->?', 'f->?', 'd->?', 'g->?', 'F->?', 'D->?', 'G->?',
+    'm->?', 'M->?'
+)
+
+_signbit_types = (
+    'e->?', 'f->?', 'd->?', 'g->?'
+)
+
+_copysign_types = (
+    'ee->e', 'ff->f', 'dd->d', 'gg->g'
+)
+
+_nextafter_types = (
+    'ee->e', 'ff->f', 'dd->d', 'gg->g'
+)
+
+_spacing_types = (
+    'e->e', 'f->f', 'd->d', 'g->g'
+)
+
+_ldexp_types = (
+    'ei->e', 'fi->f', 'el->e', 'fl->f', 'di->d', 'dl->d', 'gi->g', 'gl->g'
+)
+
 _invert_types = (
     '?->?', 'b->b', 'B->B', 'h->h', 'H->H', 'i->i', 'I->I', 'l->l',
     'L->L', 'q->q', 'Q->Q',
@@ -165,8 +427,18 @@ _floor_types = (
     'e->e', 'f->f', 'd->d',
 )
 
+_floor_divide_types = (
+    'bb->b', 'BB->B', 'hh->h', 'HH->H', 'ii->i', 'II->I', 'll->l', 'LL->L',
+    'qq->q', 'QQ->Q', 'ee->e', 'ff->f', 'dd->d', 'gg->g', 'FF->F', 'DD->D',
+    'GG->G', 'mq->m', 'md->m', 'mm->q', 'OO->O'
+)
+
 _ceil_types = (
     'e->e', 'f->f', 'd->d',
+)
+
+_trunc_types = (
+    'e->e', 'f->f', 'd->d', 'f->f', 'd->d', 'g->g', 'O->O'
 )
 
 _fmod_types = (

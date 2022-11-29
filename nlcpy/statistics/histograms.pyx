@@ -63,7 +63,6 @@ import copy
 import nlcpy
 from nlcpy.core.core cimport ndarray
 from nlcpy.core cimport internal
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport core
 from nlcpy.core cimport manipulation
 from nlcpy.core cimport broadcast
@@ -159,7 +158,7 @@ def histogram(a, bins=10, range=None, weights=None, density=None):
     array(1.)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('histogram is not implemented yet.')
 
 
 @numpy_wrap
@@ -243,7 +242,7 @@ def histogram2d(x, y, bins=10, range=None, normed=None, weights=None, density=No
     ((5, 5), 1, 1)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('histogram2d is not implemented yet.')
 
 
 @numpy_wrap
@@ -316,7 +315,7 @@ def histogramdd(sample, bins=10, range=None, normed=None, weights=None, density=
     ((5, 8, 4), 6, 9, 5)
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('histogramdd is not implemented yet.')
 
 
 @numpy_wrap
@@ -383,7 +382,7 @@ def bincount(x, weights=None, minlength=0):
     array([0.3, 0.7, 1.1])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('bincount is not implemented yet.')
 
 
 @numpy_wrap
@@ -553,7 +552,7 @@ def histogram_bin_edges(a, bins=10, range=None, weights=None):
     array([0., 1., 2., 3., 4., 5.])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('histogram_bin_edges is not implemented yet.')
 
 
 @numpy_wrap
@@ -633,4 +632,4 @@ def digitize(x, bins, right=False):
     array([1, 3, 3, 4, 5])
 
     """
-    raise NotImplementedError
+    raise NotImplementedError('digitize is not implemented yet.')

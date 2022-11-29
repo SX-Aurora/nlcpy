@@ -30,8 +30,10 @@
 #
 
 from libc.stdint cimport *
-from nlcpy.core.core cimport ndarray
+from nlcpy.venode._venode cimport VENode
 
-cdef _write_array(a_cpu, ndarray a_ve)
-cdef _alloc_array(ndarray a)
-cdef _destroy_array(uint64_t ve_adr, uint64_t nbytes)
+
+cpdef _alloc_mem(size_t nbytes, VENode venode)
+cpdef _write_mem(a_cpu, uint64_t ve_adr, size_t nbytes, VENode venode)
+cpdef _free_mem(uint64_t veo_hmem, bint is_pool, VENode venode)
+cpdef _hmemcpy(uint64_t dst, uint64_t src, size_t size)

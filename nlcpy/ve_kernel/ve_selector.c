@@ -304,31 +304,6 @@ manipulation_op get_manipulation_func(int64_t func_num) {
 }
 
 
-cblas_wrapper_op get_cblas_wrapper_func(int64_t func_num) {
-    //printf("func_num = %d\n", func_num);
-    switch (func_num) {
-    case VE_FUNC_CBLAS_SDOT       :
-        return wrapper_cblas_sdot;
-    case VE_FUNC_CBLAS_DDOT       :
-        return wrapper_cblas_ddot;
-    case VE_FUNC_CBLAS_CDOTU_SUB  :
-        return wrapper_cblas_cdotu_sub;
-    case VE_FUNC_CBLAS_ZDOTU_SUB  :
-        return wrapper_cblas_zdotu_sub;
-    case VE_FUNC_CBLAS_SGEMM      :
-        return wrapper_cblas_sgemm;
-    case VE_FUNC_CBLAS_DGEMM      :
-        return wrapper_cblas_dgemm;
-    case VE_FUNC_CBLAS_CGEMM      :
-        return wrapper_cblas_cgemm;
-    case VE_FUNC_CBLAS_ZGEMM      :
-        return wrapper_cblas_zgemm;
-    default:
-        return nlcpy__select_err;
-    }
-}
-
-
 linalg_op get_linalg_func(int64_t func_num) {
     //printf("func_num = %d\n", func_num);
     switch (func_num) {

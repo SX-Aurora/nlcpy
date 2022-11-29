@@ -62,7 +62,11 @@ def astype_without_warning(x, dtype, *args, **kwargs):
     # nlcpy interpret bool as int32
     if dtype == numpy.dtype(bool):
         dtype = numpy.dtype('int32')
-    return x.astype(dtype, *args, **kwargs)
+    if x.dtype.kind == 'c' and dtype.kind not in ['b', 'c']:
+        with testing.assert_warns(numpy.ComplexWarning):
+            return x.astype(dtype, *args, **kwargs)
+    else:
+        return x.astype(dtype, *args, **kwargs)
 
 
 class TestArrayCopyAndView(unittest.TestCase):
@@ -284,6 +288,41 @@ class TestArrayCopyAndView(unittest.TestCase):
         b = xp.empty(a.shape, dtype=dtype, order=order)
         b[:] = a
         return b
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_resize1(self, xp, dtype):
+        a = testing.shaped_arange((3, 4, 5), xp, dtype)
+        a.resize(3 * 4 * 5)
+        return a
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_resize2(self, xp, dtype):
+        a = xp.array(testing.shaped_arange((3, 4, 5), xp, dtype))
+        a.resize((3, 4), refcheck=False)
+        return a
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_resize3(self, xp, dtype):
+        a = xp.array(testing.shaped_arange((3, 4, 5), xp, dtype))
+        a.resize((3, 4, 5, 6), refcheck=False)
+        return a
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_resize4(self, xp, dtype):
+        a = xp.arange(100)
+        a.resize(13, refcheck=False)
+        return a
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_resize5(self, xp, dtype):
+        a = xp.arange(100)
+        a.resize(120, refcheck=False)
+        return a
 
 
 @testing.parameterize(

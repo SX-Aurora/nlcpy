@@ -76,4 +76,12 @@ _basic_kernel_list = {
             ]
     },
 
+    "nlcpy_set_constant": {
+        "ret": "uint64_t",
+        "args":
+            [
+                "void",
+            ]
+    },
+
 }

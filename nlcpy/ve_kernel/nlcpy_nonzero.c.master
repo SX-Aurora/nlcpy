@@ -55,7 +55,7 @@ uint64_t nlcpy_nonzero(ve_arguments *args, int32_t *psw)
 {
     ve_array *a = &(args->nonzero.a);
     ve_array *ret = &(args->nonzero.ret);
-    int32_t axis = (int32_t)args->nonzero.axis;
+    int64_t axis = (int64_t)args->nonzero.axis;
 #begin_switch
     @TYPE1@ *pa   = (@TYPE1@ *)a->ve_adr;
     if (pa == NULL) {

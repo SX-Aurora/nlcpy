@@ -95,6 +95,7 @@ from nlcpy import any
 from nlcpy import nan
 from nlcpy.request import request
 from nlcpy import AxisError
+from nlcpy.venode import VE
 
 # change in the future
 from numpy import broadcast
@@ -127,8 +128,12 @@ def get_state():
 
     Returns
     -------
-    out : ndarray
-        An ndarray containing seeds to be required for generating random numbers.
+    out : tuple(ndarray, int, float)
+        The returned tuple has the following items:
+
+        1. an ndarray containing seeds to be required for generating random numbers.
+        2. an integer ``has_gauss``.
+        3. a float ``cached_gaussian``.
 
     Note
     ----
@@ -149,9 +154,12 @@ def set_state(state):
 
     Parameters
     ----------
-    state : ndarrayi
-        The state ndarray has the following items:
+    state : tuple(ndarray, int, float)
+        The tuple has the following items:
+
         1. seeds for ASL Unified Interface.
+        2. an integer ``has_gauss``.
+        3. a float ``cached_gaussian``.
 
     Returns
     -------
@@ -213,6 +221,7 @@ class RandomState():
 
     """
     _asl_seed_max = numpy.iinfo(numpy.uint32).max
+    _ve_seed = {}
 
     def __init__(self, seed=None):
         self.seed(seed)
@@ -229,8 +238,12 @@ class RandomState():
 
         Returns
         -------
-        out : ndarray
-            An ndarray containing seeds to be required for generating random numbers.
+        out : tuple(ndarray, int, float)
+            The returned tuple has the following items:
+
+            1. an ndarray containing seeds to be required for generating random numbers.
+            2. an integer ``has_gauss``.
+            3. a float ``cached_gaussian``.
 
         Note
         ----
@@ -239,9 +252,9 @@ class RandomState():
 
         See Also
         --------
-        RandomState.set_state : Sets the internal state of the generator from an ndarray.
+        RandomState.set_state : Sets the internal state of the generator.
         """
-        return self._asl_get_state()
+        return (self._asl_get_state(), *nlcpy.random._numpy_state)
 
     def set_state(self, state):
         """Sets the internal state of the generator from an ndarray.
@@ -251,8 +264,12 @@ class RandomState():
 
         Parameters
         ----------
-        state : ndarray
-            An ndarray containing seeds to be required for generating random numbers.
+        state : tuple(ndarray, int, float)
+            The tuple has the following items:
+
+            1. an ndarray containing seeds to be required for generating random numbers.
+            2. an integer ``has_gauss``.
+            3. a float ``cached_gaussian``.
 
         Returns
         -------
@@ -269,24 +286,27 @@ class RandomState():
         RandomState.get_state : Returns a tuple representing the internal
                                 state of the generator.
         """
-        if not isinstance(state, ndarray):
-            raise TypeError('state is not valid')
+        if not isinstance(state, (tuple, list)) or len(state) != 3:
+            raise TypeError('state must be a tuple with length 3.')
         else:
-            if not numpy.dtype(state.dtype).name == 'uint32':
+            if not numpy.dtype(state[0].dtype).name == 'uint32':
                 raise TypeError(
                     'Unsupported dtype {} for set_state' .format(
                         numpy.dtype(
-                            state.dtype).name))
-            self._asl_set_state(state)
+                            state[0].dtype).name))
+            self._asl_set_state(state[0])
+            if not type(state[1]) is int:
+                raise TypeError('an integer is required')
+            nlcpy.random._numpy_state = (state[1], float(state[2]))
 
     def _get_seed(self):
-        return self._ve_seed.get().tolist()
+        return self._ve_seed[int(VE())].get().tolist()
 
     def tomaxint(self, size):
-        """Random integers between 0 and ``nlcpy.iinfo(nlcpy.int).max``, inclusive.
+        """Random integers between 0 and ``nlcpy.iinfo(nlcpy.int_).max``, inclusive.
 
         Return a sample of uniformly distributed random integers in the interval
-        ``[0, nlcpy.iinfo(nlcpy.int).max]``.
+        ``[0, nlcpy.iinfo(nlcpy.int_).max]``.
         The nlcpy.int64/nlcpy.int32 type translates to the C long integer type,
         which is int64_t in NLCPy.
 
@@ -307,12 +327,12 @@ class RandomState():
         >>> import nlcpy as vp
         >>> rs = vp.random.RandomState() # need a RandomState object
         >>> rs.tomaxint((2,2,2))    # doctest: +SKIP
-        array([[[1170048599, 1600360186], # random
-                [ 739731006, 1947757578]],
+        array([[[1079106830703163808, 3459384031587249938], # random
+                [8049598135358749809, 3711974831622109574]],
         <BLANKLINE>
-               [[1871712945,  752307660],
-                [1601631370, 1479324245]]])
-        >>> rs.tomaxint((2,2,2)) < vp.iinfo(vp.int).max
+                [[ 346377385468830352, 8096829319065988726],
+                [2838928252329023857, 5551944918900034754]]])
+        >>> rs.tomaxint((2,2,2)) < vp.iinfo(vp.int_).max
         array([[[ True,  True],
                 [ True,  True]],
         <BLANKLINE>
@@ -320,7 +340,7 @@ class RandomState():
                 [ True,  True]]])
 
         """
-        return self.randint(0, 2**31 - 1, size=size)
+        return self.randint(0, nlcpy.iinfo(nlcpy.int_).max, size=size)
 
     def rand(self, size):
         """Random values in a given shape.
@@ -1698,33 +1718,35 @@ class RandomState():
         >>> rs.seed(987654321)     # doctest: +SKIP
 
         """
+        nlcpy.random._numpy_state = (0, 0.0)
+        veid = int(VE())
         if seed is None:
             import random
             r = random.randint(0, self._asl_seed_max)
-            self._ve_seed = nlcpy.array(r, dtype='u4')
+            self._ve_seed[veid] = nlcpy.array(r, dtype='u4')
         else:
             if isinstance(seed, nlcpy.random.BitGenerator):
-                self._ve_seed = nlcpy.asarray(seed.entropy)
+                self._ve_seed[veid] = nlcpy.asarray(seed.entropy)
             else:
-                self._ve_seed = nlcpy.asarray(seed)
-            if self._ve_seed.size == 0:
+                self._ve_seed[veid] = nlcpy.asarray(seed)
+            if self._ve_seed[veid].size == 0:
                 raise ValueError("Seed must be non-empty")
-            if self._ve_seed.ndim > 1:
+            if self._ve_seed[veid].ndim > 1:
                 raise ValueError("Seed array must be 1-d")
-            if nlcpy.any(self._ve_seed < 0) or nlcpy.any(
-                    self._ve_seed > self._asl_seed_max):
+            if nlcpy.any(self._ve_seed[veid] < 0) or nlcpy.any(
+                    self._ve_seed[veid] > self._asl_seed_max):
                 raise ValueError('Seed must be between 0 and 2**32 - 1')
-            self._ve_seed = self._ve_seed.astype(dtype='u4', copy=False)
+            self._ve_seed[veid] = self._ve_seed[veid].astype(dtype='u4', copy=False)
 
         fpe = request._get_fpe_flag()
-        args = (self._ve_seed._ve_array,
+        args = (self._ve_seed[veid],
                 veo.OnStack(fpe, inout=veo.INTENT_OUT))
         request._push_and_flush_request(
             'nlcpy_random_set_seed',
             args,
             callback=self._asl_error_check
         )
-        self._vh_seed = self._ve_seed.get()
+        self._vh_seed = self._ve_seed[veid].get()
 
     def _update_vh_seed(self, size):
         self._vh_seed = self._vh_seed + size
@@ -1768,7 +1790,7 @@ class RandomState():
         state = ndarray(shape, dtype=nlcpy.uint32)
 
         fpe = request._get_fpe_flag()
-        args = (state._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        args = (state, veo.OnStack(fpe, inout=veo.INTENT_OUT))
         request._push_and_flush_request(
             'nlcpy_random_save_state',
             args,
@@ -1778,7 +1800,7 @@ class RandomState():
 
     def _asl_set_state(self, state):
         fpe = request._get_fpe_flag()
-        args = (state._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        args = (state, veo.OnStack(fpe, inout=veo.INTENT_OUT))
         request._push_and_flush_request(
             'nlcpy_random_restore_state',
             args,
@@ -1795,7 +1817,7 @@ class RandomState():
         out = ndarray(shape=size, dtype=dtype)
 
         fpe = request._get_fpe_flag()
-        args = (out._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        args = (out, veo.OnStack(fpe, inout=veo.INTENT_OUT))
         request._push_and_flush_request(
             'nlcpy_random_generate_uniform_f64',
             args,
@@ -1815,8 +1837,8 @@ class RandomState():
         fpe = request._get_fpe_flag()
 
         args = (
-            out._ve_array,
-            work._ve_array,
+            out,
+            work,
             low,
             high - low,
             veo.OnStack(fpe, inout=veo.INTENT_OUT))
@@ -1844,7 +1866,7 @@ class RandomState():
         out = ndarray(shape=size, dtype=dtype)
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             loc,
             scale,
             veo.OnStack(fpe, inout=veo.INTENT_OUT))
@@ -1869,7 +1891,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             shape,
             1 / scale,
             veo.OnStack(fpe, inout=veo.INTENT_OUT))
@@ -1895,7 +1917,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             lam,
             veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
@@ -1917,7 +1939,7 @@ class RandomState():
         fpe = request._get_fpe_flag()
 
         args = (
-            out._ve_array,
+            out,
             loc,
             scale,
             veo.OnStack(
@@ -1945,7 +1967,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             a,
             b,
             veo.OnStack(
@@ -1973,7 +1995,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             scale,
             veo.OnStack(
                 fpe,
@@ -1997,7 +2019,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             a,
             b,
             veo.OnStack(
@@ -2026,7 +2048,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             mean,
             sigma,
             veo.OnStack(
@@ -2055,7 +2077,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             loc,
             scale,
             veo.OnStack(
@@ -2079,7 +2101,7 @@ class RandomState():
         out = ndarray(shape=size, dtype=dtype)
 
         fpe = request._get_fpe_flag()
-        args = (out._ve_array, p, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        args = (out, p, veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
         request._push_and_flush_request(
             'nlcpy_random_generate_geometric_f64',
@@ -2102,7 +2124,7 @@ class RandomState():
 
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             n,
             p,
             veo.OnStack(
@@ -2119,7 +2141,7 @@ class RandomState():
 
     def _generate_random_uniform_for_generator(self, size=None, out=None):
         fpe = request._get_fpe_flag()
-        args = (out._ve_array, veo.OnStack(fpe, inout=veo.INTENT_OUT))
+        args = (out, veo.OnStack(fpe, inout=veo.INTENT_OUT))
 
         request._push_and_flush_request(
             'nlcpy_random_generate_uniform_f64',
@@ -2133,7 +2155,7 @@ class RandomState():
             self, scale=1.0, size=None, out=None):
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             scale,
             veo.OnStack(
                 fpe,
@@ -2151,7 +2173,7 @@ class RandomState():
             self, loc=0.0, scale=1.0, size=None, out=None):
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             loc,
             scale,
             veo.OnStack(
@@ -2170,7 +2192,7 @@ class RandomState():
             self, shape, scale=1.0, size=None, out=None):
         fpe = request._get_fpe_flag()
         args = (
-            out._ve_array,
+            out,
             shape,
             1 / scale,
             veo.OnStack(
@@ -2239,4 +2261,4 @@ class RandomState():
         return arr
 
 
-_rand = RandomState()
+_rand = None

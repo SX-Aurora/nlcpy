@@ -28,7 +28,11 @@
 #     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+# distutils: language = c++
+
 from nlcpy.veo.libveo cimport *
+from nlcpy.veo cimport _nlcpy_veo_hook
 
 #
 # EF: commented out veo_api_version until it finds its way into the VEO mainline.
@@ -42,11 +46,11 @@ import os
 import numbers
 import atexit
 import sys
-import nlcpy
+import gc
 from nlcpy.kernel_register import ve_kernel_register as register
-from nlcpy.mempool.mempool cimport *
 from nlcpy.prof import prof
-from nlcpy import _path
+from nlcpy import _environment
+from nlcpy.logging import _vp_logging
 from cpython.buffer cimport \
     PyBUF_SIMPLE, PyBUF_ANY_CONTIGUOUS, Py_buffer, PyObject_GetBuffer, \
     PyObject_CheckBuffer, PyBuffer_Release
@@ -58,26 +62,9 @@ include "conv_i64.pxi"
 cdef _proc_init_hook
 _proc_init_hook = list()
 
-#
-# Re-declaring the enums here because they're otherwise not visible in Python
-#
-cpdef enum _veo_args_intent:
-    INTENT_IN = VEO_INTENT_IN
-    INTENT_INOUT = VEO_INTENT_INOUT
-    INTENT_OUT = VEO_INTENT_OUT
 
-cpdef enum _veo_context_state:
-    STATE_UNKNOWN = VEO_STATE_UNKNOWN
-    STATE_RUNNING = VEO_STATE_RUNNING
-    STATE_SYSCALL = VEO_STATE_SYSCALL
-    STATE_BLOCKED = VEO_STATE_BLOCKED
-    STATE_EXIT = VEO_STATE_EXIT
+_nlcpy_veo_hook._get_veo_sym()  # to hook veo_alloc_hmem/veo_free_hmem
 
-cpdef enum _veo_command_state:
-    COMMAND_OK = VEO_COMMAND_OK
-    COMMAND_EXCEPTION = VEO_COMMAND_EXCEPTION
-    COMMAND_ERROR = VEO_COMMAND_ERROR
-    COMMAND_UNFINISHED = VEO_COMMAND_UNFINISHED
 
 cpdef set_proc_init_hook(v):
     """
@@ -174,7 +161,7 @@ cdef class VeoFunction(object):
         a = VeoArgs()
         for i in xrange(len(self.args_conv)):
             x = args[i]
-            if isinstance(x, nlcpy.ndarray):
+            if hasattr(x, "_ve_array"):
                 x = x._ve_array
             if isinstance(x, OnStack):
                 try:
@@ -190,7 +177,9 @@ cdef class VeoFunction(object):
                 except Exception as e:
                     raise ValueError("%r : args conversion: f = %r, x = %r" % (e, f, x))
 
-        cdef uint64_t res = veo_call_async(ctx.thr_ctxt, self.addr, a.args)
+        cdef uint64_t res
+        with nogil:
+            res = veo_call_async(ctx.thr_ctxt, self.addr, a.args)
         if res == VEO_REQUEST_ID_INVALID:
             return None
             # raise RuntimeError("veo_call_async failed")
@@ -199,6 +188,10 @@ cdef class VeoFunction(object):
         # collecting the result. If they go out of scope and are freed,
         # we'll get a SIGSEGV!
         #
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_call_async: name=%s, reqid=%d', self.name, res)
         return VeoRequest(ctx, a, res, self.ret_conv)
 
 
@@ -232,6 +225,11 @@ cdef class VeoRequest(object):
             raise RuntimeError("wait_result command handling error")
         elif rc < 0:
             raise RuntimeError("wait_result command exception on VH")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_call_wait_result: nodeid=%d, reqid=%d',
+                self.ctx.proc.nodeid, self.req)
         return self.ret_conv(<int64_t>res)
 
     def peek_result(self):
@@ -310,9 +308,8 @@ cdef class VeoLibrary(object):
         res = veo_get_sym(self.proc.proc_handle, self.lib_handle, symname)
         if res == 0UL:
             raise RuntimeError("veo_get_sym '%s' failed" % symname)
-        memptr = VEMemPtr(self.proc, res, 0)
-        self.symbol[<bytes>symname] = memptr
-        return memptr
+        self.symbol[<bytes>symname] = res
+        return res
 
     def find_function(self, char *symname):
         cdef uint64_t res
@@ -395,8 +392,9 @@ cdef class VeoArgs(object):
     #               uint64_t buff, size_t len):
     def set_stack(self, OnStack x, int argnum):
         cdef uint64_t buff = x.c_pointer()
+        cdef veo_args_intent _inout = x.scope()
         veo_args_set_stack(
-            self.args, x.scope(), argnum, <char *>buff, x.size())
+            self.args, _inout, argnum, <char *>buff, x.size())
         self.stacks.append(x)
 
     def clear(self):
@@ -420,11 +418,16 @@ cdef class VeoCtxt(object):
             raise RuntimeError("veo_context_open failed")
 
     def __dealloc__(self):
-        veo_context_close(self.thr_ctxt)
+        self.context_close()
 
-    def async_read_mem(self, dst, VEMemPtr src, Py_ssize_t size):
-        if src.proc != self.proc:
-            raise ValueError("src memptr not owned by this proc!")
+    def context_close(self):
+        if self.thr_ctxt == NULL:
+            return
+        if veo_context_close(self.thr_ctxt):
+            raise RuntimeError("veo_context_close failed")
+        self.thr_ctxt = NULL
+
+    def async_read_mem(self, dst, uint64_t src, Py_ssize_t size):
         cdef Py_buffer data
         cdef uint64_t req
         if not PyObject_CheckBuffer(dst):
@@ -439,15 +442,18 @@ cdef class VeoCtxt(object):
                 % (data.len, size)
             )
 
-        req = veo_async_read_mem(self.thr_ctxt, data.buf, src.addr, size)
+        req = veo_async_read_mem(self.thr_ctxt, data.buf, src, size)
         if req == VEO_REQUEST_ID_INVALID:
             PyBuffer_Release(&data)
             raise RuntimeError("veo_async_read_mem failed")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_async_read_mem: nodeid=%d, size=%d, reqid=%d',
+                self.proc.nodeid, size, req)
         return VeoMemRequest.create(self, req, data)
 
-    def async_write_mem(self, VEMemPtr dst, src, Py_ssize_t size):
-        if dst.proc != self.proc:
-            raise ValueError("dst memptr not owned by this proc!")
+    def async_write_mem(self, uint64_t dst, src, Py_ssize_t size):
         cdef Py_buffer data
         cdef uint64_t req
         if not PyObject_CheckBuffer(src):
@@ -462,24 +468,20 @@ cdef class VeoCtxt(object):
                 % (data.len, size)
             )
 
-        req = veo_async_write_mem(self.thr_ctxt, dst.addr, data.buf, size)
+        req = veo_async_write_mem(self.thr_ctxt, dst, data.buf, size)
         if req == VEO_REQUEST_ID_INVALID:
             PyBuffer_Release(&data)
             raise RuntimeError("veo_write_mem failed")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_async_write_mem: nodeid=%d, size=%d, reqid=%d',
+                self.proc.nodeid, size, req)
         return VeoMemRequest.create(self, req, data)
 
     def context_sync(self):
         veo_context_sync(self.thr_ctxt)
 
-
-# Memory Pool Threashold
-# If the allocated memory size on VE is larger than pool_threashold,
-# the memory pool implementation is not used.
-# DEF pool_threashold = 0x0000000000000000
-# 512 Mbyte
-DEF pool_threashold = 0x0000000020000000
-# 1 Gbyte
-# DEF pool_threashold = 0x0000000040000000
 
 cdef class VeoProc(object):
 
@@ -500,12 +502,24 @@ cdef class VeoProc(object):
         if len(_proc_init_hook) > 0:
             for init_func in _proc_init_hook:
                 init_func(self)
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                "veo_proc(%d) created", nodeid)
 
     def __dealloc__(self):
+        self.proc_destroy()
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                "veo_proc(%d) destroyed", self.nodeid)
+
+    def proc_destroy(self):
         if self.proc_handle == NULL:
             return  # to avoid segmentation fault when ve node is offline.
         if veo_proc_destroy(self.proc_handle):
             raise RuntimeError("veo_proc_destroy failed")
+        self.proc_handle = NULL
 
     def get_function(self, name):
         """
@@ -518,12 +532,11 @@ cdef class VeoProc(object):
                 return lib.func[name]
         return None
 
-    def i64_to_memptr(self, int64_t x):
-        return VEMemPtr(self, ConvFromI64.to_ulong(x), 0)
+    def i64_to_addr(self, int64_t x):
+        return ConvFromI64.to_ulong(x)
 
     def load_library(self, char *libname):
         cdef uint64_t res = veo_load_library(self.proc_handle, libname)
-        self.lib_handle = res
         if res == 0UL:
             raise RuntimeError("veo_load_library '%s' failed" % libname)
         lib = VeoLibrary(self, <bytes> libname, res)
@@ -534,7 +547,6 @@ cdef class VeoProc(object):
         cdef int res = veo_unload_library(self.proc_handle, lib.lib_handle)
         if res != 0:
             raise RuntimeError("veo_unload_library '%s' failed" % lib.name)
-        self.lib_handle = 0LU
         del self.lib[<bytes>lib.name]
 
     def static_library(self):
@@ -545,41 +557,47 @@ cdef class VeoProc(object):
     @prof.profile_alloc_mem
     def alloc_mem(self, size_t size):
         cdef uint64_t addr
-        if size > pool_threashold:
-            if veo_alloc_mem(self.proc_handle, &addr, size):
-                nlcpy.request.flush()
-                if veo_alloc_mem(self.proc_handle, &addr, size):
-                    raise MemoryError("Out of memory on VE")
-        else:
-            pool = _get_veo_pool()
-            addr = pool.reserve(<size_t>size)
-        return VEMemPtr(self, addr, size)
+        if veo_alloc_mem(self.proc_handle, &addr, size):
+            raise MemoryError("Out of memory on VE")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_alloc_mem: nodeid=%d, addr=%x, size=%d',
+                self.nodeid, addr, size)
+        return addr
 
-    def realloc_mem(self, src, size_t size):
-        ctx = _get_veo_ctx()
-        lib = _get_veo_lib()
-        dst = self.alloc_mem(size)
-        args = (dst.addr, src.addr, size)
-        req = lib.func[b"nlcpy_memcpy"](ctx, *args)
-        req.wait_result()
-        return dst
+    def alloc_hmem(self, size_t size):
+        cdef uint64_t addr
+        if _nlcpy_veo_hook._hooked_alloc_hmem(self.proc_handle, &addr, size):
+            raise MemoryError("Out of memory on VE")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_alloc_hmem: nodeid=%d, addr=%x, size=%d',
+                self.nodeid, addr, size)
+        return <uint64_t>addr
 
     @prof.profile_free_mem
-    def free_mem(self, memptr):
-        if memptr.proc != self:
-            raise ValueError("memptr not owned by this proc!")
-        if memptr.size > pool_threashold:
-            if veo_free_mem(self.proc_handle, memptr.addr):
-                raise RuntimeError("veo_free_mem failed")
-        else:
-            pool = _get_veo_pool()
-            if pool is not None:
-                pool.release(memptr.addr)
+    def free_mem(self, uint64_t addr):
+        if veo_free_mem(self.proc_handle, addr):
+            raise RuntimeError("veo_free_mem failed")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_free_mem: nodeid=%d, addr=%x',
+                self.nodeid, addr)
+
+    def free_hmem(self, uint64_t addr):
+        if _nlcpy_veo_hook._hooked_free_hmem(addr):
+            raise RuntimeError("veo_free_hmem failed")
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_free_hmem: nodeid=%d, addr=%x',
+                self.nodeid, addr)
 
     @prof.profile_read_mem
-    def read_mem(self, dst, VEMemPtr src, Py_ssize_t size):
-        if src.proc != self:
-            raise ValueError("src memptr not owned by this proc!")
+    def read_mem(self, dst, uint64_t src, Py_ssize_t size):
         cdef Py_buffer data
         if not PyObject_CheckBuffer(dst):
             raise TypeError("dst must implement the buffer protocol!")
@@ -592,15 +610,18 @@ cdef class VeoProc(object):
                     % (data.len, size)
                 )
 
-            if veo_read_mem(self.proc_handle, data.buf, src.addr, size):
+            if veo_read_mem(self.proc_handle, data.buf, src, size):
                 raise RuntimeError("veo_read_mem failed")
         finally:
             PyBuffer_Release(&data)
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_read_mem: nodeid=%d, size=%d',
+                self.nodeid, size)
 
     @prof.profile_write_mem
-    def write_mem(self, VEMemPtr dst, src, Py_ssize_t size):
-        if dst.proc != self:
-            raise ValueError("dst memptr not owned by this proc!")
+    def write_mem(self, uint64_t dst, src, Py_ssize_t size):
         cdef Py_buffer data
         if not PyObject_CheckBuffer(src):
             raise TypeError("src must implement the buffer protocol!")
@@ -613,22 +634,15 @@ cdef class VeoProc(object):
                     % (data.len, size)
                 )
 
-            if veo_write_mem(self.proc_handle, dst.addr, data.buf, size):
+            if veo_write_mem(self.proc_handle, dst, data.buf, size):
                 raise RuntimeError("veo_write_mem failed")
         finally:
             PyBuffer_Release(&data)
-
-    def alloc_mempool(self):
-        return MemPool(self, self.context[0])
-
-    def reserve_mempool(self, pool, size):
-        return pool.reserve(size)
-
-    def release_mempool(self, pool, ve_adr):
-        return pool.release(ve_adr)
-
-    def free_mempool(self, pool):
-        pool.__del__()
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                'veo_write_mem: nodeid=%d, size=%d',
+                self.nodeid, size)
 
     def open_context(self):
         cdef VeoCtxt c
@@ -640,107 +654,31 @@ cdef class VeoProc(object):
         self.context.remove(c)
         del c
 
+    def proc_identifier(self):
+        cdef int iden
+        iden = veo_proc_identifier(self.proc_handle)
+        if iden < 0:
+            raise RuntimeError('veo_proc_identifier failed:'
+                               'VEO process not found in list.')
+        return iden
 
-cdef class VEMemPtr(object):
-
-    def __init__(self, proc, uint64_t addr, size_t size):
-        """
-        Initialize a VE memory pointer object
-
-        Arguments:
-        proc: VeoProc who owns the memory
-        addr: the VEMVA virtual address of the memory pointer
-        size: size of the memory, if known. Known if allocated.
-        """
-        self.addr = addr
-        self.size = size
-        self.proc = proc
-
-    def __repr__(self):
-        out = "<%s object VE addr: %s %s owner %r>" % \
-              (self.__class__.__name__,
-               hex(self.addr), ", size: %dbytes," % self.size if self.size != 0 else "",
-               self.proc)
-        return out
+    def set_proc_identifier(self, uint64_t addr, int proc_ident):
+        cdef uint64_t hmem
+        hmem = <uint64_t>veo_set_proc_identifier(<void*>addr, proc_ident)
+        if hmem == 0:
+            raise RuntimeError('veo_set_proc_identifier failed.')
+        return hmem
 
 
-_here = _path._here
+cdef class VEO_HMEM(object):
 
-cdef object _proc = None
-cdef object _lib = None
-cdef object _ctx = None
-cdef object _pool = None
+    @staticmethod
+    def get_hmem_addr(uint64_t hmem_addr):
+        cdef uint64_t addr
+        addr = <uint64_t>veo_get_hmem_addr(<void*>hmem_addr)
+        return addr
 
-
-# TODO: thread lock
-cpdef _get_veo_proc():
-    global _proc
-    return _proc
-
-cdef _set_veo_proc(proc):
-    global _proc
-    _proc = proc
-
-cpdef _get_veo_lib():
-    global _lib
-    return _lib
-
-cdef _set_veo_lib(lib):
-    global _lib
-    _lib = lib
-
-cpdef _get_veo_ctx():
-    global _ctx
-    return _ctx
-
-cdef _set_veo_ctx(ctx):
-    global _ctx
-    _ctx = ctx
-
-cpdef _get_veo_pool():
-    global _pool
-    return _pool
-
-cdef _set_veo_pool(pool):
-    global _pool
-    _pool = pool
-
-
-cpdef _initialize(node=-1):
-    set_proc_init_hook(register._register_ve_kernel)
-    proc = VeoProc(node)
-    lib = None
-
-    fast_math = os.environ.get('VE_NLCPY_FAST_MATH', 'no')
-    if fast_math in ('yes', 'YES'):
-        lib = proc.lib[
-            (
-                _here + "/lib/libnlcpy_ve_kernel_fast_math.so"
-            ).encode('utf-8')
-        ]
-    else:
-        lib = proc.lib[
-            (
-                _here + "/lib/libnlcpy_ve_kernel_no_fast_math.so"
-            ).encode('utf-8')
-        ]
-
-    if lib is None:
-        raise RuntimeError("cannot detect ve kernel")
-    ctx = proc.open_context()
-    pool = proc.alloc_mempool()
-
-    _set_veo_proc(proc)
-    _set_veo_lib(lib)
-    _set_veo_ctx(ctx)
-    _set_veo_pool(pool)
-
-
-@atexit.register
-def finalize():
-    proc = _get_veo_proc()
-    pool = _get_veo_pool()
-    try:
-        proc.free_mempool(pool)
-    except AttributeError as e:
-        pass
+    @staticmethod
+    def hmemcpy(uint64_t dst, const uint64_t src, size_t size):
+        if veo_hmemcpy(<void*>dst, <void*>src, size) < 0:
+            raise RuntimeError('veo_hmemcpy failed')

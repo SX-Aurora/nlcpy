@@ -34,8 +34,10 @@ import numpy
 from nlcpy.ufuncs import operations as ufunc_op
 from nlcpy.linalg import cblas_wrapper
 from nlcpy.request import request
+from nlcpy.wrapper.numpy_wrap import numpy_wrap
 
 
+@numpy_wrap
 def dot(a, b, out=None):
     """Computes a dot product of two arrays.
 
@@ -149,6 +151,7 @@ def dot(a, b, out=None):
     return out
 
 
+@numpy_wrap
 def inner(a, b):
     """Computes an inner product of two arrays.
 

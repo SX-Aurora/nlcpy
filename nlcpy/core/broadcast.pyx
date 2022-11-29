@@ -55,7 +55,6 @@ from libcpp.vector cimport vector
 from libc.stdint cimport *
 
 from nlcpy.core.core cimport ndarray
-from nlcpy.core.core cimport MemoryLocation
 from nlcpy.core cimport internal
 from nlcpy.core cimport vememory
 
@@ -130,10 +129,6 @@ cpdef ndarray broadcast_to(ndarray array, shape):
     cdef int i, j, ndim = array._shape.size(), length = len(shape)
     cdef Py_ssize_t sh, a_sh
 
-    if array._memloc == MemoryLocation.on_VH:
-        raise NotImplementedError(
-            'broadcast_to with _memloc=\'on_VH\' not yet implemented.')
-
     if ndim > length:
         raise ValueError(
             'input operand has more dimensions than allowed by the axis '
@@ -151,8 +146,5 @@ cpdef ndarray broadcast_to(ndarray array, shape):
                 'operands could not be broadcast together with shape {} and '
                 'requested shape {}'.format(array.shape, shape))
 
-    vh_view = None
-    if array._memloc in {MemoryLocation.on_VH, MemoryLocation.on_VE_VH}:
-        vh_view = numpy.broadcast_to(array.vh_data, shape)
-    view = array._view(_shape, strides, True, True, True, vh_view=vh_view)
+    view = array._view(_shape, strides, True, True, True)
     return view

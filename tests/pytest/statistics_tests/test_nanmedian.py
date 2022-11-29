@@ -1,4 +1,5 @@
 import unittest
+import warnings
 import numpy
 import nlcpy
 from nlcpy import testing
@@ -52,10 +53,12 @@ class TestNanmedian(unittest.TestCase):
         a = xp.asarray(a, order=order)
         if dtype in nan_dtypes:
             a[1] = xp.nan
-        if a.ndim > 1:
-            return xp.nanmedian(a, axis=1)
-        else:
-            return xp.nanmedian(a)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', RuntimeWarning)
+            if a.ndim > 1:
+                return xp.nanmedian(a, axis=1)
+            else:
+                return xp.nanmedian(a)
 
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
@@ -65,10 +68,12 @@ class TestNanmedian(unittest.TestCase):
         a = xp.asarray(a, order=order)
         if dtype in nan_dtypes:
             a[1] = xp.nan
-        if a.ndim > 2:
-            return xp.nanmedian(a, axis=2)
-        else:
-            return xp.nanmedian(a)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', RuntimeWarning)
+            if a.ndim > 2:
+                return xp.nanmedian(a, axis=2)
+            else:
+                return xp.nanmedian(a)
 
     @testing.for_CF_orders()
     @testing.for_all_dtypes()

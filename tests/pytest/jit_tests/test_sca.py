@@ -190,8 +190,8 @@ class TestSca(unittest.TestCase):
             4.0 / 256, 16.0 / 256, 24.0 / 256, 16.0 / 256, 4.0 / 256,  # NOQA
             1.0 / 256,  4.0 / 256,  6.0 / 256,  4.0 / 256, 1.0 / 256   # NOQA
         ], dtype='f4')  # Gaussian Filter
-        img = nlcpy.empty((NY, NX), dtype='f4')  # output
-        wrk = nlcpy.empty((NY + 4, NX + 4), dtype='f4')  # input
+        img = nlcpy.zeros((NY, NX), dtype='f4')  # output
+        wrk = nlcpy.zeros((NY + 4, NX + 4), dtype='f4')  # input
         self.lib.get_function(
             'create_image',
             args_type=(int64, int64, uint64),

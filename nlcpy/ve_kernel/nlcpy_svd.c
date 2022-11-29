@@ -66,28 +66,43 @@ uint64_t nlcpy_svd_s(const char job, ve_array *a, ve_array *s, ve_array *u, ve_a
     int64_t i;
     int64_t ia = 0;
     int64_t is = 0;
-    int64_t iu = 0;
-    int64_t ivt = 0;
     int64_t *cnt = (int64_t*)alloca(sizeof(int64_t)*a->ndim);
     for (i = 0; i < a->ndim; i++) cnt[i] = 0;
-    do {
-        sgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, piw, info);
-        for (i = 2; i < a->ndim; i++) {
-            if (++cnt[i] < a->shape[i]) {
-                ia += a->strides[i] / a->itemsize;
-                is += s->strides[i-1] / s->itemsize;
-                iu += u->strides[i] / u->itemsize;
-                ivt += vt->strides[i] / vt->itemsize;
-                break;
+    if (job == 'N') {
+        do {
+            sgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu, &ldu, pvt, &ldvt, pw, &lwork, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
             }
-            cnt[i] = 0;
-            ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
-            is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
-            iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
-            ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
-        }
-    } while(i < a->ndim);
-
+        } while(i < a->ndim);
+    } else {
+        int64_t iu = 0;
+        int64_t ivt = 0;
+        do {
+            sgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    iu += u->strides[i] / u->itemsize;
+                    ivt += vt->strides[i] / vt->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
+                iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
+                ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
+            }
+        } while(i < a->ndim);
+    }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -115,28 +130,43 @@ uint64_t nlcpy_svd_d(const char job, ve_array *a, ve_array *s, ve_array *u, ve_a
     int64_t i;
     int64_t ia = 0;
     int64_t is = 0;
-    int64_t iu = 0;
-    int64_t ivt = 0;
     int64_t *cnt = (int64_t*)alloca(sizeof(int64_t)*a->ndim);
     for (i = 0; i < a->ndim; i++) cnt[i] = 0;
-    do {
-        dgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, piw, info);
-        for (i = 2; i < a->ndim; i++) {
-            if (++cnt[i] < a->shape[i]) {
-                ia += a->strides[i] / a->itemsize;
-                is += s->strides[i-1] / s->itemsize;
-                iu += u->strides[i] / u->itemsize;
-                ivt += vt->strides[i] / vt->itemsize;
-                break;
+    if (job == 'N') {
+        do {
+            dgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu, &ldu, pvt, &ldvt, pw, &lwork, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
             }
-            cnt[i] = 0;
-            ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
-            is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
-            iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
-            ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
-        }
-    } while(i < a->ndim);
-
+        } while(i < a->ndim);
+    } else {
+        int64_t iu = 0;
+        int64_t ivt = 0;
+        do {
+            dgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    iu += u->strides[i] / u->itemsize;
+                    ivt += vt->strides[i] / vt->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
+                iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
+                ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
+            }
+        } while(i < a->ndim);
+    }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -166,28 +196,43 @@ uint64_t nlcpy_svd_c(const char job, ve_array *a, ve_array *s, ve_array *u, ve_a
     int64_t i;
     int64_t ia = 0;
     int64_t is = 0;
-    int64_t iu = 0;
-    int64_t ivt = 0;
     int64_t *cnt = (int64_t*)alloca(sizeof(int64_t)*a->ndim);
     for (i = 0; i < a->ndim; i++) cnt[i] = 0;
-    do {
-        cgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, prw, piw, info);
-        for (i = 2; i < a->ndim; i++) {
-            if (++cnt[i] < a->shape[i]) {
-                ia += a->strides[i] / a->itemsize;
-                is += s->strides[i-1] / s->itemsize;
-                iu += u->strides[i] / u->itemsize;
-                ivt += vt->strides[i] / vt->itemsize;
-                break;
+    if (job == 'N') {
+        do {
+            cgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu, &ldu, pvt, &ldvt, pw, &lwork, prw, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
             }
-            cnt[i] = 0;
-            ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
-            is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
-            iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
-            ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
-        }
-    } while(i < a->ndim);
-
+        } while(i < a->ndim);
+    } else {
+        int64_t iu = 0;
+        int64_t ivt = 0;
+        do {
+            cgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, prw, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    iu += u->strides[i] / u->itemsize;
+                    ivt += vt->strides[i] / vt->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
+                iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
+                ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
+            }
+        } while(i < a->ndim);
+    }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }
@@ -216,28 +261,43 @@ uint64_t nlcpy_svd_z(const char job, ve_array *a, ve_array *s, ve_array *u, ve_a
     int64_t i;
     int64_t ia = 0;
     int64_t is = 0;
-    int64_t iu = 0;
-    int64_t ivt = 0;
     int64_t *cnt = (int64_t*)alloca(sizeof(int64_t)*a->ndim);
     for (i = 0; i < a->ndim; i++) cnt[i] = 0;
-    do {
-        zgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, prw, piw, info);
-        for (i = 2; i < a->ndim; i++) {
-            if (++cnt[i] < a->shape[i]) {
-                ia += a->strides[i] / a->itemsize;
-                is += s->strides[i-1] / s->itemsize;
-                iu += u->strides[i] / u->itemsize;
-                ivt += vt->strides[i] / vt->itemsize;
-                break;
+    if (job == 'N') {
+        do {
+            zgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu, &ldu, pvt, &ldvt, pw, &lwork, prw, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
             }
-            cnt[i] = 0;
-            ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
-            is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
-            iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
-            ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
-        }
-    } while(i < a->ndim);
-
+        } while(i < a->ndim);
+    } else {
+        int64_t iu = 0;
+        int64_t ivt = 0;
+        do {
+            zgesdd_(&job, &m, &n, pa+ia, &lda, ps+is, pu+iu, &ldu, pvt+ivt, &ldvt, pw, &lwork, prw, piw, info);
+            for (i = 2; i < a->ndim; i++) {
+                if (++cnt[i] < a->shape[i]) {
+                    ia += a->strides[i] / a->itemsize;
+                    is += s->strides[i-1] / s->itemsize;
+                    iu += u->strides[i] / u->itemsize;
+                    ivt += vt->strides[i] / vt->itemsize;
+                    break;
+                }
+                cnt[i] = 0;
+                ia -= (a->strides[i] / a->itemsize) * (a->shape[i] - 1);
+                is -= (s->strides[i-1] / s->itemsize) * (a->shape[i] - 1);
+                iu -= (u->strides[i] / u->itemsize) * (a->shape[i] - 1);
+                ivt -= (vt->strides[i] / vt->itemsize) * (a->shape[i] - 1);
+            }
+        } while(i < a->ndim);
+    }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
 }

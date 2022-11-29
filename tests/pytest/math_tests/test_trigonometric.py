@@ -64,7 +64,10 @@ class TestTrigonometric(unittest.TestCase):
     @testing.for_all_dtypes(no_bool=True)
     @testing.numpy_nlcpy_allclose(atol=1e-5)
     def check_unary(self, name, xp, dtype):
-        a = testing.shaped_arange(self.shape, xp, dtype)
+        if name in ('arcsin', 'arccos'):
+            a = testing.shaped_random(self.shape, xp, dtype, scale=1)
+        else:
+            a = testing.shaped_arange(self.shape, xp, dtype)
         return getattr(xp, name)(a)
 
     @testing.for_all_dtypes(no_complex=True, no_bool=True)

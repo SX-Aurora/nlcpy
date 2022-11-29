@@ -62,12 +62,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
         raise TypeError("cannot accumulate on a scalar")
 
     ########################################################################
-    # TODO: VE-VH collaboration
-    if input_arr._memloc in {on_VH, on_VE_VH}:
-        raise NotImplementedError(
-            "accumulate_core on VH is not yet impremented")
-
-    ########################################################################
     # check order
     if input_arr._f_contiguous and not input_arr._c_contiguous:
         order_out = 'F'
@@ -87,10 +81,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
             elif not isinstance(out[0], nlcpy.ndarray):
                 raise TypeError("output must be an array")
             else:
-                # TODO: VE-VH collaboration
-                if out[0]._memloc in {on_VH, on_VE_VH}:
-                    raise NotImplementedError(
-                        "accumulate_core on VH is not yet implemented.")
                 out = out[0]
 
         if isinstance(out, nlcpy.ndarray):
@@ -148,11 +138,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                                              +str(input_arr.shape).replace(" ", "")
                                              +"->"+str(input_arr.shape).replace(" ", "")
                                              +" ")
-                        # TODO: VE-VH collaboration
-                        if out._memloc in {on_VH, on_VE_VH}:
-                            raise NotImplementedError(
-                                "accumulate_core on VH is not yet implemented.")
-
                     y = out
                     output_flg = True
                 else:
@@ -541,6 +526,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
     request._push_request(
         name,
         "accumulate_op",
-        (input_arr2, y2, w2, axis, get_dtype_number(get_dtype(dt))),
+        (input_arr2, y2, w2, axis),
     )
     return y

@@ -127,23 +127,6 @@ typedef struct argfunc_arguments_tag {
     uint64_t axis;
 } argfunc_arguments;
 
-typedef struct cblas_gemm_arguments_tag {
-    uint64_t order;
-    uint64_t transA;
-    uint64_t transB;
-    uint64_t m;
-    uint64_t n;
-    uint64_t k;
-    ve_array alpha;
-    ve_array a;
-    uint64_t lda;
-    ve_array b;
-    uint64_t ldb;
-    ve_array beta;
-    ve_array c;
-    uint64_t ldc;
-} cblas_gemm_arguments;
-
 typedef struct reduce_arguments_tag {
     ve_array x;
     ve_array y;
@@ -162,7 +145,6 @@ typedef struct accumulate_arguments_tag {
     ve_array y;
     ve_array w;
     uint64_t axis;
-    uint64_t dtype;
 } accumulate_arguments;
 
 typedef struct outer_arguments_tag {
@@ -238,7 +220,7 @@ typedef struct copy_masked_op_arguments_tag {
 } copy_masked_op_arguments;
 
 typedef struct sca_op_arguments_tag {
-    uint64_t code;
+    ve_array code;
 } sca_op_arguments;
 
 typedef struct sort_multi_op_arguments_tag {
@@ -310,7 +292,6 @@ typedef union ve_arguments_tag{
     scatter_arguments scatter;
     where_arguments where;
     argfunc_arguments argfunc;
-    cblas_gemm_arguments gemm;
     reduce_arguments reduce;
     accumulate_arguments accumulate;
     outer_arguments outer;

@@ -58,11 +58,72 @@ When you want to specify VE Node number, you should use the environment variable
     In such a case, the performance becomes significantly slower.
 
 
+.. _label_multiple_ves:
+
+Using Multiple VEs
+------------------
+
+NLCPy provides two ways to use multiple VEs.
+
+1. `mpi4py-ve <https://github.com/SX-Aurora/mpi4py-ve>`_
+
+    mpi4py-ve is a Message Passing Interface (MPI) Python library for SX-Aurora TSUBASA.
+    It provides point-to-point and collective communication operations among processes.
+    The available objects for MPI communication are `numpy.ndarray` and `nlcpy.ndarray`.
+    Note that mpi4py-ve requires NEC MPI runtime packages.
+
+    For details, please refer to the `mpi4py-ve project <https://github.com/SX-Aurora/mpi4py-ve>`_
+
+2. :ref:`VE Device Management <label_venode>`
+
+    You can select execution VE device in a Python script by using "with" context manager.
+
+    ::
+
+        import nlcpy
+        with nlcpy.venode.VE(0):
+            # do something on VE#0
+            x_ve0 = nlcpy.arange(10)
+        with nlcpy.venode.VE(1):
+            # do something on VE#1
+            y_ve1 = nlcpy.arange(10)
+        # transfer x_ve0 to VE#1
+        x_ve1 = nlcpy.venode.transfer_array(x_ve0, nlcpy.venode.VE(1))
+        with nlcpy.venode.VE(1):
+            # do something on VE#1
+            z_ve1 = x_ve1 + y_ve1
+
+    Note that :func:`nlcpy.venode.transfer_array` cannot yet transfer data directly between VEs, in other words, the data transfer between VEs has to go through VH.
+    If you need to transfer large data, we recommend using mpi4py-ve.
+
+    By default, NLCPy creates a VE process on only physical VE#0 when executing ``import nlcpy``.
+    Other VE processes will be created at first call of :meth:`nlcpy.venode.VENode.__enter__`, :meth:`nlcpy.venode.VENode.use`, or :meth:`nlcpy.venode.VENode.apply`.
+    Please note that creation of VE process takes few seconds.
+    If you want to create processes on some VEs at ``import nlcpy``, you can set an environment variable ``VE_NLCPY_NODELIST=0,1,...``.
+    NLCPy creates processes at ``import nlcpy`` for the physical VEs corresponding to the IDs set by ``VE_NLCPY_NODELIST``.
+
+    When environment variable ``VE_NLCPY_NODELIST`` is set, it may be different from the argument id of :func:`nlcpy.venode.VE` to
+    the physical VE id.
+
+    Example of VE device mapping when environment variable is set by ``VE_NLCPY_NODELIST=1,2`` is the following:
+
+    ::
+
+        $ VE_NLCPY_NODELIST=1,2 python
+        >>> import nlcpy
+        >>> nlcpy.venode.VE(0)
+        <VE node logical_id=0, physical_id=1>
+        >>> nlcpy.venode.VE(1)
+        <VE node logical_id=1, physical_id=2>
+
+
+.. _label_fast_math:
+
 Optimization for Mathematical Functions
 ---------------------------------------
 
 When the environment variable ``VE_NLCPY_FAST_MATH`` is set to ``yes`` or ``YES``,
-NLCPy uses shared objects ``libnlcpy_ve_kernel_fast_math.so`` for VE.
+NLCPy uses shared object ``libnlcpy_ve_kernel_fast_math.so`` for VE.
 By default, ``VE_NLCPY_FAST_MATH`` is not set.
 The shared objects ( ``libnlcpy_ve_kernel_fast_math.so`` ) have been compiled with the following optimization options in NEC C/C++ compiler.
 
@@ -110,14 +171,15 @@ You can set ``VE_NLCPY_FAST_MATH`` as follows:
         $ VE_NLCPY_FAST_MATH=yes python example.py
 
 
-.. _label_warmup:
+.. _label_mempool:
 
-Warming Up Threads and Memory Pre-allocation
---------------------------------------------
+Memory Pool Management
+----------------------
 
-When the environment variable ``VE_NLCPY_WARMUP`` is set to ``yes`` or ``YES``,
-NLCPy pre-allocates memory around 10 GiB and executes some VE kernels at initialization.
-By default, ``VE_NLCPY_WARMUP`` is not set.
+NLCPy reduces overhead of VE memory allocation by reusing pre-allocated memory (memory pool) without calling malloc and free.
+You can control amount of memory pool by an environment variable ``VE_NLCPY_MEMPOOL_SIZE``.
+The default value is set 1 GB.
+For usage of this variable, please refer to the :ref:`Environment Variables <label_envs>`
 
-In some cases, enabling this option improves performance.
+In some cases, setting this variable to larger value than 1 GB may improve performance.
 However, an out of memory error may be caused by memory fragmentation.

@@ -29,10 +29,11 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import warnings
 import numpy
 import unittest
 import pytest
-
+import gc
 import nlcpy
 from nlcpy import testing
 
@@ -101,7 +102,7 @@ def is_executable(op, dtype_in=None, dtype=None, dtype_out=None):
         if op in (
             'divide', 'true_divide', 'arctan2', 'hypot', 'copysign',
             'logaddexp', 'logaddexp2', 'nextafter', 'heaviside',
-            'power', 'floor_divide', 'mod', 'remainder', 'fmod', 'nextafter',
+            'power', 'floor_divide', 'mod', 'remainder', 'fmod',
             'right_shift', 'left_shift', 'subtract'
         ):
             return dtype != numpy.bool and not (dtype is None and dtype_in == numpy.bool)
@@ -114,7 +115,9 @@ def execute_ufunc(xp, op, in1, indices, out=None, dtype=None, axis=0):
     if not is_executable(op, in1.dtype, dtype, dtype_out):
         return 0
     dtype = adjust_dtype(xp, op, in1.dtype, dtype, dtype_out)
-    return getattr(xp, op).reduceat(in1, indices, out=out, dtype=dtype, axis=axis)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', numpy.ComplexWarning)
+        return getattr(xp, op).reduceat(in1, indices, out=out, dtype=dtype, axis=axis)
 
 
 @pytest.mark.full
@@ -123,6 +126,10 @@ class TestReduceat(unittest.TestCase):
     shapes = ((4, 4), (4, 5, 1, 4), (4, 5, 1, 2, 5))
     axes = (0, 1, -1)
     indices = ((1, 3, 2), (3, 0, 1, 3), (0, 2, 1, 0, 3))
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
         ops, shapes, dtype_x=all_types, ufunc_name='reduceat',

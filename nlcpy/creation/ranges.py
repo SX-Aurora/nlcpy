@@ -82,7 +82,6 @@ import numpy
 
 import operator
 import nlcpy
-from nlcpy.core.core import on_VE, on_VH, on_VE_VH
 from nlcpy.request import request
 
 
@@ -188,16 +187,10 @@ def arange(start, stop=None, step=1, dtype=None):
     else:
         raise TypeError('detected invalid dtype.')
 
-    if ret._memloc in {on_VE, on_VE_VH}:
-        request._push_request(
-            "nlcpy_arange",
-            "creation_op",
-            (typ(start), typ(step), ret),)
-
-    if ret._memloc in {on_VH, on_VE_VH}:
-        del ret.vh_data
-        ret.vh_data = numpy.arange(typ(start), typ(stop), typ(step),
-                                   dtype=ret.dtype)
+    request._push_request(
+        "nlcpy_arange",
+        "creation_op",
+        (typ(start), typ(step), ret),)
 
     return ret
 
@@ -294,35 +287,21 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis
         return ret
     else:
         ret = nlcpy.empty((num,) + delta.shape, dtype=dtype)
-    retdata = ret
 
     delta = delta[nlcpy.newaxis]
     start = nlcpy.array(nlcpy.broadcast_to(start, delta.shape))
     stop = nlcpy.array(nlcpy.broadcast_to(stop, delta.shape))
     step = delta / div if div > 1 else delta
-    if retdata._memloc in {on_VE, on_VE_VH}:
-        denormal = nlcpy.zeros(1, dtype='l')
-        request._push_request(
-            "nlcpy_linspace",
-            "creation_op",
-            (ret, start, stop, delta, step, int(endpoint), denormal))
-        if axis != 0:
-            ret = nlcpy.moveaxis(ret, 0, axis)
-        if retstep:
-            ret = (ret, step)
+    denormal = nlcpy.zeros(1, dtype='l')
+    request._push_request(
+        "nlcpy_linspace",
+        "creation_op",
+        (ret, start, stop, delta, step, int(endpoint), denormal))
+    if axis != 0:
+        ret = nlcpy.moveaxis(ret, 0, axis)
+    if retstep:
+        ret = (ret, step)
 
-    if retdata._memloc in {on_VH, on_VE_VH}:
-        del retdata.vh_data
-        del step.vh_data
-        typ = numpy.dtype(dtype).type
-        if retstep:
-            (retdata.vh_data, step.vh_data) = numpy.linspace(typ(start),
-                                                             typ(stop), num, endpoint,
-                                                             typ(retstep), dtype, axis)
-        else:
-            retdata.vh_data = numpy.linspace(typ(start),
-                                             typ(stop), num, endpoint,
-                                             typ(retstep), dtype, axis)
     return ret
 
 

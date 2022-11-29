@@ -232,7 +232,7 @@ def eye(N, M=None, k=0, dtype=float, order='C'):
 
 
 def identity(n, dtype=None):
-    """Returns the identity array.The identity array is a square array with ones on the
+    """Returns the identity array. The identity array is a square array with ones on the
     main diagonal.
 
     Parameters

@@ -43,16 +43,16 @@
 #include <inc_i64/cblas.h>
 
 
-uint64_t wrapper_cblas_sdot(ve_arguments *args, int32_t *psw)
-{
+uint64_t wrapper_cblas_sdot(
+    ve_array *x,
+    ve_array *y,
+    ve_array *z,
+    int32_t *psw
+){
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-    ve_array *x = &(args->binary.x);
-    ve_array *y = &(args->binary.y);
-    ve_array *z = &(args->binary.z);
-
     float *px = (float *)x->ve_adr;
     if (px == NULL) {
         px = (float *)nlcpy__get_scalar(x);
@@ -83,16 +83,16 @@ uint64_t wrapper_cblas_sdot(ve_arguments *args, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_ddot(ve_arguments *args, int32_t *psw)
-{
+uint64_t wrapper_cblas_ddot(
+    ve_array *x,
+    ve_array *y,
+    ve_array *z,
+    int32_t *psw
+){
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-    ve_array *x = &(args->binary.x);
-    ve_array *y = &(args->binary.y);
-    ve_array *z = &(args->binary.z);
-
     double *px = (double *)x->ve_adr;
     if (px == NULL) {
         px = (double *)nlcpy__get_scalar(x);
@@ -123,16 +123,16 @@ uint64_t wrapper_cblas_ddot(ve_arguments *args, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_cdotu_sub(ve_arguments *args, int32_t *psw)
-{
+uint64_t wrapper_cblas_cdotu_sub(
+    ve_array *x,
+    ve_array *y,
+    ve_array *z,
+    int32_t *psw
+){
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-    ve_array *x = &(args->binary.x);
-    ve_array *y = &(args->binary.y);
-    ve_array *z = &(args->binary.z);
-
     float _Complex *px = (float _Complex *)x->ve_adr;
     if (px == NULL) {
         px = (float _Complex *)nlcpy__get_scalar(x);
@@ -164,16 +164,16 @@ uint64_t wrapper_cblas_cdotu_sub(ve_arguments *args, int32_t *psw)
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_zdotu_sub(ve_arguments *args, int32_t *psw)
-{
+uint64_t wrapper_cblas_zdotu_sub(
+    ve_array *x,
+    ve_array *y,
+    ve_array *z,
+    int32_t *psw
+){
 #ifdef _OPENMP
 #pragma omp single
 #endif /* _OPENMP */
 {
-    ve_array *x = &(args->binary.x);
-    ve_array *y = &(args->binary.y);
-    ve_array *z = &(args->binary.z);
-
     double _Complex *px = (double _Complex *)x->ve_adr;
     if (px == NULL) {
         px = (double _Complex *)nlcpy__get_scalar(x);
@@ -208,351 +208,139 @@ uint64_t wrapper_cblas_zdotu_sub(ve_arguments *args, int32_t *psw)
 
 
 
-uint64_t wrapper_cblas_sgemm(ve_arguments *args, int32_t *psw)
+uint64_t wrapper_cblas_sgemm(
+    int64_t order,
+    int64_t transA,
+    int64_t transB,
+    int64_t m,
+    int64_t n,
+    int64_t k,
+    ve_array *a,
+    int64_t lda,
+    ve_array *b,
+    int64_t ldb,
+    ve_array *c,
+    int64_t ldc,
+    int32_t *psw
+){
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
 {
-    const int64_t order = args->gemm.order;
-    const int64_t transA = args->gemm.transA;
-    const int64_t transB = args->gemm.transB;
-    const int64_t m = args->gemm.m;
-    const int64_t n = args->gemm.n;
-    const int64_t k = args->gemm.k;
-    const float alpha = *((float *)nlcpy__get_scalar(&(args->gemm.alpha)));
-    float* const a = (float *)args->gemm.a.ve_adr;
-    const int64_t lda = args->gemm.lda;
-    float* const b = (float *)args->gemm.b.ve_adr;
-    const int64_t ldb = args->gemm.ldb;
-    const float beta = *((float *)nlcpy__get_scalar(&(args->gemm.beta)));
-    float* const c = (float *)args->gemm.c.ve_adr;
-    const int64_t ldc = args->gemm.ldc;
-
-    if (a == NULL || b == NULL || c == NULL) {
+    float* const pa = (float *)a->ve_adr;
+    float* const pb = (float *)b->ve_adr;
+    float* const pc = (float *)c->ve_adr;
+    if (pa == NULL || pb == NULL || pc == NULL) {
         return NLCPY_ERROR_MEMORY;
     }
-
-
-#ifdef _OPENMP
-    const int64_t nt = omp_get_num_threads();
-    const int64_t it = omp_get_thread_num();
-#else
-    const int64_t nt = 1;
-    const int64_t it = 0;
-#endif /* _OPENMP */
-
-    const int64_t m_s = m * it / nt;
-    const int64_t m_e = m * (it + 1) / nt;
-    const int64_t m_d = m_e - m_s;
-    const int64_t n_s = n * it / nt;
-    const int64_t n_e = n * (it + 1) / nt;
-    const int64_t n_d = n_e - n_s;
-
-    int64_t mode = 1;
-    if ( n > nt ) {
-        mode = 2;
-    }
-    int64_t iar, iac, ibr, ibc, icr, icc;
-    if (transA == CblasNoTrans ) {
-        iar = 1;
-        iac = lda;
-    } else {
-        iar = lda;
-        iac = 1;
-    }
-    if (transB == CblasNoTrans ) {
-        ibr = 1;
-        ibc = ldb;
-    } else {
-        ibr = ldb;
-        ibc = 1;
-    }
-    if (order == CblasColMajor ) {
-        icr = 1;
-        icc = ldc;
-    } else {
-        icr = ldc;
-        icc = 1;
-    }
-
-    if (order == CblasColMajor) {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_sgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_sgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);
-        }
-    } else {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_sgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_sgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);
-        }
-    }
-
+    const float alpha = (float)1;
+    const float beta = (float)0;
+    cblas_sgemm(order, transA, transB, m, n, k, alpha, pa, lda, pb, ldb, beta, pc, ldc);
     retrieve_fpe_flags(psw);
+} /* omp single */
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_dgemm(ve_arguments *args, int32_t *psw)
+uint64_t wrapper_cblas_dgemm(
+    int64_t order,
+    int64_t transA,
+    int64_t transB,
+    int64_t m,
+    int64_t n,
+    int64_t k,
+    ve_array *a,
+    int64_t lda,
+    ve_array *b,
+    int64_t ldb,
+    ve_array *c,
+    int64_t ldc,
+    int32_t *psw
+){
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
 {
-    const int64_t order = args->gemm.order;
-    const int64_t transA = args->gemm.transA;
-    const int64_t transB = args->gemm.transB;
-    const int64_t m = args->gemm.m;
-    const int64_t n = args->gemm.n;
-    const int64_t k = args->gemm.k;
-    const double alpha = *((double *)nlcpy__get_scalar(&(args->gemm.alpha)));
-    double* const a = (double *)args->gemm.a.ve_adr;
-    const int64_t lda = args->gemm.lda;
-    double* const b = (double *)args->gemm.b.ve_adr;
-    const int64_t ldb = args->gemm.ldb;
-    const double beta = *((double *)nlcpy__get_scalar(&(args->gemm.beta)));
-    double* const c = (double *)args->gemm.c.ve_adr;
-    const int64_t ldc = args->gemm.ldc;
-
-    if (a == NULL || b == NULL || c == NULL) {
+    double* const pa = (double *)a->ve_adr;
+    double* const pb = (double *)b->ve_adr;
+    double* const pc = (double *)c->ve_adr;
+    if (pa == NULL || pb == NULL || pc == NULL) {
         return NLCPY_ERROR_MEMORY;
     }
-
-
-#ifdef _OPENMP
-    const int64_t nt = omp_get_num_threads();
-    const int64_t it = omp_get_thread_num();
-#else
-    const int64_t nt = 1;
-    const int64_t it = 0;
-#endif /* _OPENMP */
-
-    const int64_t m_s = m * it / nt;
-    const int64_t m_e = m * (it + 1) / nt;
-    const int64_t m_d = m_e - m_s;
-    const int64_t n_s = n * it / nt;
-    const int64_t n_e = n * (it + 1) / nt;
-    const int64_t n_d = n_e - n_s;
-
-    int64_t mode = 1;
-    if ( n > nt ) {
-        mode = 2;
-    }
-    int64_t iar, iac, ibr, ibc, icr, icc;
-    if (transA == CblasNoTrans ) {
-        iar = 1;
-        iac = lda;
-    } else {
-        iar = lda;
-        iac = 1;
-    }
-    if (transB == CblasNoTrans ) {
-        ibr = 1;
-        ibc = ldb;
-    } else {
-        ibr = ldb;
-        ibc = 1;
-    }
-    if (order == CblasColMajor ) {
-        icr = 1;
-        icc = ldc;
-    } else {
-        icr = ldc;
-        icc = 1;
-    }
-
-    if (order == CblasColMajor) {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_dgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_dgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);
-        }
-    } else {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_dgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_dgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);
-        }
-    }
-
+    const double alpha = (double)1;
+    const double beta = (double)0;
+    cblas_dgemm(order, transA, transB, m, n, k, alpha, pa, lda, pb, ldb, beta, pc, ldc);
     retrieve_fpe_flags(psw);
+} /* omp single */
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_cgemm(ve_arguments *args, int32_t *psw)
+uint64_t wrapper_cblas_cgemm(
+    int64_t order,
+    int64_t transA,
+    int64_t transB,
+    int64_t m,
+    int64_t n,
+    int64_t k,
+    ve_array *a,
+    int64_t lda,
+    ve_array *b,
+    int64_t ldb,
+    ve_array *c,
+    int64_t ldc,
+    int32_t *psw
+){
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
 {
-    const int64_t order = args->gemm.order;
-    const int64_t transA = args->gemm.transA;
-    const int64_t transB = args->gemm.transB;
-    const int64_t m = args->gemm.m;
-    const int64_t n = args->gemm.n;
-    const int64_t k = args->gemm.k;
-    const void *alpha = (void *)nlcpy__get_scalar(&(args->gemm.alpha));
-    if (alpha == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float  _Complex* const a = (float  _Complex *)args->gemm.a.ve_adr;
-    const int64_t lda = args->gemm.lda;
-    float  _Complex* const b = (float  _Complex *)args->gemm.b.ve_adr;
-    const int64_t ldb = args->gemm.ldb;
-    const void *beta = (void *)nlcpy__get_scalar(&(args->gemm.beta));
-    if (beta == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    float  _Complex* const c = (float  _Complex *)args->gemm.c.ve_adr;
-    const int64_t ldc = args->gemm.ldc;
-
-    if (a == NULL || b == NULL || c == NULL) {
+    float  _Complex* const pa = (float  _Complex *)a->ve_adr;
+    float  _Complex* const pb = (float  _Complex *)b->ve_adr;
+    float  _Complex* const pc = (float  _Complex *)c->ve_adr;
+    if (pa == NULL || pb == NULL || pc == NULL) {
         return NLCPY_ERROR_MEMORY;
     }
-
-
-#ifdef _OPENMP
-    const int64_t nt = omp_get_num_threads();
-    const int64_t it = omp_get_thread_num();
-#else
-    const int64_t nt = 1;
-    const int64_t it = 0;
-#endif /* _OPENMP */
-
-    const int64_t m_s = m * it / nt;
-    const int64_t m_e = m * (it + 1) / nt;
-    const int64_t m_d = m_e - m_s;
-    const int64_t n_s = n * it / nt;
-    const int64_t n_e = n * (it + 1) / nt;
-    const int64_t n_d = n_e - n_s;
-
-    int64_t mode = 1;
-    if ( n > nt ) {
-        mode = 2;
-    }
-    int64_t iar, iac, ibr, ibc, icr, icc;
-    if (transA == CblasNoTrans ) {
-        iar = 1;
-        iac = lda;
-    } else {
-        iar = lda;
-        iac = 1;
-    }
-    if (transB == CblasNoTrans ) {
-        ibr = 1;
-        ibc = ldb;
-    } else {
-        ibr = ldb;
-        ibc = 1;
-    }
-    if (order == CblasColMajor ) {
-        icr = 1;
-        icc = ldc;
-    } else {
-        icr = ldc;
-        icc = 1;
-    }
-
-    if (order == CblasColMajor) {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_cgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_cgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);
-        }
-    } else {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_cgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_cgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);
-        }
-    }
-
+    const float  _Complex _alpha = 1 + 0I;
+    const float  _Complex _beta = 0 + 0I;
+    const float  _Complex *alpha = (float  _Complex *)&_alpha;
+    const float  _Complex *beta = (float  _Complex *)&_beta;
+    cblas_cgemm(order, transA, transB, m, n, k, alpha, pa, lda, pb, ldb, beta, pc, ldc);
     retrieve_fpe_flags(psw);
+} /* omp single */
     return (uint64_t)NLCPY_ERROR_OK;
 }
 
-uint64_t wrapper_cblas_zgemm(ve_arguments *args, int32_t *psw)
+uint64_t wrapper_cblas_zgemm(
+    int64_t order,
+    int64_t transA,
+    int64_t transB,
+    int64_t m,
+    int64_t n,
+    int64_t k,
+    ve_array *a,
+    int64_t lda,
+    ve_array *b,
+    int64_t ldb,
+    ve_array *c,
+    int64_t ldc,
+    int32_t *psw
+){
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
 {
-    const int64_t order = args->gemm.order;
-    const int64_t transA = args->gemm.transA;
-    const int64_t transB = args->gemm.transB;
-    const int64_t m = args->gemm.m;
-    const int64_t n = args->gemm.n;
-    const int64_t k = args->gemm.k;
-    const void *alpha = (void *)nlcpy__get_scalar(&(args->gemm.alpha));
-    if (alpha == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double _Complex* const a = (double _Complex *)args->gemm.a.ve_adr;
-    const int64_t lda = args->gemm.lda;
-    double _Complex* const b = (double _Complex *)args->gemm.b.ve_adr;
-    const int64_t ldb = args->gemm.ldb;
-    const void *beta = (void *)nlcpy__get_scalar(&(args->gemm.beta));
-    if (beta == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
-    double _Complex* const c = (double _Complex *)args->gemm.c.ve_adr;
-    const int64_t ldc = args->gemm.ldc;
-
-    if (a == NULL || b == NULL || c == NULL) {
+    double _Complex* const pa = (double _Complex *)a->ve_adr;
+    double _Complex* const pb = (double _Complex *)b->ve_adr;
+    double _Complex* const pc = (double _Complex *)c->ve_adr;
+    if (pa == NULL || pb == NULL || pc == NULL) {
         return NLCPY_ERROR_MEMORY;
     }
-
-
-#ifdef _OPENMP
-    const int64_t nt = omp_get_num_threads();
-    const int64_t it = omp_get_thread_num();
-#else
-    const int64_t nt = 1;
-    const int64_t it = 0;
-#endif /* _OPENMP */
-
-    const int64_t m_s = m * it / nt;
-    const int64_t m_e = m * (it + 1) / nt;
-    const int64_t m_d = m_e - m_s;
-    const int64_t n_s = n * it / nt;
-    const int64_t n_e = n * (it + 1) / nt;
-    const int64_t n_d = n_e - n_s;
-
-    int64_t mode = 1;
-    if ( n > nt ) {
-        mode = 2;
-    }
-    int64_t iar, iac, ibr, ibc, icr, icc;
-    if (transA == CblasNoTrans ) {
-        iar = 1;
-        iac = lda;
-    } else {
-        iar = lda;
-        iac = 1;
-    }
-    if (transB == CblasNoTrans ) {
-        ibr = 1;
-        ibc = ldb;
-    } else {
-        ibr = ldb;
-        ibc = 1;
-    }
-    if (order == CblasColMajor ) {
-        icr = 1;
-        icc = ldc;
-    } else {
-        icr = ldc;
-        icc = 1;
-    }
-
-    if (order == CblasColMajor) {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_zgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iar, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_zgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibc, ldb, beta, c + n_s * icc, ldc);
-        }
-    } else {
-        if ( mode == 1 ) {
-            // split 'm'
-            cblas_zgemm(order, transA, transB, m_d, n, k, alpha, a + m_s * iac, lda, b, ldb, beta, c + m_s * icr, ldc);
-        } else {
-            // split 'n'
-            cblas_zgemm(order, transA, transB, m, n_d, k, alpha, a, lda, b + n_s * ibr, ldb, beta, c + n_s * icc, ldc);
-        }
-    }
-
+    const double _Complex _alpha = 1 + 0I;
+    const double _Complex _beta = 0 + 0I;
+    const double _Complex *alpha = (double _Complex *)&_alpha;
+    const double _Complex *beta = (double _Complex *)&_beta;
+    cblas_zgemm(order, transA, transB, m, n, k, alpha, pa, lda, pb, ldb, beta, pc, ldc);
     retrieve_fpe_flags(psw);
+} /* omp single */
     return (uint64_t)NLCPY_ERROR_OK;
 }
 

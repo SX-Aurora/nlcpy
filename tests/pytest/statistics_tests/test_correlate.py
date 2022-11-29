@@ -1,13 +1,13 @@
 import unittest
-import numpy
+import numpy as np
 import nlcpy as vp
 from nlcpy import testing
 
 nan_dtypes = (
-    numpy.float32,
-    numpy.float64,
-    numpy.complex64,
-    numpy.complex128,
+    np.float32,
+    np.float64,
+    np.complex64,
+    np.complex128,
 )
 
 shapes = (
@@ -32,18 +32,27 @@ class TestCorr(unittest.TestCase):
 
 
 def test_me_1():
-    a = vp.array([1, 2, 3])
-    v = vp.array([0, 1, 0.5])
-    return vp.correlate(a, v, "same")
+    a = np.array([1, 2, 3])
+    v = np.array([0, 1, 0.5])
+    testing.assert_allclose(
+        np.correlate(a, v, 'same'),
+        vp.correlate(a, v, 'same')
+    )
 
 
 def test_me_2():
-    a = vp.array([1, 2, 3])
-    v = vp.array([0, 1, 0.5])
-    return vp.correlate(a, v, "full")
+    a = np.array([1, 2, 3])
+    v = np.array([0, 1, 0.5])
+    testing.assert_allclose(
+        np.correlate(a, v, 'full'),
+        vp.correlate(a, v, 'full')
+    )
 
 
 def test_me_3():
-    a = vp.array([1 + 1j, 2, 3 - 1j])
-    v = vp.array([0, 1, 0.5j])
-    return vp.correlate(a, v, "full")
+    a = np.array([1 + 1j, 2, 3 - 1j])
+    v = np.array([0, 1, 0.5j])
+    testing.assert_allclose(
+        np.correlate(a, v, 'full'),
+        vp.correlate(a, v, 'full')
+    )

@@ -215,6 +215,7 @@ def test_fft_with_order(dtype, order, fft):
     X = rng.rand((8, 7, 13)).astype(dtype, copy=False)
     # See discussion in pull/14178
     _tol = 8.0 * np.sqrt(np.log2(X.size)) * np.finfo(X.dtype).eps
+    _tol = float(_tol)
     if order == 'F':
         # Y = np.asfortranarray(X)
         Y = np.asarray(X, order='F')

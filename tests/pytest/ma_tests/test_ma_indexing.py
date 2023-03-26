@@ -326,6 +326,7 @@ class TestArrayIndex(unittest.TestCase):
         return a.T
 
     @testing.numpy_nlcpy_array_equal()
+    @testing.with_requires('numpy<1.22')
     def test_setitem_with_masked_array_index(self, xp):
         data = testing.shaped_random([3, 2, 4], xp)
         mask = testing.shaped_random([3, 2, 4], xp, dtype=numpy.bool_)

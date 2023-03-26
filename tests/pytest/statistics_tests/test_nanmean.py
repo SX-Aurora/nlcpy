@@ -33,6 +33,8 @@ from __future__ import division, absolute_import, print_function
 
 import warnings
 import random
+import os
+import atexit
 from numpy.testing import assert_array_equal
 from nlcpy import testing
 
@@ -62,6 +64,12 @@ typedata = {
 }
 
 fil = "tmp.npy"
+
+
+@atexit.register
+def cleanup():
+    if os.path.isfile(fil):
+        os.remove(fil)
 
 
 def ca1(arg):

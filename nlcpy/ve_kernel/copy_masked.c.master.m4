@@ -89,7 +89,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 @#endif /* _OPENMP */
         const int64_t is = y->size * it / nt;
         const int64_t ie = y->size * (it + 1) / nt;
-        if (x->size == 1){
+        if (x->size == 1) {
             @TYPE1@ px_s = px[0];
             for (i = is; i < ie; i++) {
                 if (pwhere[i]) {
@@ -161,9 +161,10 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iw = 0;
-        uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
-        uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
-        uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
+        const uint64_t iy0 = y->strides[n_inner2] / y->itemsize;
+        const uint64_t iw0 = where->strides[n_inner2] / where->itemsize;
+        const uint64_t x_inner_shape = x->shape[n_inner2];
         const int64_t len = y->shape[n_outer2];
         const int64_t cnt_s = len * it / nt;
         const int64_t cnt_e = len * (it + 1) / nt;
@@ -173,8 +174,8 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
             iw = cnt * where->strides[n_outer2] / where->itemsize;
             for (;;) {
                 // most inner loop for vectorize
-                if (x->size == 1){
-                    @TYPE1@ px_s = px[0];
+                if (x_inner_shape == 1){
+                    @TYPE1@ px_s = px[ix];
                     for (i = 0; i < y->shape[n_inner2]; i++) {
                         if (pwhere[i*iw0+iw]){
                             @UNARY_OPERATOR@(px_s,py[i*iy0+iy],$1)

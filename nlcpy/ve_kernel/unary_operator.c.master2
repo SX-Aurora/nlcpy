@@ -97,27 +97,30 @@ uint64_t FILENAME_@DTAG1@_i32(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],i32)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],i32)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],i32)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],i32)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],i32)
@@ -152,16 +155,25 @@ uint64_t FILENAME_@DTAG1@_i32(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i32)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -184,11 +196,22 @@ uint64_t FILENAME_@DTAG1@_i32(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i32)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i32)
+                            }
                         }
                     }
                     // set next index
@@ -262,27 +285,30 @@ uint64_t FILENAME_@DTAG1@_i64(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],i64)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],i64)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],i64)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],i64)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],i64)
@@ -317,16 +343,25 @@ uint64_t FILENAME_@DTAG1@_i64(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i64)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -349,11 +384,22 @@ uint64_t FILENAME_@DTAG1@_i64(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],i64)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],i64)
+                            }
                         }
                     }
                     // set next index
@@ -427,27 +473,30 @@ uint64_t FILENAME_@DTAG1@_u32(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],u32)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],u32)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],u32)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],u32)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],u32)
@@ -482,16 +531,25 @@ uint64_t FILENAME_@DTAG1@_u32(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u32)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -514,11 +572,22 @@ uint64_t FILENAME_@DTAG1@_u32(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u32)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u32)
+                            }
                         }
                     }
                     // set next index
@@ -592,27 +661,30 @@ uint64_t FILENAME_@DTAG1@_u64(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],u64)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],u64)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],u64)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],u64)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],u64)
@@ -647,16 +719,25 @@ uint64_t FILENAME_@DTAG1@_u64(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u64)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -679,11 +760,22 @@ uint64_t FILENAME_@DTAG1@_u64(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],u64)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],u64)
+                            }
                         }
                     }
                     // set next index
@@ -757,27 +849,30 @@ uint64_t FILENAME_@DTAG1@_f32(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],f32)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],f32)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],f32)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],f32)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],f32)
@@ -812,16 +907,25 @@ uint64_t FILENAME_@DTAG1@_f32(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f32)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -844,11 +948,22 @@ uint64_t FILENAME_@DTAG1@_f32(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f32)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f32)
+                            }
                         }
                     }
                     // set next index
@@ -922,27 +1037,30 @@ uint64_t FILENAME_@DTAG1@_f64(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],f64)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],f64)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],f64)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],f64)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],f64)
@@ -977,16 +1095,25 @@ uint64_t FILENAME_@DTAG1@_f64(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f64)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -1009,11 +1136,22 @@ uint64_t FILENAME_@DTAG1@_f64(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],f64)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],f64)
+                            }
                         }
                     }
                     // set next index
@@ -1087,27 +1225,30 @@ uint64_t FILENAME_@DTAG1@_c64(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],c64)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],c64)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],c64)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],c64)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],c64)
@@ -1142,16 +1283,25 @@ uint64_t FILENAME_@DTAG1@_c64(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c64)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -1174,11 +1324,22 @@ uint64_t FILENAME_@DTAG1@_c64(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c64)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c64)
+                            }
                         }
                     }
                     // set next index
@@ -1252,27 +1413,30 @@ uint64_t FILENAME_@DTAG1@_c128(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],c128)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],c128)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],c128)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],c128)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],c128)
@@ -1307,16 +1471,25 @@ uint64_t FILENAME_@DTAG1@_c128(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c128)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -1339,11 +1512,22 @@ uint64_t FILENAME_@DTAG1@_c128(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],c128)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],c128)
+                            }
                         }
                     }
                     // set next index
@@ -1417,27 +1601,30 @@ uint64_t FILENAME_@DTAG1@_bool(
         (x->is_f_contiguous & y->is_f_contiguous & (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
 @#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     @UNARY_OPERATOR@(px_s,py[i],bool)
                 }
             } else {
+@#pragma _NEC ivdep
+                for (i = cnt_s; i < cnt_e; i++) {
+                    @UNARY_OPERATOR@(px[i],py[i],bool)
+                }
+            }
+        } else {
+            if (x->size == 1) {
+                @TYPE1@ px_s = px[0];
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px_s,py[i],bool)
                     }
                 }
-            }
-        } else {
-@#pragma _NEC ivdep
-            if (w == NULL) {
-                for (i = cnt_s; i < cnt_e; i++) {
-                    @UNARY_OPERATOR@(px[i],py[i],bool)
-                }
             } else {
+@#pragma _NEC ivdep
                 for (i = cnt_s; i < cnt_e; i++) {
                     if (pw[i]) {
                         @UNARY_OPERATOR@(px[i],py[i],bool)
@@ -1472,16 +1659,25 @@ uint64_t FILENAME_@DTAG1@_bool(
         int64_t i, j, k;
         uint64_t ix = 0;
         uint64_t iy = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
-                    }
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px_s,py[i*iy0+iy],bool)
+                        }
+                    } else {
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                        }
+                     }
                     // set next index
                     for (k = y->ndim - 2; k >= 1; k--) {
                         int64_t kk = idx[k];
@@ -1504,11 +1700,22 @@ uint64_t FILENAME_@DTAG1@_bool(
                 iy = cnt * y->strides[n_outer] / y->itemsize;
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
-                    // most inner loop for vectorize
+                    if (x_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        // most inner loop for vectorize
 @#pragma _NEC ivdep
-                    for (i = 0; i < y->shape[n_inner]; i++) {
-                        if (pw[i*iw0+iw]) {
-                            @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px_s,py[i*iy0+iy],bool)
+                            }
+                        }
+                    } else {
+                        // most inner loop for vectorize
+@#pragma _NEC ivdep
+                        for (i = 0; i < y->shape[n_inner]; i++) {
+                            if (pw[i*iw0+iw]) {
+                                @UNARY_OPERATOR@(px[i*ix0+ix],py[i*iy0+iy],bool)
+                            }
                         }
                     }
                     // set next index

@@ -577,7 +577,8 @@ def full(shape, fill_value, dtype=None, order='C'):
                     'Casting complex values to real discards the imaginary part',
                     numpy.ComplexWarning, stacklevel=2)
         out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
-        out.fill(fill_value)
+        # out.fill(fill_value)
+        out.fill(numpy.array(fill_value).astype(dtype))
 
     elif fill_value is None:
         raise NotImplementedError('fill_value in nlcpy.full is None')

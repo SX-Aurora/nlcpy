@@ -35,13 +35,8 @@ import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
 
 ops = [
     'power',
@@ -59,7 +54,7 @@ ops = [
 
 def adjust_dtype(xp, op, dtype):
     if xp is numpy:
-        if dtype == numpy.bool:
+        if dtype == numpy.bool_:
             if op in ('divide', 'true_divide', 'logaddexp', 'logaddexp2', 'arctan2'):
                 dtype = numpy.float32
             elif op == 'power':
@@ -72,8 +67,8 @@ def is_executable(op, dtype1=None, dtype2=None, dtype=None):
         'divide', 'true_divide', 'arctan2', 'logaddexp', 'logaddexp2',
         'power', 'floor_divide', 'mod', 'remainder', 'fmod',
     ):
-        return dtype != numpy.bool and \
-            not (dtype is None and (dtype1 == numpy.bool or dtype2 == numpy.bool))
+        return dtype != numpy.bool_ and \
+            not (dtype is None and (dtype1 == numpy.bool_ or dtype2 == numpy.bool_))
 
     return True
 
@@ -104,6 +99,8 @@ def execute_ufunc(xp, op, in1, in2, dtype=None, order='K'):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuter(unittest.TestCase):
 
     shapes = (((3, 4), (2, 3)),)
@@ -130,6 +127,8 @@ class TestOuter(unittest.TestCase):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuterArrayScalar(unittest.TestCase):
 
     shapes = ((3, 4),)
@@ -156,6 +155,8 @@ class TestOuterArrayScalar(unittest.TestCase):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuterScalar(unittest.TestCase):
 
     def tearDown(self):
@@ -180,6 +181,8 @@ class TestOuterScalar(unittest.TestCase):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuter2(unittest.TestCase):
 
     def tearDown(self):

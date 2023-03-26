@@ -43,7 +43,8 @@ class TestCflags(unittest.TestCase):
             '-O2',
             '-I',
             nlcpy.get_include(),
-            '-fopenmp'
+            '-march=ve' + str(nlcpy.venode.VE().arch),
+            '-fopenmp',
         )
         assert got == exp
 
@@ -54,6 +55,7 @@ class TestCflags(unittest.TestCase):
             '-O2',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch)
         )
         assert got == exp
 
@@ -65,6 +67,7 @@ class TestCflags(unittest.TestCase):
             '-O0',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-fopenmp'
         )
         assert got == exp
@@ -76,6 +79,7 @@ class TestCflags(unittest.TestCase):
             '-O4',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-fopenmp'
         )
         assert got == exp
@@ -100,6 +104,7 @@ class TestCflags(unittest.TestCase):
             '-O2',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-fopenmp',
             '-g'
         )
@@ -112,6 +117,7 @@ class TestCflags(unittest.TestCase):
             '-O2',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-fopenmp',
         )
         assert got == exp
@@ -124,6 +130,7 @@ class TestCflags(unittest.TestCase):
             '-O3',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-fopenmp',
             '-g'
         )
@@ -136,6 +143,7 @@ class TestCflags(unittest.TestCase):
             '-O1',
             '-I',
             nlcpy.get_include(),
+            '-march=ve' + str(nlcpy.venode.VE().arch),
             '-g'
         )
         assert got == exp

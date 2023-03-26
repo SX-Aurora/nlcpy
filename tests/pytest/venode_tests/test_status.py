@@ -54,19 +54,19 @@ def eval(lid, pid, serial_id):
     else:
         assert status['lid'] == lid
     assert status['pid'] == pid
-    assert status['pool_capacity'] == pool_size
-    prev_used = status['pool_used']
-    assert status['pool_remainder'] == pool_size - prev_used
+    assert status['mempool_capacity'] == pool_size
+    prev_used = status['mempool_used']
+    assert status['mempool_remainder'] == pool_size - prev_used
     assert status['offload_timing'] == 'lazy'
     assert status['stacked_request_on_VH'] == 0
     assert status['running_request_on_VE'] == 0
 
     x = nlcpy.empty(10, dtype='f8')
     status = ve.status
-    assert (status['pool_used'] == prev_used + 80
-            or status['pool_used'] == prev_used)
-    assert (status['pool_remainder'] == pool_size - 80 - prev_used
-            or status['pool_remainder'] == pool_size - prev_used)
+    assert (status['mempool_used'] == prev_used + 80
+            or status['mempool_used'] == prev_used)
+    assert (status['mempool_remainder'] == pool_size - 80 - prev_used
+            or status['mempool_remainder'] == pool_size - prev_used)
 
     y = x + 1
     status = ve.status

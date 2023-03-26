@@ -81,6 +81,7 @@ from nlcpy.statistics.average import var
 from nlcpy.statistics.average import std
 from nlcpy.sca.description cimport description
 from nlcpy.venode._venode cimport VE
+from nlcpy.venode._venode cimport _find_venode_from_proc_handle
 from nlcpy._environment import _is_numpy_wrap_enabled
 import numpy
 cimport numpy as cnp
@@ -106,6 +107,8 @@ cdef class ndarray:
         Strides of data in memory.
     order : {'C','F'}, optional
         Row-major (C-style) or column-major (Fortran-style) order.
+    veo_hmem : int, optional
+        VEO heterogeneous memory.
 
     See Also
     --------
@@ -128,8 +131,7 @@ cdef class ndarray:
 
     """
 
-    def __init__(self, shape, dtype=float, strides=None,
-                 order='C'):
+    def __init__(self, shape, dtype=float, strides=None, order='C', veo_hmem=None):
         cdef int64_t itemsize
         cdef tuple _shape = internal.get_size(shape)
         del shape
@@ -168,12 +170,24 @@ cdef class ndarray:
         else:
             raise ValueError('Unsupported order \'%s\'' % order)
 
-        self._is_view = False
-        self._venode = VE()
-
-        # set ve_adr with allocating memory.
-        self._is_pool, self.veo_hmem, self.ve_adr = vememory._alloc_mem(
-            self.nbytes, self._venode)
+        if veo_hmem is None:
+            # set address with allocating memory.
+            self._venode = VE()
+            self._is_pool, self.veo_hmem, self.ve_adr = vememory._alloc_mem(
+                self.nbytes, self._venode)
+            self._is_view = False
+        else:
+            # set address without allocating memory.
+            if not _veo.VEO_HMEM.is_ve_addr(veo_hmem):
+                raise MemoryError('veo_hmem was not allocated by veo_alloc_hmem().')
+            self._venode = _find_venode_from_proc_handle(
+                _veo.VEO_HMEM.get_proc_handle_from_hmem(veo_hmem))
+            if self._venode is None:
+                raise MemoryError('veo_hmem exists on unknown veo process.')
+            self._is_pool = False
+            self.veo_hmem = veo_hmem
+            self.ve_adr = _veo.VEO_HMEM.get_hmem_addr(veo_hmem)
+            self._is_view = True
 
     def __dealloc__(self):
         if _exit_mode:
@@ -1697,7 +1711,8 @@ cpdef ndarray array(obj, dtype=None, bint copy=True, order='K',
                 a = a.view()
             # expands shape
             a.shape = (1,) * (ndmin - a.ndim) + a.shape
-
+    elif hasattr(obj, '__ve_array_interface__'):
+        a = _array_from_ve_array_interface(obj, dtype, copy, order, subok, ndmin)
     elif isinstance(obj, numpy.ndarray):
         if order is None or order in 'kK':
             if obj.flags['F_CONTIGUOUS'] and not obj.flags["C_CONTIGUOUS"]:
@@ -1754,6 +1769,48 @@ cpdef ndarray array(obj, dtype=None, bint copy=True, order='K',
             order = ('F' if order is not None and order in 'Ff' else 'C')
             a = _send_object_to_ve(obj, dtype, order, ndmin)
     return a
+
+
+cdef ndarray _array_from_ve_array_interface(
+        obj, dtype, bint copy, order, bint subok, Py_ssize_t ndim):
+    cdef dict vai
+    cdef tuple data
+    cdef str typestr
+    cdef tuple shape
+    cdef tuple strides
+    cdef list descr
+    cdef uint64_t veo_hmem
+    cdef bint readonly = 0
+    cdef Py_ssize_t s, size = 1
+    cdef Py_ssize_t itemsize = 1
+    cdef char typekind = c'u'
+    try:
+        vai = obj.__ve_array_interface__
+    except AttributeError:
+        raise RuntimeError("missing VE array interface")
+    # mandatory
+    data = vai['data']
+    typestr = vai['typestr']
+    shape = tuple(vai['shape'])
+    # optional
+    strides = None if vai.get('strides') is None else tuple(vai.get('strides'))
+    descr = vai.get('descr')
+    mask = vai.get('mask')
+    veo_hmem, readonly = data
+    for s in shape:
+        size *= s
+    if mask is not None:
+        raise NotImplementedError(
+            "__ve_array_interface__: "
+            "cannot handle masked arrays"
+        )
+    if size < 0:
+        raise ValueError(
+            "__ve_array_interface__: "
+            "buffer with negative size (shape:%s, size:%d)"
+            % (shape, size)
+        )
+    return ndarray(shape, dtype=typestr, strides=strides, order=None, veo_hmem=veo_hmem)
 
 
 cdef tuple _get_concat_shape(object obj):

@@ -11,10 +11,14 @@ ftrace.out*
 /build/
 /dist/
 /obj/
+/obj_ve1/
+/obj_ve3/
 /.tox/
 /doc/build/
 generated
 MANIFEST.in
+setup.cfg
 __pycache__
 htmlcov
 .coverage
+build_info.py

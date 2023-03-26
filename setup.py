@@ -18,6 +18,12 @@
 import shutil
 from setuptools import setup, Extension
 from setuptools.command import build_ext
+try:
+    from setuptools.command import build
+    from setuptools._distutils import dir_util
+except ImportError:
+    from distutils.command import build
+    from distutils import dir_util
 from setuptools.command.sdist import sdist
 from wheel.bdist_wheel import bdist_wheel
 import numpy
@@ -34,42 +40,57 @@ from Cython.Build import cythonize
 here = path.abspath(path.dirname(__file__))
 
 # get __version__ from _version.py
-exec(open(here + '/nlcpy/_version.py').read())
+exec(open(os.path.join(here, 'nlcpy/_version.py')).read())
 
 # get long_description from README.md
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # find NLC directory
-base = '/opt/nec/ve/nlc'
-files = os.listdir(base)
-dirs = [os.path.join(base, f)
-        for f in files
-        if os.path.isdir(os.path.join(base, f))]
-dirs.sort(key=lambda s: [int(u) for u in os.path.basename(s).split('.')], reverse=True)
-NLC_PATH = dirs[0]
+NLC_PATH = os.environ.get("NLC_HOME")
+if NLC_PATH is None:
+    raise RuntimeError('Undefined environment variable NLC_HOME. Please execute '
+                       '`source /opt/nec/ve[3]/nlc/X.X.X/bin/nlcvars.sh`')
 
 
 #####################################################
 # parse arguments
 #####################################################
 
+targs_ref = ('vh', 've1', 've3')
+
+
+def parse_targs(targs):
+    ret = []
+    for t in targs.split(','):
+        if t not in targs_ref:
+            raise ValueError
+        ret.append(t)
+    return ret
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--targ', metavar="COMMA_SEPARATED_TARGS", required=True,
+    nargs=1, type=parse_targs,
+    help='select comma separated build targets')
+parser.add_argument(
+    '--profile', action='store_true', default=False,
+    help='enable profiling for Cython code')
+parser.add_argument(
+    '--debug', action='store_true', default=False,
+    help='enable debugging for Cython code')
+args, sys.argv = parser.parse_known_args(sys.argv)
+
+#####################################################
+# set macros and compiler directives
+#####################################################
 compiler_directives = {
     'embedsignature': True,
 }
 
 define_macros = []
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--profile', action='store_true', default=False,
-    help='enable profiling for Cython code'
-)
-parser.add_argument(
-    '--debug', action='store_true', default=False,
-    help='enable debugging for Cython code'
-)
-args, sys.argv = parser.parse_known_args(sys.argv)
 if args.profile:
     compiler_directives['linetrace'] = True
     define_macros.append(('CYTHON_TRACE_NOGIL', '1'))
@@ -94,7 +115,6 @@ if args.debug:
 ext_modules = {
     'veo': [
         'nlcpy.veo._veo',
-        'nlcpy.veo._nlcpy_veo_hook',
     ],
     'veosinfo': [
         'nlcpy.veosinfo._veosinfo',
@@ -169,11 +189,11 @@ include_dirs = {
         numpy.get_include(),
     ],
     'random': [
-        NLC_PATH + '/include',
+        os.path.join(NLC_PATH, 'include'),
         numpy.get_include(),
     ],
     'fft': [
-        NLC_PATH + '/include',
+        os.path.join(NLC_PATH, 'include'),
         numpy.get_include(),
     ],
     'request': [
@@ -270,43 +290,10 @@ for key in ext_modules:
 
 
 #####################################################
-# set custom cmdclass
-#####################################################
-
-class custom_bdist_wheel(bdist_wheel):
-    def run(self):
-        shutil.copyfile('MANIFEST.in.wheel', 'MANIFEST.in')
-        ret = subprocess.call(['make', '-f', os.getcwd() + '/Makefile'])
-        if ret != 0:
-            raise RuntimeError('Failed to build VE kernel.')
-        bdist_wheel.run(self)
-
-
-class custom_build_ext(build_ext.build_ext):
-    def run(self):
-        ret = subprocess.call(['make', '-f', os.getcwd() + '/Makefile'])
-        if ret != 0:
-            raise RuntimeError('Failed to build VE kernel.')
-        build_ext.build_ext.run(self)
-
-
-class custom_sdist(sdist):
-    def run(self):
-        shutil.copyfile('MANIFEST.in.sdist', 'MANIFEST.in')
-        sdist.run(self)
-
-
-cmdclass = {}
-cmdclass['bdist_wheel'] = custom_bdist_wheel
-cmdclass['build_ext'] = custom_build_ext
-cmdclass['sdist'] = custom_sdist
-
-
-#####################################################
 # show build stats
 #####################################################
 
-def show_build_stats(NLC_PATH):
+def show_build_stats():
     # get ncc version
     ret = subprocess.run(
         'ncc --version |& grep -o "[0-9]\.[0-9]\.[0-9]"',
@@ -336,7 +323,6 @@ def show_build_stats(NLC_PATH):
 
     print("===============BUILDING STATS==============")
     print("  NCC    version:", ncc_version)
-    print("  NLC    path   :", NLC_PATH)
     print("  GCC    version:", gcc_version)
     print("  PYTHON version:", python_version)
     print("  CYTHON version:", cython_version)
@@ -344,15 +330,124 @@ def show_build_stats(NLC_PATH):
     print("===========================================")
 
 
-show_build_stats(NLC_PATH)
+show_build_stats()
 
 
-setup(
-    version=__version__,  # NOQA
-    cmdclass=cmdclass,
-    ext_modules=cythonize(
-        extensions,
-        compiler_directives=compiler_directives,
-        language_level=3
-    ),
-)
+#####################################################
+# set custom cmdclass
+#####################################################
+
+CFG_DIR = 'config'
+
+# customize bdist_wheel
+
+
+class vh_custom_bdist_wheel(bdist_wheel):
+    def run(self):
+        shutil.copyfile(os.path.join(CFG_DIR, 'MANIFEST.in.wheel.vh'), 'MANIFEST.in')
+        super().run()
+
+
+class ve1_custom_bdist_wheel(bdist_wheel):
+    def run(self):
+        shutil.copyfile(os.path.join(CFG_DIR, 'MANIFEST.in.wheel.ve1'), 'MANIFEST.in')
+        ret = subprocess.call(['make', 'ARCH=ve1', '-f',
+                               os.path.join(os.getcwd(), 'Makefile')])
+        if ret != 0:
+            raise RuntimeError('Failed to build VE1 kernel.')
+        super().run()
+
+
+class ve3_custom_bdist_wheel(bdist_wheel):
+    def run(self):
+        shutil.copyfile(os.path.join(CFG_DIR, 'MANIFEST.in.wheel.ve3'), 'MANIFEST.in')
+        ret = subprocess.call(['make', 'ARCH=ve3', '-f',
+                               os.path.join(os.getcwd(), 'Makefile')])
+        if ret != 0:
+            raise RuntimeError('Failed to build VE3 kernel.')
+        super().run()
+
+
+# customize build
+
+
+class vh_custom_build(build.build):
+    def run(self):
+        # as-is
+        super().run()
+
+
+class ve1_custom_build(build.build):
+    def run(self):
+        self.build_lib += '-ve1'
+        super().run()
+
+
+class ve3_custom_build(build.build):
+    def run(self):
+        self.build_lib += '-ve3'
+        super().run()
+
+
+# customize build_ext
+
+
+class vh_custom_build_ext(build_ext.build_ext):
+    def run(self):
+        # as-is
+        super().run()
+
+
+class ve1_custom_build_ext(build_ext.build_ext):
+    def run(self):
+        ret = subprocess.call(['make', 'ARCH=ve1', '-f',
+                               os.path.join(os.getcwd(), 'Makefile')])
+        if ret != 0:
+            raise RuntimeError('Failed to build VE1 kernel.')
+        super().run()
+
+
+class ve3_custom_build_ext(build_ext.build_ext):
+    def run(self):
+        ret = subprocess.call(['make', 'ARCH=ve3', '-f',
+                               os.path.join(os.getcwd(), 'Makefile')])
+        if ret != 0:
+            raise RuntimeError('Failed to build VE3 kernel.')
+        super().run()
+
+
+# customize sdist
+
+
+class custom_sdist(sdist):
+    def run(self):
+        shutil.copyfile('MANIFEST.in.sdist', 'MANIFEST.in')
+        super().run()
+
+
+cmdclass = {}
+
+flat_targs = sum(args.targ, [])
+print("Build Targets:", flat_targs)
+for bt in flat_targs:
+    print("\n===Begin Building for %s ===" % bt)
+    shutil.copyfile(os.path.join(CFG_DIR, f'setup_{bt}.cfg'), 'setup.cfg')
+
+    cmdclass['bdist_wheel'] = locals()[f'{bt}_custom_bdist_wheel']
+    cmdclass['build_ext'] = locals()[f'{bt}_custom_build_ext']
+    cmdclass['build'] = locals()[f'{bt}_custom_build']
+    cmdclass['sdist'] = custom_sdist
+    kwargs = {'version': __version__,  # NOQA
+              'cmdclass': cmdclass}
+    if bt == 'vh':
+        kwargs['install_requires'] = ['numpy>=1.17',
+                                      'nlcpy_ve1_kernel==' + __version__, # NOQA
+                                      'nlcpy_ve3_kernel==' + __version__] # NOQA
+        kwargs['ext_modules'] = cythonize(
+            extensions,
+            compiler_directives=compiler_directives,
+            language_level=3)
+
+    setup(**kwargs)
+    dir_util._path_created.clear()
+    print("===End Building for %s ===" % bt)

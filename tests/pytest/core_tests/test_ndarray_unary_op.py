@@ -66,8 +66,8 @@ class TestArrayBoolOp(unittest.TestCase):
             self.assertFalse(bool(nlcpy.array((), dtype=dtype)))
 
     def test_bool_scalar_bool(self):
-        self.assertTrue(bool(nlcpy.array(True, dtype=numpy.bool)))
-        self.assertFalse(bool(nlcpy.array(False, dtype=numpy.bool)))
+        self.assertTrue(bool(nlcpy.array(True, dtype=numpy.bool_)))
+        self.assertFalse(bool(nlcpy.array(False, dtype=numpy.bool_)))
 
     @testing.for_all_dtypes()
     def test_bool_scalar(self, dtype):
@@ -75,8 +75,8 @@ class TestArrayBoolOp(unittest.TestCase):
         self.assertFalse(bool(nlcpy.array(0, dtype=dtype)))
 
     def test_bool_one_element_bool(self):
-        self.assertTrue(bool(nlcpy.array([True], dtype=numpy.bool)))
-        self.assertFalse(bool(nlcpy.array([False], dtype=numpy.bool)))
+        self.assertTrue(bool(nlcpy.array([True], dtype=numpy.bool_)))
+        self.assertFalse(bool(nlcpy.array([False], dtype=numpy.bool_)))
 
     @testing.for_all_dtypes()
     def test_bool_one_element(self, dtype):
@@ -122,19 +122,19 @@ class TestArrayUnaryOp(unittest.TestCase):
     @testing.for_all_dtypes(no_bool=True)
     @testing.numpy_nlcpy_allclose()
     def check_zerodim_op(self, op, xp, dtype):
-        a = xp.array(-2, dtype)
+        a = xp.array(-2).astype(dtype)
         return op(a)
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_allclose()
     def check_zerodim_op_full(self, op, xp, dtype):
-        a = xp.array(-2, dtype)
+        a = xp.array(-2).astype(dtype)
         return op(a)
 
     @testing.for_all_dtypes(no_bool=True)
     @testing.numpy_nlcpy_allclose()
     def test_neg_zerodim(self, xp, dtype):
-        a = xp.array(-2, dtype)
+        a = xp.array(-2).astype(dtype)
         return operator.neg(a)
 
     def test_pos_zerodim(self):
@@ -162,7 +162,7 @@ class TestArrayIntUnaryOp(unittest.TestCase):
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_allclose(accept_error=TypeError)
     def check_zerodim_op(self, op, xp, dtype):
-        a = xp.array(-2, dtype)
+        a = xp.array(-2).astype(dtype)
         return op(a)
 
     def test_invert_zerodim(self):

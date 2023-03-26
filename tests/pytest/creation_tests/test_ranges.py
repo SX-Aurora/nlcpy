@@ -79,6 +79,7 @@ class TestRanges(unittest.TestCase):
     @testing.for_all_dtypes(no_bool=True)
     @testing.numpy_nlcpy_array_equal()
     def test_arange4(self, xp, dtype):
+        print(xp, dtype)
         return xp.arange(20, 2, -3, dtype=dtype)
 
     @testing.for_all_dtypes(no_bool=True)
@@ -102,6 +103,7 @@ class TestRanges(unittest.TestCase):
         return xp.arange(10, 8, -1, dtype=dtype)
 
     @testing.numpy_nlcpy_raises()
+    @testing.with_requires("numpy<1.24")
     def test_arange9(self, xp):
         return xp.arange(10, dtype=xp.bool_)
 

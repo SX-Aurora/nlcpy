@@ -90,7 +90,7 @@ class VeObj(object):
             rc = _shell_cmd(cmd, verbose=verbose)
         except Exception as e:
             os.chdir(owd)
-            raise(e)
+            raise (e)
         if verbose and os.path.isfile(oname + ".L"):
             print("---------")
             with open(oname + ".L", "r") as f:

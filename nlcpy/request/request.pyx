@@ -293,7 +293,8 @@ cdef class RequestManager:
         if _vp_logging._is_enable(_vp_logging.REQUEST):
             _vp_logging.info(
                 _vp_logging.REQUEST,
-                'push VE request `%s` (nodeid=%d)', name, self.venode.lid)
+                'push VE request `%s` (nodeid=%d) ',
+                name, self.venode.lid)
 
         self._set_request(func_num, func_type, args)
         self.record_reqname(name)

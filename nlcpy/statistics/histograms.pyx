@@ -387,7 +387,8 @@ def bincount(x, weights=None, minlength=0):
 
 @numpy_wrap
 def histogram_bin_edges(a, bins=10, range=None, weights=None):
-    """Function to calculate only the edges of the bins used by :func:`histogram` function.
+    """Function to calculate only the edges of the bins used by :func:`histogram`
+    function.
 
     Parameters
     ----------

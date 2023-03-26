@@ -31,7 +31,12 @@
 
 import os
 import re
-from nlcpy import _path
+import warnings
+
+_default_lib_root_ve1 = '/opt/nec/ve/lib'
+_default_lib_root_ve3 = '/opt/nec/ve3/lib'
+_default_nlc_home_ve1 = '/opt/nec/ve'
+_default_nlc_home_ve3 = '/opt/nec/ve3'
 
 
 def _set_ve_omp_num_threads(n=None):
@@ -43,27 +48,32 @@ def _set_ve_omp_num_threads(n=None):
         os.environ['VE_OMP_NUM_THREADS'] = ve_num_threads
 
 
-def _set_ve_ld_library_path():
+def _set_ve_ld_library_path(path):
     _ve_ld_library_path = os.environ.get('VE_LD_LIBRARY_PATH', '')
-    os.environ['VE_LD_LIBRARY_PATH'] = _path._lib_path + ':' + _ve_ld_library_path
+    os.environ['VE_LD_LIBRARY_PATH'] = path + ':' + _ve_ld_library_path
 
 
 # XXX: This is a temporary workaround
 # find NCC directory and set VE_LD_PRELOAD
-def _set_ve_ld_preload():
-    NCC_COMP_VER = '3.0.7'
-    base = '/opt/nec/ve/ncc'
-    files = os.listdir(base)
-    dirs = [os.path.join(base, f)
-            for f in files
-            if os.path.isdir(os.path.join(base, f))]
-    dirs.append(os.path.join(base, NCC_COMP_VER))
-    dirs.sort(
-        key=lambda s: [int(u) for u in os.path.basename(s).split('.')], reverse=True)
-    NCC_PATH = dirs[0]
-    if os.path.basename(NCC_PATH) != NCC_COMP_VER:
-        _ve_ld_preload = os.environ.get('VE_LD_PRELOAD', '')
-        os.environ['VE_LD_PRELOAD'] = NCC_PATH + '/lib/libncc.so.2:' + _ve_ld_preload
+def _set_ve_ld_preload(arch):
+    libncc_candidates = ('libncc.so', 'libncc.so.2')
+    if arch == 1:
+        libdir = _default_lib_root_ve1
+    elif arch == 3:
+        libdir = _default_lib_root_ve3
+    else:
+        raise ValueError('Unknown VE arch:', arch)
+    libncc = None
+    for libncc_name in libncc_candidates:
+        if os.path.exists(os.path.join(libdir, libncc_name)):
+            libncc = libncc_name
+            break
+    if libncc is None:
+        warnings.warn('Not exists libncc.so in {}'.format(libdir),
+                      RuntimeWarning)
+        return
+    _ve_ld_preload = os.environ.get('VE_LD_PRELOAD', '')
+    os.environ['VE_LD_PRELOAD'] = libncc + ':' + _ve_ld_preload
 
 
 def _is_fast_math():
@@ -150,3 +160,26 @@ def _get_ve_nlcpy_nodelist_ids():
 
 def _is_numpy_wrap_enabled():
     return not os.environ.get('VE_NLCPY_ENABLE_NUMPY_WRAP') in ('no', 'NO')
+
+
+def _get_ve_nlcpy_ve_arch():
+    ve_arch = os.environ.get('VE_NLCPY_VE_ARCH', None)
+    if ve_arch:
+        ve_arch = int(ve_arch)
+    return ve_arch
+
+
+def _get_nlc_home(arch):
+    nlc_home = os.environ.get('NLC_HOME', None)
+    if nlc_home and os.path.exists(nlc_home):
+        return nlc_home
+    if arch == 1:
+        nlc_home = _default_nlc_home_ve1
+    elif arch == 3:
+        nlc_home = _default_nlc_home_ve3
+    else:
+        raise ValueError('Unknown Arch:', arch)
+    if os.path.exists(nlc_home):
+        return nlc_home
+    else:
+        return None

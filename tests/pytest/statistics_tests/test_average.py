@@ -31,6 +31,8 @@
 
 from __future__ import division, absolute_import, print_function
 import random
+import os
+import atexit
 
 from numpy.testing import assert_allclose
 
@@ -59,6 +61,12 @@ typedata = {
     '14': ('ca4', (2, 3, 4), 'float64', None, None, None),
 }
 fil = "tmp.npy"
+
+
+@atexit.register
+def cleanup():
+    if os.path.isfile(fil):
+        os.remove(fil)
 
 
 def ca1(arg):

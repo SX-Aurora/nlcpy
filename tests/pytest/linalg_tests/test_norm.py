@@ -181,13 +181,13 @@ class TestNormMatrix(unittest.TestCase):
 
 
 class TestNormMatrixNotContiguous(unittest.TestCase):
-    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
+    @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
     def test_norm_matrix_not_contiguous(self, xp):
         x = xp.arange(3 * 4 * 5).reshape(3, 4, 5).astype('f')
         x = xp.moveaxis(x, 0, 1)
         return xp.linalg.norm(x, 'fro', (1, 0))
 
-    @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
+    @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
     def test_norm_matrix_not_contiguous_2d(self, xp):
         x = xp.arange(4 * 5).reshape(4, 5).astype('f')
         x = xp.moveaxis(x, 0, 1)

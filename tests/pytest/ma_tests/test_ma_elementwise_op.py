@@ -107,18 +107,21 @@ class TestArrayElementwiseOp(unittest.TestCase):
     def test_iadd_scalar(self):
         self.check_array_scalar_op(operator.iadd)
 
+    @testing.with_requires('numpy<1.24')
     def test_iadd_scalar_nomask(self):
         self.check_array_scalar_op(operator.iadd, nomask=True)
 
     def test_isub_scalar(self):
         self.check_array_scalar_op(operator.isub, no_bool=True)
 
+    @testing.with_requires('numpy<1.24')
     def test_isub_scalar_nomask(self):
         self.check_array_scalar_op(operator.isub, no_bool=True, nomask=True)
 
     def test_imul_scalar(self):
         self.check_array_scalar_op(operator.imul)
 
+    @testing.with_requires('numpy<1.24')
     def test_imul_scalar_nomask(self):
         self.check_array_scalar_op(operator.imul, nomask=True)
 
@@ -293,16 +296,18 @@ class TestArrayElementwiseOp(unittest.TestCase):
         b = xp.ma.array(testing.shaped_random([2, 3, 4], xp))
         return a + b
 
+    @testing.for_all_dtypes_combination(names=['x_type', 'y_type'], full=True)
     @testing.numpy_nlcpy_array_equal()
-    def test_binary_op_both_0d(self, xp):
-        a = xp.ma.array(1, xp)
-        b = xp.ma.array(2, xp)
+    def test_binary_op_both_0d(self, xp, x_type, y_type):
+        a = xp.ma.array(1, dtype=x_type)
+        b = xp.ma.array(2, dtype=y_type)
         return a + b
 
+    @testing.for_all_dtypes_combination(names=['x_type', 'y_type'], full=True)
     @testing.numpy_nlcpy_allclose()
-    def test_domained_binary_op_both_0d(self, xp):
-        a = xp.ma.array(1, xp)
-        b = xp.ma.array(2, xp)
+    def test_domained_binary_op_both_0d(self, xp, x_type, y_type):
+        a = xp.ma.array(1, dtype=x_type)
+        b = xp.ma.array(2, dtype=y_type)
         return a / b
 
     @testing.for_orders('CF', name='order_in')

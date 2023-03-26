@@ -99,27 +99,14 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *whe
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 // TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
 #pragma _NEC novector
 @-->,<--@dnl
 #pragma _NEC ivdep
 @-->)
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,$1)
-            }
-        } else {
-ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
-// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
-#pragma _NEC novector
-@-->,<--@dnl
-#pragma _NEC ivdep
-@-->)
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,$1)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,$1)
         }
 
 /////////

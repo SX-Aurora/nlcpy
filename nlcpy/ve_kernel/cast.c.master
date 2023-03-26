@@ -100,19 +100,10 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,i32)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,i32)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,i32)
         }
 
 /////////
@@ -286,19 +277,10 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,i64)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,i64)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,i64)
         }
 
 /////////
@@ -472,19 +454,10 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,u32)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,u32)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,u32)
         }
 
 /////////
@@ -658,19 +631,10 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,u64)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,u64)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,u64)
         }
 
 /////////
@@ -844,19 +808,10 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,f32)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,f32)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,f32)
         }
 
 /////////
@@ -1030,19 +985,10 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,f64)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,f64)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,f64)
         }
 
 /////////
@@ -1216,19 +1162,10 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,c64)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,c64)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,c64)
         }
 
 /////////
@@ -1402,19 +1339,10 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 #pragma _NEC ivdep
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,c128)
-            }
-        } else {
-#pragma _NEC ivdep
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,c128)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,c128)
         }
 
 /////////
@@ -1588,21 +1516,11 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
         const int64_t lenm = y->size;
         const int64_t cntm_s = lenm * it / nt;
         const int64_t cntm_e = lenm * (it + 1) / nt;
-        if (x->size == 1) {
-            @TYPE1@ px_s = px[0];
 // TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
 #pragma _NEC novector
 
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px_s,@DTAG1@,bool)
-            }
-        } else {
-// TODO: If you use ncc 3.0.1 or later, replace "novector" to "ivdep".
-#pragma _NEC novector
-
-            for (i0 = cntm_s; i0 < cntm_e; i0++) {
-                py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,bool)
-            }
+        for (i0 = cntm_s; i0 < cntm_e; i0++) {
+            py[i0] = @CAST_OPERATOR@(px[i0],@DTAG1@,bool)
         }
 
 /////////

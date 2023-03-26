@@ -34,8 +34,6 @@
 #include "nlcpy_mempool.h"
 
 static size_t POOL_SIZE = DEFAULT_POOL_SIZE;
-static int (*hooked_veo_alloc_hmem)(struct veo_proc_handle *, void **, const size_t);
-static int (*hooked_veo_free_hmem)(void *);
 
 // *************************************************************************
 //  Entry Functions
@@ -56,7 +54,7 @@ mempool_t *nlcpy_mempool_alloc(struct veo_proc_handle *hnd, size_t tot_memsize)
     // allocate pool
     int iret;
     void *vemem;
-    iret = hooked_veo_alloc_hmem(hnd, &vemem, POOL_SIZE);
+    iret = veo_alloc_hmem(hnd, &vemem, POOL_SIZE);
     if (iret != VEO_COMMAND_OK) return NULL;
     pool->base = (uint64_t)vemem;
 
@@ -167,13 +165,6 @@ void nlcpy_mempool_set_size(const size_t pool_size) {
     printf("set pool size: %lu\n", pool_size);
 #endif
     POOL_SIZE = pool_size;
-}
-
-
-void nlcpy_mempool_set_hooked_veo_sym(const void * const _hooked_veo_alloc_hmem,
-                                      const void * const _hooked_veo_free_hmem) {
-    hooked_veo_alloc_hmem = _hooked_veo_alloc_hmem;
-    hooked_veo_free_hmem  = _hooked_veo_free_hmem;
 }
 
 

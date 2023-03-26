@@ -35,21 +35,9 @@ import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
+from nlcpy.testing.types import f64_type
 
-f64_type = [numpy.float64, ]
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-no_bool_types = float_types + int_types + complex_types
-no_bool_no_uint_types = float_types + signed_int_types + complex_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
-negative_types = (
-    [numpy.bool] + float_types + signed_int_types + complex_types)
-negative_no_complex_types = [numpy.bool] + float_types + signed_int_types
-no_complex_types = [numpy.bool] + float_types + int_types
-no_bool_no_complex_types = float_types + int_types
 
 minval = -100
 maxval = 100
@@ -77,9 +65,9 @@ ops = [
 def adjust_input(xp, op, a, is_left=True):
     a = xp.array(a)
     if op == 'power':
-        if a.dtype == numpy.bool:
+        if a.dtype == numpy.bool_:
             if is_left:
-                a = xp.ones(a.shape, numpy.bool)
+                a = xp.ones(a.shape, numpy.bool_)
         else:
             a = testing.shaped_random(a.shape, xp, a.dtype, scale=3) + 1
     elif op in ('mod', 'remainder', 'fmod'):
@@ -96,6 +84,8 @@ def adjust_input(xp, op, a, is_left=True):
 ###########################################################
 
 
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestBinaryCast(unittest.TestCase):
 
     def tearDown(self):
@@ -259,6 +249,8 @@ shapes_base = [(4, ),
 b_shapes = testing.shaped_rearrange_for_broadcast(shapes_base)
 
 
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestBinaryBroadcast(unittest.TestCase):
 
     def tearDown(self):

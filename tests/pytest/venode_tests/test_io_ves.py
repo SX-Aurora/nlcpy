@@ -30,12 +30,15 @@
 #
 
 import unittest
+import os
 
 import numpy
 import nlcpy
 from nlcpy import venode
 from nlcpy import testing
 from tempfile import TemporaryFile
+from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile
 from tempfile import mkstemp
 
 
@@ -57,44 +60,50 @@ class TestIOVEs(unittest.TestCase):
 
     def test_save_load(self):
         base = nlcpy.array([[1, 2, 3], [4, 5, 6]])
-        nlcpy.save('/tmp/123', base)
-        res_vp = nlcpy.load('/tmp/123.npy')
-        testing.assert_array_equal(res_vp, base)
-        assert res_vp.venode == venode.VE(self.veid)
+        with TemporaryDirectory() as tmpdir:
+            outfile = os.path.join(tmpdir, '123')
+            nlcpy.save(outfile, base)
+            res_vp = nlcpy.load(outfile + '.npy')
+            testing.assert_array_equal(res_vp, base)
+            assert res_vp.venode == venode.VE(self.veid)
 
     def test_savez(self):
-        outfile = TemporaryFile()
-        x = nlcpy.arange(10)
-        y = nlcpy.sin(x)
-        nlcpy.savez(outfile, x=x, y=y)
-        _ = outfile.seek(0)
-        npzfile = nlcpy.load(outfile)
-        testing.assert_array_equal(npzfile['x'], x)
-        testing.assert_array_equal(npzfile['y'], y)
-        assert npzfile['x'].venode == venode.VE(self.veid)
-        assert npzfile['y'].venode == venode.VE(self.veid)
+        with TemporaryFile() as outfile:
+            x = nlcpy.arange(10)
+            y = nlcpy.sin(x)
+            nlcpy.savez(outfile, x=x, y=y)
+            _ = outfile.seek(0)
+            npzfile = nlcpy.load(outfile)
+            testing.assert_array_equal(npzfile['x'], x)
+            testing.assert_array_equal(npzfile['y'], y)
+            assert npzfile['x'].venode == venode.VE(self.veid)
+            assert npzfile['y'].venode == venode.VE(self.veid)
 
     def test_savez_compressed(self):
         test_array = nlcpy.random.rand(3, 2)
         test_vector = nlcpy.random.rand(4)
-        nlcpy.savez_compressed('/tmp/123', a=test_array, b=test_vector)
-        loaded = nlcpy.load('/tmp/123.npz')
-        testing.assert_array_equal(test_array, loaded['a'])
-        testing.assert_array_equal(test_vector, loaded['b'])
-        assert loaded['a'].venode == venode.VE(self.veid)
-        assert loaded['b'].venode == venode.VE(self.veid)
+        with TemporaryDirectory() as tmpdir:
+            outfile = os.path.join(tmpdir, '123')
+            nlcpy.savez_compressed(outfile, a=test_array, b=test_vector)
+            loaded = nlcpy.load(outfile + '.npz')
+            testing.assert_array_equal(test_array, loaded['a'])
+            testing.assert_array_equal(test_vector, loaded['b'])
+            assert loaded['a'].venode == venode.VE(self.veid)
+            assert loaded['b'].venode == venode.VE(self.veid)
 
     def test_loadtxt_savetxt(self):
         c = nlcpy.array([[0., 1.], [2., 3.]])
-        nlcpy.savetxt('/tmp/test.out', c, delimiter=',')
-        res_vp = nlcpy.loadtxt('/tmp/test.out', delimiter=',')
-        testing.assert_array_equal(res_vp, c)
-        assert res_vp.venode == venode.VE(self.veid)
+        with NamedTemporaryFile() as outfile:
+            nlcpy.savetxt(outfile.name, c, delimiter=',')
+            res_vp = nlcpy.loadtxt(outfile.name, delimiter=',')
+            testing.assert_array_equal(res_vp, c)
+            assert res_vp.venode == venode.VE(self.veid)
 
     def test_fromfile(self):
         x = numpy.random.uniform(0, 1, 5)
         fname = mkstemp()[1]
         x.tofile(fname)
         res_vp = nlcpy.fromfile(fname)
+        os.remove(fname)
         testing.assert_array_equal(res_vp, x)
         assert res_vp.venode == venode.VE(self.veid)

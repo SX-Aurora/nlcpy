@@ -182,7 +182,7 @@ def solve(a, b):
 
 def _lstsq_errchk(info):
     def _info_check(*args):
-        if info == 1:
+        if info > 0:
             raise util.LinAlgError('a singular value did not converge')
     return _info_check
 

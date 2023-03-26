@@ -36,13 +36,8 @@ import pytest
 import nlcpy
 import gc
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
 
 ops = [
     'power',
@@ -110,6 +105,8 @@ def execute_ufunc(op, xp, in1, dtype=None, axis=0, initial=numpy._NoValue):
     'initial': (numpy._NoValue, None, 0, 2, -2.63, -3.2 + 0.3j),
 }))
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduceDtype(unittest.TestCase):
 
     shape = ((4,), (3, 2), )
@@ -139,6 +136,8 @@ class TestReduceDtype(unittest.TestCase):
     'initial': (numpy._NoValue, None, 1.1),
 }))
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduceAxis(unittest.TestCase):
 
     axes = (0, 1, -2, (0, 2), None)
@@ -158,6 +157,8 @@ class TestReduceAxis(unittest.TestCase):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduce(unittest.TestCase):
 
     def tearDown(self):

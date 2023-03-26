@@ -29,26 +29,13 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import numpy
 import unittest
 import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-no_bool_types = float_types + int_types + complex_types
-no_bool_no_uint_types = float_types + signed_int_types + complex_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
-negative_types = (
-    [numpy.bool] + float_types + signed_int_types + complex_types)
-negative_no_complex_types = [numpy.bool] + float_types + signed_int_types
-no_complex_types = [numpy.bool] + float_types + int_types
-no_bool_no_complex_types = float_types + int_types
 
 minval = -100
 maxval = 100
@@ -110,6 +97,8 @@ def adjust_input(xp, op, a):
     return a
 
 
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestUnaryCast(unittest.TestCase):
 
     def tearDown(self):

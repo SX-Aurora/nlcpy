@@ -36,13 +36,8 @@ import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
 
 ops = [
     'power',
@@ -129,6 +124,8 @@ def execute_ufunc(op, xp, in1, out=None, dtype=None,
     'initial': (numpy._NoValue, None, 0, 2, -2.63, -1.2 + 0.3j),
 }))
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduce(unittest.TestCase):
 
     shapes = ((1, 3, 2), (3, 2, 5), (5, 4, 2, 3))
@@ -192,6 +189,8 @@ class TestReduce(unittest.TestCase):
     'initial': (numpy._NoValue, None, 2, -2.63, -1.2 + 0.3j),
 }))
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduce2(unittest.TestCase):
 
     shapes = ((1, 3, 2), (3, 2, 5))
@@ -252,6 +251,8 @@ class TestReduce2(unittest.TestCase):
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduce3(unittest.TestCase):
 
     def tearDown(self):
@@ -312,6 +313,8 @@ class TestReduce3(unittest.TestCase):
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduceKeepdims(unittest.TestCase):
 
     shape = ((3, 4), )

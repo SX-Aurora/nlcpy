@@ -36,8 +36,7 @@ from libc.stdint cimport *
 
 cdef extern from "<ve_offload.h>" nogil:
 
-    # uncomment until API_VERSION comes back into mainline VEO
-    # enum: VEO_API_VERSION
+    enum: VEO_API_VERSION
 
     # maximum number of arguments to VEO calls (32)
     cdef enum: VEO_MAX_NUM_ARGS
@@ -72,7 +71,8 @@ cdef extern from "<ve_offload.h>" nogil:
     cdef struct veo_thr_ctxt:
         pass
 
-    # int veo_api_version()
+    const char *veo_version_string()
+    int veo_api_version()
     veo_proc_handle *veo_proc_create(int)
     veo_proc_handle *veo_proc_create_static(int, char *)
     int veo_proc_destroy(veo_proc_handle *)
@@ -101,11 +101,13 @@ cdef extern from "<ve_offload.h>" nogil:
     int veo_alloc_mem(veo_proc_handle *, uint64_t *, size_t)
     int veo_alloc_hmem(veo_proc_handle *, void **, size_t)
     int veo_free_mem(veo_proc_handle *, uint64_t)
+    int veo_free_hmem(void *)
     int veo_read_mem(veo_proc_handle *, void *, uint64_t, size_t)
     int veo_write_mem(veo_proc_handle *, uint64_t, void *, size_t)
     int veo_hmemcpy(void *dst, const void *src, size_t size)
     uint64_t veo_async_read_mem(veo_thr_ctxt *, void *, uint64_t, size_t)
     uint64_t veo_async_write_mem(veo_thr_ctxt *, uint64_t, void *, size_t)
+    int veo_get_ve_arch(int ve_node_numember)
 
     ##############################################
     # VEO HMEM API
@@ -114,3 +116,4 @@ cdef extern from "<ve_offload.h>" nogil:
     void *veo_get_hmem_addr(void *)
     int veo_get_max_proc_identifier()
     int veo_get_proc_identifier_from_hmem(const void *)
+    veo_proc_handle *veo_get_proc_handle_from_hmem(const void *)

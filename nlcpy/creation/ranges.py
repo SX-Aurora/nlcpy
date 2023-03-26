@@ -190,7 +190,7 @@ def arange(start, stop=None, step=1, dtype=None):
     request._push_request(
         "nlcpy_arange",
         "creation_op",
-        (typ(start), typ(step), ret),)
+        (numpy.array(start).astype(typ), numpy.array(step).astype(typ), ret),)
 
     return ret
 

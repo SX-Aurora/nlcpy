@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-18 10:59+0900\n"
+"POT-Creation-Date: 2023-03-02 17:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,6 +54,9 @@ msgid ":obj:`nlcpy.show_config <nlcpy.show_config>`"
 msgstr ""
 
 #: ../../source/reference/miscellaneous.rst:24:<autosummary>:1
-msgid "Shows library versions in the system on which NLCPy is running."
+msgid "Shows various information in the system on which NLCPy is running."
 msgstr ""
+
+#~ msgid "Shows library versions in the system on which NLCPy is running."
+#~ msgstr ""
 

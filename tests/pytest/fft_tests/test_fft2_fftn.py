@@ -6,10 +6,8 @@ import numpy as np
 from numpy.testing import assert_allclose
 import nlcpy       # NOQA
 from nlcpy import testing
+from nlcpy.testing.types import int_types
 
-signed_int_types = [np.int32, np.int64]
-unsigned_int_types = [np.uint32, np.uint64]
-int_types = signed_int_types + unsigned_int_types
 global enable_nd_planning
 enable_nd_planning = True
 
@@ -54,7 +52,7 @@ def nd_planning_states(states=[True, False], name='enable_nd'):
 
 
 def _numpy_fftn_correct_dtype(xp, a):
-    if xp == np and a.dtype in int_types + [np.bool]:
+    if xp == np and a.dtype in int_types + [np.bool_]:
         a = xp.asarray(a, dtype=np.float64)
     return a
 
@@ -141,7 +139,7 @@ class TestFft2DInvalidParam(object):
                              ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
                              [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
     def test_fft2_param_array_U21(self, a):
-        if np.__version__ < np.lib.NumpyVersion('1.19.0'):
+        if np.__version__ < np.lib.NumpyVersion('1.19.1'):
             with pytest.raises(ValueError):
                 nlcpy.fft.fft2(a)
         else:
@@ -161,7 +159,7 @@ class TestFft2DInvalidParam(object):
                              ([1, 2], [3, "4"]), [(1, 2), (3, "4")],
                              [[1, 2], (3, "4")], ((1, 2), [3, "4"]),))
     def test_ifft2_param_array_U21(self, a):
-        if np.__version__ < np.lib.NumpyVersion('1.19.0'):
+        if np.__version__ < np.lib.NumpyVersion('1.19.1'):
             with pytest.raises(ValueError):
                 nlcpy.fft.ifft2(a)
         else:

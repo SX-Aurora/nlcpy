@@ -191,7 +191,7 @@ cdef void get_reduced_dims(
             index += 1
 
 
-cpdef inline Py_ssize_t _extract_slice_element(x) except? 0:
+cpdef inline Py_ssize_t _extract_slice_element(x) except ? 0:
     try:
         return x.__index__()
     except AttributeError:
@@ -272,7 +272,7 @@ cpdef tuple complete_slice_list(list slice_list, Py_ssize_t ndim):
     return slice_list, n_newaxes
 
 
-cpdef inline int _normalize_order(order, bint allow_k=True) except? 0:
+cpdef inline int _normalize_order(order, bint allow_k=True) except ? 0:
     cdef int order_char = 0
     if type(order) not in (int, float, complex):
         order_char = b'C' if len(order) == 0 else ord(order[0])

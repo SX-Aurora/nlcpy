@@ -1,4 +1,6 @@
-prune obj/
+prune obj_ve1/
+prune obj_ve3/
+prune build/
 prune dist/
 prune rpm/
 prune nlcpy.egg-info

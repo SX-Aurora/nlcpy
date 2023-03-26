@@ -1,0 +1,9 @@
+=========================================
+What's new in Version 3.0.0 (March, 2023)
+=========================================
+
+
+New Features
+------------
+
+* Newly added shared libraries for VE30.

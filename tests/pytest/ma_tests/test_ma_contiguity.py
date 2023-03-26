@@ -83,16 +83,16 @@ class TestArrayContiguity(unittest.TestCase):
         fill_value = testing.shaped_arange((2, 3, 4), nlcpy)
         va = nlcpy.ma.array(data, mask=mask, fill_value=fill_value)
 
-        assert(is_same_contiguity(na, va))
+        assert (is_same_contiguity(na, va))
 
         nb = na.transpose(2, 0, 1)
         vb = va.transpose(2, 0, 1)
-        assert(is_same_contiguity(nb, vb))
+        assert (is_same_contiguity(nb, vb))
 
         nc = na[::-1]
         vc = va[::-1]
-        assert(is_same_contiguity(nc, vc))
+        assert (is_same_contiguity(nc, vc))
 
         nd = na[:, :, ::2]
         vd = va[:, :, ::2]
-        assert(is_same_contiguity(nd, vd))
+        assert (is_same_contiguity(nd, vd))

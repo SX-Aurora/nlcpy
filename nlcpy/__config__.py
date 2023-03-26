@@ -55,205 +55,138 @@
 #     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+import sys
 import re
-from nlcpy import _path
-import subprocess
 import os
-import numpy as np
+import io
+import platform
+import nlcpy
+from nlcpy.veo import _veo
+import numpy
 
-pkg_ver = {'NLC': '', 'ASL': '', 'BLAS': '',
-           'LAPACK': '', 'SCA': '', 'NUMPY': '', 'NCC': ''}
 
+def get_nlc_lib_path(arch):
+    nlc_path = os.environ.get('VE_LD_LIBRARY_PATH', None)
+    if nlc_path is not None:
+        pat = re.compile(r'nlc/[0-9]+\.[0-9]+\.[0-9]+')
+        for _nlc_path in nlc_path.split(':'):
+            if pat.search(_nlc_path):
+                return _nlc_path
 
-def chk_data(data):
-    ans = ""
+    if arch == 1:
+        default_nlc_path = '/opt/nec/ve/lib'
+    elif arch == 3:
+        default_nlc_path = '/opt/nec/ve3/lib'
 
-    if data == "":
-        ans = "Not Available"
+    if not os.path.exists(default_nlc_path):
+        return None
+    require_nlc_libs = [
+        'libasl_openmp_i64.so',
+        'libaslfftw3_i64.so',
+        'liblapack_i64.so',
+        'libblas_openmp_i64.so',
+        'libsca_openmp_i64.so',
+        'libheterosolver_openmp_i64.so',
+        'libsblas_openmp_i64.so',
+        'libcblas_i64.so',
+    ]
+    for _file in os.listdir(default_nlc_path):
+        if _file in require_nlc_libs:
+            require_nlc_libs.pop(require_nlc_libs.index(_file))
+    if len(require_nlc_libs) == 0:
+        return default_nlc_path
     else:
-        pat = r"[\d+]+[\w.]*(?:[-\s]+(?:alpha|beta|build)[\w.]*)?"
-        mat = re.match(pat, data)
-        if mat is None:
-            ans = "Not Available"
-        else:
-            ans = data
-
-    return ans
+        return None
 
 
-def exec_cmd(get_com):
-    try:
-        proc = subprocess.check_output(get_com, shell=True)
-        std_proc = proc
-    except subprocess.CalledProcessError:
-        std_proc = ""
-
-    if std_proc != "":
-        out = std_proc.decode().rstrip()
-    else:
-        out = ""
-
-    return out
-
-
-def get_nlc_ver():
-    ld_path = os.getenv('VE_LD_LIBRARY_PATH')
-    if ld_path is None:
-        gp = None
-    else:
-        pat = r'nlc/([0-9]+\.){1}[0-9]+(\.[0-9]+)?'
-        p = re.search(pat, ld_path)
-        gp = p.group(0)
-        gp = gp[4:]
-
-    if gp is None:
-        pkg_ver['NLC'] = ""
-    else:
-        pkg_ver['NLC'] = gp
-    return gp
-
-
-def get_asl_ver(base_ver):
-    cmd = '/usr/bin/rpm -qi nec-asl-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Version | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    m_v = exec_cmd(get_cmd)
-
-    cmd = '/usr/bin/rpm -qi nec-asl-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin//grep Release | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    n_v = exec_cmd(get_cmd)
-
-    ans = m_v + "-" + n_v
-
-    pkg_ver['ASL'] = ans
-
-
-def get_blas_ver(base_ver):
-    cmd = '/usr/bin/rpm -qi nec-blas-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Version | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    m_v = exec_cmd(get_cmd)
-
-    cmd = '/usr/bin/rpm -qi nec-blas-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Release | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    n_v = exec_cmd(get_cmd)
-
-    ans = m_v + "-" + n_v
-
-    pkg_ver['BLAS'] = ans
-
-
-def get_lapack_ver(base_ver):
-    cmd = '/usr/bin/rpm -qi nec-lapack-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Version | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    m_v = exec_cmd(get_cmd)
-
-    cmd = 'rpm -qi nec-lapack-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Release | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    n_v = exec_cmd(get_cmd)
-
-    ans = m_v + "-" + n_v
-
-    pkg_ver['LAPACK'] = ans
-
-
-def get_sca_ver(base_ver):
-    cmd = '/usr/bin/rpm -qi nec-sca-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Version |" + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    m_v = exec_cmd(get_cmd)
-
-    cmd = '/usr/bin/rpm -qi nec-sca-ve-' + base_ver
-    get_cmd = cmd + "| /usr/bin/grep Release | " + \
-        "/usr/bin/awk -F':' '{print $2}'"
-    get_cmd = get_cmd + " | /usr/bin/sed 's/^[[:blank:]]*//'"
-    n_v = exec_cmd(get_cmd)
-
-    ans = m_v + "-" + n_v
-
-    pkg_ver['SCA'] = ans
+def get_nlcpy_ver():
+    return nlcpy.__version__
 
 
 def get_numpy_ver():
-    pkg_ver['NUMPY'] = np.__version__
+    return numpy.__version__
 
 
-def get_ncc_ver():
-    cnv_path = _path._common_kernel_path
-    get_com = "/opt/nec/ve/bin/nreadelf -dW " + cnv_path + \
-        "|/usr/bin/grep \"/opt/nec/ve/ncc\" | " \
-        "/usr/bin/grep -o -E \"([0-9]+\\.){1}[0-9]+(\\.[0-9]+)?\" | " \
-        "/usr/bin/head -n1"
-    out = exec_cmd(get_com)
-    ans = chk_data(out)
-    pkg_ver['NCC'] = ans
+def get_ncc_build_ver(arch):
+    try:
+        if arch == 1:
+            from nlcpy_ve1_kernel import build_info
+        elif arch == 3:
+            from nlcpy_ve3_kernel import build_info
+        else:
+            raise RuntimeError('Unknown arch:', arch)
+    except ImportError:
+        return None
+    try:
+        ncc_ver = build_info.ncc_build_version
+    except AttributeError:
+        return None
+    return ncc_ver
 
 
-def get_pkg_version():
-    base_ver = ''
+class pkg_info(object):
 
-    get_nlc_ver()
-    if pkg_ver['NLC'] == '':
-        for key in pkg_ver:
-            pkg_ver[key] = 'Not Available'
-    else:
-        base_ver = pkg_ver['NLC']
+    def __init__(self):
+        self.nve = nlcpy.venode.get_num_available_venodes()
+        self.ve_pids = [nlcpy.venode.VE(i).pid for i in range(self.nve)]
+        self.ve_archs = [nlcpy.venode.VE(i).arch for i in range(self.nve)]
+        self.ve_ncores = [nlcpy.venode.VE(i).ncore for i in range(self.nve)]
+        self.ve_tot_mems = [nlcpy.venode.VE(i).meminfo['kb_main_total']
+                            for i in range(self.nve)]
+        self.ve_used_mems = [nlcpy.venode.VE(i).meminfo['kb_main_used']
+                             for i in range(self.nve)]
 
-        get_asl_ver(base_ver)
-        get_blas_ver(base_ver)
-        get_lapack_ver(base_ver)
-        get_sca_ver(base_ver)
-        get_numpy_ver()
-        get_ncc_ver()
+        _ve = nlcpy.venode.VE()
+        self.ve_pid = _ve.pid
+        self.ve_arch = _ve.arch
+        self.records = {
+            'OS': platform.platform(),
+            'Python Version': platform.python_version(),
+            'NLC Library Path': get_nlc_lib_path(self.ve_arch),
+            'NLCPy Kernel Path': _ve.libpath._lib_dir,
+            'NLCPy Version': get_nlcpy_ver(),
+            'NumPy Version': get_numpy_ver(),
+            'ncc Build Version': get_ncc_build_ver(self.ve_arch),
+            'VEO API Version': _veo._veo_api_version,
+            'VEO Version': _veo._veo_version,
+            'Assigned VE IDs': self.ve_pids,
+            'VE Arch': self.ve_archs,
+            'VE ncore': self.ve_ncores,
+            'VE Total Mem[KB]': self.ve_tot_mems,
+            'VE Used  Mem[KB]': self.ve_used_mems,
+        }
+
+    def __str__(self):
+        max_width = max([len(k) for k in self.records.keys()])
+        fmt = '{:' + str(max_width) + '}: {}\n'
+        with io.StringIO() as s:
+            for k, v in self.records.items():
+                s.write(fmt.format(k, v))
+            ret = s.getvalue()
+        return ret
 
 
 def show_config():
-    """Shows library versions in the system on which NLCPy is running.
-
-    This function prints the versions of the following
-    libraries and compiler on which NLCPy is running.
-
-    - NLC: Numeric Library Collection
-    - ASL: Advanced Scientific Library
-    - BLAS: Basic Linear Algebra Subprograms
-    - LAPACK: Linear Algebra PACKage
-    - SCA: Stencil Code Accelerator
-    - NumPy: Fundamental package for scientific computing in Python
-    - ncc: NEC C/C++ compiler
-
-    Here, the version of ncc indicates that it was used
-    when the shared objects of NLCPy were built.
+    """Shows various information in the system on which NLCPy is running.
 
     Examples
     --------
     >>> import nlcpy as vp
     >>> vp.show_config()  # doctest: +SKIP
-    NLC             : 2.2.0
-         ASL        : 2.2-4.el7
-         BLAS       : 2.3-1.el7
-         LAPACK     : 2.1-1.el7
-         SCA        : 3.2-2.el7
-    NumPy           : 1.20.3
-    ncc(build)      : 3.3.0
-
+    OS                : Linux-4.18.0-372.32.1.el8_6.x86_64-x86_64-with-glibc2.10
+    Python Version    : 3.8.12
+    NLC Library Path  : /opt/nec/ve3/nlc/3.0.0/lib
+    NLCPy Kernel Path : /opt/nec/ve/nlcpy/3.0.0/lib/python3.6/nlcpy_ve1_kernel
+    NLCPy Version     : 3.0.0
+    NumPy Version     : 1.19.5
+    ncc Build Version : 4.0.83
+    VEO API Version   : 15
+    VEO Version       : 2.13.0
+    Assigned VE IDs  : [0, 1, 2, 3]
+    VE Arch          : [1, 1, 1, 1]
+    VE ncore         : [8, 8, 8, 8]
+    VE Total Mem[KB] : [50331648, 50331648, 50331648, 50331648]
+    VE Used  Mem[KB] : [4085760, 131072, 131072, 131072]
     """
-    get_pkg_version()
-
-    print('{0:15} : {1:9}'.format("NLC", pkg_ver['NLC']))
-    print('     {0:10} : {1:9}'.format("ASL", pkg_ver['ASL']))
-    print('     {0:10} : {1:9}'.format("BLAS", pkg_ver['BLAS']))
-    print('     {0:10} : {1:9}'.format("LAPACK", pkg_ver['LAPACK']))
-    print('     {0:10} : {1:9}'.format("SCA", pkg_ver['SCA']))
-    print('{0:15} : {1:9}'.format("NumPy", pkg_ver['NUMPY']))
-    print('{0:15} : {1:9}'.format("ncc(build)", pkg_ver['NCC']))
+    sys.stdout.write(str(pkg_info()))
+    sys.stdout.flush()

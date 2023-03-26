@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 17:42+0900\n"
+"POT-Creation-Date: 2023-03-02 17:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/reference/envs.rst:56
-msgid "Default: The number of VE core."
+msgid "Default: The number of VE cores."
 msgstr ""
 
 #: ../../source/reference/envs.rst:58
@@ -125,5 +125,8 @@ msgstr ""
 #~ "pool. You can specify the suffixes "
 #~ "B, b, K, k, M, m, G, or "
 #~ "g."
+#~ msgstr ""
+
+#~ msgid "Default: The number of VE core."
 #~ msgstr ""
 

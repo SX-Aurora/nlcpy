@@ -401,10 +401,10 @@ uint64_t nlcpy_$1_2d_$2_$2(ve_array *x, ve_array *y, ve_array *axes, ve_array *n
     if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    const uint64_t axis_1 = _axes[0];
-    const uint64_t axis_2 = _axes[1];
-    const asl_int_t n1 = (asl_int_t)_n_in[0];
-    const asl_int_t n2 = (asl_int_t)_n_in[1];
+    const uint64_t axis_1 = _axes[1];
+    const uint64_t axis_2 = _axes[0];
+    const asl_int_t n1 = (asl_int_t)_n_in[1];
+    const asl_int_t n2 = (asl_int_t)_n_in[0];
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
@@ -677,12 +677,12 @@ uint64_t nlcpy_$1_3d_$2_$2(ve_array *x, ve_array *y, ve_array *axes, ve_array *n
     if (_n_in == NULL) return (uint64_t)NLCPY_ERROR_MEMORY;
 
     asl_error_t err = ASL_ERROR_OK;
-    const uint64_t axis_1 = _axes[0];
+    const uint64_t axis_1 = _axes[2];
     const uint64_t axis_2 = _axes[1];
-    const uint64_t axis_3 = _axes[2];
-    const asl_int_t n1 = (asl_int_t)_n_in[0];
+    const uint64_t axis_3 = _axes[0];
+    const asl_int_t n1 = (asl_int_t)_n_in[2];
     const asl_int_t n2 = (asl_int_t)_n_in[1];
-    const asl_int_t n3 = (asl_int_t)_n_in[2];
+    const asl_int_t n3 = (asl_int_t)_n_in[0];
     if ( !reuse ) {
         err = nlcpy_destroy_handle();
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);

@@ -76,7 +76,7 @@ class TestCopyScalar(unittest.TestCase):
     @testing.numpy_nlcpy_array_equal()
     def test_copyto_scalar(self, xp, dst_dtype):
         if numpy.can_cast(self.val, dst_dtype, casting=self.casting):
-            dst = xp.asanyarray(-999, dtype=dst_dtype)  # make some 0-dim array
+            dst = xp.asanyarray(-999).astype(dtype=dst_dtype)  # make some 0-dim array
             src = self.val
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', numpy.ComplexWarning)
@@ -90,7 +90,7 @@ class TestCopyScalar(unittest.TestCase):
     @testing.numpy_nlcpy_array_equal()
     def test_copyto_scalar_masked(self, xp, dst_dtype):
         if numpy.can_cast(self.val, dst_dtype, casting=self.casting):
-            dst = xp.asanyarray(-999, dtype=dst_dtype)  # make some 0-dim array
+            dst = xp.asanyarray(-999).astype(dtype=dst_dtype)  # make some 0-dim array
             src = self.val
             where = xp.asanyarray(1, dtype='bool')
             with warnings.catch_warnings():
@@ -105,7 +105,7 @@ class TestCopyScalar(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_copyto_scalar_fail_casting(self, xp, dst_dtype):
         if not numpy.can_cast(self.val, dst_dtype, casting=self.casting):
-            dst = xp.asanyarray(-999, dtype=dst_dtype)  # make some 0-dim array
+            dst = xp.asanyarray(-999).astype(dtype=dst_dtype)  # make some 0-dim array
             src = self.val
             xp.copyto(dst, src, casting=self.casting)
         else:

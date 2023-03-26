@@ -4,7 +4,14 @@ BASEDIR = ../..
 
 include $(BASEDIR)/make.inc
 
+# NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -rV |head -1)
+ifeq ($(ARCH),ve1)
 NLCPATH=$(shell ls -d /opt/nec/ve/nlc/*.*.*|sort -rV |head -1)
+MARCH=-march=ve1
+else ifeq ($(ARCH),ve3)
+NLCPATH=$(shell ls -d /opt/nec/ve3/nlc/*.*.*|sort -rV |head -1)
+MARCH=-march=ve3
+endif
 LIBPATH=-L$(NLCPATH)/lib
 INCPATH=-I$(NLCPATH)/include -I.
 LIB_NLC=-lasl_openmp_i64 -llapack_i64 -lcblas_i64 -lblas_openmp_i64 -lsca_openmp_i64
@@ -19,14 +26,15 @@ LIB_PROF=$(LIBDIR)/libnlcpy_profiling.so
 
 CC=ncc
 CFLAGS=-fpic -O2 -report-all -fopenmp
-LDFLAGS=-shared -L$(LIBDIR) -l$(patsubst lib%.so,%,$(notdir $(LIB_COMMON))) $(LIBPATH) $(LIB_NLC) -fopenmp
-LDFLAGS_COMMON=-shared $(LIBPATH) $(LIB_NLC) -fopenmp
+BUILDID=-Wl,--build-id=sha1
+LDFLAGS=-shared -L$(LIBDIR) -l$(patsubst lib%.so,%,$(notdir $(LIB_COMMON))) $(LIBPATH) $(LIB_NLC) -fopenmp $(BUILDID)
+LDFLAGS_COMMON=-shared $(LIBPATH) $(LIB_NLC) -fopenmp $(BUILDID)
 ifeq ($(FTRACE),yes)
 CFLAGS+=-ftrace
 LDFLAGS+=-ftrace
 LIB_NLC+=-lveftrace_p
 endif
-LDFLAGS_PROF=-shared -fpic -fopenmp -ftrace -lveftrace_p
+LDFLAGS_PROF=-shared -fpic -fopenmp -ftrace -lveftrace_p $(BUILDID)
 
 CPP = $(TOOLDIR)/cppnlcpy.pl
 ifeq ($(NO_OPERATOR),yes)
@@ -52,6 +60,18 @@ CFLAGS+=\
 	-mno-vector-power-to-explog \
 	-mno-vector-low-precise-divide-function
 endif
+
+CFLAGS_NOVEC=\
+	-fpic -O2 -report-all -fopenmp \
+	-fno-fast-math \
+	-mno-vector-intrinsic-check \
+	-fno-reciprocal-math \
+	-mno-vector-power-to-explog \
+	-mno-vector-low-precise-divide-function
+
+FUNC_NOVECTOR = \
+  nlcpy_domain_mask.c\
+  nlcpy_isfinite.c
 
 # Sorting
 VE_SORTING = \
@@ -464,6 +484,7 @@ ifeq ($(FAST_MATH),yes)
 all: make.dep $(LIB)
 else ifeq ($(COMMON),yes)
 all: make.dep $(LIB_COMMON) $(LIB_PROF)
+# all: make.dep $(LIB_COMMON)
 else
 all: make.dep $(LIB)
 endif
@@ -472,13 +493,24 @@ make.dep:
 	sh $(TOOLDIR)/make_dep.sh
 
 $(LIB): $(OBJS)
-	mkdir -p $(LIBDIR) && $(CC) -o $@ $(OBJS) ${LDFLAGS}
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $(OBJS) ${MARCH} ${LDFLAGS}
 
 $(LIB_COMMON): $(OBJS_COMMON)
-	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${LDFLAGS_COMMON}
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${MARCH} ${LDFLAGS_COMMON}
 
 $(LIB_PROF): nlcpy_profiling.c
-	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${LDFLAGS_PROF}
+	mkdir -p $(LIBDIR) && $(CC) -o $@ $^ ${MARCH} ${LDFLAGS_PROF}
+
+# Lazy evaluate
+BUILD_VER=`/opt/nec/ve/bin/nreadelf -dW $(LIB_COMMON) | /usr/bin/grep "/opt/nec/ve[3]*/ncc" | \
+	/usr/bin/grep -o -E "([0-9]+\.)[0-9]+(\.[0-9]+)?" | /usr/bin/head -n1`
+
+embed_build_info: $(BUILD_VER_FILE)
+	echo "ncc_build_version = '$(BUILD_VER)'" > $^
+
+$(BUILD_VER_FILE):
+	rm -f $@
+	touch $@
 
 include make.dep
 
@@ -556,7 +588,13 @@ $(VE_DOT): $(VE_DOT:.c=.c.master)
 	$(CPP) $(CPPFLAGS) $< $@
 
 %.o: %.c
-	$(CC) -c ${CFLAGS} -o $@ $(@F:%.o=%.c) ${INCPATH}
+	$(CC) -c ${MARCH} ${CFLAGS} -o $@ $(filter-out $(FUNC_NOVECTOR), $(@F:%.o=%.c)) ${INCPATH}
+
+nlcpy_domain_mask.o: nlcpy_domain_mask.c
+	$(CC) -c ${MARCH} -mno-vector ${CFLAGS_NOVEC} -o $@ $< ${INCPATH}
+
+nlcpy_isfinite.o: nlcpy_isfinite.c
+	$(CC) -c ${MARCH} -mno-vector ${CFLAGS_NOVEC} -o $@ $< ${INCPATH}
 
 ifneq ($(FAST_MATH),yes)
 nlcpy_remainder.o:CFLAGS+=-mno-vector-fma

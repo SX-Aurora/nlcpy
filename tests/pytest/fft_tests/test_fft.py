@@ -60,6 +60,7 @@ class TestFft1DRaise(unittest.TestCase):
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_raises()
+    @testing.with_requires('numpy<1.20')
     def test_fft(self, xp, dtype):
         if self.n is None and self.axis == -1:
             raise Exception("ignore case")
@@ -73,6 +74,7 @@ class TestFft1DRaise(unittest.TestCase):
     # NumPy 1.17.0 and 1.17.1 raises ZeroDivisonError due to a bug
     @testing.with_requires('numpy!=1.17.0')
     @testing.with_requires('numpy!=1.17.1')
+    @testing.with_requires('numpy<1.20')
     def test_ifft(self, xp, dtype):
         if self.n is None and self.axis == -1:
             raise Exception("ignore case")

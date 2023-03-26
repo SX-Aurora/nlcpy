@@ -1,0 +1,302 @@
+/*
+#
+# * The source code in this file is developed independently by NEC Corporation.
+#
+# # NLCPy License #
+#
+#     Copyright (c) 2020 NEC Corporation
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimer in the documentation
+#       and/or other materials provided with the distribution.
+#     * Neither NEC Corporation nor the names of its contributors may be
+#       used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#     FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#     ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+*/
+
+include(macros.m4)dnl
+@#include <alloca.h>
+@#include <complex.h>
+@#include <math.h>
+@#include "nlcpy.h"
+
+define(<--@macro_domain_mask_real@-->,<--@
+uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array *out, int32_t *psw)
+{
+    int64_t i, j, k;
+
+    int32_t *pa = (int32_t *)a->ve_adr;
+    int32_t *pb = (int32_t *)b->ve_adr;
+    int32_t *pout = (int32_t *)out->ve_adr;
+    $2 *parr = ($2 *)arr->ve_adr;
+
+/////////
+// 0-d //
+/////////
+    if (out->ndim == 0) {
+#ifdef _OPENMP
+#pragma omp single
+#endif /* _OPENMP */
+{
+        if (*pa || *pb || !isfinite(*parr)) {
+            *pout = 1;
+        } else {
+            *pout = 0;
+        }
+
+} /* omp single */
+
+/////////
+// 1-d //
+/////////
+    } else if (out->ndim == 1) {
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t cnt_s = out->shape[0] * it / nt;
+        const int64_t cnt_e = out->shape[0] * (it + 1) / nt;
+
+        const int64_t ia0 = a->strides[0] / a->itemsize;
+        const int64_t ib0 = b->strides[0] / b->itemsize;
+        const int64_t iarr0 = arr->strides[0] / arr->itemsize;
+        const int64_t iout0 = out->strides[0] / out->itemsize;
+        for (i = cnt_s; i < cnt_e; i++) {
+            if (pa[i*ia0] || pb[i*ib0] || !isfinite(parr[i*iarr0])) {
+                pout[i*iout0] = 1;
+            } else {
+                pout[i*iout0] = 0;
+            }
+        }
+/////////
+// N-d //
+/////////
+    } else {
+        int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__rearrange_axis(out, idx);
+
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif
+        const int64_t n_inner = out->ndim - 1;
+        const int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        const int64_t cnt_s = out->shape[n_outer2] * it / nt;
+        const int64_t cnt_e = out->shape[n_outer2] * (it + 1) / nt;
+
+        const int64_t ia0 = a->strides[n_inner2] / a->itemsize;
+        const int64_t ib0 = b->strides[n_inner2] / b->itemsize;
+        const int64_t iout0 = out->strides[n_inner2] / out->itemsize;
+        const int64_t iarr0 = arr->strides[n_inner2] / arr->itemsize;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            int64_t ia = cnt * a->strides[n_outer2] / a->itemsize;
+            int64_t ib = cnt * b->strides[n_outer2] / b->itemsize;
+            int64_t iout = cnt * out->strides[n_outer2] / out->itemsize;
+            int64_t iarr = cnt * arr->strides[n_outer2] / arr->itemsize;
+            int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+            nlcpy__reset_coords(cnt, out->ndim);
+            do {
+                for (i = 0; i < out->shape[n_inner2]; i++) {
+                    if (pa[ia+i*ia0] || pb[ib+i*ib0] || !isfinite(parr[iarr+i*iarr0])) {
+                        pout[iout+i*iout0] = 1;
+                    } else {
+                        pout[iout+i*iout0] = 0;
+                    }
+                }
+                for (k = n_inner - 1; k > 0; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt[kk] < out->shape[kk]) {
+                        ia += a->strides[kk] / a->itemsize;
+                        ib += b->strides[kk] / b->itemsize;
+                        iout += out->strides[kk] / out->itemsize;
+                        iarr += arr->strides[kk] / arr->itemsize;
+                        break;
+                    }
+                    ia -= (a->shape[kk] - 1) * a->strides[kk] / a->itemsize;
+                    ib -= (b->shape[kk] - 1) * b->strides[kk] / b->itemsize;
+                    iout -= (out->shape[kk] - 1) * out->strides[kk] / out->itemsize;
+                    iarr -= (arr->shape[kk] - 1) * arr->strides[kk] / arr->itemsize;
+                    cnt[kk] = 0;
+                }
+            } while (k > 0);
+        }
+    }
+    return 0;
+}
+@-->)dnl
+
+macro_domain_mask_real(f32,float)dnl
+macro_domain_mask_real(f64,double)dnl
+
+define(<--@macro_domain_mask_complex@-->,<--@
+uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array *out, int32_t *psw)
+{
+    int64_t i, j, k;
+
+    int32_t *pa = (int32_t *)a->ve_adr;
+    int32_t *pb = (int32_t *)b->ve_adr;
+    int32_t *pout = (int32_t *)out->ve_adr;
+    $2 *parr = ($2 *)arr->ve_adr;
+
+/////////
+// 0-d //
+/////////
+    if (out->ndim == 0) {
+@#ifdef _OPENMP
+@#pragma omp single
+@#endif /* _OPENMP */
+{
+        if (*pa || *pb || !isfinite($3(*parr)) || !isfinite($4(*parr))) {
+            *pout = 1;
+        } else {
+            *pout = 0;
+        }
+
+} /* omp single */
+
+/////////
+// 1-d //
+/////////
+    } else if (out->ndim == 1) {
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif /* _OPENMP */
+        const int64_t cnt_s = out->shape[0] * it / nt;
+        const int64_t cnt_e = out->shape[0] * (it + 1) / nt;
+
+        const int64_t ia0 = a->strides[0] / a->itemsize;
+        const int64_t ib0 = b->strides[0] / b->itemsize;
+        const int64_t iarr0 = arr->strides[0] / arr->itemsize;
+        const int64_t iout0 = out->strides[0] / out->itemsize;
+        for (i = cnt_s; i < cnt_e; i++) {
+            if (pa[i*ia0] || pb[i*ib0] || !isfinite($3(parr[i*iarr0])) || !isfinite($4(parr[i*iarr0]))) {
+                pout[i*iout0] = 1;
+            } else {
+                pout[i*iout0] = 0;
+            }
+        }
+/////////
+// N-d //
+/////////
+    } else {
+        int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+        nlcpy__rearrange_axis(out, idx);
+
+@#ifdef _OPENMP
+        const int nt = omp_get_num_threads();
+        const int it = omp_get_thread_num();
+@#else
+        const int nt = 1;
+        const int it = 0;
+@#endif
+        const int64_t n_inner = out->ndim - 1;
+        const int64_t n_outer = 0;
+        const int64_t n_inner2 = idx[n_inner];
+        const int64_t n_outer2 = idx[n_outer];
+        const int64_t cnt_s = out->shape[n_outer2] * it / nt;
+        const int64_t cnt_e = out->shape[n_outer2] * (it + 1) / nt;
+
+        const int64_t ia0 = a->strides[n_inner2] / a->itemsize;
+        const int64_t ib0 = b->strides[n_inner2] / b->itemsize;
+        const int64_t iout0 = out->strides[n_inner2] / out->itemsize;
+        const int64_t iarr0 = arr->strides[n_inner2] / arr->itemsize;
+        for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
+            int64_t ia = cnt * a->strides[n_outer2] / a->itemsize;
+            int64_t ib = cnt * b->strides[n_outer2] / b->itemsize;
+            int64_t iout = cnt * out->strides[n_outer2] / out->itemsize;
+            int64_t iarr = cnt * arr->strides[n_outer2] / arr->itemsize;
+            int64_t *cnt = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
+            nlcpy__reset_coords(cnt, out->ndim);
+            do {
+                for (i = 0; i < out->shape[n_inner2]; i++) {
+                    if (pa[ia+i*ia0] || pb[ib+i*ib0] || !isfinite($3(parr[iarr+i*iarr0])) || !isfinite($4(parr[iarr+i*iarr0]))) {
+                        pout[iout+i*iout0] = 1;
+                    } else {
+                        pout[iout+i*iout0] = 0;
+                    }
+                }
+                for (k = n_inner - 1; k > 0; k--) {
+                    int64_t kk = idx[k];
+                    if (++cnt[kk] < out->shape[kk]) {
+                        ia += a->strides[kk] / a->itemsize;
+                        ib += b->strides[kk] / b->itemsize;
+                        iout += out->strides[kk] / out->itemsize;
+                        iarr += arr->strides[kk] / arr->itemsize;
+                        break;
+                    }
+                    ia -= (a->shape[kk] - 1) * a->strides[kk] / a->itemsize;
+                    ib -= (b->shape[kk] - 1) * b->strides[kk] / b->itemsize;
+                    iout -= (out->shape[kk] - 1) * out->strides[kk] / out->itemsize;
+                    iarr -= (arr->shape[kk] - 1) * arr->strides[kk] / arr->itemsize;
+                    cnt[kk] = 0;
+                }
+            } while (k > 0);
+        }
+    }
+    return 0;
+}
+@-->)dnl
+
+macro_domain_mask_complex(c64,float _Complex,crealf,cimagf)dnl
+macro_domain_mask_complex(c128,double _Complex,creal,cimag)dnl
+
+uint64_t nlcpy_domain_mask(ve_arguments *args, int32_t *psw) {
+
+    uint64_t err = NLCPY_ERROR_OK;
+
+    ve_array *a = &(args->domain_mask.a);
+    ve_array *b = &(args->domain_mask.b);
+    ve_array *arr = &(args->domain_mask.arr);
+    ve_array *out = &(args->domain_mask.out);
+
+    if (!a->ve_adr || !b->ve_adr || !arr->ve_adr || !out->ve_adr) {
+        return NLCPY_ERROR_MEMORY;
+    }
+
+    switch(arr->dtype) {
+    case ve_f32:
+        err = nlcpy_domain_mask_f32(a, b, arr, out, psw);
+        break;
+    case ve_f64:
+        err = nlcpy_domain_mask_f64(a, b, arr, out, psw);
+        break;
+    case ve_c64:
+        err = nlcpy_domain_mask_c64(a, b, arr, out, psw);
+        break;
+    case ve_c128:
+        err = nlcpy_domain_mask_c128(a, b, arr, out, psw);
+        break;
+    default:
+        err = NLCPY_ERROR_DTYPE;
+    }
+    return (uint64_t)err;
+}

@@ -363,15 +363,18 @@ class TestArrayDistributeMultiVE(unittest.TestCase):
 @testing.multi_ve(nve)
 class TestTransferArray(unittest.TestCase):
 
+    @testing.for_orders('CF', name='ord0')
+    @testing.for_orders('CF', name='ord1')
     @testing.for_all_dtypes()
-    def test_transfer_array1(self, dtype):
+    def test_transfer_array1(self, dtype, ord0, ord1):
         ves = [venode.VE(n) for n in range(nve)]
         x_src = []
         x_dst = []
         for ve in ves:
             with ve:
-                x_src.append(testing.shaped_arange(self.shape, nlcpy, dtype=dtype))
-                x_dst.append(nlcpy.empty(self.shape, dtype=dtype))
+                x_src.append(
+                    testing.shaped_arange(self.shape, nlcpy, dtype=dtype, order=ord0))
+                x_dst.append(nlcpy.empty(self.shape, dtype=dtype, order=ord1))
         for i, ve in enumerate(ves):
             for j, _ve in enumerate(ves):
                 prev_ve = venode.VE()

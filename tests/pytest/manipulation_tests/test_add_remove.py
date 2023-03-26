@@ -337,7 +337,7 @@ class TestInsertFailure(unittest.TestCase):
 
     @testing.numpy_nlcpy_raises()
     def test_insert_incompatible_scalar_index3(self, xp):
-        return xp.insert([1], xp.array(-1, dtype='L'), 1)
+        return xp.insert([1], xp.array(-1).astype(dtype='L'), 1)
 
     @testing.numpy_nlcpy_raises()
     def test_insert_incompatible_list_index1(self, xp):

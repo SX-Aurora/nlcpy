@@ -31,7 +31,7 @@
 
 from libc.stdint cimport *
 
-cdef extern from "../ve_kernel/ve_funcnum.h":
+cdef extern from "../include/ve_funcnum.h":
     cdef enum ve_funcnum:
         # binary functions
         VE_FUNC_ADD
@@ -300,7 +300,7 @@ cdef extern from "../ve_kernel/ve_funcnum.h":
 cdef dict funcNumList
 
 
-cdef extern from "../ve_kernel/ve_functype.h":
+cdef extern from "../include/ve_functype.h":
     cdef enum ve_functype:
         BINARY_OP
         UNARY_OP
@@ -324,7 +324,7 @@ cdef extern from "../ve_kernel/ve_functype.h":
 cdef dict funcTypeList
 
 
-cdef extern from "../ve_kernel/ve_array.h":
+cdef extern from "../include/ve_array.h":
     cdef int NLCPY_MAXNDIM
     cdef int SIZEOF_VE_ARRAY
     cdef int N_VE_ARRAY_ELEMENTS
@@ -339,11 +339,11 @@ cdef extern from "../ve_kernel/ve_array.h":
     cdef int F_CONTIGUOUS_OFFSET
     cdef int SCALAR_OFFSET = F_CONTIGUOUS_OFFSET
 
-cdef extern from "../ve_kernel/ve_request.h":
+cdef extern from "../include/ve_request.h":
     cdef uint64_t SIZEOF_REQUEST_PACKAGE
     cdef uint64_t N_REQUEST_PACKAGE
 
-cdef extern from "../ve_kernel/ve_error.h":
+cdef extern from "../include/ve_error.h":
     cdef uint64_t NLCPY_ERROR_OK
     cdef uint64_t NLCPY_ERROR_NDIM
     cdef uint64_t NLCPY_ERROR_DTYPE

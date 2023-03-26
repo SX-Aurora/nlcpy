@@ -102,9 +102,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -113,21 +113,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -143,20 +130,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i32)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i32)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i32)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i32)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i32)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -171,14 +171,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -188,7 +187,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],i32)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -209,7 +208,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -221,7 +220,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],i32)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -255,6 +254,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -262,8 +263,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -272,8 +273,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],i32)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -318,8 +320,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -330,8 +332,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i32(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],i32)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -432,9 +434,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -443,21 +445,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -473,20 +462,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i64)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i64)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],i64)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],i64)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],i64)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -501,14 +503,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -518,7 +519,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],i64)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -539,7 +540,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -551,7 +552,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],i64)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -585,6 +586,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -592,8 +595,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -602,8 +605,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],i64)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -648,8 +652,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -660,8 +664,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_i64(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],i64)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -762,9 +766,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -773,21 +777,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -803,20 +794,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u32)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u32)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u32)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u32)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u32)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -831,14 +835,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -848,7 +851,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],u32)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -869,7 +872,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -881,7 +884,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],u32)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -915,6 +918,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -922,8 +927,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -932,8 +937,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],u32)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -978,8 +984,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -990,8 +996,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u32(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],u32)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1092,9 +1098,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1103,21 +1109,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1133,20 +1126,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u64)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u64)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],u64)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],u64)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],u64)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -1161,14 +1167,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1178,7 +1183,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],u64)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1199,7 +1204,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1211,7 +1216,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],u64)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1245,6 +1250,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -1252,8 +1259,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1262,8 +1269,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],u64)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1308,8 +1316,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1320,8 +1328,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_u64(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],u64)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1422,9 +1430,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1433,21 +1441,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1463,20 +1458,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f32)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f32)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f32)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f32)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f32)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -1491,14 +1499,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1508,7 +1515,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],f32)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1529,7 +1536,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1541,7 +1548,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],f32)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1575,6 +1582,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -1582,8 +1591,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1592,8 +1601,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],f32)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1638,8 +1648,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1650,8 +1660,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f32(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],f32)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1752,9 +1762,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1763,21 +1773,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1793,20 +1790,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f64)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f64)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],f64)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],f64)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],f64)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -1821,14 +1831,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1838,7 +1847,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],f64)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1859,7 +1868,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1871,7 +1880,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],f64)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -1905,6 +1914,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -1912,8 +1923,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1922,8 +1933,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],f64)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1968,8 +1980,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -1980,8 +1992,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_f64(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],f64)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2082,9 +2094,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2093,21 +2105,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2123,20 +2122,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c64)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c64)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c64)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c64)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c64)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -2151,14 +2163,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2168,7 +2179,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],c64)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2189,7 +2200,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2201,7 +2212,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],c64)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2235,6 +2246,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -2242,8 +2255,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2252,8 +2265,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],c64)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2298,8 +2312,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2310,8 +2324,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c64(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],c64)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2412,9 +2426,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2423,21 +2437,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2453,20 +2454,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c128)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c128)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],c128)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],c128)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],c128)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -2481,14 +2495,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2498,7 +2511,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],c128)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2519,7 +2532,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2531,7 +2544,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],c128)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2565,6 +2578,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -2572,8 +2587,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2582,8 +2597,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],c128)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2628,8 +2644,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2640,8 +2656,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_c128(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],c128)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2742,9 +2758,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
          (w == NULL || w->is_f_contiguous))
     ) {
         int64_t i;
-        if (x->size == 1 && y->size != 1) {
-            @TYPE1@ px_s = px[0];
-            if (w == NULL) {
+        if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2753,21 +2769,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
                 }
-            } else {
-#ifdef left_shift_reduce
-@#pragma _NEC novector
-#else
-@#pragma _NEC ivdep
-#endif
-                for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
-                    }
-                }
-            }
-        } else if (x->size != 1 && y->size == 1) {
-            @TYPE2@ py_s = py[0];
-            if (w == NULL) {
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2783,20 +2786,33 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    if (pw[i]) {
-                        @BINARY_OPERATOR@(px[i],py_s,pz[i],bool)
-                    }
+                    @BINARY_OPERATOR@(px[i],py[i],pz[i],bool)
                 }
             }
         } else {
-            if (w == NULL) {
+            if (x->size == 1 && y->size > 1) {
+                @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
 @#pragma _NEC ivdep
 #endif
                 for (i = cnt_s; i < cnt_e; i++) {
-                    @BINARY_OPERATOR@(px[i],py[i],pz[i],bool)
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px_s,py[i],pz[i],bool)
+                    }
+                }
+            } else if (x->size > 1 && y->size == 1) {
+                @TYPE2@ py_s = py[0];
+#ifdef left_shift_reduce
+@#pragma _NEC novector
+#else
+@#pragma _NEC ivdep
+#endif
+                for (i = cnt_s; i < cnt_e; i++) {
+                    if (pw[i]) {
+                        @BINARY_OPERATOR@(px[i],py_s,pz[i],bool)
+                    }
                 }
             } else {
 #ifdef left_shift_reduce
@@ -2811,14 +2827,13 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 }
             }
         }
-
 /////////
 // 1-d //
 /////////
     } else if (z->ndim == 1) {
         int64_t i;
         if (w == NULL) {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2828,7 +2843,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 for (i = cnt_s; i < cnt_e; i++) {
                     @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],bool)
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2849,7 +2864,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 }
             }
         } else {
-            if (x->size == 1 && y->size != 1) {
+            if (x->size == 1 && y->size > 1) {
                 @TYPE1@ px_s = px[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2861,7 +2876,7 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                         @BINARY_OPERATOR@(px_s,py[i*iy0],pz[i*iz0],bool)
                     }
                 }
-            } else if (x->size != 1 && y->size == 1) {
+            } else if (x->size > 1 && y->size == 1) {
                 @TYPE2@ py_s = py[0];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
@@ -2895,6 +2910,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
         uint64_t ix = 0;
         uint64_t iy = 0;
         uint64_t iz = 0;
+        const uint64_t x_inner_shape = x->shape[n_inner];
+        const uint64_t y_inner_shape = y->shape[n_inner];
         if (w == NULL) {
             for (int64_t cnt = cnt_s; cnt < cnt_e; cnt++) {
                 ix = cnt * x->strides[n_outer] / x->itemsize;
@@ -2902,8 +2919,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 iz = cnt * z->strides[n_outer] / z->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2912,8 +2929,9 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                         for (i = 0; i < z->shape[n_inner]; i++) {
                             @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],bool)
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE1@ px_s = px[ix];
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2958,8 +2976,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                 iw = cnt * w->strides[n_outer] / w->itemsize;
                 for (;;) {
                     // most inner loop for vectorize
-                    if (x->size == 1 && y->size != 1) {
-                        @TYPE1@ px_s = px[0];
+                    if (x_inner_shape == 1 && y_inner_shape > 1) {
+                        @TYPE1@ px_s = px[ix];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else
@@ -2970,8 +2988,8 @@ uint64_t FILENAME_@DTAG1@_@DTAG2@_bool(
                                 @BINARY_OPERATOR@(px_s,py[i*iy0+iy],pz[i*iz0+iz],bool)
                             }
                         }
-                    } else if (x->size != 1 && y->size == 1) {
-                        @TYPE2@ py_s = py[0];
+                    } else if (x_inner_shape > 1 && y_inner_shape == 1) {
+                        @TYPE2@ py_s = py[iy];
 #ifdef left_shift_reduce
 @#pragma _NEC novector
 #else

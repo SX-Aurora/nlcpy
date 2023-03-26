@@ -56,19 +56,14 @@ import pytest
 
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
+from nlcpy.testing.types import negative_types
+from nlcpy.testing.types import float_types
+from nlcpy.testing.types import no_bool_no_uint_types
+from nlcpy.testing.types import no_complex_types
+from nlcpy.testing.types import negative_no_complex_types
+from nlcpy.testing.types import complex_types
 
-
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-no_bool_no_uint_types = float_types + signed_int_types + complex_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
-negative_types = (
-    [numpy.bool] + float_types + signed_int_types + complex_types)
-negative_no_complex_types = [numpy.bool] + float_types + signed_int_types
-no_complex_types = [numpy.bool] + float_types + int_types
 
 shapes = ([3], [2, 3], [4, 2, 3])
 values = (

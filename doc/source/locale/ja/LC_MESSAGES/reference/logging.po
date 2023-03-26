@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 2.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 17:56+0900\n"
+"POT-Creation-Date: 2023-03-02 17:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,39 +29,42 @@ msgstr ""
 msgid "Logging management"
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid ":obj:`nlcpy.logging.set_stream_handler <nlcpy.logging.set_stream_handler>`"
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid "Sets StreamHandler to the specified logger."
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid ":obj:`nlcpy.logging.set_file_handler <nlcpy.logging.set_file_handler>`"
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid "Sets FileHandler to the specified logger."
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid ":obj:`nlcpy.logging.reset_handler <nlcpy.logging.reset_handler>`"
 msgstr ""
 
-#: ../../source/reference/logging.rst:16:<autosummary>:1
+#: ../../source/reference/logging.rst:17:<autosummary>:1
 msgid "Resets the logger."
 msgstr ""
 
-#: ../../source/reference/logging.rst:17
-msgid "Example:"
-msgstr ""
-
-#: ../../source/reference/logging.rst:30
+#: ../../source/reference/logging.rst:18
 msgid "The following logger names are available in NLCPy."
 msgstr ""
 
-#: ../../source/reference/logging.rst:33
+#: ../../source/reference/logging.rst:21
 msgid "Logger Constants"
 msgstr ""
+
+#: ../../source/reference/logging.rst:31
+msgid "Example Usage"
+msgstr ""
+
+#~ msgid "Example:"
+#~ msgstr ""
 

@@ -74,8 +74,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([1, 2, xp.nan, 4, 5])
         out = xp.empty([5])
         ret = xp.nancumsum(a, out=out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -85,8 +85,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([1, 2, xp.nan, 4, 5])
         out = xp.empty([5])
         ret = xp.nancumsum(a, out=out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -96,8 +96,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([1, 2, xp.nan, 4, 5])
         out = xp.empty([5])
         ret = xp.nancumsum(a, 0, numpy.float64, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -106,7 +106,7 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         a = xp.arange(12).reshape(3, 4)
         ret = xp.apply_along_axis(xp.sum, 1, a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -117,7 +117,7 @@ class TestNumpyWrap(unittest.TestCase):
         condlist = (a < 0, a >= 0)
         funclist = [lambda a: -a, lambda a: a]
         ret = xp.piecewise(a, condlist=condlist, funclist=funclist)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -129,7 +129,7 @@ class TestNumpyWrap(unittest.TestCase):
         funclist = [numpy.positive, numpy.negative]
         out = numpy.zeros([3])
         ret = xp.piecewise(a, condlist, funclist, out=out)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -141,7 +141,7 @@ class TestNumpyWrap(unittest.TestCase):
         funclist = [nlcpy.positive, nlcpy.negative]
         out = nlcpy.zeros([3])
         ret = xp.piecewise(a, condlist, funclist, out=out)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -149,7 +149,7 @@ class TestNumpyWrap(unittest.TestCase):
         if _is_skip():
             pytest.skip('Python3.6 is not testable')
         ret = xp.fromfunction(lambda i, j: i + j, (3, 3), dtype=int)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -222,7 +222,7 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         a = xp.array([1, 2, xp.inf, xp.nan, 5])
         ret = xp.nan_to_num(a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -273,7 +273,7 @@ class TestNumpyWrap(unittest.TestCase):
         sio = io.StringIO()
         nlcpy.lookfor("svd", output=sio)
         res = sio.getvalue()
-        assert(res.count("nlcpy") > 0)
+        assert (res.count("nlcpy") > 0)
 
     def test_info(self):
         if _is_skip():
@@ -281,7 +281,7 @@ class TestNumpyWrap(unittest.TestCase):
         sio = io.StringIO()
         nlcpy.info("arange", output=sio)
         res = sio.getvalue()
-        assert(res.count("nlcpy") > 0)
+        assert (res.count("nlcpy") > 0)
 
     @testing.numpy_nlcpy_array_equal()
     def test_ndarray_partition(self, xp):
@@ -303,8 +303,8 @@ class TestNumpyWrap(unittest.TestCase):
         choices = [-10, 10]
         out = xp.zeros([3, 3])
         ret = xp.choose(a, choices, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -315,8 +315,8 @@ class TestNumpyWrap(unittest.TestCase):
         choices = [-10, 10]
         out = xp.zeros([3, 3])
         ret = xp.choose(a, choices, out=out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -326,8 +326,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(6).reshape(3, 2)
         out = xp.zeros([1, 2], dtype='l')
         ret = xp.compress([0, 1], a, 0, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -335,8 +335,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(6).reshape(3, 2)
         out = xp.zeros([1, 2], dtype='l')
         ret = a.compress([0, 1], 0, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -346,8 +346,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(6).reshape(2, 3)
         out = xp.zeros([2, 3])
         ret = xp.cumprod(a, 0, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -355,8 +355,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(6).reshape(2, 3)
         out = xp.zeros([2, 3])
         ret = a.cumprod(0, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -366,8 +366,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(8).reshape(2, 2, 2)
         out = xp.zeros(2)
         ret = xp.trace(a, 0, 1, 0, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -375,8 +375,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(8).reshape(2, 2, 2)
         out = xp.zeros(2)
         ret = a.trace(0, 1, 0, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -386,8 +386,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(3)
         out = xp.zeros(3)
         ret = xp.around(a, 0, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -397,8 +397,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(3)
         out = xp.zeros(3)
         ret = xp.round_(a, 0, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -406,8 +406,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(3)
         out = xp.zeros(3)
         ret = a.round(0, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -416,8 +416,8 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = xp.array(0, dtype='d')
         ret = xp.fix(3.14, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -427,8 +427,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([[1, 2], [3, xp.nan]])
         out = xp.array(0)
         ret = xp.nanprod(a, None, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -438,8 +438,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([[1, 2], [3, xp.nan]])
         out = xp.array(0)
         ret = xp.nansum(a, None, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -449,8 +449,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([[1, 2], [3, xp.nan]])
         out = xp.zeros(4)
         ret = xp.nancumprod(a, None, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -460,8 +460,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([[1, 2], [3, xp.nan]])
         out = xp.zeros(4)
         ret = xp.nancumsum(a, None, 'd', out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -472,8 +472,8 @@ class TestNumpyWrap(unittest.TestCase):
         b = [xp.array(12), xp.array(20)]
         out = xp.zeros(2)
         ret = xp.lcm(a, b, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -482,8 +482,8 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = xp.array(0)
         ret = xp.gcd(12, 20, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -492,8 +492,8 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = xp.array(0)
         ret = xp.isnat(numpy.datetime64("NaT"), out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -502,8 +502,8 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = xp.array(0)
         ret = xp.isneginf(xp.NINF, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -512,8 +512,8 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = xp.array(0)
         ret = xp.isposinf(xp.inf, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -523,8 +523,8 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(6)
         out = xp.zeros(6)
         ret = xp.float_power(a, 2, out)
-        assert(isinstance(ret, xp.ndarray))
-        assert(ret is out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -534,10 +534,10 @@ class TestNumpyWrap(unittest.TestCase):
         out1 = xp.zeros(2)
         out2 = xp.zeros(2)
         ret = xp.modf([0, 3.5], out1, out2)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out1)
-        assert(ret[1] is out2)
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out1)
+        assert (ret[1] is out2)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -546,10 +546,10 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = (xp.zeros(2), xp.zeros(2))
         ret = xp.modf([0, 3.5], out=out)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out[0])
-        assert(ret[1] is out[1])
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out[0])
+        assert (ret[1] is out[1])
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -559,10 +559,10 @@ class TestNumpyWrap(unittest.TestCase):
         out1 = xp.zeros(2)
         out2 = xp.zeros(2)
         ret = xp.frexp([1, 2], out1, out2)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out1)
-        assert(ret[1] is out2)
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out1)
+        assert (ret[1] is out2)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -571,10 +571,10 @@ class TestNumpyWrap(unittest.TestCase):
             pytest.skip('Python3.6 is not testable')
         out = (xp.zeros(2), xp.zeros(2))
         ret = xp.frexp([1, 2], out=out)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out[0])
-        assert(ret[1] is out[1])
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out[0])
+        assert (ret[1] is out[1])
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -585,10 +585,10 @@ class TestNumpyWrap(unittest.TestCase):
         out1 = xp.zeros(5)
         out2 = xp.zeros(5)
         ret = xp.divmod(a, 3, out1, out2)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out1)
-        assert(ret[1] is out2)
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out1)
+        assert (ret[1] is out2)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -598,10 +598,10 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(5)
         out = (xp.zeros(5), xp.zeros(5))
         ret = xp.divmod(a, 3, out=out)
-        assert(isinstance(ret[0], xp.ndarray))
-        assert(isinstance(ret[1], xp.ndarray))
-        assert(ret[0] is out[0])
-        assert(ret[1] is out[1])
+        assert (isinstance(ret[0], xp.ndarray))
+        assert (isinstance(ret[1], xp.ndarray))
+        assert (ret[0] is out[0])
+        assert (ret[1] is out[1])
         return ret
 
     @testing.numpy_nlcpy_allclose()
@@ -616,7 +616,7 @@ class TestNumpyWrap(unittest.TestCase):
     def test_sort_complex(self, xp):
         a = xp.arange(5, dtype='F')
         ret = xp.sort(a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -629,7 +629,7 @@ class TestNumpyWrap(unittest.TestCase):
     def test_sort_kind(self, xp):
         a = xp.arange(5)
         ret = xp.sort(a, kind='quicksort')
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -659,7 +659,7 @@ class TestNumpyWrap(unittest.TestCase):
     def test_ndarray_astype_inplace(self, xp):
         a = xp.array([1 + 2j, 3 + 4j])
         ret = a.astype('D', casting='unsafe', copy=False)
-        assert(ret is a)
+        assert (ret is a)
         return a
 
     @testing.numpy_nlcpy_array_equal()
@@ -667,7 +667,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(5)
         out = xp.empty(2, dtype='l')
         ret = xp.take(a, (4, 10), mode='clip', out=out)
-        assert(out is ret)
+        assert (out is ret)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -675,7 +675,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(5)
         out = xp.empty(2, dtype='l')
         ret = xp.take(a, (4, 10), None, out, 'clip')
-        assert(out is ret)
+        assert (out is ret)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -683,7 +683,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(5)
         out = xp.empty(2, dtype='l')
         ret = a.take((4, 10), mode='clip', out=out)
-        assert(out is ret)
+        assert (out is ret)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -691,14 +691,14 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(5)
         out = xp.empty(2, dtype='l')
         ret = a.take((4, 10), None, out, 'clip')
-        assert(out is ret)
+        assert (out is ret)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_ndarray_flatten_order(self, xp):
         a = xp.arange(4).reshape(2, 2)
         ret = a.flatten(order='F')
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -713,7 +713,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(4).reshape(2, 2)
         out = xp.empty([2, 2], dtype='l')
         ret = xp.dot(a, a, out=out)
-        assert(ret is out)
+        assert (ret is out)
         return out
 
     @testing.numpy_nlcpy_array_equal()
@@ -721,7 +721,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(4).reshape(2, 2)
         out = xp.empty([2, 2], dtype='l')
         ret = xp.dot(a, a, out)
-        assert(ret is out)
+        assert (ret is out)
         return out
 
     @testing.numpy_nlcpy_array_equal()
@@ -729,7 +729,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([[True, False]])
         b = xp.array([[True], [False]])
         ret = xp.matmul(a, b)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -737,7 +737,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(4).reshape(2, 2)
         out = xp.empty([2, 2], dtype='l')
         ret = xp.matmul(a, a, out=out)
-        assert(ret is out)
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -745,42 +745,42 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.arange(4).reshape(2, 2)
         out = xp.empty([2, 2], dtype='l')
         ret = xp.matmul(a, a, out)
-        assert(ret is out)
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_matmul_3d(self, xp):
         a = xp.arange(8).reshape(2, 2, 2)
         ret = xp.matmul(a, a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_inner_2d(self, xp):
         a = xp.arange(4).reshape(2, 2)
         ret = xp.inner(a, a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_unique_complex(self, xp):
         a = xp.array([1 + 2j, 3 + 4j, 1 + 2j, 3 + 5j])
         ret = xp.unique(a)
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_mean_multi_axis(self, xp):
         a = xp.arange(16).reshape(2, 2, 2, 2)
         ret = xp.mean(a, axis=(1, 2))
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_ndarray_mean_multi_axis(self, xp):
         a = xp.arange(16).reshape(2, 2, 2, 2)
         ret = a.mean(axis=(1, 2))
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -798,28 +798,28 @@ class TestNumpyWrap(unittest.TestCase):
 
     @testing.numpy_nlcpy_array_equal()
     def test_reduce_where_broadcast(self, xp):
-        a = xp.array([1, 2])
-        w = xp.array([[True, True], [False, True]])
+        a = xp.array([[1, 2], [3, 4]])
+        w = xp.array([[True], [False]])
         ret = xp.add.reduce(a, where=w)
-        assert(isinstance(ret, xp.ndarray) or numpy.isscalar(ret))
+        assert (isinstance(ret, xp.ndarray) or numpy.isscalar(ret))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_reduce_where_broadcast_with_out(self, xp):
-        a = xp.array([1, 2])
-        w = xp.array([[True, True], [False, True]])
-        out = xp.array(0, dtype='l')
+        a = xp.array([[1, 2], [3, 4]])
+        w = xp.array([[True], [False]])
+        out = xp.zeros(2, dtype='l')
         ret = xp.add.reduce(a, where=w, out=out)
-        assert(ret is out)
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
     def test_reduce_where_broadcast_with_out_2(self, xp):
-        a = xp.array([1, 2])
-        w = xp.array([[True, True], [False, True]])
+        a = xp.array([[1, 2], [3, 4]])
+        w = xp.array([[True], [False]])
         out = xp.array(0, dtype='l')
         ret = xp.add.reduce(a, None, None, out, where=w)
-        assert(ret is out)
+        assert (ret is out)
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -827,7 +827,7 @@ class TestNumpyWrap(unittest.TestCase):
         a = xp.array([1, 2])
         b = xp.array([1 + 2j, 3 + 4j])
         ret = xp.subtract.outer(a, b, casting='unsafe')
-        assert(isinstance(ret, xp.ndarray))
+        assert (isinstance(ret, xp.ndarray))
         return ret
 
     @testing.numpy_nlcpy_array_equal()
@@ -847,7 +847,7 @@ class TestNumpyWrap(unittest.TestCase):
         c = xp.arange(6).reshape(2, 3)
         out = xp.zeros([3, 3], dtype='l')
         ret = xp.linalg.multi_dot([a, b, c], out=out)
-        assert(ret is out)
+        assert (ret is out)
         return ret
 
 
@@ -957,7 +957,7 @@ class TestRandom2(unittest.TestCase):
         nlcpy.random.set_state(vs)
         nlcpy.random.beta(1, 1, 10)
         v2 = nlcpy.random.rand()
-        assert(v1 != v2)
+        assert (v1 != v2)
 
 
 @testing.parameterize(*testing.product({

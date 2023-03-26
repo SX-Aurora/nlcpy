@@ -44,7 +44,7 @@ nve = nlcpy.venode.get_num_available_venodes()
 @testing.parameterize(*testing.product({
     'veid': [i for i in range(nve)],
 }))
-class TestCreationVEs(unittest.TestCase):
+class TestManipulationVEs(unittest.TestCase):
 
     def setUp(self):
         self._prev_ve = venode.VE(0)

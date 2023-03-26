@@ -1687,6 +1687,11 @@ EOS
      'others'          => '@op2@ = (@ari_dtype@)(@op1@);',
      'bool'            => '@op2@ = @cast_Bint1@(@op1@);',
 },
+isfinite => {
+     'float _Complex'  => '@op2@ = isfinite(crealf(@op1@)) ? (isfinite(cimagf(@op1@)) ?  1 : 0) : 0;',
+     'double _Complex' => '@op2@ = isfinite(creal(@op1@)) ? (isfinite(cimag(@op1@)) ?  1 : 0) : 0;',
+     'others'          => '@op2@ = isfinite((double)@op1@) ? 1 : 0;',
+},
 'isinf'=> {
      'others'          => '@op2@ = @ISINF1@(@op1@);',
 },
@@ -1839,9 +1844,9 @@ EOS
 #'signbit'=> {
 #     'others'          => 'signbit',
 #},
-'isfinite'=> {
-     'others'          => 'isfinite',
-},
+#'isfinite'=> {
+#     'others'          => 'isfinite',
+#},
 #'isinf'=> {
 #     'others'         => 'isinf',
 #},

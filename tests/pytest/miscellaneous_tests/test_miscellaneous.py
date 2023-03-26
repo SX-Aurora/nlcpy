@@ -1,5 +1,5 @@
 #
-# * The source code in this file is developed independently by NEC Corporation.
+# * The source code in this file is based on the soure code of CuPy.
 #
 # # NLCPy License #
 #
@@ -29,25 +29,46 @@
 #     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import unittest
+import sys
+import io
 
-from libc.stdint cimport *
-from nlcpy.veo.libveo cimport *
+import nlcpy
 
 
-cdef extern from "<dlfcn.h>" nogil:
-    void *dlopen(const char *, int)
-    char *dlerror()
-    void *dlsym(void *, const char *)
-    int dlclose(void *)
+class Capture:
 
-    int RTLD_LAZY
-    int RTLD_NOW
-    int RTLD_GLOBAL
-    int RTLD_LOCAL
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._str = io.StringIO()  # redirect
+        return self
 
-cdef _get_veo_sym()
-cdef int _hooked_alloc_hmem(veo_proc_handle *proc,
-                            uint64_t *addr, const size_t size)
-cdef int _hooked_free_hmem(uint64_t addr)
-cdef void *_get_hooked_veo_alloc_hmem()
-cdef void *_get_hooked_veo_free_hmem()
+    def __exit__(self, *args):
+        sys.stdout = self._stdout  # restore
+
+    def get_str(self):
+        return self._str.getvalue().splitlines()
+
+
+class TestShowConfig(unittest.TestCase):
+
+    def test_show_config(self):
+
+        with Capture() as c:
+            nlcpy.show_config()
+            _str = ''.join(c.get_str())
+            assert 'OS' in _str
+            assert 'Python Version' in _str
+            assert 'NLC Library Path' in _str
+            assert 'NLCPy Kernel Path' in _str
+            assert 'NLCPy Version' in _str
+            assert 'NumPy Version' in _str
+            assert 'ncc Build Version' in _str
+            assert 'VEO API Version' in _str
+            assert 'VEO Version' in _str
+            assert 'Assigned VE IDs' in _str
+            assert 'VE Arch' in _str
+            assert 'VE ncore' in _str
+            assert 'VE Total Mem[KB]' in _str
+            assert 'VE Used  Mem[KB]' in _str
+            assert 'None' not in _str

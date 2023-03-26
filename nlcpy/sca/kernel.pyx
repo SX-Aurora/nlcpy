@@ -67,7 +67,8 @@ cdef class kernel:
         self.destroyed = False
 
     def execute(self):
-        """Executes the created SCA kernel and returns the result of stencil computations.
+        """Executes the created SCA kernel and returns the result of stencil
+        computations.
 
         For usage of this function, see :ref:`Basic Usage <label_sca_basic>` and
         :ref:`Advanced Usage <label_sca_advanced>`.

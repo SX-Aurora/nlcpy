@@ -33,9 +33,9 @@ import unittest
 import pytest
 
 
-class TestMPIRuntimeErrorAtImport(unittest.TestCase):
+class TestRuntimeErrorAtImport(unittest.TestCase):
 
     @pytest.mark.import_err
-    def test_mpi_runtime_error_at_import(self):
+    def test_runtime_error_at_import(self):
         with pytest.raises(RuntimeError):
             import nlcpy  # NOQA

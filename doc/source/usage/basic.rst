@@ -9,7 +9,7 @@ Basic Usage
 Preparation
 -----------
 
-NLCPy uses the functions of `NEC Numeric Library collection (NLC) <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_. 
+NLCPy uses the functions of `NEC Numeric Library collection (NLC) <https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_.
 Before importing this package, you need to execute the environment setup script ``nlcvars.sh``
 or ``nlcvars.csh`` once in advance.
 
@@ -17,15 +17,49 @@ or ``nlcvars.csh`` once in advance.
 
 ::
 
-    $ source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.sh 
+    $ source /opt/nec/ve/bin/nlcvars.sh
 
 * When using ``csh`` or its variant:
 
 ::
 
-    % source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.csh 
+    % source /opt/nec/ve/bin/nlcvars.csh
 
-Here, **X.X.X** denotes the version number of NEC Numeric Library Collection on your x86 node(Vector Host).
+
+Preparation with specifying the version of NEC Numeric Library Collection
+-------------------------------------------------------------------------
+
+If you want to specify the version of the NEC Numeric Library Collection, specify the version in the following manner before executing.
+
+**For VE30**
+
+* When using ``sh`` or its variant:
+
+::
+
+    $ source /opt/nec/ve3/nlc/X.X.X/bin/nlcvars.sh
+
+* When using ``csh`` or its variant:
+
+::
+
+    % source /opt/nec/ve3/nlc/X.X.X/bin/nlcvars.csh
+
+**For VE20, VE10, or VE10E**
+
+* When using ``sh`` or its variant:
+
+::
+
+    $ source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.sh
+
+* When using ``csh`` or its variant:
+
+::
+
+    % source /opt/nec/ve/nlc/X.X.X/bin/nlcvars.csh
+
+Here, **X.X.X** denotes the version number of NEC Numeric Library Collection.
 
 
 Supported Python Versions
@@ -45,7 +79,7 @@ Import Package
 
 When you use NLCPy in your Python scripts, the package ``nlcpy`` must be imported.
 
-* When running the scripts using NLCPy in interactive mode: 
+* When running the scripts using NLCPy in interactive mode:
 
     ::
 
@@ -77,8 +111,8 @@ Please see also :ref:`installation guide <installation>`.
     ...
     RuntimeError: veo_load_library 'b'/path_to_nlcpy/lib/nlcpy_ve_kernel_no_fast_math.so'' failed
 
-After you import ``nlcpy`` successfully in Python scripts, 
-the scripts can use :class:`nlcpy.ndarray` of 
+After you import ``nlcpy`` successfully in Python scripts,
+the scripts can use :class:`nlcpy.ndarray` of
 NLCPy and functions described in :ref:`Reference <nlcpy_reference>` .
 
 An easy example of NLCPy script is shown below:
@@ -95,7 +129,7 @@ An easy example of NLCPy script is shown below:
            [ 3.,  5.,  7.],
            [ 6.,  8., 10.]])
 
-In addition, the current version of NLCPy provides the 
+In addition, the current version of NLCPy provides the
 following operators of the :class:`nlcpy.ndarray` class:
 
 ================================ =========================================================

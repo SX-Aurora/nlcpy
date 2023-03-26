@@ -30,6 +30,7 @@
 #
 
 import unittest
+import os
 import nlcpy
 import numpy
 from nlcpy import veo
@@ -249,7 +250,11 @@ def _callback(err):
 class TestHeteroSolver(unittest.TestCase):
 
     def setUp(self):
-        pass
+        ld_library_path = os.environ.get('LD_LIBRARY_PATH', None)
+        nlc_home = os.environ.get('NLC_HOME', None)
+        if ld_library_path is None or nlc_home is None:
+            # skip if NLC setting is omitted
+            self.skipTest('Not set LD_LIBRARY_PATH or NLC_HOME.')
 
     def tearDown(self):
         nlcpy.jit.unload_library(self.lib)

@@ -34,6 +34,7 @@ from nlcpy.veo cimport _veo
 from nlcpy.mempool cimport mempool
 from nlcpy.request cimport request
 from libcpp cimport bool
+from libc.stdint cimport *
 cimport cython
 
 
@@ -49,8 +50,11 @@ cdef class VENode:
         readonly int pid  # physical id
         readonly int lid  # logical id
         readonly int serial_id  # serial id
+        readonly int arch  # VE architecture
+        readonly object libpath
         readonly bool _phys
         readonly bool _connected
+        readonly bool _is_fast_math
         readonly _veo.VeoProc proc
         readonly _veo.VeoLibrary lib
         readonly _veo.VeoLibrary lib_prof
@@ -61,5 +65,6 @@ cdef class VENode:
 
 cdef bool _is_multive
 cpdef _create_venode_pool()
+cpdef VENode _find_venode_from_proc_handle(uint64_t key_proc)
 cpdef VENode VE(int veid=*)
 cpdef transfer_array(ndarray src, VENode target_ve, ndarray dst=*)

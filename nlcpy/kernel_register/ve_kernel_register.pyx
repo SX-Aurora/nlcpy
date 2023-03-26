@@ -30,8 +30,7 @@
 #
 
 import nlcpy
-from nlcpy import _path
-from nlcpy import _environment
+
 
 include "basic_kernel_list.pxi"
 include "asluni_kernel_list.pxi"
@@ -49,15 +48,14 @@ include "sca_kernel_list.pxi"
 include "profiling_kernel_list.pxi"
 
 
-def _register_ve_kernel(p):
+def _register_ve_kernel(p, libpath, is_fast_math):
     lib = None
     lib_prof = None
-    fast_math = _environment._is_fast_math()
-    if fast_math:
-        lib = p.load_library(_path._fast_math_kernel_path.encode('utf-8'))
+    if is_fast_math:
+        lib = p.load_library(libpath._fast_math_kernel_path.encode('utf-8'))
     else:
-        lib = p.load_library(_path._no_fast_math_kernel_path.encode('utf-8'))
-    lib_prof = p.load_library(_path._profiling_kernel_path.encode('utf-8'))
+        lib = p.load_library(libpath._no_fast_math_kernel_path.encode('utf-8'))
+    lib_prof = p.load_library(libpath._profiling_kernel_path.encode('utf-8'))
     if lib is None or lib_prof is None:
         raise RuntimeError("failed to load ve kernel")
     all_kernel_list = {

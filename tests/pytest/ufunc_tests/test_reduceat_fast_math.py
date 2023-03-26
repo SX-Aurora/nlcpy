@@ -36,13 +36,8 @@ import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
 
 ops = [
     'power',
@@ -60,7 +55,7 @@ ops = [
 
 def adjust_dtype(xp, op, dtype_in, dtype):
     if xp is numpy:
-        if dtype == numpy.bool:
+        if dtype == numpy.bool_:
             if op in ('divide', 'true_divide', 'logaddexp', 'logaddexp2', 'arctan2'):
                 dtype = numpy.float32
             elif op == 'power':
@@ -73,7 +68,7 @@ def is_executable(op, dtype_in=None, dtype=None):
         'divide', 'true_divide', 'arctan2', 'logaddexp', 'logaddexp2',
         'power', 'floor_divide', 'mod', 'remainder', 'fmod',
     ):
-        return dtype != numpy.bool and not (dtype is None and dtype_in == numpy.bool)
+        return dtype != numpy.bool_ and not (dtype is None and dtype_in == numpy.bool_)
 
     return True
 
@@ -88,6 +83,8 @@ def execute_ufunc(xp, op, in1, indices, dtype=None, axis=0):
 
 
 @pytest.mark.fast_math
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestReduceat(unittest.TestCase):
 
     shapes = ((4,), (4, 4),)

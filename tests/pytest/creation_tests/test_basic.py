@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import warnings
 
 import numpy
 
@@ -69,6 +70,7 @@ class TestBasic(unittest.TestCase):
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
+    @testing.with_requires("numpy<1.20")
     def test_empty_scalar(self, xp, dtype, order):
         a = xp.empty(None, dtype=dtype, order=order)
         a.fill(0)
@@ -117,6 +119,7 @@ class TestBasic(unittest.TestCase):
         return b
 
     @testing.for_CF_orders()
+    @testing.with_requires("numpy<1.23")
     def test_empty_zero_sized_array_strides(self, order):
         a = numpy.empty((1, 0, 2), dtype='d', order=order)
         b = nlcpy.empty((1, 0, 2), dtype='d', order=order)
@@ -141,6 +144,7 @@ class TestBasic(unittest.TestCase):
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
+    @testing.with_requires("numpy<1.20")
     def test_zeros_scalar(self, xp, dtype, order):
         return xp.zeros(None, dtype=dtype, order=order)
 
@@ -184,6 +188,41 @@ class TestBasic(unittest.TestCase):
     def test_ones_like_subok(self):
         a = nlcpy.ndarray((2, 3, 4))
         return nlcpy.ones_like(a, subok=True)
+
+    @testing.for_CF_orders()
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_full(self, xp, dtype, order):
+        return xp.full((2, 3, 4), 1, dtype=dtype, order=order)
+
+    @testing.for_CF_orders()
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_full_default_dtype(self, xp, dtype, order):
+        return xp.full((2, 3, 4), xp.array(1, dtype=dtype), order=order)
+
+    @testing.for_all_dtypes_combination(('dtype1', 'dtype2'))
+    @testing.numpy_nlcpy_array_equal()
+    def test_full_dtypes_cpu_input(self, xp, dtype1, dtype2):
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.full(
+                (2, 3, 4), numpy.array(1, dtype=dtype1), dtype=dtype2)
+
+    @testing.for_orders('CFAK')
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_full_like(self, xp, dtype, order):
+        a = xp.ndarray((2, 3, 4), dtype=dtype)
+        return xp.full_like(a, 1, order=order)
+
+    @testing.for_all_dtypes_combination(('dtype1', 'dtype2'))
+    @testing.numpy_nlcpy_array_equal()
+    def test_full_like_dtypes_cpu_input(self, xp, dtype1, dtype2):
+        a = xp.ndarray((2, 3, 4), dtype=dtype1)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return xp.full_like(a, numpy.array(1, dtype=dtype1))
 
 
 @testing.parameterize(

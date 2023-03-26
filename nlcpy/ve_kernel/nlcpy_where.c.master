@@ -48,7 +48,7 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
     ve_array *condition = &(args->where.condition);
     ve_array *x = &(args->where.x);
     ve_array *y = &(args->where.y);
-    assert(out->size == condition->size);
+    //assert(out->size == condition->size);
     //assert(x->size == y->size);
 
 #begin_switch
@@ -123,6 +123,7 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
         const uint64_t iy0 = y->strides[n_inner] / y->itemsize;
         const int is = it / nt * out->size;
         const int ie = (it + 1) / nt * out->size;
+#pragma _NEC ivdep
         for(int64_t i = is; i < ie; i++) {
             if(pcond[i*icond0]) {
                 pout[i*iout0] = px[i*ix0];
@@ -163,6 +164,7 @@ uint64_t nlcpy_where(ve_arguments *args, int32_t *psw
             icond = cnt * condition->strides[n_outer2] / condition->itemsize;
             for (;;) {
                 // most inner loop for vectorize
+#pragma _NEC ivdep
                 for (i = 0; i < out->shape[n_inner2]; i++) {
                     if(pcond[i*icond0+icond]) {
                         pout[i*iout0+iout] = px[i*ix0+ix];

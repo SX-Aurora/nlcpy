@@ -51,6 +51,8 @@ NLCPy is a package for accelerating performance of Python scripts using NumPy on
 install -d --mode=755 %{buildroot}%{nlcpy_libdir}
 install -d --mode=755 %{buildroot}%{nlcpy_docdir}
 cp -r nlcpy %{buildroot}%{nlcpy_libdir}/
+cp -r nlcpy_ve1_kernel %{buildroot}%{nlcpy_libdir}/
+cp -r nlcpy_ve3_kernel %{buildroot}%{nlcpy_libdir}/
 find %{buildroot}%{nlcpy_libdir} -name "*.so" -type f | xargs chmod 755
 find %{buildroot}%{nlcpy_libdir} ! -name "*.so" -type f | xargs chmod 644
 cp -r doc/* %{buildroot}%{nlcpy_docdir}/
@@ -98,6 +100,8 @@ echo ${nlcpy_path} > nlcpy.pth
 ##############################################
 if [ $1 == 0 ]; then
   rm -rf %{nlcpy_libdir}/nlcpy
+  rm -rf %{nlcpy_libdir}/nlcpy_ve1_kernel
+  rm -rf %{nlcpy_libdir}/nlcpy_ve3_kernel
   rmdir --ignore-fail-on-non-empty %{nlcpy_libdir} > /dev/null 2>&1
   rmdir --ignore-fail-on-non-empty %{nlcpy_topdir}/%{nlcpy_version}/lib > /dev/null 2>&1
   rmdir --ignore-fail-on-non-empty %{nlcpy_topdir}/%{nlcpy_version} > /dev/null 2>&1
@@ -119,5 +123,7 @@ fi
 %changelog
 ##
 ##############################################
+* Thu Jan 19 2023 NEC Corporation
+- Added VE3.
 * Wed Mar 31 2021 NEC Corporation
 - First version of this spec file.

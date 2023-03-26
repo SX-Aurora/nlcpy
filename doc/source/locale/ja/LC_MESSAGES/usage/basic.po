@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-15 14:44+0900\n"
+"POT-Creation-Date: 2023-03-02 17:14+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,63 +32,81 @@ msgid ""
 " script ``nlcvars.sh`` or ``nlcvars.csh`` once in advance."
 msgstr ""
 "NLCPyは、 `NEC Numeric Library collection (NLC) "
-"<https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_ "
-"の機能を使用します。このパッケージをインポートする前に、事前に環境設定スクリプト ``nlcvars.sh`` または "
+"<https://sxauroratsubasa.sakura.ne.jp/documents/sdk/SDK_NLC/UsersGuide/main/en/>`_"
+" の機能を使用します。このパッケージをインポートする前に、事前に環境設定スクリプト ``nlcvars.sh`` または "
 "``nlcvars.csh`` を実行する必要があります。"
 
-#: ../../source/usage/basic.rst:16
+#: ../../source/usage/basic.rst:16 ../../source/usage/basic.rst:36
+#: ../../source/usage/basic.rst:50
 msgid "When using ``sh`` or its variant:"
 msgstr "使用シェルが ``sh`` 系の場合:"
 
-#: ../../source/usage/basic.rst:22
+#: ../../source/usage/basic.rst:22 ../../source/usage/basic.rst:42
+#: ../../source/usage/basic.rst:56
 msgid "When using ``csh`` or its variant:"
 msgstr "使用シェルが ``csh`` 系の場合:"
 
-#: ../../source/usage/basic.rst:28
-msgid ""
-"Here, **X.X.X** denotes the version number of NEC Numeric Library "
-"Collection on your x86 node(Vector Host)."
-msgstr ""
-"ここで、**X.X.X** は、x86ノード（Vector Host）上のNEC Numeric Library "
-"Collectionのバージョン番号を示します。"
+#: ../../source/usage/basic.rst:30
+msgid "Preparation with specifying the version of NEC Numeric Library Collection"
+msgstr "NEC Numeric Library Collectionのバージョンを指定する場合"
 
 #: ../../source/usage/basic.rst:32
+msgid ""
+"If you want to specify the version of the NEC Numeric Library Collection,"
+" specify the version in the following manner before executing."
+msgstr "NEC Numeric Library Collectionのバージョンを指定する場合、実行前に、以下の方法でバージョンを指定してください。"
+
+#: ../../source/usage/basic.rst:34
+msgid "**For VE30**"
+msgstr "VE30用"
+
+#: ../../source/usage/basic.rst:48
+msgid "**For VE20, VE10, or VE10E**"
+msgstr "VE20、VE10、およびVE10E用"
+
+#: ../../source/usage/basic.rst:62
+msgid ""
+"Here, **X.X.X** denotes the version number of NEC Numeric Library "
+"Collection."
+msgstr "ここで、**X.X.X** は、NEC Numeric Library Collectionのバージョン番号を示します。"
+
+#: ../../source/usage/basic.rst:66
 msgid "Supported Python Versions"
 msgstr "Pythonのバージョン"
 
-#: ../../source/usage/basic.rst:34
+#: ../../source/usage/basic.rst:68
 msgid "NLCPy is available from Python version 3.6, 3.7, or 3.8."
 msgstr "NLCPyは、Pythonのバージョン3.6, 3.7または3.8で使用できます。"
 
-#: ../../source/usage/basic.rst:38
+#: ../../source/usage/basic.rst:72
 msgid "NLCPy is not supported for Python version 3.5 or earlier."
 msgstr "NLCPyは、Pythonのバージョン3.5またはそれ以前をサポートしていません。"
 
-#: ../../source/usage/basic.rst:40
+#: ../../source/usage/basic.rst:74
 msgid ""
 "This manual is intended for users who will use Python version 3.6, 3.7, "
 "or 3.8."
 msgstr "このマニュアルは、Pythonのバージョン3.6, 3.7または3.8のいずれかを使用するユーザを想定しています。"
 
-#: ../../source/usage/basic.rst:44
+#: ../../source/usage/basic.rst:78
 msgid "Import Package"
 msgstr "インポート"
 
-#: ../../source/usage/basic.rst:46
+#: ../../source/usage/basic.rst:80
 msgid ""
 "When you use NLCPy in your Python scripts, the package ``nlcpy`` must be "
 "imported."
 msgstr "PythonスクリプトでNLCPyを使用する場合は、パッケージ ``nlcpy`` をインポートする必要があります。"
 
-#: ../../source/usage/basic.rst:48
+#: ../../source/usage/basic.rst:82
 msgid "When running the scripts using NLCPy in interactive mode:"
 msgstr "対話モードでNLCPyを使用してスクリプトを実行する場合:"
 
-#: ../../source/usage/basic.rst:55
+#: ../../source/usage/basic.rst:89
 msgid "When running the scripts using NLCPy in non-interactive mode:"
 msgstr "非対話モードでNLCPyを使用してスクリプトを実行する場合:"
 
-#: ../../source/usage/basic.rst:62
+#: ../../source/usage/basic.rst:96
 msgid ""
 "If you get something similar to the following errors, NLCPy or NEC "
 "Numeric Library Collection probably is not installed, or is not executed "
@@ -99,11 +117,11 @@ msgstr ""
 "Collectionがインストールされていないか、上記の環境設定スクリプトが実行されていない可能性があります。 :ref:`インストール "
 "<installation>` もご覧ください。"
 
-#: ../../source/usage/basic.rst:72
+#: ../../source/usage/basic.rst:106
 msgid ", or"
 msgstr "または"
 
-#: ../../source/usage/basic.rst:80
+#: ../../source/usage/basic.rst:114
 msgid ""
 "After you import ``nlcpy`` successfully in Python scripts, the scripts "
 "can use :class:`nlcpy.ndarray` of NLCPy and functions described in "
@@ -112,97 +130,105 @@ msgstr ""
 "Pythonスクリプトで ``nlcpy`` を正常にインポートすると、スクリプトはNLCPyの :class:`nlcpy.ndarray` と"
 " :ref:`リファレンス <nlcpy_reference>` で説明されている関数を使用できます。"
 
-#: ../../source/usage/basic.rst:84
+#: ../../source/usage/basic.rst:118
 msgid "An easy example of NLCPy script is shown below:"
 msgstr "NLCPyスクリプトの簡単な例を以下に示します。"
 
-#: ../../source/usage/basic.rst:98
+#: ../../source/usage/basic.rst:132
 msgid ""
 "In addition, the current version of NLCPy provides the following "
 "operators of the :class:`nlcpy.ndarray` class:"
 msgstr "さらに、NLCPyの現行バージョンは、 :class:`nlcpy.ndarray` クラスの次の演算子を提供します。"
 
-#: ../../source/usage/basic.rst:103
+#: ../../source/usage/basic.rst:137
 msgid "Assignment operator"
 msgstr "代入演算子"
 
-#: ../../source/usage/basic.rst:103
+#: ../../source/usage/basic.rst:137
 msgid "``=``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:104
+#: ../../source/usage/basic.rst:138
 msgid "Arithmetic operators"
 msgstr "算術演算子"
 
-#: ../../source/usage/basic.rst:104
+#: ../../source/usage/basic.rst:138
 msgid "``+``, ``-``, ``*``, ``/``, ``//``, ``%``, ``**``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:105
+#: ../../source/usage/basic.rst:139
 msgid "Arithmetic assignment operators"
 msgstr "算術代入演算子"
 
-#: ../../source/usage/basic.rst:105
+#: ../../source/usage/basic.rst:139
 msgid "``+=``, ``-=``, ``*=``, ``/=``, ``//=``, ``%=``, ``**=``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:106
+#: ../../source/usage/basic.rst:140
 msgid "Matrix multiplication operator"
 msgstr "行列乗算演算子"
 
-#: ../../source/usage/basic.rst:106
+#: ../../source/usage/basic.rst:140
 msgid "``@``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:107
+#: ../../source/usage/basic.rst:141
 msgid "Comparison operators"
 msgstr "比較演算子"
 
-#: ../../source/usage/basic.rst:107
+#: ../../source/usage/basic.rst:141
 msgid "``==``, ``!=``, ``>``, ``>=``, ``<``, ``<=``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:108
+#: ../../source/usage/basic.rst:142
 msgid "Bitwise operators"
 msgstr "ビット演算子"
 
-#: ../../source/usage/basic.rst:108
+#: ../../source/usage/basic.rst:142
 msgid "``&``, ``|``, ``^``, ``~``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:109
+#: ../../source/usage/basic.rst:143
 msgid "Bitwise assignment operators"
 msgstr "ビット単位の代入演算子"
 
-#: ../../source/usage/basic.rst:109
+#: ../../source/usage/basic.rst:143
 msgid "``&=``, ``|=``, ``^=``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:110
+#: ../../source/usage/basic.rst:144
 msgid "Bit-shift operators"
 msgstr "ビットシフト演算子"
 
-#: ../../source/usage/basic.rst:110
+#: ../../source/usage/basic.rst:144
 msgid "``<<``, ``>>``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:111
+#: ../../source/usage/basic.rst:145
 msgid "Bit-shift assignment operators"
 msgstr "ビットシフト代入演算子"
 
-#: ../../source/usage/basic.rst:111
+#: ../../source/usage/basic.rst:145
 msgid "``<<=``, ``>>=``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:112
+#: ../../source/usage/basic.rst:146
 msgid "Logical operators"
 msgstr "論理演算子"
 
-#: ../../source/usage/basic.rst:112
+#: ../../source/usage/basic.rst:146
 msgid "``and``, ``or``, ``xor``, ``not``"
 msgstr ""
 
-#: ../../source/usage/basic.rst:118
+#: ../../source/usage/basic.rst:152
 msgid "In-place matrix multiplication operator ``@=`` is not implemented yet."
 msgstr "行列演算の算術代入演算子 ``@=`` は、未実装です。"
+
+#~ msgid ""
+#~ "If you want to specify the version"
+#~ " of the NEC Numeric Library "
+#~ "Collection, specify the version in the"
+#~ " following manner before compiling and "
+#~ "linking."
+#~ msgstr ""
 

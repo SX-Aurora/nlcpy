@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-15 14:44+0900\n"
+"POT-Creation-Date: 2023-03-13 16:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -86,12 +86,12 @@ msgstr ""
 "<https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
 
 #: ../../source/installation.rst:42
-msgid "required NEC C/C++ compiler version: >= 3.5.1"
-msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 3.5.1"
+msgid "required NEC C/C++ compiler version: >= 5.0.0"
+msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 5.0.0"
 
 #: ../../source/installation.rst:43
-msgid "required NLC version: >= 2.3.0"
-msgstr "必要なNLCのバージョン: >= 2.3.0"
+msgid "required NLC version: >= 3.0.0"
+msgstr "必要なNLCのバージョン: >= 3.0.0"
 
 #: ../../source/installation.rst
 msgid ""
@@ -100,26 +100,32 @@ msgid ""
 msgstr ""
 
 #: ../../source/installation.rst:47
-msgid "required version: >= 2.13.1"
-msgstr "必要なバージョン: >= 2.13.1"
+msgid "required version: >= 3.0.2"
+msgstr "必要なバージョン: >= 3.0.2"
 
 #: ../../source/installation.rst:49
 msgid ""
 "If you install NLCPy from wheel, the runtime packages of Alternative VE "
 "Offloading(AVEO) are required."
-msgstr ""
+msgstr "NLCPyをwheelからインストールする場合、Alternative VE Offloading(AVEO)のランタイムパッケージが必要です。"
 
 #: ../../source/installation.rst:55
 msgid ""
 "If you install NLCPy from source, the development packages of Alternative"
 " VE Offloading(AVEO) are required."
 msgstr ""
+"NLCPyをソースコードからインストールする場合、Alternative VE "
+"Offloading(AVEO)のdevelopmentパッケージが必要です。"
+
+#: ../../source/installation.rst
+msgid "veosinfo3"
+msgstr ""
 
 #: ../../source/installation.rst
 msgid "`Python <https://www.python.org/>`_"
 msgstr ""
 
-#: ../../source/installation.rst:64
+#: ../../source/installation.rst:69
 msgid "required version: 3.6, 3.7, or 3.8"
 msgstr "必要なバージョン: 3.6, 3.7, 3.8 のいずれか"
 
@@ -127,59 +133,66 @@ msgstr "必要なバージョン: 3.6, 3.7, 3.8 のいずれか"
 msgid "`NumPy <https://www.numpy.org/>`_"
 msgstr ""
 
-#: ../../source/installation.rst:68
+#: ../../source/installation.rst:73
 msgid "required version: >= v1.17"
 msgstr "必要なバージョン: >= v1.17"
 
-#: ../../source/installation.rst:72
+#: ../../source/installation.rst:77
 msgid "Install from wheel"
 msgstr "wheelパッケージからインストール"
 
-#: ../../source/installation.rst:74
+#: ../../source/installation.rst:79
 msgid "You can install NLCPy by executing either of following commands."
 msgstr "NLCPyは、次のいずれかのコマンドを実行してインストールできます。"
 
-#: ../../source/installation.rst:76
+#: ../../source/installation.rst:81
 msgid "Install from PyPI"
 msgstr "PyPIからのインストール"
 
-#: ../../source/installation.rst:83
+#: ../../source/installation.rst:88
 msgid "Install from your local computer"
 msgstr "ローカルコンピュータからインストール"
 
-#: ../../source/installation.rst:85
+#: ../../source/installation.rst:90
 msgid ""
 "Download the wheel package from `GitHub <https://github.com/SX-"
 "Aurora/nlcpy/>`_."
 msgstr "`GitHub <https://github.com/SX-Aurora/nlcpy/>`_ からwheelパッケージをダウンロード"
 
-#: ../../source/installation.rst:86
+#: ../../source/installation.rst:91
 msgid "Put the wheel package to your any directory."
 msgstr "wheelパッケージを任意のディレクトリに配置"
 
-#: ../../source/installation.rst:87
+#: ../../source/installation.rst:92
 msgid "Install the local wheel package via pip command."
 msgstr "pipコマンドを使用してローカルのwheelパッケージをインストール"
 
-#: ../../source/installation.rst:93
+#: ../../source/installation.rst:98
 msgid ""
 "The shared objects for Vector Engine, which are included in the wheel "
-"package, are compiled and tested by using NEC C/C++ Compiler Version "
-"3.4.0 and NumPy v1.19.2."
+"package, are tested by using NEC C/C++ Compiler Version 5.0.0 and NumPy "
+"v1.19.5."
 msgstr ""
-"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ コンパイラバージョン3.4.0とNumPy"
-" v1.19.2を使用してコンパイルおよびテストしています。"
+"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ コンパイラバージョン5.0.0とNumPy"
+" v1.19.5を使用してテストしています。"
 
-#: ../../source/installation.rst:97
+#: ../../source/installation.rst:102
 msgid "Install from source (with building)"
 msgstr "ソースからインストール（ビルドあり）"
 
-#: ../../source/installation.rst:99
+#: ../../source/installation.rst:104
 msgid "Before building source files, please install following packages."
 msgstr "ソースファイルをビルドする前に、以下のパッケージをインストールしてください。"
 
-#: ../../source/installation.rst:105
+#: ../../source/installation.rst:112
 msgid ""
 "And, entering the following commands in the environment where `gcc` and "
 "`ncc` commands are available."
 msgstr "そして、`gcc` および `ncc` コマンドが使用可能な環境で以下のコマンドを入力します。"
+
+#~ msgid "required version: >= 2.13.1"
+#~ msgstr "必要なバージョン: >= 2.13.1"
+
+#~ msgid "`veosinfo3`"
+#~ msgstr ""
+

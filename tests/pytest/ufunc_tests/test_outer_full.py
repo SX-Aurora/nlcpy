@@ -35,13 +35,8 @@ import pytest
 import gc
 import nlcpy
 from nlcpy import testing
+from nlcpy.testing.types import all_types
 
-float_types = [numpy.float32, numpy.float64]
-complex_types = [numpy.complex64, numpy.complex128]
-signed_int_types = [numpy.int32, numpy.int64]
-unsigned_int_types = [numpy.uint32, numpy.uint64]
-int_types = signed_int_types + unsigned_int_types
-all_types = [numpy.bool] + float_types + int_types + complex_types
 
 ops = [
     'power',
@@ -84,7 +79,7 @@ ops = [
 
 def adjust_dtype(xp, op, dtype, dtype_out):
     if xp is numpy:
-        if dtype == numpy.bool:
+        if dtype == numpy.bool_:
             if op in ('divide', 'true_divide', 'logaddexp', 'logaddexp2',
                       'heaviside', 'arctan2', 'hypot', 'copysign', 'nextafter'):
                 dtype = numpy.float32
@@ -101,8 +96,8 @@ def is_executable(op, dtype1=None, dtype2=None, dtype=None, dtype_out=None):
             'power', 'floor_divide', 'mod', 'remainder', 'fmod',
             'right_shift', 'left_shift',
         ):
-            return dtype != numpy.bool and \
-                not (dtype is None and (dtype1 == numpy.bool or dtype2 == numpy.bool))
+            return dtype != numpy.bool_ and \
+                not (dtype is None and (dtype1 == numpy.bool_ or dtype2 == numpy.bool_))
 
     return True
 
@@ -136,6 +131,8 @@ def execute_ufunc(
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuter(unittest.TestCase):
 
     shapes = (((3, 4), (2, 3)),)
@@ -189,6 +186,8 @@ class TestOuter(unittest.TestCase):
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuterArrayScalar(unittest.TestCase):
 
     shapes = ((3, 4),)
@@ -244,6 +243,8 @@ class TestOuterArrayScalar(unittest.TestCase):
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuterScalar(unittest.TestCase):
 
     castings = ('no', 'equiv', 'safe', 'same_kind')
@@ -299,6 +300,8 @@ class TestOuterScalar(unittest.TestCase):
 
 
 @pytest.mark.full
+@testing.with_requires('numpy>=1.19')
+@testing.with_requires('numpy<1.20')
 class TestOuter2(unittest.TestCase):
 
     def tearDown(self):

@@ -205,7 +205,12 @@ class TestSearch(unittest.TestCase):
 
 
 @testing.parameterize(
+    {'cond_shape': (10,), 'x_shape': (10,), 'y_shape': (10,)},
+    {'cond_shape': (5, 6), 'x_shape': (5, 6), 'y_shape': (5, 6)},
     {'cond_shape': (2, 3, 4), 'x_shape': (2, 3, 4), 'y_shape': (2, 3, 4)},
+    {'cond_shape': (2, 3, 4, 5), 'x_shape': (2, 3, 4, 5), 'y_shape': (2, 3, 4, 5)},
+    {'cond_shape': (2, 3, 1, 5), 'x_shape': (2, 1, 4, 5), 'y_shape': (2, 3, 4, 1)},
+    {'cond_shape': (1, 3, 1, 5), 'x_shape': (2, 1, 1, 5), 'y_shape': (1, 1, 4, 1)},
     {'cond_shape': (4,), 'x_shape': (2, 3, 4), 'y_shape': (2, 3, 4)},
     {'cond_shape': (2, 3, 4), 'x_shape': (2, 3, 4), 'y_shape': (3, 4)},
     {'cond_shape': (3, 4), 'x_shape': (2, 3, 4), 'y_shape': (4,)},
@@ -223,6 +228,39 @@ class TestWhereTwoArrays(unittest.TestCase):
         x = testing.shaped_random(self.x_shape, xp, x_type, seed=0)
         y = testing.shaped_random(self.y_shape, xp, y_type, seed=1)
         return xp.where(cond, x, y)
+
+
+@testing.parameterize(
+    {'shape': (10,)},
+    {'shape': (10, 11)},
+    {'shape': (10, 11, 12)},
+    {'shape': (10, 11, 12, 5)},
+)
+class TestWhereOneArray(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_where_condition_zero_0(self, xp, dtype):
+        x = testing.shaped_random(self.shape, xp, dtype, seed=0)
+        return xp.where(0, x, 1)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_where_condition_zero_1(self, xp, dtype):
+        y = testing.shaped_random(self.shape, xp, dtype, seed=0)
+        return xp.where(0, 1, y)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_where_condition_one_0(self, xp, dtype):
+        x = testing.shaped_random(self.shape, xp, dtype, seed=0)
+        return xp.where(1, x, 1)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_where_condition_one_1(self, xp, dtype):
+        y = testing.shaped_random(self.shape, xp, dtype, seed=0)
+        return xp.where(1, 1, y)
 
 
 @testing.parameterize(

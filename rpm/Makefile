@@ -8,7 +8,7 @@ BASEDIR = ..
 PLAT           = el8
 ARCH           = x86_64
 VERSION_PYTHON = python3.6
-VERSION_NLCPY  = 2.2.0
+VERSION_NLCPY  = 3.0.0
 VERSION_RPM    = 1
 RELEASE        = 1
 VERSION_NUMPY  = 1.19.5
@@ -54,7 +54,7 @@ $(RPMS)/$(ARCH)/$(RPM_NLCPY): $(SPECS)/$(RPM_NLCPY:%.rpm=%.spec)
 	mkdir -p $(SRCDIR)
 	mkdir -p $(SRCDIR)/doc
 	cp -p $(DISTDIR)/nlcpy*.whl $(SRCDIR)/
-	cd $(SRCDIR) && unzip nlcpy*.whl && rm -f nlcpy*.whl
+	cd $(SRCDIR) && unzip 'nlcpy*.whl' && rm -f nlcpy*.whl
 	cp -r $(DOCDIR)/* $(SRCDIR)/doc/
 	cd $(SOURCES) && tar zcvf $(SRC).tar.gz $(SRC)
 	cd $(SPECS) && rpmbuild --bb $(SPECDEF) $(^F)

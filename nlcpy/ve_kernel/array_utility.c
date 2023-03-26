@@ -63,12 +63,12 @@ uint64_t nlcpy__get_ptr(ve_array *a) {
     if (a->ve_adr == 0LU) {
         return nlcpy__get_scalar(a);
     } else {
-        int64_t strides = 0;
+        // int64_t strides = 0;
 //#pragma _NEC novector
-        for (int64_t i = 0; i < NLCPY_MAXNDIM; i++) {
-            strides += a->strides[i];
-        }
-        if (strides == 0) a->size = 1;
+        // for (int64_t i = 0; i < NLCPY_MAXNDIM; i++) {
+        //     strides += a->strides[i];
+        // }
+        // if (strides == 0) a->size = 1;
         return a->ve_adr;
     }
 }

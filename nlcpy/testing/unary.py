@@ -246,7 +246,7 @@ def _check_unary_no_out_no_where_no_dtype(
             worst_dtype = numpy.dtype(p[0])
             n_calc = 1
 
-        if p[0] == numpy.bool and op in float16_op:
+        if p[0] == numpy.bool_ and op in float16_op:
             worst_dtype = ufunc._guess_worst_dtype((worst_dtype, numpy.dtype('f4')))
 
         kw[name_in1] = in1
@@ -278,7 +278,7 @@ def _check_unary_no_out_no_where_with_dtype(
                 p[0], p[1], p[2], minval, maxval)
             in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             dtype = numpy.dtype(p[3])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
             else:
                 worst_dtype = ufunc._guess_worst_dtype((in1.dtype, dtype))
@@ -291,7 +291,7 @@ def _check_unary_no_out_no_where_with_dtype(
             in1, minval, maxval = ufunc._create_random_scalar(p[0], minval, maxval)
             in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             dtype = numpy.dtype(p[1])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype((in1.dtype, numpy.dtype('f4')))
             else:
                 worst_dtype = ufunc._guess_worst_dtype((numpy.dtype(p[0]), dtype))
@@ -381,7 +381,7 @@ def _check_unary_with_out_no_where_with_dtype(
                 p[0], p[2], p[4], ufunc_name, mode,
                 axis=p[6], indices=p[7], keepdims=keepdims)
             dtype = numpy.dtype(p[5])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype(
                     (in1.dtype, out.dtype, numpy.dtype('f4')))
             else:
@@ -397,7 +397,7 @@ def _check_unary_with_out_no_where_with_dtype(
             in1 = _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name)
             out = _create_out_array(p[0], p[1], p[3], ufunc_name, mode)
             dtype = numpy.dtype(p[4])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype(
                     (numpy.dtype(p[2]), out.dtype, numpy.dtype('f4')))
             else:
@@ -543,7 +543,7 @@ def _check_unary_with_out_with_where_with_dtype(
             where, minval, maxval = ufunc._create_random_array(
                 p[0], p[3], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[6])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype(
                     (in1.dtype, out.dtype, numpy.dtype('f4')))
             else:
@@ -559,7 +559,7 @@ def _check_unary_with_out_with_where_with_dtype(
             where, minval, maxval = ufunc._create_random_array(
                 p[0], p[2], ufunc.DT_BOOL, minval, maxval)
             dtype = numpy.dtype(p[5])
-            if dtype == numpy.bool and op in float16_op:
+            if dtype == numpy.bool_ and op in float16_op:
                 worst_dtype = ufunc._guess_worst_dtype(
                     (in1.dtype, out.dtype, numpy.dtype('f4')))
             else:

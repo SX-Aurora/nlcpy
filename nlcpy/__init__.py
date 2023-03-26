@@ -3,13 +3,6 @@ from numpy import _NoValue  # NOQA
 from nlcpy.__config__ import show_config  # NOQA
 from nlcpy import _path
 
-# -----------------------------------------------------------------------------
-# set environment variable
-# -----------------------------------------------------------------------------
-from nlcpy import _environment
-_environment._set_ve_ld_library_path()
-_environment._set_ve_ld_preload()
-
 # --------------------------------------------------
 # parameter
 # --------------------------------------------------
@@ -222,7 +215,6 @@ from numpy import unsignedinteger  # NOQA
 # Booleans
 # -----------------------------------------------------------------------------
 from numpy import bool_  # NOQA
-from numpy import bool8  # NOQA
 
 # -----------------------------------------------------------------------------
 # Integers

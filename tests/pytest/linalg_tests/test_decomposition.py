@@ -274,6 +274,7 @@ class TestQr(unittest.TestCase):
     @testing.for_orders('CF')
     @testing.for_dtypes('fF')
     @testing.numpy_nlcpy_allclose(atol=1e-6, rtol=1e-6)
+    @testing.with_requires('numpy<1.22')
     def test_qr_single(self, xp, dtype, order):
         a = xp.asarray(testing.shaped_random(self.shape, xp, dtype), order=order)
         args = dict()
@@ -300,6 +301,7 @@ class TestQr(unittest.TestCase):
     @testing.for_orders('CF')
     @testing.for_dtypes('?ilILdD')
     @testing.numpy_nlcpy_allclose(atol=1e-12, rtol=1e-12)
+    @testing.with_requires('numpy<1.22')
     def test_qr_double(self, xp, dtype, order):
         a = xp.asarray(testing.shaped_random(self.shape, xp, dtype), order=order)
         if self.mode == 'complete':

@@ -584,8 +584,8 @@ def percentile(a, q, axis=None, out=None, overwrite_input=False,
 @numpy_wrap
 def nanpercentile(a, q, axis=None, out=None, overwrite_input=False,
                   interpolation='linear', keepdims=False):
-    """Computes the *q*-th percentile of the data along the specified axis, while ignoring
-    nan values.
+    """Computes the *q*-th percentile of the data along the specified axis, while
+    ignoring nan values.
 
     Returns the *q*-th percentile(s) of the array elements.
 

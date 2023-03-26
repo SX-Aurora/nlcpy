@@ -54,7 +54,7 @@ cimport numpy
 cpdef get_dtype(t)
 cpdef tuple get_dtype_with_itemsize(t)
 
-cdef extern from "../ve_kernel/ve_dtype.h":
+cdef extern from "../include/ve_dtype.h":
     cdef enum ve_dtype:
         ve_bool
         ve_i8

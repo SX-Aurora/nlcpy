@@ -119,6 +119,7 @@ function fft_complex_1d_multi_s(zin, zout_forward, zout_backward, nx, m)
     call asl_fft_execute_complex_backward_s(fft, zout_forward, zout_backward)
     ! DFT Finalization
     call asl_fft_destroy(fft)
+    fft_complex_1d_multi_s = 0
 end
 '''
 

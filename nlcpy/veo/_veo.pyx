@@ -32,38 +32,32 @@
 # distutils: language = c++
 
 from nlcpy.veo.libveo cimport *
-from nlcpy.veo cimport _nlcpy_veo_hook
-
-#
-# EF: commented out veo_api_version until it finds its way into the VEO mainline.
-#
-# _veo_api_version = veo_api_version()
-# if _veo_api_version < 3:
-#    raise ImportError("VEO API Version must be at least 3! The system uses version %d."
-#                      % _veo_api_version)
 
 import os
 import numbers
 import atexit
 import sys
 import gc
-from nlcpy.kernel_register import ve_kernel_register as register
 from nlcpy.prof import prof
-from nlcpy import _environment
 from nlcpy.logging import _vp_logging
 from cpython.buffer cimport \
     PyBUF_SIMPLE, PyBUF_ANY_CONTIGUOUS, Py_buffer, PyObject_GetBuffer, \
     PyObject_CheckBuffer, PyBuffer_Release
 import numpy as np
-cimport numpy as np
+# cimport numpy as np
 
 include "conv_i64.pxi"
 
+
+_veo_api_version = VEO_API_VERSION
+_veo_version = veo_version_string().decode()
+# if _veo_api_version < 3:
+#    raise ImportError("VEO API Version must be at least 3! The system uses version %d."
+#                      % _veo_api_version)
+
+
 cdef _proc_init_hook
 _proc_init_hook = list()
-
-
-_nlcpy_veo_hook._get_veo_sym()  # to hook veo_alloc_hmem/veo_free_hmem
 
 
 cpdef set_proc_init_hook(v):
@@ -102,6 +96,10 @@ cdef union U64:
 
 cdef inline zsign(x):
     return 0 if x >= 0 else -1
+
+
+cpdef get_ve_arch(pid):
+    return veo_get_ve_arch(pid)
 
 
 cdef class VeoFunction(object):
@@ -420,6 +418,10 @@ cdef class VeoCtxt(object):
     def __dealloc__(self):
         self.context_close()
 
+    @property
+    def _thr_ctxt(self):
+        return <uint64_t>self.thr_ctxt
+
     def context_close(self):
         if self.thr_ctxt == NULL:
             return
@@ -507,6 +509,10 @@ cdef class VeoProc(object):
                 _vp_logging.VEO,
                 "veo_proc(%d) created", nodeid)
 
+    @property
+    def _proc_handle(self):
+        return <uint64_t>self.proc_handle
+
     def __dealloc__(self):
         self.proc_destroy()
         if _vp_logging._is_enable(_vp_logging.VEO):
@@ -567,9 +573,11 @@ cdef class VeoProc(object):
         return addr
 
     def alloc_hmem(self, size_t size):
+        cdef void *vemem
         cdef uint64_t addr
-        if _nlcpy_veo_hook._hooked_alloc_hmem(self.proc_handle, &addr, size):
+        if veo_alloc_hmem(self.proc_handle, &vemem, size):
             raise MemoryError("Out of memory on VE")
+        addr = <uint64_t>vemem
         if _vp_logging._is_enable(_vp_logging.VEO):
             _vp_logging.info(
                 _vp_logging.VEO,
@@ -588,7 +596,7 @@ cdef class VeoProc(object):
                 self.nodeid, addr)
 
     def free_hmem(self, uint64_t addr):
-        if _nlcpy_veo_hook._hooked_free_hmem(addr):
+        if veo_free_hmem(<void *>addr):
             raise RuntimeError("veo_free_hmem failed")
         if _vp_logging._is_enable(_vp_logging.VEO):
             _vp_logging.info(
@@ -673,10 +681,30 @@ cdef class VeoProc(object):
 cdef class VEO_HMEM(object):
 
     @staticmethod
+    def is_ve_addr(uint64_t addr):
+        cdef int ret = veo_is_ve_addr(<void*>addr)
+        return True if ret == 1 else False
+
+    @staticmethod
     def get_hmem_addr(uint64_t hmem_addr):
         cdef uint64_t addr
         addr = <uint64_t>veo_get_hmem_addr(<void*>hmem_addr)
         return addr
+
+    @staticmethod
+    def get_proc_identifier_from_hmem(uint64_t hmem):
+        cdef int iden
+        iden = veo_get_proc_identifier_from_hmem(<void*>hmem)
+        return iden
+
+    @staticmethod
+    def get_proc_handle_from_hmem(uint64_t addr):
+        cdef veo_proc_handle *proc_handle
+        proc_handle = veo_get_proc_handle_from_hmem(<void*>addr)
+        if proc_handle == NULL:
+            raise RuntimeError(
+                'veo_get_proc_handle_from_hmem failed')
+        return <uint64_t>proc_handle
 
     @staticmethod
     def hmemcpy(uint64_t dst, const uint64_t src, size_t size):

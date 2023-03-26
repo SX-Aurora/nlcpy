@@ -252,7 +252,7 @@ class TestIndexing(unittest.TestCase):
     @testing.numpy_nlcpy_array_equal()
     def test_take_0d_ind_wrap_around_negative(self, xp, dtype_a, dtype_b):
         a = testing.shaped_arange((3, 4, 5), xp, dtype_a)
-        b = xp.array(-1, dtype=dtype_b)
+        b = xp.array(-1).astype(dtype_b)
         return xp.take(a, b, mode='wrap')
 
     @testing.for_all_dtypes()

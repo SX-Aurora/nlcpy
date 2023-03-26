@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, NEC Corporation
+# This file is distributed under the same license as the nlcpy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nlcpy 3.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-02 17:28+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../source/release_notes/v3.0.0.rst:3
+msgid "What's new in Version 3.0.0 (March, 2023)"
+msgstr "バージョン3.0.0の更新事項（2023年3月）"
+
+#: ../../source/release_notes/v3.0.0.rst:7
+msgid "New Features"
+msgstr "新機能"
+
+#: ../../source/release_notes/v3.0.0.rst:9
+msgid "Newly added shared libraries for VE30."
+msgstr "VE30用の共有ライブラリを新規に追加しました。"
+
+#~ msgid ""
+#~ "Newly support for VE30 architecture. "
+#~ "Since NLCPy v3.0.0, we provide 3 "
+#~ "wheel packages on PyPI:"
+#~ msgstr "新規にVE30アーキテクチャに対応しました。NLCPy v3.0.0から、PyPIでは3つのwheelパッケージが提供されます:"
+
+#~ msgid "``nlcpy``: A VH side package that controls VE kernels."
+#~ msgstr "``nlcpy``: VEカーネルを管理するVH用のパッケージ"
+
+#~ msgid ""
+#~ "``nlcpy_ve1_kernel``: A VE side package "
+#~ "that includes shared libraries for VE20,"
+#~ " VE10, or VE10E."
+#~ msgstr "``nlcpy_ve1_kernel``: VE20、VE10、およびVE10E向けの共有ライブラリを含むVE用のパッケージ"
+
+#~ msgid ""
+#~ "``nlcpy_ve3_kernel``: A VE side package "
+#~ "that includes shared libraries for VE30."
+#~ msgstr "``nlcpy_ve3_kernel``: VE30向けの共有ライブラリを含むVE用のパッケージ"
+
+#~ msgid ""
+#~ "The package ``nlcpy`` has dependencies "
+#~ "on ``nlcpy_ve1_kernel`` and ``nlcpy_ve3_kernel``."
+#~ " When you intall ``nlcpy`` from "
+#~ "``pip`` command, ``nlcpy_ve1_kernel`` and "
+#~ "``nlcpy_ve3_kernel`` are automatically installed "
+#~ "according to its dependencies."
+#~ msgstr "パッケージ``nlcpy``は``nlcpy_ve1_kernel``と``nlcpy_ve3_kernel``に対して依存関係を持ちます。``pip``コマンドから``nlcpy``をインストールすると、``nlcpy_ve1_kernel``と``nlcpy_ve3_kernel``は依存関係に従い、自動的にインストールされます。"
+
+#~ msgid "Newly added libraries for VE30."
+#~ msgstr ""
+

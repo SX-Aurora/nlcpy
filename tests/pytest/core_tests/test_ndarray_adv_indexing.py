@@ -126,10 +126,10 @@ class TestArrayAdvancedIndexingGetitemPerm(unittest.TestCase):
     {'shape': (2, 3, 4), 'indexes': (slice(None), ())},
     {'shape': (2, 3, 4), 'indexes': ((), ())},
     {'shape': (2, 3, 4), 'indexes': ((()),)},
-    {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool)},
+    {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool_)},
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), numpy.array([], dtype=numpy.bool))},
-    {'shape': (2, 3, 4), 'indexes': numpy.array([[], []], dtype=numpy.bool)},
+     'indexes': (slice(None), numpy.array([], dtype=numpy.bool_))},
+    {'shape': (2, 3, 4), 'indexes': numpy.array([[], []], dtype=numpy.bool_)},
     # list indexes
     {'shape': (2, 3, 4), 'indexes': [1]},
     {'shape': (2, 3, 4), 'indexes': [1, 1]},
@@ -326,7 +326,7 @@ class TestArrayAdvancedIndexingOverflow(unittest.TestCase):
     {'shape': (0,), 'indexes': numpy.array([False, True, True])},
     {'shape': (0, 1), 'indexes': (0, Ellipsis)},
     {'shape': (2, 3), 'indexes': (slice(None), [1, 2], slice(None))},
-    {'shape': (2, 3), 'indexes': numpy.array([], dtype=numpy.float)},
+    {'shape': (2, 3), 'indexes': numpy.array([], dtype=numpy.float_)},
 )
 class TestArrayInvalidIndexAdvGetitem(unittest.TestCase):
 
@@ -355,14 +355,21 @@ class TestArrayInvalidIndexAdvGetitem2(unittest.TestCase):
 @testing.parameterize(
     {'shape': (2, 3, 4), 'indexes': [1, [1, [1]]]},
 )
-@testing.with_requires('numpy>=1.16')
 class TestArrayInvalidValueAdvGetitem(unittest.TestCase):
 
-    @testing.numpy_nlcpy_raises(accept_error=IndexError)
-    def test_invalid_adv_getitem(self, xp):
+    @testing.with_requires('numpy>=1.16')
+    @testing.with_requires('numpy<1.24')
+    @testing.numpy_nlcpy_raises()
+    def test_invalid_adv_getitem0(self, xp):
         a = testing.shaped_arange(self.shape, xp)
         with testing.assert_warns(FutureWarning):
             a[self.indexes]
+
+    @testing.with_requires('numpy>=1.24')
+    @testing.numpy_nlcpy_raises()
+    def test_invalid_adv_getitem1(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        a[self.indexes]
 
 
 @testing.parameterize(
@@ -456,12 +463,12 @@ class TestArrayInvalidValueAdvGetitem(unittest.TestCase):
      'value': 1},
     {'shape': (2, 3, 4), 'indexes': ((), ()),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool),
+    {'shape': (2, 3, 4), 'indexes': numpy.array([], dtype=numpy.bool_),
      'value': 1},
     {'shape': (2, 3, 4),
-     'indexes': (slice(None), numpy.array([], dtype=numpy.bool)),
+     'indexes': (slice(None), numpy.array([], dtype=numpy.bool_)),
      'value': 1},
-    {'shape': (2, 3, 4), 'indexes': numpy.array([[], []], dtype=numpy.bool),
+    {'shape': (2, 3, 4), 'indexes': numpy.array([[], []], dtype=numpy.bool_),
      'value': numpy.random.uniform(size=(4,))},
     # list indexes
     {'shape': (2, 3, 4), 'indexes': [1, 0], 'value': 1},

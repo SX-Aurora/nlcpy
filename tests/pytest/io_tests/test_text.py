@@ -57,6 +57,7 @@
 #
 import unittest
 import tempfile
+import os
 from io import BytesIO, StringIO
 
 from nlcpy import testing
@@ -183,7 +184,7 @@ class TestSaveTxt(unittest.TestCase):
     def test_file_roundtrip(self, xp):
         a = xp.array([(1, 2), (3, 4)])
         with tempfile.TemporaryDirectory() as path:
-            f = path + 'tempfile'
+            f = os.path.join(path, 'tempfile')
             xp.savetxt(f, a)
             return xp.loadtxt(f)
 

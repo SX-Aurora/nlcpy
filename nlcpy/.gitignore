@@ -1,5 +1,4 @@
 *.cpp
 *.c
-/include/*.h
 !/ve_kernel/*.c
 !/mempool/nlcpy_mempool.c

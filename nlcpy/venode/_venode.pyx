@@ -66,10 +66,13 @@ from nlcpy.veo._veo cimport INTENT_OUT
 from nlcpy.request cimport request
 from nlcpy.veosinfo import node_info
 from nlcpy.veosinfo import check_node_status
+from nlcpy.veosinfo import mem_info
 from nlcpy.mempool cimport mempool
 from nlcpy import _environment
 from cpython.object cimport *
 from libcpp.vector cimport vector
+from nlcpy._path import LibPath
+from nlcpy.veo._veo import get_ve_arch
 cimport cython
 
 
@@ -146,6 +149,14 @@ cdef inline _get_venode_pool():
 cpdef VENode _get_venode(int veid=0):
     return <VENode>_get_venode_pool()[veid]
 
+cpdef VENode _find_venode_from_proc_handle(uint64_t key_proc):
+    vnp = _get_venode_pool()
+    for _venode in vnp.venode_list:
+        if _venode.connected:
+            if key_proc == _venode.proc._proc_handle:
+                return <VENode>_venode
+    return None
+
 
 @cython.no_gc
 cdef class VENode:
@@ -176,12 +187,25 @@ cdef class VENode:
         self.serial_id = serial_id
         self._phys = phys
         self._connected = False
+        eve_arch = _environment._get_ve_nlcpy_ve_arch()
+        if eve_arch:
+            self.arch = eve_arch
+        else:
+            if phys:
+                self.arch = get_ve_arch(self.pid)
+            else:
+                self.arch = get_ve_arch(self.lid)
+        self.libpath = LibPath(self.arch)
+        self._is_fast_math = _environment._is_fast_math()
         if connect:
             self.connect()
 
     def connect(self):
         """ Establish connection to VE.
         """
+
+        _environment._set_ve_ld_preload(self.arch)
+        _environment._set_ve_ld_library_path(self.libpath._lib_dir)
 
         if self._connected:
             return
@@ -190,7 +214,8 @@ cdef class VENode:
         else:
             self.proc = VeoProc(self.lid)
         self.ctx = self.proc.open_context()
-        self.lib, self.lib_prof = ve_kernel_register._register_ve_kernel(self.proc)
+        self.lib, self.lib_prof = ve_kernel_register._register_ve_kernel(
+            self.proc, self.libpath, self._is_fast_math)
         # alloc_mempool must be called later than kernel register
         self.pool = mempool.MemPool(self)
         self.request_manager = request.RequestManager(self, request.VeoReqs())
@@ -223,7 +248,8 @@ cdef class VENode:
         return self.serial_id
 
     def __repr__(self):
-        return '<VE node logical_id=%d, physical_id=%d>' % (self.lid, self.pid)
+        return '<VE node logical_id=%d, physical_id=%d, arch=%d>' % \
+               (self.lid, self.pid, self.arch)
 
     def __enter__(self):
         if not self.connected:
@@ -312,29 +338,47 @@ cdef class VENode:
         >>> import nlcpy
         >>> from pprint import pprint
         >>> pprint(nlcpy.venode.VE(0).status)  # doctest: +SKIP
-        {'lid': 0,
+        {'arch': 3,
+         'fast_math': False,
+         'lid': 0,
+         'main_mem_used': 5389680640,
+         'main_total_memsize': 103079215104,
+         'mempool_capacity': 1073741824,
+         'mempool_remainder': 1073741824,
+         'mempool_used': 0,
+         'ncore': 16,
          'offload_timing': 'lazy',
          'pid': 0,
-         'pool_capacity': 1073741824,
-         'pool_remainder': 1073741824,
-         'pool_used': 0,
          'running_request_on_VE': 0,
-         'stacked_request_on_VH': 0,
-         'total_memsize': 51539607552}
+         'stacked_request_on_VH': 0}
         """
 
         pool_status = self.pool.get_status()
+        ve_meminfo = self.meminfo
         return {
             'lid': self.lid,
             'pid': self.pid,
-            'total_memsize': pool_status['total_ve_memsize'],
-            'pool_capacity': pool_status['pool_capacity'],
-            'pool_used': pool_status['pool_used'],
-            'pool_remainder': pool_status['pool_remainder'],
+            'arch': self.arch,
+            'ncore': self.ncore,
+            'fast_math': self._is_fast_math,
+            'main_total_memsize': ve_meminfo['kb_main_total'] * 1024,
+            'main_mem_used': ve_meminfo['kb_main_used'] * 1024,
+            'mempool_capacity': pool_status['pool_capacity'],
+            'mempool_used': pool_status['pool_used'],
+            'mempool_remainder': pool_status['pool_remainder'],
             'offload_timing': self.request_manager.timing,
             'stacked_request_on_VH': self.request_manager.nreq,
             'running_request_on_VE': self.request_manager.veo_reqs.cnt
         }
+
+    @property
+    def ncore(self):
+        vni = node_info()
+        return vni['cores'][vni['nodeid'].index(self.pid)]
+
+    @property
+    def meminfo(self):
+        return mem_info(self.pid)
 
     def _destroy_handle(self):
         try:
@@ -441,11 +485,12 @@ cdef class VENodePool:
             myid = logical_node_ids[local_rank]
             ncores = []
             for nid, nc in node_count.items():
-                if nc > vni['cores'][nid]:
+                vni_idx = vni['nodeid'].index(nid)
+                if nc > vni['cores'][vni_idx]:
                     raise ValueError('The number of process on VE exceeds '
                                      'the number of VE core')
                 for i in range(nc):
-                    ncores.append((vni['cores'][nid] + i) // nc)
+                    ncores.append((vni['cores'][vni_idx] + i) // nc)
             _environment._set_ve_omp_num_threads(ncores[local_rank])
             if _environment._is_venodelist():
                 if _environment._is_ve_nlcpy_nodelist():

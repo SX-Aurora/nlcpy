@@ -39,25 +39,30 @@ installed on your x86 Node of SX-Aurora TSUBASA.
 
 * | `NEC SDK <https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_
 
-    - required NEC C/C++ compiler version: >= 3.5.1
-    - required NLC version: >= 2.3.0
+    - required NEC C/C++ compiler version: >= 5.0.0
+    - required NLC version: >= 3.0.0
 
 * | `Alternative VE Offloading (AVEO) <https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_
 
-    - required version: >= 2.13.0
+    - required version: >= 3.0.2
 
     - If you install NLCPy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
 
       ::
 
-        # yum install veoffload-aveo veoffload-aveorun
+        # yum install veoffload-aveo veoffload-aveorun-ve1 veoffload-aveorun-ve3
 
     - If you install NLCPy from source, the development packages of Alternative VE Offloading(AVEO) are required.
 
       ::
 
-        # yum install veoffload-aveo-devel veoffload-aveorun-devel
+        # yum install veoffload-aveo-devel veoffload-aveorun-ve1-devel veoffload-aveorun-ve3-devel
 
+* | veosinfo3
+
+    ::
+
+      # yum install veosinfo3
 
 * | `Python <https://www.python.org/>`_
 
@@ -90,7 +95,7 @@ You can install NLCPy by executing either of following commands.
 
            $ pip install <path_to_wheel>
 
-The shared objects for Vector Engine, which are included in the wheel package, are compiled and tested by using NEC C/C++ Compiler Version 3.4.0 and NumPy v1.19.2.
+The shared objects for Vector Engine, which are included in the wheel package, are tested by using NEC C/C++ Compiler Version 5.0.0 and NumPy v1.19.5.
 
 
 Install from source (with building)
@@ -101,6 +106,8 @@ Before building source files, please install following packages.
 ::
 
     $ pip install numpy cython wheel
+    $ sudo yum install veosinfo3-devel
+    $ sudo yum install veoffload-aveo-devel veoffload-aveorun-ve1-devel veoffload-aveorun-ve3-devel
 
 And, entering the following commands in the environment where `gcc` and `ncc` commands are available.
 
@@ -108,5 +115,5 @@ And, entering the following commands in the environment where `gcc` and `ncc` co
 
     $ git clone https://github.com/SX-Aurora/nlcpy.git
     $ cd nlcpy
-    $ pip install .
-
+    $ python3 setup.py build_ext --targ ve1,ve3,vh
+    $ python3 setup.py intall --targ ve1,ve3,vh

@@ -292,7 +292,7 @@ def _make_decorator(check_func, name, type_check, accept_error, sp_name=None,
 
 
 def numpy_nlcpy_allclose(rtol=1e-7, atol=0, err_msg='', verbose=True,
-                         name='xp', type_check=True, accept_error=False,
+                         name='xp', type_check=True, accept_error=None,
                          sp_name=None, scipy_name=None, contiguous_check=True):
     """Decorator that checks NumPy results and nlcpy ones are close.
 
@@ -367,7 +367,7 @@ def numpy_nlcpy_allclose(rtol=1e-7, atol=0, err_msg='', verbose=True,
 
 def numpy_nlcpy_array_almost_equal(decimal=6, err_msg='', verbose=True,
                                    name='xp', type_check=True,
-                                   accept_error=False, sp_name=None,
+                                   accept_error=None, sp_name=None,
                                    scipy_name=None):
     """Decorator that checks NumPy results and nlcpy ones are almost equal.
 
@@ -406,7 +406,7 @@ def numpy_nlcpy_array_almost_equal(decimal=6, err_msg='', verbose=True,
 
 
 def numpy_nlcpy_array_almost_equal_nulp(nulp=1, name='xp', type_check=True,
-                                        accept_error=False, sp_name=None,
+                                        accept_error=None, sp_name=None,
                                         scipy_name=None):
     """Decorator that checks results of NumPy and nlcpy are equal w.r.t. spacing.
 
@@ -441,7 +441,7 @@ def numpy_nlcpy_array_almost_equal_nulp(nulp=1, name='xp', type_check=True,
 
 
 def numpy_nlcpy_array_max_ulp(maxulp=1, dtype=None, name='xp', type_check=True,
-                              accept_error=False, sp_name=None,
+                              accept_error=None, sp_name=None,
                               scipy_name=None):
     """Decorator that checks results of NumPy and nlcpy ones are equal w.r.t. ulp.
 
@@ -480,7 +480,7 @@ def numpy_nlcpy_array_max_ulp(maxulp=1, dtype=None, name='xp', type_check=True,
 
 
 def numpy_nlcpy_array_equal(err_msg='', verbose=True, name='xp',
-                            type_check=True, accept_error=False, sp_name=None,
+                            type_check=True, accept_error=None, sp_name=None,
                             scipy_name=None, strides_check=False):
     """Decorator that checks NumPy results and nlcpy ones are equal.
 
@@ -573,7 +573,7 @@ def numpy_nlcpy_array_list_equal(
 
 
 def numpy_nlcpy_array_less(err_msg='', verbose=True, name='xp',
-                           type_check=True, accept_error=False, sp_name=None,
+                           type_check=True, accept_error=None, sp_name=None,
                            scipy_name=None):
     """Decorator that checks the nlcpy result is less than NumPy result.
 

@@ -52,7 +52,7 @@
 
 import nlcpy
 from nlcpy.jit import kernel
-from nlcpy.__config__ import get_nlc_ver
+from nlcpy._environment import _get_nlc_home
 
 import os
 import datetime
@@ -144,6 +144,7 @@ def get_default_cflags(openmp=True, opt_level=2, debug=False):
      '-O2',
      '-I',
      '/your/path/to/nlcpy/include',
+     '-march=ve3'
      '-fopenmp')
 
     """
@@ -154,12 +155,21 @@ def get_default_cflags(openmp=True, opt_level=2, debug=False):
     if _opt_level < 0 or _opt_level > 4:
         raise ValueError('Invalid value of opt_level. '
                          'Expected 0 <= opt_level <= 4.')
+    arch = VE().arch
+    if arch == 1:
+        march = 've1'
+    elif arch == 3:
+        march = 've3'
+    else:
+        raise RuntimeError("Unknown VE architecture version:", arch)
+
     cflags = (
         '-c',
         '-fpic',
         '-O' + str(_opt_level),
         '-I',
         nlcpy.get_include(),
+        '-march=' + march,
     )
     if openmp:
         cflags += ('-fopenmp',)
@@ -374,12 +384,18 @@ class CustomVELibrary:
     def _make_obj(self):
         cmd = (self._compiler, self._src_path) + self._cflags + ('-o', self._obj_path)
         if self._use_nlc:
-            nlc_ver = get_nlc_ver()
+            nlc_home = _get_nlc_home(VE().arch)
+            if nlc_home is None:
+                raise RuntimeError('Failed to find NLC directory. '
+                                   'Please execute '
+                                   '`source /opt/nec/ve[3]/nlc/X.X.X/nlcvars.sh` '
+                                   'or '
+                                   '`source /opt/nec/ve[3]/nlc/X.X.X/nlcvars.csh`')
             if 'ncc' in os.path.basename(self._compiler) or \
                     'nc++' in os.path.basename(self._compiler):
-                cmd += ('-I/opt/nec/ve/nlc/{}/include/inc_i64/'.format(nlc_ver),)
+                cmd += ('-I{}'.format(os.path.join(nlc_home, 'include/inc_i64')),)
             if 'nfort' in os.path.basename(self._compiler):
-                cmd += ('-I/opt/nec/ve/nlc/{}/include/mod_i64/'.format(nlc_ver),)
+                cmd += ('-I{}'.format(os.path.join(nlc_home, 'include/mod_i64')),)
         if self._ftrace:
             cmd += ('-ftrace',)
         _ = _exec_cmd(cmd, log_stream=self._log_stream)

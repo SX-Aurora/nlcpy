@@ -37,7 +37,7 @@ from nlcpy.veosinfo import mem_info
 from nlcpy.logging import _vp_logging
 from nlcpy.mempool cimport mempool
 from nlcpy.venode._venode cimport VENode
-from nlcpy.veo cimport _nlcpy_veo_hook
+from nlcpy.veo cimport libveo
 cimport cython
 
 
@@ -56,11 +56,6 @@ cdef class MemPool(object):
 
         # total memsize
         cdef size_t tot_memsize = mem_info(venode.pid)['kb_main_total'] * 1024
-
-        # set hooked veo symbol
-        cdef void *_hooked_veo_alloc_hmem = _nlcpy_veo_hook._get_hooked_veo_alloc_hmem()
-        cdef void *_hooked_veo_free_hmem = _nlcpy_veo_hook._get_hooked_veo_free_hmem()
-        nlcpy_mempool_set_hooked_veo_sym(_hooked_veo_alloc_hmem, _hooked_veo_free_hmem)
 
         self._pool = nlcpy_mempool_alloc(proc_hnd, tot_memsize)
         if self._pool == NULL:

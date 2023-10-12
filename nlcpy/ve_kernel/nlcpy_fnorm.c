@@ -86,7 +86,7 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     } else {
         idx[n_inner] = max_idx[0];
         idx[max_idx[0]] = n_inner;
-        if (max_idx[1] == axis1) max_idx[1] = max_idx[2];
+        if (idx[max_idx[1]] == axis1) max_idx[1] = max_idx[2];
         int64_t tmp = idx[n_outer];
         idx[n_outer] = idx[max_idx[1]];
         idx[max_idx[1]] = tmp;
@@ -97,9 +97,17 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     int64_t n_outer2 = idx[n_outer];
     uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
     uint64_t iw0;
+    uint64_t stride_outer2;
+    if (n_outer2 < axis1) {
+        stride_outer2 = w2->strides[n_outer2] / w2->itemsize;
+    } else if (n_outer2 > axis1) {
+        stride_outer2 = w2->strides[n_outer2 - 1] / w2->itemsize;
+    } else {
+        return NLCPY_ERROR_INTERNAL;
+    }
     if (n_inner2 < axis1) {
         iw0 = w2->strides[n_inner2] / w2->itemsize;
-    } else if (n_inner2 > axis1) {
+    } else {
         iw0 = w2->strides[n_inner2 - 1] / w2->itemsize;
     }
 
@@ -115,17 +123,16 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // sum along first axis
         len = w1->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * w1->strides[n_outer2] / w1->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < w1->shape[n_inner2]; j++) {
@@ -158,17 +165,19 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
             } while (k >= 1);
         }
     } else {
+#ifdef _OPENMP
+#pragma omp barrier
+#endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // abs(x) * abs(x) and sum along the first axis
         len = x->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * x->strides[n_outer2] / x->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < x->shape[n_inner2]; j++) {
@@ -207,6 +216,9 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     // sum along second axis
     if (w2->ndim == 1) {
 #ifdef _OPENMP
@@ -236,7 +248,7 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         } else {
             idx[n_inner] = max_idx[0];
             idx[max_idx[0]] = n_inner;
-            if (max_idx[1] == axis2) max_idx[1] = max_idx[2];
+            if (idx[max_idx[1]] == axis2) max_idx[1] = max_idx[2];
             int64_t tmp = idx[n_outer];
             idx[n_outer] = idx[max_idx[1]];
             idx[max_idx[1]] = tmp;
@@ -245,6 +257,13 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         n_outer2 = idx[n_outer];
         int64_t iy;
         int64_t iy0;
+        if (n_outer2 < axis2) {
+            stride_outer2 = y->strides[n_outer2] / y->itemsize;
+        } else if (n_outer2 > axis2) {
+            stride_outer2 = y->strides[n_outer2 - 1] / y->itemsize;
+        } else {
+            return NLCPY_ERROR_INTERNAL;
+        }
         if (n_inner2 < axis2) {
             iy0 = y->strides[n_inner2] / y->itemsize;
         } else if (n_inner2 > axis2) {
@@ -257,11 +276,7 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             iw = i * w2->strides[n_outer2] / w2->itemsize;
-            if (n_outer2 < axis2) {
-                iy = i * y->strides[n_outer2] / y->itemsize;
-            } else if (n_outer2 > axis2) {
-                iy = i * y->strides[n_outer2 - 1] / y->itemsize;
-            }
+            iy = i * stride_outer2;
 
             do {
                 if (n_inner2 == axis2) {
@@ -298,6 +313,9 @@ uint64_t nlcpy_fnorm_s(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     i_s = y->size * it / nt;
     i_e = y->size * (it + 1) / nt;
     for (i = i_s; i < i_e; i++) {
@@ -353,7 +371,7 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     } else {
         idx[n_inner] = max_idx[0];
         idx[max_idx[0]] = n_inner;
-        if (max_idx[1] == axis1) max_idx[1] = max_idx[2];
+        if (idx[max_idx[1]] == axis1) max_idx[1] = max_idx[2];
         int64_t tmp = idx[n_outer];
         idx[n_outer] = idx[max_idx[1]];
         idx[max_idx[1]] = tmp;
@@ -364,9 +382,17 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     int64_t n_outer2 = idx[n_outer];
     uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
     uint64_t iw0;
+    uint64_t stride_outer2;
+    if (n_outer2 < axis1) {
+        stride_outer2 = w2->strides[n_outer2] / w2->itemsize;
+    } else if (n_outer2 > axis1) {
+        stride_outer2 = w2->strides[n_outer2 - 1] / w2->itemsize;
+    } else {
+        return NLCPY_ERROR_INTERNAL;
+    }
     if (n_inner2 < axis1) {
         iw0 = w2->strides[n_inner2] / w2->itemsize;
-    } else if (n_inner2 > axis1) {
+    } else {
         iw0 = w2->strides[n_inner2 - 1] / w2->itemsize;
     }
 
@@ -382,17 +408,16 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // sum along first axis
         len = w1->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * w1->strides[n_outer2] / w1->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < w1->shape[n_inner2]; j++) {
@@ -425,17 +450,19 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
             } while (k >= 1);
         }
     } else {
+#ifdef _OPENMP
+#pragma omp barrier
+#endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // abs(x) * abs(x) and sum along the first axis
         len = x->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * x->strides[n_outer2] / x->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < x->shape[n_inner2]; j++) {
@@ -474,6 +501,9 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     // sum along second axis
     if (w2->ndim == 1) {
 #ifdef _OPENMP
@@ -503,7 +533,7 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         } else {
             idx[n_inner] = max_idx[0];
             idx[max_idx[0]] = n_inner;
-            if (max_idx[1] == axis2) max_idx[1] = max_idx[2];
+            if (idx[max_idx[1]] == axis2) max_idx[1] = max_idx[2];
             int64_t tmp = idx[n_outer];
             idx[n_outer] = idx[max_idx[1]];
             idx[max_idx[1]] = tmp;
@@ -512,6 +542,13 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         n_outer2 = idx[n_outer];
         int64_t iy;
         int64_t iy0;
+        if (n_outer2 < axis2) {
+            stride_outer2 = y->strides[n_outer2] / y->itemsize;
+        } else if (n_outer2 > axis2) {
+            stride_outer2 = y->strides[n_outer2 - 1] / y->itemsize;
+        } else {
+            return NLCPY_ERROR_INTERNAL;
+        }
         if (n_inner2 < axis2) {
             iy0 = y->strides[n_inner2] / y->itemsize;
         } else if (n_inner2 > axis2) {
@@ -524,11 +561,7 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             iw = i * w2->strides[n_outer2] / w2->itemsize;
-            if (n_outer2 < axis2) {
-                iy = i * y->strides[n_outer2] / y->itemsize;
-            } else if (n_outer2 > axis2) {
-                iy = i * y->strides[n_outer2 - 1] / y->itemsize;
-            }
+            iy = i * stride_outer2;
 
             do {
                 if (n_inner2 == axis2) {
@@ -565,6 +598,9 @@ uint64_t nlcpy_fnorm_d(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     i_s = y->size * it / nt;
     i_e = y->size * (it + 1) / nt;
     for (i = i_s; i < i_e; i++) {
@@ -620,7 +656,7 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     } else {
         idx[n_inner] = max_idx[0];
         idx[max_idx[0]] = n_inner;
-        if (max_idx[1] == axis1) max_idx[1] = max_idx[2];
+        if (idx[max_idx[1]] == axis1) max_idx[1] = max_idx[2];
         int64_t tmp = idx[n_outer];
         idx[n_outer] = idx[max_idx[1]];
         idx[max_idx[1]] = tmp;
@@ -631,9 +667,17 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     int64_t n_outer2 = idx[n_outer];
     uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
     uint64_t iw0;
+    uint64_t stride_outer2;
+    if (n_outer2 < axis1) {
+        stride_outer2 = w2->strides[n_outer2] / w2->itemsize;
+    } else if (n_outer2 > axis1) {
+        stride_outer2 = w2->strides[n_outer2 - 1] / w2->itemsize;
+    } else {
+        return NLCPY_ERROR_INTERNAL;
+    }
     if (n_inner2 < axis1) {
         iw0 = w2->strides[n_inner2] / w2->itemsize;
-    } else if (n_inner2 > axis1) {
+    } else {
         iw0 = w2->strides[n_inner2 - 1] / w2->itemsize;
     }
 
@@ -649,17 +693,16 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // sum along first axis
         len = w1->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * w1->strides[n_outer2] / w1->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < w1->shape[n_inner2]; j++) {
@@ -692,17 +735,19 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
             } while (k >= 1);
         }
     } else {
+#ifdef _OPENMP
+#pragma omp barrier
+#endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // abs(x) * abs(x) and sum along the first axis
         len = x->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * x->strides[n_outer2] / x->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < x->shape[n_inner2]; j++) {
@@ -741,6 +786,9 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     // sum along second axis
     if (w2->ndim == 1) {
 #ifdef _OPENMP
@@ -770,7 +818,7 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         } else {
             idx[n_inner] = max_idx[0];
             idx[max_idx[0]] = n_inner;
-            if (max_idx[1] == axis2) max_idx[1] = max_idx[2];
+            if (idx[max_idx[1]] == axis2) max_idx[1] = max_idx[2];
             int64_t tmp = idx[n_outer];
             idx[n_outer] = idx[max_idx[1]];
             idx[max_idx[1]] = tmp;
@@ -779,6 +827,13 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         n_outer2 = idx[n_outer];
         int64_t iy;
         int64_t iy0;
+        if (n_outer2 < axis2) {
+            stride_outer2 = y->strides[n_outer2] / y->itemsize;
+        } else if (n_outer2 > axis2) {
+            stride_outer2 = y->strides[n_outer2 - 1] / y->itemsize;
+        } else {
+            return NLCPY_ERROR_INTERNAL;
+        }
         if (n_inner2 < axis2) {
             iy0 = y->strides[n_inner2] / y->itemsize;
         } else if (n_inner2 > axis2) {
@@ -791,11 +846,7 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             iw = i * w2->strides[n_outer2] / w2->itemsize;
-            if (n_outer2 < axis2) {
-                iy = i * y->strides[n_outer2] / y->itemsize;
-            } else if (n_outer2 > axis2) {
-                iy = i * y->strides[n_outer2 - 1] / y->itemsize;
-            }
+            iy = i * stride_outer2;
 
             do {
                 if (n_inner2 == axis2) {
@@ -832,6 +883,9 @@ uint64_t nlcpy_fnorm_c(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     i_s = y->size * it / nt;
     i_e = y->size * (it + 1) / nt;
     for (i = i_s; i < i_e; i++) {
@@ -887,7 +941,7 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     } else {
         idx[n_inner] = max_idx[0];
         idx[max_idx[0]] = n_inner;
-        if (max_idx[1] == axis1) max_idx[1] = max_idx[2];
+        if (idx[max_idx[1]] == axis1) max_idx[1] = max_idx[2];
         int64_t tmp = idx[n_outer];
         idx[n_outer] = idx[max_idx[1]];
         idx[max_idx[1]] = tmp;
@@ -898,9 +952,17 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
     int64_t n_outer2 = idx[n_outer];
     uint64_t ix0 = x->strides[n_inner2] / x->itemsize;
     uint64_t iw0;
+    uint64_t stride_outer2;
+    if (n_outer2 < axis1) {
+        stride_outer2 = w2->strides[n_outer2] / w2->itemsize;
+    } else if (n_outer2 > axis1) {
+        stride_outer2 = w2->strides[n_outer2 - 1] / w2->itemsize;
+    } else {
+        return NLCPY_ERROR_INTERNAL;
+    }
     if (n_inner2 < axis1) {
         iw0 = w2->strides[n_inner2] / w2->itemsize;
-    } else if (n_inner2 > axis1) {
+    } else {
         iw0 = w2->strides[n_inner2 - 1] / w2->itemsize;
     }
 
@@ -916,17 +978,16 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // sum along first axis
         len = w1->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * w1->strides[n_outer2] / w1->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < w1->shape[n_inner2]; j++) {
@@ -959,17 +1020,19 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
             } while (k >= 1);
         }
     } else {
+#ifdef _OPENMP
+#pragma omp barrier
+#endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         // abs(x) * abs(x) and sum along the first axis
         len = x->shape[n_outer2];
         i_s = len * it / nt;
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             ix = i * x->strides[n_outer2] / x->itemsize;
-            if (n_outer2 < axis1) {
-                iw = i * w2->strides[n_outer2] / w2->itemsize;
-            } else if (n_outer2 > axis1) {
-                iw = i * w2->strides[n_outer2 - 1] / w2->itemsize;
-            }
+            iw = i * stride_outer2;
             do {
                 if (n_inner2 == axis1) {
                     for (j = 0; j < x->shape[n_inner2]; j++) {
@@ -1008,6 +1071,9 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     // sum along second axis
     if (w2->ndim == 1) {
 #ifdef _OPENMP
@@ -1037,7 +1103,7 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         } else {
             idx[n_inner] = max_idx[0];
             idx[max_idx[0]] = n_inner;
-            if (max_idx[1] == axis2) max_idx[1] = max_idx[2];
+            if (idx[max_idx[1]] == axis2) max_idx[1] = max_idx[2];
             int64_t tmp = idx[n_outer];
             idx[n_outer] = idx[max_idx[1]];
             idx[max_idx[1]] = tmp;
@@ -1046,6 +1112,13 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         n_outer2 = idx[n_outer];
         int64_t iy;
         int64_t iy0;
+        if (n_outer2 < axis2) {
+            stride_outer2 = y->strides[n_outer2] / y->itemsize;
+        } else if (n_outer2 > axis2) {
+            stride_outer2 = y->strides[n_outer2 - 1] / y->itemsize;
+        } else {
+            return NLCPY_ERROR_INTERNAL;
+        }
         if (n_inner2 < axis2) {
             iy0 = y->strides[n_inner2] / y->itemsize;
         } else if (n_inner2 > axis2) {
@@ -1058,11 +1131,7 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
         i_e = len * (it + 1) / nt;
         for (i = i_s; i < i_e; i++) {
             iw = i * w2->strides[n_outer2] / w2->itemsize;
-            if (n_outer2 < axis2) {
-                iy = i * y->strides[n_outer2] / y->itemsize;
-            } else if (n_outer2 > axis2) {
-                iy = i * y->strides[n_outer2 - 1] / y->itemsize;
-            }
+            iy = i * stride_outer2;
 
             do {
                 if (n_inner2 == axis2) {
@@ -1099,6 +1168,9 @@ uint64_t nlcpy_fnorm_z(ve_array *x, ve_array *y, ve_array *w1, ve_array *w2, int
 #ifdef _OPENMP
 #pragma omp barrier
 #endif
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
     i_s = y->size * it / nt;
     i_e = y->size * (it + 1) / nt;
     for (i = i_s; i < i_e; i++) {

@@ -271,10 +271,55 @@ void nlcpy_memcpy(uint64_t *dst, uint64_t *src, uint64_t nbytes) {
     return;
 }
 
+#ifdef DEBUG_BARRIER
+#include <stddef.h>
+#include <time.h>
+int tn;
+int64_t usec;
+#endif
+
 uint64_t nlcpy_set_constant() {
     extern float  nlcpy_g_nanf;
     extern double nlcpy_g_nan;
     nlcpy_g_nanf = nanf("n");
     nlcpy_g_nan = nan("n");
+#ifdef DEBUG_BARRIER
+    char *env = NULL;
+    extern int tn;
+    extern int64_t usec;
+    if ((env = (char *)getenv("VE_NLCPY_SLEEP_THREAD")) != NULL) {
+        tn = atoi(env);
+    }
+    if (tn < 0) tn = 0;
+
+    usec = 100;
+    if ((env = (char *)getenv("VE_NLCPY_SLEEP_USEC")) != NULL) {
+        usec = atoll(env);
+    }
+    if (usec < 0) usec = 0;
+    printf("DEBUG MODE: sleep thread: %d, sleep usec: %d [usec]\n", tn, usec);
+#endif
     return NLCPY_ERROR_OK;
 }
+
+#ifdef DEBUG_BARRIER
+void nlcpy__sleep_thread() {
+    extern int tn;
+    extern int64_t usec;
+    if (usec == 0) return;
+
+    const int64_t n2usec = 1000; // nsec -> usec
+    struct timespec req = {0, usec * n2usec};
+#ifdef _OPENMP
+    const int mt = omp_get_max_threads();
+    const int it = omp_get_thread_num();
+#else
+    const int mt = 1;
+    const int it = 0;
+#endif
+    if (tn >= mt) tn = mt - 1; // clip
+    if (it == tn) {
+        nanosleep(&req, NULL);
+    }
+}
+#endif

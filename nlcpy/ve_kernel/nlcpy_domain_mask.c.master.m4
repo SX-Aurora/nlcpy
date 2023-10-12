@@ -91,7 +91,7 @@ uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array 
 /////////
 // N-d //
 /////////
-    } else {
+    } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM){
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
         nlcpy__rearrange_axis(out, idx);
 
@@ -145,6 +145,8 @@ uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array 
                 }
             } while (k > 0);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
     return 0;
 }
@@ -207,7 +209,7 @@ uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array 
 /////////
 // N-d //
 /////////
-    } else {
+    } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM){
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
         nlcpy__rearrange_axis(out, idx);
 
@@ -261,6 +263,8 @@ uint64_t nlcpy_domain_mask_$1(ve_array *a, ve_array *b, ve_array *arr, ve_array 
                 }
             } while (k > 0);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
     return 0;
 }

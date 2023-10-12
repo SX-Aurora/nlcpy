@@ -60,10 +60,15 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
 
+///////////
+// error //
+///////////
+    if (y->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (y->ndim == 0) {
+    } else if (y->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -140,7 +145,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
 /////////
 // N-d //
 /////////
-    } else if (y->ndim > 1 && y->ndim <= NLCPY_MAXNDIM){
+    } else {
 @#ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -205,9 +210,6 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *where, int32_t *psw)
                 if (k < 1) break;
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     int32_t dummy_psw;

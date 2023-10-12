@@ -211,12 +211,6 @@ def _is_int_cast_for_iterable(param):
     return True
 
 
-def _is_duplicated(param):
-    before = len(param)
-    _set = set(param)
-    return (before != len(_set))
-
-
 def _get_params_1d(a, n, axis, array_func=_get_complex_ndarray):
     if isinstance(axis, tuple):
         _len = len(axis)
@@ -290,7 +284,7 @@ def _get_params_nd(a, s, axes, array_func=_get_complex_ndarray, invreal=False):
                 raise ValueError("Shape and axes have different lengths.")
         else:
             raise TypeError('{} object is not iterable'.format(
-                type(axes).__name__))
+                type(s).__name__))
 
     s = list(s)
     if axes is None:
@@ -702,7 +696,7 @@ def fftshift(x, axes=None):
     else:
         shift = [x.shape[ax] // 2 for ax in axes]
 
-    return _nlcpy_roll(x, shift, axes)
+    return nlcpy.roll(x, shift, axes)
 
 
 def ifftshift(x, axes=None):
@@ -715,141 +709,4 @@ def ifftshift(x, axes=None):
     else:
         shift = [-(x.shape[ax] // 2) for ax in axes]
 
-    return _nlcpy_roll(x, shift, axes)
-
-
-def _nlcpy_roll(a, shift, axis=None):
-    if axis is None:
-        return _nlcpy_roll(a.ravel(), shift, 0).reshape(a.shape)
-    else:
-        axis = _nlcpy_normalize_axis_tuple(axis, a.ndim, allow_duplicate=True)
-        broadcasted, o_shape = _nlcpy_broadcast(shift, axis)
-
-        shifts = {ax: 0 for ax in range(a.ndim)}
-        i=0
-        for mix in list(broadcasted):
-            pal = mix[0]
-            dat = mix[1]
-            shifts[i] += pal
-            i += 1
-
-        rolls = [((slice(None), slice(None)),)] * a.ndim
-        for ax, offset in shifts.items():
-            offset %= a.shape[ax] or 1
-            if offset:
-                rolls[ax] = ((slice(None, -offset), slice(offset, None)),
-                             (slice(-offset, None), slice(None, offset)))
-
-        result = nlcpy.empty_like(a)
-        for indices in itertools.product(*rolls):
-            arr_index, res_index = zip(*indices)
-            result[res_index] = a[arr_index]
-
-        return result
-
-
-def _nlcpy_normalize_axis_tuple(axis, ndim, argname=None, allow_duplicate=False):
-    if type(axis) not in (tuple, list):
-        try:
-            axis = [operator.index(axis)]
-        except TypeError:
-            pass
-    axis = tuple([_nlcpy_normalize_axis_index(ax, ndim, argname) for ax in axis])
-    if not allow_duplicate and len(set(axis)) != len(axis):
-        if argname:
-            raise ValueError('repeated axis in `{}` argument'.format(argname))
-        else:
-            raise ValueError('repeated axis')
-    return axis
-
-
-def _nlcpy_broadcast(shift, axis):
-    out_shape = _nlcpy_broadcast_shape(shift, axis)
-
-    bd_shift = _nlcpy_broadcast_to(nlcpy.array(shift), out_shape)
-    bd_axis = _nlcpy_broadcast_to(nlcpy.array(axis), out_shape)
-
-    ret = []
-    for x, y in zip(bd_shift, bd_axis):
-        c_x = x.astype(x.dtype)
-        c_y = y.astype(y.dtype)
-
-        ret.append((c_x, c_y))
-    return ret, out_shape
-
-
-def _nlcpy_broadcast_shape(shift, axis):
-    sf = _nlcpy_cnv_tuple(shift)
-    ax = _nlcpy_cnv_tuple(axis)
-    cal_shape = _nlcpy_cal_shape(sf, ax)
-
-    return cal_shape
-
-
-def _nlcpy_cnv_tuple(lst, shape=()):
-    if not isinstance(lst, Sequence):
-        return shape
-
-    if isinstance(lst[0], Sequence):
-        _l = len(lst[0])
-        if not all(len(item) == _l for item in lst):
-            msg = 'not all lists have the same length'
-            raise ValueError(msg)
-
-    shape += (len(lst), )
-    shape = _nlcpy_cnv_tuple(lst[0], shape)
-
-    return shape
-
-
-def _nlcpy_broadcast_to(array, shape, subok=False):
-    return nlcpy.broadcast_to(array, shape, subok)
-
-
-def _nlcpy_normalize_axis_index(axis, ndim, msg_prefix=None):
-    ret = 0
-    if axis<0:
-        ret += ndim
-    else:
-        ret = axis
-
-    return ret
-
-
-def _nlcpy_is_broadcastable(shp1, shp2):
-    for a, b in zip(shp1[::-1], shp2[::-1]):
-        if a == 1 or b == 1 or a == b:
-            pass
-        else:
-            return False
-    return True
-
-
-def _nlcpy_cal_shape(shp1, shp2):
-    ret = []
-    if _nlcpy_is_broadcastable(shp1, shp2):
-        if len(shp1) != len(shp2):
-            one, tmp = _nlcpy_sort_order(shp1, shp2)
-            l_tmp = list(tmp)
-            l_tmp.insert(0, 1)
-            two = tuple(l_tmp)
-        else:
-            one, two = shp1, shp2
-
-        ans = []
-        for a, b in zip(one, two):
-            if a<b:
-                ans.append(b)
-            else:
-                ans.append(a)
-
-        ret = ans
-
-    return tuple(ret)
-
-
-def _nlcpy_sort_order(shp1, shp2):
-    if len(shp1) < len(shp2):
-        return shp2, shp1
-
-    return shp1, shp2
+    return nlcpy.roll(x, shift, axes)

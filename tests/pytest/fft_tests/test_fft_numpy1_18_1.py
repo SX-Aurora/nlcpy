@@ -4,6 +4,7 @@ import numpy
 import nlcpy as np
 import pytest
 from nlcpy.random import random
+from nlcpy.random import seed
 from nlcpy.testing import (  # NOQA
     assert_array_equal, assert_allclose)
 from numpy.testing import assert_raises
@@ -13,6 +14,8 @@ from numpy.testing import assert_raises
 #    import queue
 # else:
 #    import Queue as queue
+
+seed(0)
 
 
 def fft1(x):

@@ -41,6 +41,10 @@ def pytest_addoption(parser):
         parser.addoption(
             '--import_err', action='store_true')
         parser.addoption(
+            '--ctxt_close', action='store_true')
+        parser.addoption(
+            '--proc_destroy', action='store_true')
+        parser.addoption(
             '--ftrace_gen', action='store_true')
         parser.addoption(
             '--ftrace_chk', action='store_true')
@@ -52,6 +56,8 @@ def pytest_runtest_setup(item):
     option = item.config.getoption("--test")
     fast_math = item.config.getoption("--fast_math")
     import_err = item.config.getoption("--import_err")
+    ctxt_close = item.config.getoption("--ctxt_close")
+    proc_destroy = item.config.getoption("--proc_destroy")
     ftrace_gen = item.config.getoption("--ftrace_gen")
     ftrace_chk = item.config.getoption("--ftrace_chk")
     if option == 'standard':
@@ -74,6 +80,16 @@ def pytest_runtest_setup(item):
         if 'import_err' in item.keywords:
             pytest.skip(
                 "need --import_err option to run this test")
+
+    if not ctxt_close:
+        if 'ctxt_close' in item.keywords:
+            pytest.skip(
+                "need --ctxt_close option to run this test")
+
+    if not proc_destroy:
+        if 'proc_destroy' in item.keywords:
+            pytest.skip(
+                "need --proc_destroy option to run this test")
 
     if not ftrace_gen:
         if 'ftrace_gen' in item.keywords:

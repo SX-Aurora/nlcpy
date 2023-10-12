@@ -80,7 +80,7 @@ class TestArraySet(unittest.TestCase):
     @testing.multi_ve(2)
     @testing.for_orders('CF')
     @testing.for_all_dtypes()
-    def test_get_multive(self, dtype, order):
+    def test_set_multive(self, dtype, order):
         with nlcpy.venode.VE(1):
             dst = nlcpy.empty((2, 3), dtype, order)
         with nlcpy.venode.VE(0):
@@ -88,3 +88,21 @@ class TestArraySet(unittest.TestCase):
         dst.set(src)
         expected = testing.shaped_arange((2, 3), nlcpy, dtype, order)
         testing.assert_array_equal(dst, expected)
+
+    def test_not_numpy_array(self):
+        dst = nlcpy.empty((3,), dtype='f8')
+        src = testing.shaped_arange((3,), nlcpy, dtype='f8')
+        with self.assertRaises(TypeError):
+            dst.set(src)
+
+    def test_dtype_mismatch(self):
+        dst = nlcpy.empty((3,), dtype='f8')
+        src = testing.shaped_arange((3,), numpy, dtype='f4')
+        with self.assertRaises(TypeError):
+            dst.set(src)
+
+    def test_shape_mismatch(self):
+        dst = nlcpy.empty((3,), dtype='f8')
+        src = testing.shaped_arange((5,), numpy, dtype='f8')
+        with self.assertRaises(ValueError):
+            dst.set(src)

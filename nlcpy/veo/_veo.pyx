@@ -54,6 +54,7 @@ _veo_version = veo_version_string().decode()
 # if _veo_api_version < 3:
 #    raise ImportError("VEO API Version must be at least 3! The system uses version %d."
 #                      % _veo_api_version)
+_veo_max_num_args = VEO_MAX_NUM_ARGS
 
 
 cdef _proc_init_hook
@@ -92,10 +93,6 @@ cdef union U64:
     int8_t i8[8]
     float f32[2]
     double d64
-
-
-cdef inline zsign(x):
-    return 0 if x >= 0 else -1
 
 
 cpdef get_ve_arch(pid):
@@ -150,7 +147,7 @@ cdef class VeoFunction(object):
         """
         if self._args_type is None:
             raise RuntimeError("VeoFunction needs arguments format info before call()")
-        if len(args) > VEO_MAX_NUM_ARGS:
+        if len(args) > _veo_max_num_args:
             raise ValueError("call_async: too many arguments (%d)" % len(args))
         if len(args) != len(self.args_conv):
             raise ValueError("invalid number of arguments, expected `{}`, got `{}`"
@@ -343,9 +340,6 @@ cdef class OnStack(object):
     def __dealloc__(self):
         PyBuffer_Release(&self.data)
 
-    def buff(self):
-        return self._buff
-
     def c_pointer(self):
         return <uint64_t>self._c_pointer
 
@@ -515,10 +509,6 @@ cdef class VeoProc(object):
 
     def __dealloc__(self):
         self.proc_destroy()
-        if _vp_logging._is_enable(_vp_logging.VEO):
-            _vp_logging.info(
-                _vp_logging.VEO,
-                "veo_proc(%d) destroyed", self.nodeid)
 
     def proc_destroy(self):
         if self.proc_handle == NULL:
@@ -526,17 +516,10 @@ cdef class VeoProc(object):
         if veo_proc_destroy(self.proc_handle):
             raise RuntimeError("veo_proc_destroy failed")
         self.proc_handle = NULL
-
-    def get_function(self, name):
-        """
-        Return a VeoFunction for function 'name' which
-        has been previously found in one of the loaded libraries.
-        Return None if the function wasn't found.
-        """
-        for lib in self.lib:
-            if name in lib.func.keys():
-                return lib.func[name]
-        return None
+        if _vp_logging._is_enable(_vp_logging.VEO):
+            _vp_logging.info(
+                _vp_logging.VEO,
+                "veo_proc(%d) destroyed", self.nodeid)
 
     def i64_to_addr(self, int64_t x):
         return ConvFromI64.to_ulong(x)
@@ -554,11 +537,6 @@ cdef class VeoProc(object):
         if res != 0:
             raise RuntimeError("veo_unload_library '%s' failed" % lib.name)
         del self.lib[<bytes>lib.name]
-
-    def static_library(self):
-        lib = VeoLibrary(self, "__static__", 0UL)
-        self.lib["__static__"] = lib
-        return lib
 
     @prof.profile_alloc_mem
     def alloc_mem(self, size_t size):

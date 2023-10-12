@@ -102,8 +102,21 @@ function run_venode_tests () {
     MPIRANK=0 _MPI4PYVE_MPI_INITIALIZED=1 _MPI4PYVE_MPI_LOCAL_SIZE=1000 $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_value_error_at_import.py --import_err || retcode=$(($? | retcode))
     MPIRANK=0 _MPI4PYVE_MPI_INITIALIZED=1 _MPI4PYVE_MPI_LOCAL_SIZE=1 $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_status.py || retcode=$(($? | retcode))
     MPIRANK=0 _MPI4PYVE_MPI_INITIALIZED=1 _MPI4PYVE_MPI_LOCAL_SIZE=1 VE_NLCPY_NODELIST=0,1 $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_status.py || retcode=$(($? | retcode))
+    VE_NLCPY_VE_ARCH=1 $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_status.py || retcode=$(($? | retcode))
     $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_ftrace_ves.py --ftrace_gen || retcode=$(($? | retcode))
     $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/venode_tests/test_ftrace_ves.py --ftrace_chk || retcode=$(($? | retcode))
+    # request tests
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_get_fpe_flag" || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_set_max_request" || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_set_offload_timing_onthefly" || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_set_offload_timing_lazy" || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_get_offload_timing" || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/request_tests/test_not_connected.py -k "test_flush" || retcode=$(($? | retcode))
+    # veo tests
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/veo_tests/test_close.py --ctxt_close || retcode=$(($? | retcode))
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/veo_tests/test_close.py --proc_destroy || retcode=$(($? | retcode))
+    # logging tests
+    $PYTEST_CMD $_COV_OPT -x ${LPYTEST_DIR}/logging_tests/test_logging.py -k "test_logging_veo_proc_init" || retcode=$(($? | retcode))
     set +x
     echo ""
     echo "---------- End venode tests ------------"
@@ -304,8 +317,6 @@ echo "cov: ${COV}"
 echo "cov-path: ${COV_PATH}"
 echo "scheduler: ${SCH}"
 echo "pytest-cmd: ${PYTEST_CMD}"
-
-clean_coverage
 
 err_state=0
 

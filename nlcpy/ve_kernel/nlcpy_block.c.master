@@ -80,7 +80,7 @@ uint64_t nlcpy_block(ve_arguments *args, int32_t *psw)
 
         if (a_ndim == 0) {
             pout[iout] = *pa;
-        } else {
+        } else if (a_ndim > 0 && a_ndim <= NLCPY_MAXNDIM) {
             int64_t n_inner = a_ndim - 1;
             int64_t max_len = a_shape[n_inner];
             int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * a_ndim);
@@ -117,6 +117,8 @@ uint64_t nlcpy_block(ve_arguments *args, int32_t *psw)
                     cnt[kk] = 0;
                 }
             } while (k >= 0);
+        } else {
+            return (uint64_t)NLCPY_ERROR_NDIM;
         }
 #end_switch
     }

@@ -212,6 +212,9 @@ uint64_t kernel_launcher(uint64_t req_adr, uint64_t nreq, int32_t *psw) {
     *psw = 0;
 
     for(i = 0; i < nreq; i++) {
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
         flag = run_request(&reqs[i], &lpsw);
 #ifdef _OPENMP
 #pragma omp critical

@@ -50,7 +50,8 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
-
+import numpy
+import nlcpy
 from nlcpy import testing
 
 
@@ -61,6 +62,10 @@ from nlcpy import testing
     {'reps': (0, 1)},
     {'reps': (2, 3)},
     {'reps': (2, 3, 4, 5)},
+    {'reps': ()},
+    {'reps': numpy.array(0)},
+    {'reps': (numpy.array(0),)},
+    {'reps': numpy.array([2, 3])},
 )
 class TestTile(unittest.TestCase):
 
@@ -69,17 +74,61 @@ class TestTile(unittest.TestCase):
         x = testing.shaped_arange((2, 3, 4), xp)
         return xp.tile(x, self.reps)
 
+    @testing.numpy_nlcpy_array_equal()
+    def test_array_2d_tile(self, xp):
+        if type(self.reps) in (list, tuple):
+            if len(self.reps) > 2:
+                return True
+        elif isinstance(self.reps, numpy.ndarray):
+            if self.reps.ndim > 2:
+                return True
+        x = testing.shaped_arange((2, 3), xp)
+        return xp.tile(x, self.reps)
 
-@testing.parameterize(
-    {'reps': -1},
-    {'reps': (-1, -2)},
-)
+    @testing.numpy_nlcpy_array_equal()
+    def test_tile_list(self, xp):
+        x = testing.shaped_arange((2, 3, 4), xp).tolist()
+        return xp.tile(x, self.reps)
+
+
 class TestTileFailure(unittest.TestCase):
 
     @testing.numpy_nlcpy_raises()
     def test_tile_failure(self, xp):
         x = testing.shaped_arange((2, 3, 4), xp)
         xp.tile(x, -3)
+
+    def test_tile_reps_np_array_above_1d(self):
+        x = nlcpy.empty((2, 3, 4))
+        reps = numpy.empty((2, 2))
+        with self.assertRaises(ValueError):
+            nlcpy.tile(x, reps)
+
+    def test_tile_reps_tuple_above_1d(self):
+        x = nlcpy.empty((2, 3, 4))
+        with self.assertRaises(ValueError):
+            nlcpy.tile(x, ((0, 1), (2, 3)))
+        with self.assertRaises(ValueError):
+            nlcpy.tile(x, ((), ()))
+        with self.assertRaises(TypeError):
+            nlcpy.tile(x, ((0,), (1,)))
+        with self.assertRaises(ValueError):
+            nlcpy.tile(x, (((0,),), ((1,),)))
+        with self.assertRaises(ValueError):
+            nlcpy.tile(x, (((0, 1), (0, 1)), ((2, 3), (2, 3))))
+        with self.assertRaises(ValueError):
+            val = numpy.array(1)
+            nlcpy.tile(x, (((0, 1), val),))
+        with self.assertRaises(ValueError):
+            val = numpy.array([])
+            nlcpy.tile(x, (((0, 1), val),))
+        with self.assertRaises(TypeError):
+            val = numpy.array([0,])
+            nlcpy.tile(x, (val,))
+        with self.assertRaises(TypeError):
+            nlcpy.tile(x, (0.1, 1.1))
+        with self.assertRaises(TypeError):
+            nlcpy.tile(x, (0.1j, 1.1j))
 
 
 @testing.parameterize(
@@ -169,6 +218,7 @@ class TestRepeatNotContiguous(unittest.TestCase):
     {'repeats': 2, 'axis': -4},
     {'repeats': 2, 'axis': 3},
     {'repeats': 1 + 1j, 'axis': None},
+    {'repeats': [[0, 1], [2, 3]], 'axis': None},
 )
 class TestRepeatFailure(unittest.TestCase):
     @testing.numpy_nlcpy_raises()

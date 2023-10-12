@@ -34,6 +34,9 @@ CFLAGS+=-ftrace
 LDFLAGS+=-ftrace
 LIB_NLC+=-lveftrace_p
 endif
+ifeq ($(DEBUG),yes)
+CFLAGS+=-DDEBUG_BARRIER
+endif
 LDFLAGS_PROF=-shared -fpic -fopenmp -ftrace -lveftrace_p $(BUILDID)
 
 CPP = $(TOOLDIR)/cppnlcpy.pl

@@ -117,7 +117,7 @@ uint64_t nlcpy_scatter_update(ve_arguments *args, int32_t *psw
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
 // TODO: parallelization
 @#ifdef _OPENMP
 @#pragma omp single

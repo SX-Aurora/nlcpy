@@ -87,7 +87,7 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
 /////////
 // N-d //
 /////////
-    } else {
+    } else if (x->ndim >= 1 && x->ndim <= NLCPY_MAXNDIM && y->ndim >= 1 && y->ndim <= NLCPY_MAXNDIM) {
 @#ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -203,6 +203,8 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, ve_array *z, int32_t *psw)
                 }
             } while (j >= 1);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;

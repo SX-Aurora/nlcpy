@@ -51,8 +51,6 @@
 
 from libc.stdint cimport int8_t
 
-cpdef str get_typename(dtype)
-
 cpdef convert_scalar(x)
 
 cdef _min_scalar_type(x)

@@ -43,7 +43,6 @@ from nlcpy.core cimport core
 from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
 from nlcpy.core.dtype cimport get_dtype
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.request cimport request
 
@@ -202,28 +201,16 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         keepdims = True
     if not raveled:
         if keepdims:
-            if axis_save is None:
-                if out is not None:
-                    raise ValueError("output parameter for reduction operation "
-                                     + op_name + " has too many dimensions")
-                lst = [1] * a.ndim
-            else:
-                lst = list(a.shape)
-                if a.ndim > 0:
-                    for axis_i in axis:
-                        lst[axis_i] = 1
+            lst = list(a.shape)
+            if a.ndim > 0:
+                for axis_i in axis:
+                    lst[axis_i] = 1
         else:
-            if axis_save is None:
-                if out is not None and out.ndim > 0:
-                    raise ValueError("output parameter for reduction operation "
-                                     + op_name + " has too many dimensions")
-                lst=[]
-            else:
-                lst = list(a.shape)
-                if a.ndim > 0:
-                    axis_desc = sorted(axis, reverse=True)
-                    for i in axis_desc:
-                        lst.pop(i)
+            lst = list(a.shape)
+            if a.ndim > 0:
+                axis_desc = sorted(axis, reverse=True)
+                for i in axis_desc:
+                    lst.pop(i)
 
         shape_out = tuple(lst)
     if out is not None and shape_out != out.shape:
@@ -278,10 +265,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         if ((_dtype == 'int32' and a.dtype.char not in '?') or
                 (_dtype == 'int64' and a.dtype.char not in '?I')):
             if _flag_initial:
-                if a.ndim > 0:
-                    sl = [slice(0, None) for i in range(a.ndim)]
-                else:
-                    sl = ()
+                sl = [slice(0, None) for i in range(a.ndim)]
             else:
                 sl = [slice(0, None) if i not in axis
                       else slice(1, None) for i in range(a.ndim)]
@@ -375,7 +359,7 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                 initial = numpy.array(initial, dtype=odt)
         flag_init = 1
     else:
-        raise ValueError("Input object 'initial=%s' is not a scalar" % initial)
+        raise ValueError("Input object 'initial={}' is not a scalar".format(initial))
 
     if a._f_contiguous and not a._c_contiguous:
         order_out = 'F'

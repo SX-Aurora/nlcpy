@@ -72,10 +72,15 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -138,7 +143,7 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -216,8 +221,6 @@ uint64_t FILENAME_i32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -249,10 +252,15 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -315,7 +323,7 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -393,8 +401,6 @@ uint64_t FILENAME_i64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -426,10 +432,15 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -492,7 +503,7 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -570,8 +581,6 @@ uint64_t FILENAME_u32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -603,10 +612,15 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -669,7 +683,7 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -747,8 +761,6 @@ uint64_t FILENAME_u64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -780,10 +792,15 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -846,7 +863,7 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -924,8 +941,6 @@ uint64_t FILENAME_f32(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -957,10 +972,15 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -1023,7 +1043,7 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -1101,8 +1121,6 @@ uint64_t FILENAME_f64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -1134,10 +1152,15 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -1200,7 +1223,7 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -1278,8 +1301,6 @@ uint64_t FILENAME_c64(ve_array *x, ve_array *y, int32_t where_flag, ve_array *wh
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -1311,10 +1332,15 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -1377,7 +1403,7 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -1455,8 +1481,6 @@ uint64_t FILENAME_c128(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);
@@ -1488,10 +1512,15 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -1557,7 +1586,7 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -1637,8 +1666,6 @@ uint64_t FILENAME_bool(ve_array *x, ve_array *y, int32_t where_flag, ve_array *w
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);

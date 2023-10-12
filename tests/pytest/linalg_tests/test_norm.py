@@ -54,6 +54,7 @@ import unittest
 import nlcpy
 import numpy
 from nlcpy import testing
+from nlcpy.testing import condition
 
 
 @testing.parameterize(*(
@@ -154,6 +155,7 @@ class TestNormVectorZeroSizeArray(unittest.TestCase):
             ((3, 3), None),
             ((2, 3, 3), (0, 1)),
             ((3, 4, 4), (-1, 0)),
+            ((4, 5, 5), (1, 0)),
             ((4, 5, 3, 3), (1, -2)),
             ((3, 6, 4, 5, 5), (2, 4)),
             ((7, 3, 5, 5, 5), (3, 1)),
@@ -181,11 +183,31 @@ class TestNormMatrix(unittest.TestCase):
 
 
 class TestNormMatrixNotContiguous(unittest.TestCase):
+    @condition.repeat(times=1000)
     @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
     def test_norm_matrix_not_contiguous(self, xp):
         x = xp.arange(3 * 4 * 5).reshape(3, 4, 5).astype('f')
         x = xp.moveaxis(x, 0, 1)
         return xp.linalg.norm(x, 'fro', (1, 0))
+
+    @condition.repeat(times=1000)
+    @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
+    def test_norm_matrix_not_contiguous2(self, xp):
+        x = xp.arange(10 * 10 * 10).reshape(10, 10, 10).astype('f')
+        x = xp.moveaxis(x, 0, 1)
+        return xp.linalg.norm(x, 'fro', (1, 0))
+
+    @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
+    def test_norm_matrix_not_contiguous3(self, xp):
+        x = xp.arange(4 * 5 * 5).reshape(4, 5, 5).astype('f')
+        x = xp.moveaxis(x, 1, 2)
+        return xp.linalg.norm(x, 'fro', (1, 0))
+
+    @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
+    def test_norm_matrix_not_contiguous4(self, xp):
+        x = xp.arange(3 * 4 * 5 * 5).reshape(3, 4, 5, 5).astype('f')
+        x = xp.moveaxis(x, 2, 3)
+        return xp.linalg.norm(x, 'fro', (0, 2))
 
     @testing.numpy_nlcpy_allclose(atol=1e-4, rtol=1e-4)
     def test_norm_matrix_not_contiguous_2d(self, xp):

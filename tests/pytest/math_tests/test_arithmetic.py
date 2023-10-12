@@ -53,6 +53,7 @@ import itertools
 import numpy
 import unittest
 import pytest
+import warnings
 
 import nlcpy
 from nlcpy import testing
@@ -151,7 +152,13 @@ class TestComplex(unittest.TestCase):
         x.imag = 10
         return x
 
-    @testing.for_complex_dtypes()
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_raises()
+    def test_imag_setter_no_complex(self, xp, dtype):
+        x = testing.shaped_arange((2, 3), xp, dtype=dtype)
+        x.imag = 10
+
+    @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_real_setter(self, xp, dtype):
         x = testing.shaped_arange((2, 3), xp, dtype=dtype)
@@ -166,12 +173,39 @@ class TestComplex(unittest.TestCase):
         x.imag = y
         return x
 
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_raises()
+    def test_imag_setter_array_no_complex(self, xp, dtype):
+        x = testing.shaped_arange((2, 3), xp, dtype=dtype)
+        y = testing.shaped_arange((2, 3), xp, dtype=float)
+        x.imag = y
+
     @testing.for_complex_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_imag_setter_complex_array(self, xp, dtype):
+        x = testing.shaped_arange((2, 3), xp, dtype=dtype)
+        y = testing.shaped_arange((2, 3), xp, dtype='c16')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            x.imag = y
+        return x
+
+    @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_real_setter_array(self, xp, dtype):
         x = testing.shaped_arange((2, 3), xp, dtype=dtype)
         y = testing.shaped_arange((2, 3), xp, dtype=float)
         x.real = y
+        return x
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_real_setter_complex_array(self, xp, dtype):
+        x = testing.shaped_arange((2, 3), xp, dtype=dtype)
+        y = testing.shaped_arange((2, 3), xp, dtype='c16')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            x.real = y
         return x
 
 

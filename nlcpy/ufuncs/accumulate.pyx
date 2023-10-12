@@ -53,7 +53,7 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
 
     if dtype is not None:
         dtype = nlcpy.dtype(dtype)
-    if name in ('nlcpy_invert_accumulate', 'nlcpy_logical_not_accumualte'):
+    if name in ('nlcpy_invert_accumulate', 'nlcpy_logical_not_accumulate'):
         raise ValueError("accumulate only supported for binary functions")
 
     input_arr = core.argument_conversion(a)
@@ -224,9 +224,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
             elif input_arr.dtype.name in ('complex128'):
                 raise ValueError("could not find a matching type for "+name
                                  +", requested type has type code 'D'")
-
-        if type(dtype) == str and dtype.find(',') > 0:
-            raise TypeError('cannot perform accumulate with flexible type')
 
     if dtype is None:
         dt = input_arr.dtype if out is None else out.dtype
@@ -486,7 +483,7 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                 +str(input_arr.ndim))
         else:
             raise ValueError("accumulate does not allow multiple axes")
-    elif axis is None and input_arr.ndim > 0:
+    elif axis is None and input_arr.ndim > 1:
         raise ValueError("accumulate does not allow multiple axes")
 
     if axis is None:

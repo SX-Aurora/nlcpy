@@ -186,7 +186,7 @@ class Generator:
             self._rand = RandomState(bit_generator.entropy)
             self.bit_generator = bit_generator
         else:
-            raise RuntimeError('Generator has not entropy')
+            raise RuntimeError('Generator has not entropy')  # pragma: no cover
 
     def integers(self, low, high=None, size=None,
                  dtype='int64', endpoint=False):

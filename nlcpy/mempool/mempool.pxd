@@ -39,10 +39,10 @@ cdef extern from '../mempool/nlcpy_mempool.h':
 
     const size_t DEFAULT_POOL_SIZE
 
-    const int NLCPY_RESULT_OK = 0
-    const int NLCPY_OUT_OF_MEMORY = -1
-    const int NLCPY_INTERNAL_ERROR = -2
-    const int NLCPY_POOL_NOT_USED = -3
+    const int NLCPY_RESULT_OK
+    const int NLCPY_OUT_OF_MEMORY
+    const int NLCPY_INTERNAL_ERROR
+    const int NLCPY_POOL_NOT_USED
 
     ctypedef struct link_t:
         uint64_t *next

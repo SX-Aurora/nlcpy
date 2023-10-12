@@ -101,7 +101,7 @@ uint64_t nlcpy_roll(ve_arguments *args, int32_t *psw)
         for (int64_t i = cntm_s; i < cntm_e; i++) {
             pout[i + offset] = pa[i * ia0];
         }
-    } else {
+    } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM) {
         const int64_t n_inner = out->ndim - 1;
         const int64_t n_outer = 0;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * out->ndim);
@@ -151,6 +151,8 @@ uint64_t nlcpy_roll(ve_arguments *args, int32_t *psw)
                 }
             } while (k > 0);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
 #end_switch
     return NLCPY_ERROR_OK;

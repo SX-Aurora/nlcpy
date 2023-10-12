@@ -31,6 +31,7 @@
 
 import unittest
 import nlcpy
+import os
 from nlcpy import _environment
 from nlcpy import venode
 
@@ -54,6 +55,9 @@ def eval(lid, pid, serial_id):
     else:
         assert status['lid'] == lid
     assert status['pid'] == pid
+    ve_arch = os.environ.get('VE_NLCPY_VE_ARCH', None)
+    if ve_arch:
+        assert status['arch'] == int(ve_arch)
     assert status['mempool_capacity'] == pool_size
     prev_used = status['mempool_used']
     assert status['mempool_remainder'] == pool_size - prev_used

@@ -95,6 +95,11 @@ class TestArrayGet(unittest.TestCase):
         expected = testing.shaped_arange((2, 3), numpy, dtype, order)
         np_testing.assert_array_equal(dst, expected)
 
+    def test_order_mismatch(self):
+        arr = testing.shaped_arange((3,), nlcpy, dtype='f8')
+        with self.assertRaises(ValueError):
+            arr.get(order='K')
+
 
 class TestArrayGetWithOut(unittest.TestCase):
 
@@ -143,6 +148,24 @@ class TestArrayGetWithOut(unittest.TestCase):
             return testing.shaped_arange((3, 3), xp, dtype, order)[0::2, 0::2]
         out = numpy.empty((2, 2), dtype, order)
         self.check_get(non_contiguous_array, out)
+
+    def test_out_not_numpy_array(self):
+        arr = testing.shaped_arange((3,), nlcpy, dtype='f8')
+        out = nlcpy.empty((3,), dtype='f8')
+        with self.assertRaises(TypeError):
+            arr.get(out=out)
+
+    def test_out_dtype_mismatch(self):
+        arr = testing.shaped_arange((3,), nlcpy, dtype='f8')
+        out = numpy.empty((3,), dtype='f4')
+        with self.assertRaises(TypeError):
+            arr.get(out=out)
+
+    def test_out_shape_mismatch(self):
+        arr = testing.shaped_arange((3,), nlcpy, dtype='f8')
+        out = numpy.empty((5,), dtype='f8')
+        with self.assertRaises(ValueError):
+            arr.get(out=out)
 
     @testing.multi_ve(2)
     @testing.for_orders('CF')

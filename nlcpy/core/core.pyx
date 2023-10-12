@@ -136,13 +136,14 @@ cdef class ndarray:
         cdef tuple _shape = internal.get_size(shape)
         del shape
 
+        if len(_shape) > NLCPY_MAXNDIM:
+            raise ValueError('maximum supported dimension for an ndarray is %d, '
+                             'found %d' % (NLCPY_MAXNDIM, len(_shape)))
+
         cdef int order_char = (
             b'C' if order is None
             else internal._normalize_order(order)
         )
-
-        if order_char != b'C' and order_char != b'F':
-            raise TypeError('order \'%s\' is not understood' % order)
 
         # set shape
         self._shape.reserve(len(_shape))
@@ -188,6 +189,7 @@ cdef class ndarray:
             self.veo_hmem = veo_hmem
             self.ve_adr = _veo.VEO_HMEM.get_hmem_addr(veo_hmem)
             self._is_view = True
+            self._owndata = False
 
     def __dealloc__(self):
         if _exit_mode:
@@ -370,9 +372,6 @@ cdef class ndarray:
 
     def __abs__(x):
         return ufunc_op.absolute(x)
-
-    def __not__(x):
-        return ufunc_op.not_equal(x)
 
     def __add__(x, y):
         if hasattr(y, '__radd__'):
@@ -687,7 +686,7 @@ cdef class ndarray:
                [2, 4]])
 
         """
-        if len(axes)==1:
+        if len(axes) == 1:
             axes = axes[0]
         elif axes == ():
             axes = None
@@ -982,13 +981,6 @@ cdef class ndarray:
         )
         # when order_char is 'A' or 'K', update order_char
         order_char = _update_order_char(self, order_char)
-
-        if (order_char == b'K' or order_char == b'A') and \
-                (not self._c_contiguous and not self._f_contiguous):
-            raise NotImplementedError(
-                "order %s, but ndarray is neithere C-contiguous "
-                "not F-contiguous. this case is not implemented yet."
-            )
 
         out = ndarray(self.shape, dtype=self.dtype, order=chr(order_char))
         self._venode.request_manager._push_request(
@@ -1544,6 +1536,9 @@ cdef class ndarray:
             int64_t offset=0L):
         cdef ndarray v
         cdef Py_ssize_t ndim
+        if shape.size() > NLCPY_MAXNDIM:
+            raise ValueError('maximum supported dimension for an ndarray is %d, '
+                             'found %d' % (NLCPY_MAXNDIM, shape.size()))
         if type not in (None, ndarray):
             v = ndarray.__new__(type)
             v.__init__()
@@ -1976,36 +1971,6 @@ cpdef ndarray argument_conversion(x):
         x = array(x)
     return x
 
-cpdef tuple argument_conversion2(x, y):
-    if isinstance(x, ndarray) and isinstance(y, ndarray):
-        return x, y, numpy.result_type(x.dtype, y.dtype)
-
-    if isinstance(x, ndarray):
-        if isinstance(y, (numpy.ndarray, list, tuple)):
-            # TODO: confirm dtype specification
-            y = array(y)
-            return x, y, numpy.result_type(x.dtype, y.dtype)
-        elif isinstance(y, (int, float, complex)):
-            dtype_z = numpy.result_type(x.dtype, y)
-            return x, array(y), dtype_z
-        else:
-            raise TypeError('no operation difined (yet) for \'%s\'' % type(y))
-
-    if isinstance(y, ndarray):
-        if isinstance(x, (numpy.ndarray, list, tuple)):
-            # TODO: confirm dtype specification
-            x = array(x)
-            return x, y, numpy.result_type(x.dtype, y.dtype)
-        elif isinstance(x, (int, float, complex)):
-            dtype_z = numpy.result_type(x, y.dtype)
-            return array(x), y, dtype_z
-        else:
-            raise TypeError('no operation difined (yet) for \'%s\'' % type(x))
-
-    else:
-        return array(x), array(y), numpy.result_type(x, y)
-
-
 cpdef check_fpe_flags(fpe_flags, reqnames):
     if (fpe_flags | 0x00000000):
         hnd = error_handler.geterr()
@@ -2062,31 +2027,8 @@ cpdef check_fpe_flags(fpe_flags, reqnames):
                 print(' RuntimeWarning: %s' % mes)
 
 
-cpdef determine_contiguous_property(self, order):
-    cdef int order_char = (
-        b'C' if order is None
-        else internal._normalize_order(order)
-    )
-    # when order_char is 'A' or 'K', update order_char
-    order_char = _update_order_char(self, order_char)
-
-    cdef int is_c_contiguous = 0
-    cdef int is_f_contiguous = 0
-    if self.ndim == 0 or self.ndim == 1:
-        is_c_contiguous = 1
-        is_f_contiguous = 1
-
-    if order_char == b'C':
-        is_c_contiguous = 1
-        is_f_contiguous = 0
-    elif order_char == b'F':
-        is_c_contiguous = 0
-        is_f_contiguous = 1
-    elif (order_char == b'K' or order_char == b'A'):
-        is_c_contiguous = self._c_contiguous
-        is_f_contiguous = self._f_contiguous
-
-    return is_c_contiguous, is_f_contiguous
+cpdef get_nlcpy_maxndim():
+    return NLCPY_MAXNDIM
 
 
 cdef _exit_mode = False

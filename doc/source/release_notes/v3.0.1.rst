@@ -1,0 +1,13 @@
+=============================================
+What's new in Version 3.0.1 (September, 2023)
+=============================================
+
+
+Problem Fixes
+-------------
+
+* Fixed incorrect execution results of :func:`nlcpy.fft.fftshift` and :func:`nlcpy.fft.ifftshift` that are returned when the number of array dimensions is larger than 1 and the input parameter of `axis` is not equal to 0.
+
+* Fixed incorrect execution results of :func:`nlcpy.linalg.norm` that are returned when the number of VE threads is larger than 1 and the memory layout of input array is not contiguous.
+
+* Fixed a problem where :func:`nlcpy.diff` raises unexpected RuntimeWarning.

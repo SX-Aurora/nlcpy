@@ -71,10 +71,15 @@ uint64_t FILENAME_$1(ve_array *x, ve_array *y, int32_t where_flag, ve_array *whe
 @#endif /* _OPENMP */
 
 
+////////////
+// error  //
+////////////
+    if(x->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (x->ndim == 0) {
+    } else if (x->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -149,7 +154,7 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
 /////////
 // N-d //
 /////////
-    } else if (x->ndim > 1 && x->ndim <= NLCPY_MAXNDIM){
+    } else {
         int64_t *idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__rearrange_axis(y, idx);
         int64_t *cnt_y = (int64_t*)alloca(sizeof(int64_t)*y->ndim);
@@ -235,8 +240,6 @@ ifelse(<--@$1@-->,<--@bool@-->,<--@dnl
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);

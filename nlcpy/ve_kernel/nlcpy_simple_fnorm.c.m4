@@ -51,6 +51,11 @@ uint64_t nlcpy_simple_fnorm_$1(ve_array *x, ve_array *y, int32_t *psw)
 {
     *py = 0;
 }
+
+#ifdef DEBUG_BARRIER
+     nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
     const int nt = omp_get_num_threads();
     const int it = omp_get_thread_num();
@@ -71,6 +76,11 @@ uint64_t nlcpy_simple_fnorm_$1(ve_array *x, ve_array *y, int32_t *psw)
     *py += local_py;
 }
 #pragma omp barrier
+
+#ifdef DEBUG_BARRIER
+     nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #pragma omp single
 {
     *py = $4(*py);

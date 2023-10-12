@@ -82,14 +82,16 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     int64_t *cnt_y = NULL;
     int64_t n_inner = y->ndim - 1;
     int64_t n_outer = 0;
-    if (y->ndim == 1 ||
-          ((x->is_c_contiguous & w->is_c_contiguous &
-            (!where_flag || where->is_c_contiguous)) ||
-           (x->is_f_contiguous & w->is_f_contiguous &
-            (!where_flag || where->is_f_contiguous)))
+    if (y->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim == 1 ||
+              ((x->is_c_contiguous & w->is_c_contiguous &
+                (!where_flag || where->is_c_contiguous)) ||
+              (x->is_f_contiguous & w->is_f_contiguous &
+                (!where_flag || where->is_f_contiguous)))
     ) {
         len = y->size;
-    } else if (y->ndim <= NLCPY_MAXNDIM) {
+    } else {
         cnt_y = (int64_t*)alloca(sizeof(int64_t) * y->ndim);
         nlcpy__reset_coords(cnt_y, y->ndim);
         idx = (int64_t *)alloca(sizeof(int64_t) * y->ndim);
@@ -97,9 +99,6 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
         n_inner = idx[n_inner];
         n_outer = idx[n_outer];
         len = y->shape[n_outer];
-    } else if (y->ndim > NLCPY_MAXNDIM) {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     const uint64_t ix0 = x->strides[n_inner] / x->itemsize;
     const uint64_t iw0 = (where_flag) ? where->strides[n_inner] / where->itemsize : 0;

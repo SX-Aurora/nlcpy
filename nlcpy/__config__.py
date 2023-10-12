@@ -77,8 +77,10 @@ def get_nlc_lib_path(arch):
         default_nlc_path = '/opt/nec/ve/lib'
     elif arch == 3:
         default_nlc_path = '/opt/nec/ve3/lib'
+    else:
+        return None
 
-    if not os.path.exists(default_nlc_path):
+    if not os.path.exists(default_nlc_path):  # pragma: no cover
         return None
     require_nlc_libs = [
         'libasl_openmp_i64.so',
@@ -96,7 +98,7 @@ def get_nlc_lib_path(arch):
     if len(require_nlc_libs) == 0:
         return default_nlc_path
     else:
-        return None
+        return None  # pragma: no cover
 
 
 def get_nlcpy_ver():
@@ -119,7 +121,7 @@ def get_ncc_build_ver(arch):
         return None
     try:
         ncc_ver = build_info.ncc_build_version
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         return None
     return ncc_ver
 

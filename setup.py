@@ -87,11 +87,13 @@ args, sys.argv = parser.parse_known_args(sys.argv)
 #####################################################
 compiler_directives = {
     'embedsignature': True,
+    'c_api_binop_methods': True,
 }
 
-define_macros = []
+define_macros = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 
 if args.profile:
+    compiler_directives['profile'] = True
     compiler_directives['linetrace'] = True
     define_macros.append(('CYTHON_TRACE_NOGIL', '1'))
     define_macros.append(('CYTHON_TRACE', '1'))
@@ -396,6 +398,13 @@ class vh_custom_build_ext(build_ext.build_ext):
     def run(self):
         # as-is
         super().run()
+
+    def build_extensions(self):
+        try:
+            self.compiler.compiler_so.remove('-Wstrict-prototypes')
+        except ValueError:
+            pass
+        super().build_extensions()
 
 
 class ve1_custom_build_ext(build_ext.build_ext):

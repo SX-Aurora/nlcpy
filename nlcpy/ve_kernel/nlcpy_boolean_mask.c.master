@@ -62,10 +62,15 @@ uint64_t nlcpy_getitem_from_mask(
         return NLCPY_ERROR_MEMORY;
     }
 
+////////////
+// error  //
+////////////
+    if(a_src->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (a_src->ndim == 0) {
+    } else if (a_src->ndim == 0) {
 @#ifdef _OPENMP
 @#pragma omp single
 @#endif /* _OPENMP */
@@ -159,10 +164,6 @@ uint64_t nlcpy_getitem_from_mask(
             if (k < 0) break;
         }
 } /* omp single */
-
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);

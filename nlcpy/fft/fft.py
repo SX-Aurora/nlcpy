@@ -1168,9 +1168,9 @@ def fftshift(x, axes=None):
            [ 3.,  4., -4.],
            [-3., -2., -1.]])
     >>> vp.fft.fftshift(freqs, axes=(1,))
-    array([[-3., -2., -1.],
-           [ 0.,  1.,  2.],
-           [ 3.,  4., -4.]])
+    array([[ 2.,  0.,  1.],
+           [-4.,  3.,  4.],
+           [-1., -3., -2.]])
     """
     return _fft.fftshift(x, axes)
 

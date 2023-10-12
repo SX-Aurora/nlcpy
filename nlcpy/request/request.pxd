@@ -36,6 +36,9 @@ from libc.stdint cimport *
 from libcpp.vector cimport vector
 cimport numpy as cnp
 
+# Import in order to use NumPy C-API functions
+cdef extern from "numpy/arrayobject.h":
+    void* PyArray_DATA(cnp.ndarray)
 
 cdef class _ReqNames:
     cdef:
@@ -62,9 +65,9 @@ cdef class RequestManager:
         readonly uint64_t reqs_ve_ptr
         readonly VENode venode
         readonly VeoReqs veo_reqs
+        readonly int max_req
 
     cdef clear(self)
-    cdef increment_head(self, int num)
     cdef increment_tail(self, int num)
     cdef increment_nreq(self)
     cdef flush_if_needed(self)

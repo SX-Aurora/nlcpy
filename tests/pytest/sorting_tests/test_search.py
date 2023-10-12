@@ -53,6 +53,7 @@ import unittest
 import warnings
 
 import numpy
+import nlcpy
 
 from nlcpy import testing
 
@@ -131,6 +132,58 @@ class TestSearch(unittest.TestCase):
         a = testing.shaped_random((0, 1), xp, dtype)
         return a.argmax(axis=1)
 
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmax_array_none(self, xp):
+        return xp.argmax(None)
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmax_f_order(self, xp, dtype):
+        a = testing.shaped_random((3, 4), xp, dtype).copy(order='F')
+        return xp.argmax(a)
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmax_axis_out(self, xp, dtype):
+        x = testing.shaped_random((3, 4), xp, dtype)
+        z = xp.empty(3, dtype='i8')
+        xp.argmax(x, axis=1, out=z)
+        return z
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmax_axis_out_f_order(self, xp, dtype):
+        x = testing.shaped_random((3, 4, 5), xp, dtype)
+        z = xp.empty((3, 4), dtype='i8', order='F')
+        xp.argmax(x, axis=2, out=z)
+        return z
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmax_axis_array_0dim(self, xp, dtype):
+        x = xp.array(0)
+        return xp.argmax(x, axis=0)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmax_out_not_ndarray(self, xp):
+        xp.argmax(0, out=0)
+
+    def test_argmax_out_not_integer_type(self):
+        with self.assertRaises(TypeError):
+            nlcpy.argmax(0, out=nlcpy.empty(1, dtype='f4'))
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmax_axis_not_int(self, xp):
+        xp.argmax(0, axis=1.1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmax_axis_out_of_bounds(self, xp):
+        xp.argmax([1, 2], axis=1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmax_out_shape_mismatch(self, xp):
+        xp.argmax([1, 2], out=xp.empty(2, dtype='i8'))
+
     @testing.for_all_dtypes(no_complex=True)
     @testing.numpy_nlcpy_allclose()
     def test_argmin_all(self, xp, dtype):
@@ -202,6 +255,58 @@ class TestSearch(unittest.TestCase):
     def test_argmin_zero_size_axis1(self, xp, dtype):
         a = testing.shaped_random((0, 1), xp, dtype)
         return a.argmin(axis=1)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmin_array_none(self, xp):
+        return xp.argmin(None)
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmin_f_order(self, xp, dtype):
+        a = testing.shaped_random((3, 4), xp, dtype).copy(order='F')
+        return xp.argmin(a)
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmin_axis_out(self, xp, dtype):
+        x = testing.shaped_random((3, 4), xp, dtype)
+        z = xp.empty(3, dtype='i8')
+        xp.argmin(x, axis=1, out=z)
+        return z
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmin_axis_out_f_order(self, xp, dtype):
+        x = testing.shaped_random((3, 4, 5), xp, dtype)
+        z = xp.empty((3, 4), dtype='i8', order='F')
+        xp.argmin(x, axis=2, out=z)
+        return z
+
+    @testing.for_all_dtypes(no_complex=True)
+    @testing.numpy_nlcpy_array_equal()
+    def test_argmin_axis_array_0dim(self, xp, dtype):
+        x = xp.array(0)
+        return xp.argmin(x, axis=0)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmin_out_not_ndarray(self, xp):
+        xp.argmin(0, out=0)
+
+    def test_argmin_out_not_integer_type(self):
+        with self.assertRaises(TypeError):
+            nlcpy.argmin(0, out=nlcpy.empty(1, dtype='f4'))
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmin_axis_not_int(self, xp):
+        xp.argmin(0, axis=1.1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmin_axis_out_of_bounds(self, xp):
+        xp.argmin([1, 2], axis=1)
+
+    @testing.numpy_nlcpy_raises()
+    def test_argmin_out_shape_mismatch(self, xp):
+        xp.argmin([1, 2], out=xp.empty(2, dtype='i8'))
 
 
 @testing.parameterize(
@@ -308,6 +413,13 @@ class TestNonzero(unittest.TestCase):
         array = xp.array(self.array, dtype=dtype, order=order)
         return xp.nonzero(array)
 
+    @testing.for_all_dtypes()
+    @testing.for_orders('CF')
+    @testing.numpy_nlcpy_array_list_equal()
+    def test_nonzero_ndarray(self, xp, dtype, order):
+        array = xp.array(self.array, dtype=dtype, order=order)
+        return array.nonzero()
+
 
 @testing.parameterize(
     {'array': numpy.array(0)},
@@ -325,6 +437,12 @@ class TestNonzeroZeroDimension(unittest.TestCase):
             return xp.nonzero(array)
 
 
+class TestNonzeroNone(unittest.TestCase):
+
+    def test_nonzero_none(self):
+        assert nlcpy.nonzero(None)[0].shape == (0,)
+
+
 @testing.parameterize(
     {'array': numpy.random.randint(0, 2, (20,))},
     {'array': numpy.random.randn(3, 2, 4)},
@@ -336,9 +454,27 @@ class TestArgwhere(unittest.TestCase):
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
-    def test_argwhere(self, xp, dtype):
+    def test_argwhere0(self, xp, dtype):
         array = xp.array(self.array, dtype=dtype)
         return xp.argwhere(array)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere1(self, xp, dtype):
+        array = xp.array(self.array, dtype=dtype)
+        return xp.argwhere(array > 1)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere_not_contiguous(self, xp, dtype):
+        array = xp.array(self.array, dtype=dtype)[..., ::2]
+        return xp.argwhere(array > 1)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere_f_order(self, xp, dtype):
+        array = xp.array(self.array, dtype=dtype, order='F')
+        return xp.argwhere(array > 1)
 
 
 @testing.parameterize(
@@ -356,6 +492,29 @@ class TestArgwhereZeroDimension(unittest.TestCase):
 
     @testing.numpy_nlcpy_array_equal()
     def test_argwhere_scalar(self, xp):
+        return xp.argwhere(self.value)
+
+
+@testing.parameterize(
+    {'value': 0},
+    {'value': 3},
+    {'value': [[1, 3], [2, 4]]},
+    {'value': ((1, 3), [2, 4])},
+    {'value': numpy.array(0)},
+    {'value': numpy.array(3)},
+    {'value': numpy.array(3) > 1},
+    {'value': numpy.array(3) > 5},
+    {'value': numpy.array([3])},
+    {'value': numpy.array([3]) > 1},
+    {'value': numpy.array([3]) > 5},
+    {'value': numpy.array([[1, 3], [2, 4]])},
+    {'value': []},
+    {'value': None},
+)
+class TestArgwhereNotNdarray(unittest.TestCase):
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_argwhere_not_ndarray(self, xp):
         return xp.argwhere(self.value)
 
 

@@ -61,15 +61,149 @@ from nlcpy import veo
 from nlcpy.core cimport core
 from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.request cimport request
 from nlcpy.request.ve_kernel cimport *
 
 cimport numpy as cnp
 
-# @name Sorting, Searching, and Counting
-# @{
+
+cpdef _argmax_argmin(a, axis, out, name):
+    # check None
+    if a is None:
+        return 0
+
+    # convert to nlcpy.ndarray
+    arr = core.argument_conversion(a)
+
+    if out is not None:
+        if not isinstance(out, ndarray):
+            raise TypeError("output must be an nlcpy.ndarray.")
+        if out.dtype.char not in ('il'):
+            raise TypeError(
+                "Cannot cast array data from dtype('{}') to "
+                "dtype('int64') according to the rule 'safe'".format(out.dtype))
+
+    ########################################################################
+    # axis
+    axis_save = axis
+
+    # convert to list for assignment
+    if axis is not None and not isinstance(axis, int):
+        raise TypeError("'%s' object cannot be interpreted as an integer"
+                        %(type(axis).__name__))
+
+    else:
+        axis = (axis,)
+
+    if axis_save is not None and axis_save != NLCPY_MAXNDIM:
+        axis = list(axis)
+        # if negative, counts from the last to the first axis
+        for i in range(len(axis)):
+            if axis[i] < 0:
+                axis[i] = arr.ndim + axis[i]
+
+        # check axis range
+        if arr.ndim != 0:
+            for i in range(len(axis)):
+                if axis[i] < 0 or axis[i] > arr.ndim - 1:
+                    raise AxisError(
+                        'axis ' + str(axis[i]) +
+                        ' is out of bounds for array of dimension ' + str(arr.ndim))
+    else:
+        # all dimensions are reduced
+        axis = [-1, ]
+
+    try:
+        if axis[0] == -1 and arr.size < 1 or \
+                axis[0] != -1 and arr.shape[axis[0]] < 1:
+            raise ValueError("attempt to get {} of an empty sequence".format(name))
+    except IndexError:
+        pass
+
+    ########################################################################
+    # determine output shape
+    if axis_save is None:
+        lst = []
+    elif arr.shape == ():
+        lst = ()
+    else:
+        lst = list(arr.shape)
+        for i, axis_i in enumerate(axis):
+            lst.pop(axis_i - i if axis_i >= i else axis_i)
+    shape_out = tuple(lst)
+
+    if out is not None and out.shape != shape_out:
+        raise ValueError("output array does not match result of np.{}.".format(name))
+
+    if name == 'argmax':
+        if arr.dtype.char == '?':
+            initial = nlcpy.array(0, dtype=arr.dtype)
+        elif arr.dtype.char in ('ilIL'):
+            initial = nlcpy.array(nlcpy.iinfo(arr.dtype).min, dtype=arr.dtype)
+        elif arr.dtype.char in ('dfDF'):
+            initial = nlcpy.array(nlcpy.finfo(arr.dtype).min, dtype=arr.dtype)
+    elif name == 'argmin':
+        if arr.dtype.char == '?':
+            initial = nlcpy.array(1, dtype=arr.dtype)
+        elif arr.dtype.char in ('ilIL'):
+            initial = nlcpy.array(nlcpy.iinfo(arr.dtype).max, dtype=arr.dtype)
+        elif arr.dtype.char in ('dfDF'):
+            initial = nlcpy.array(nlcpy.finfo(arr.dtype).max, dtype=arr.dtype)
+    else:
+        raise RuntimeError  # pragma: no cover
+
+    ########################################################################
+    # check order
+    if arr._f_contiguous and not arr._c_contiguous:
+        order_out = 'F'
+    else:
+        order_out = 'C'
+
+    ########################################################################
+    # use axis
+    x = arr
+    for axis_i in axis:
+        shape = []
+        if x.ndim != 0:
+            for i in range(x.ndim):
+                if i != axis_i and axis_i != -1:
+                    shape.append(x.shape[i])
+                else:
+                    shape.append(1)
+        else:
+            shape = [1, ]
+
+        if out is not None and axis_i == axis[-1]:
+            if out._f_contiguous and not out._c_contiguous:
+                y = ndarray(shape=shape, dtype=x.dtype, order='F')
+                out = out.reshape(shape)
+                z = broadcast.broadcast_to(out, shape)
+            else:
+                y = ndarray(shape=shape, dtype=x.dtype, order='C')
+                out = out.reshape(shape)
+                z = broadcast.broadcast_to(out, shape)
+
+        else:
+            y = ndarray(shape=shape, dtype=x.dtype, order='C')
+            z = ndarray(shape=shape, dtype=numpy.int64, order='C')
+
+        # call argmax/argmin function on VE
+        request._push_request(
+            'nlcpy_' + name,
+            "searching_op",
+            (x, y, z, initial,
+             <int64_t>1 if order_out == 'C' else 0,
+             <int64_t>axis_i),
+        )
+    # return array indices
+    if axis_save is None:
+        # TODO: currently, nlcpy.ndarray class cannot be cast to int.
+        # as a workaround, cast to str first and then cast to int.
+        ret = z.reshape(shape_out)
+        return ret
+    else:
+        return z.reshape(shape_out)
 
 
 # ----------------------------------------------------------------------------
@@ -129,133 +263,7 @@ cpdef argmax(a, axis=None, out=None):
     array(1)
 
     """
-    # check None
-    if a is None:
-        if out is not None:
-            out = None
-        return 0
-
-    # convert to nlcpy.ndarray
-    arr = core.argument_conversion(a)
-
-    if out is not None:
-        if not isinstance(out, ndarray):
-            raise TypeError("output must be an nlcpy.ndarray.")
-        if out.dtype.char not in ('il'):
-            raise TypeError(
-                "Cannot cast array data from dtype('{}') to "
-                "dtype('int64') according to the rule 'safe'".format(out.dtype))
-
-    ########################################################################
-    # axis
-    axis_save = axis
-
-    # convert to list for assignment
-    if axis is not None and not isinstance(axis, int):
-        raise TypeError("'%s' object cannot be interpreted as an integer"
-                        %(type(axis).__name__))
-
-    else:
-        axis = (axis,)
-
-    if axis_save is not None and axis_save != NLCPY_MAXNDIM:
-        axis = list(axis)
-        # if negative, counts from the last to the first axis
-        for i in range(len(axis)):
-            if axis[i] < 0:
-                axis[i] = arr.ndim + axis[i]
-
-        # check axis range
-        for i in range(len(axis)):
-            if axis[i] < 0 or axis[i] > arr.ndim-1:
-                raise AxisError(
-                    'axis '+str(axis[i])
-                    +' is out of bounds for array of dimension '+str(arr.ndim))
-    else:
-        # all dimensions are reduced
-        axis = [-1, ]
-
-    if axis[0] == -1 and arr.size < 1 or \
-       axis[0] != -1 and arr.shape[axis[0]] < 1:
-        raise ValueError("attempt to get argmax of an empty sequence")
-
-    ########################################################################
-    # determine output shape
-    if axis_save is None:
-        if out is not None:
-            raise ValueError("output array does not match result of argmax")
-        lst=[1, ]
-    else:
-        lst = list(arr.shape)
-        for i, axis_i in enumerate(axis):
-            lst.pop(axis_i-i if axis_i>=i else axis_i)
-    shape_out = tuple(lst)
-
-    if out is not None and out.shape != shape_out:
-        raise ValueError("output array does not match result of np.argmax.")
-
-    if arr.dtype.char == '?':
-        initial = nlcpy.array(0, dtype=arr.dtype)
-    elif arr.dtype.char in ('ilIL'):
-        initial = nlcpy.array(nlcpy.iinfo(arr.dtype).min, dtype=arr.dtype)
-    elif arr.dtype.char in ('dfDF'):
-        initial = nlcpy.array(nlcpy.finfo(arr.dtype).min, dtype=arr.dtype)
-
-    ########################################################################
-    # check order
-    if arr._f_contiguous and not arr._c_contiguous:
-        order_out = 'F'
-    else:
-        order_out = 'C'
-
-    ########################################################################
-    # use axis
-    x = arr
-    for axis_i in axis:
-        shape = []
-        if x.ndim != 0:
-            for i in range(x.ndim):
-                if i != axis_i and axis_i != -1:
-                    shape.append(x.shape[i])
-                else:
-                    shape.append(1)
-        else:
-            shape = [1, ]
-
-        # y = ndarray(shape=shape, dtype=x.dtype, order=order_out)
-        if out is not None and axis_i == axis[-1]:
-            if out._f_contiguous and not out._c_contiguous:
-                y = ndarray(shape=shape, dtype=x.dtype, order='F')
-                out = out.reshape(shape)
-                z = broadcast.broadcast_to(out, shape)
-            else:
-                y = ndarray(shape=shape, dtype=x.dtype, order='C')
-                out = out.reshape(shape)
-                z = broadcast.broadcast_to(out, shape)
-
-        else:
-            # z = ndarray(shape=shape, dtype=numpy.int64, order=order_out)
-            y = ndarray(shape=shape, dtype=x.dtype, order='C')
-            z = ndarray(shape=shape, dtype=numpy.int64, order='C')
-            if z.ve_adr == 0:
-                raise MemoryError()
-
-        # call argmax function on VE
-        request._push_request(
-            "nlcpy_argmax",
-            "searching_op",
-            (x, y, z, initial,
-             <int64_t>1 if order_out == 'C' else 0,
-             <int64_t>axis_i),
-        )
-    # return array indices
-    if axis_save is None:
-        # TODO: currently, nlcpy.ndarray class cannot be cast to int.
-        # as a workaround, cast to str first and then cast to int.
-        ret = reshape(z, shape_out)
-        return ret[0]
-    else:
-        return reshape(z, shape_out)
+    return _argmax_argmin(a=a, axis=axis, out=out, name='argmax')
 
 
 # ----------------------------------------------------------------------------
@@ -313,135 +321,8 @@ cpdef argmin(a, axis=None, out=None):
     array([10, 11, 12, 13, 10, 15])
     >>> vp.argmin(b)  # Only the first occurrence is returned.
     array(0)
-
     """
-    # check None
-    if a is None:
-        if out is not None:
-            out = None
-        return 0
-
-    # convert to nlcpy.ndarray
-    arr = core.argument_conversion(a)
-
-    if out is not None:
-        if not isinstance(out, ndarray):
-            raise TypeError("output must be an nlcpy.ndarray.")
-        if out.dtype.char not in ('il'):
-            raise TypeError(
-                "Cannot cast array data from dtype('{}') to "
-                "dtype('int64') according to the rule 'safe'".format(out.dtype))
-
-    ########################################################################
-    # axis
-    axis_save = axis
-
-    # convert to list for assignment
-    if axis is not None and not isinstance(axis, int):
-        raise TypeError("'%s' object cannot be interpreted as an integer"
-                        %(type(axis).__name__))
-
-    else:
-        axis = (axis,)
-
-    if axis_save is not None and axis_save != NLCPY_MAXNDIM:
-        axis = list(axis)
-        # if negative, counts from the last to the first axis
-        for i in range(len(axis)):
-            if axis[i] < 0:
-                axis[i] = arr.ndim + axis[i]
-
-        # check axis range
-        for i in range(len(axis)):
-            if axis[i] < 0 or axis[i] > arr.ndim-1:
-                raise AxisError(
-                    'axis '+str(axis[i])
-                    +' is out of bounds for array of dimension '+str(arr.ndim))
-    else:
-        # all dimensions are reduced
-        axis = [-1, ]
-
-    if axis[0] == -1 and arr.size < 1 or \
-       axis[0] != -1 and arr.shape[axis[0]] < 1:
-        raise ValueError("attempt to get argmin of an empty sequence")
-
-    ########################################################################
-    # determine output shape
-    if axis_save is None:
-        if out is not None:
-            raise ValueError("output array does not match result of argmin")
-        lst=[1, ]
-    else:
-        lst = list(arr.shape)
-        for i, axis_i in enumerate(axis):
-            lst.pop(axis_i-i if axis_i>=i else axis_i)
-    shape_out = tuple(lst)
-
-    if out is not None and out.shape != shape_out:
-        raise ValueError("output array does not match result of np.argmin.")
-
-    if arr.dtype.char == '?':
-        initial = nlcpy.array(1, dtype=arr.dtype)
-    elif arr.dtype.char in ('ilIL'):
-        initial = nlcpy.array(nlcpy.iinfo(arr.dtype).max, dtype=arr.dtype)
-    elif arr.dtype.char in ('dfDF'):
-        initial = nlcpy.array(nlcpy.finfo(arr.dtype).max, dtype=arr.dtype)
-
-    ########################################################################
-    # check order
-    if arr._f_contiguous and not arr._c_contiguous:
-        order_out = 'F'
-    else:
-        order_out = 'C'
-
-    ########################################################################
-    # use axis
-    x = arr
-    for axis_i in axis:
-        shape = []
-        if x.ndim != 0:
-            for i in range(x.ndim):
-                if i != axis_i and axis_i != -1:
-                    shape.append(x.shape[i])
-                else:
-                    shape.append(1)
-        else:
-            shape = [1, ]
-
-        # y = ndarray(shape=shape, dtype=x.dtype, order=order_out)
-        if out is not None and axis_i == axis[-1]:
-            if out._f_contiguous and not out._c_contiguous:
-                y = ndarray(shape=shape, dtype=x.dtype, order='F')
-                out = out.reshape(shape)
-                z = broadcast.broadcast_to(out, shape)
-            else:
-                y = ndarray(shape=shape, dtype=x.dtype, order='C')
-                out = out.reshape(shape)
-                z = broadcast.broadcast_to(out, shape)
-
-        else:
-            # z = ndarray(shape=shape, dtype=numpy.int64, order=order_out)
-            y = ndarray(shape=shape, dtype=x.dtype, order='C')
-            z = ndarray(shape=shape, dtype=numpy.int64, order='C')
-            if z.ve_adr == 0:
-                raise MemoryError()
-
-        # call argmin function on VE
-        request._push_request(
-            "nlcpy_argmin",
-            "searching_op",
-            (x, y, z, initial,
-             <int64_t>1 if order_out == 'C' else 0,
-             <int64_t>axis_i),
-        )
-    # return array indices
-    if axis_save is None:
-        # TODO: currently, nlcpy.ndarray class cannot be cast to int.
-        # as a workaround, cast to str first and then cast to int.
-        ret = reshape(z, shape_out)
-        return ret[0]
-    else:
-        return reshape(z, shape_out)
+    return _argmax_argmin(a=a, axis=axis, out=out, name='argmin')
 
 
 # ----------------------------------------------------------------------------
@@ -618,22 +499,20 @@ cpdef ndarray argwhere(a):
                 arr = core.argument_conversion(a)
             elif isinstance(a, tuple) and len(a) >= 1:
                 arr = core.argument_conversion(a)
-            elif isinstance(a, numpy.ndarray):
-                arr = core.argument_conversion(a)
             else:
                 shape = (0, 1)
                 errcnt += 1
         else:
-            if a.size == 1:
-                arr = core.array([a.get()])
-                shape = (0 if a == 0 else 1, 0)
-                errcnt += 1
-            elif a.size > 1:
-                arr = core.argument_conversion(a)
+            if a.size > 0:
+                if not isinstance(a, ndarray):
+                    arr = core.argument_conversion(a)
+                else:
+                    arr = a
             else:
                 shape = (0, a.ndim)
                 errcnt += 1
     else:
+        shape = (0, 0)
         errcnt += 1
 
     if errcnt != 0:

@@ -69,7 +69,6 @@ from nlcpy.core cimport broadcast
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core cimport dtype as _dtype
 from nlcpy import veo
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.statistics.function_base import *
 from nlcpy.wrapper.numpy_wrap import numpy_wrap
@@ -151,7 +150,7 @@ cpdef average(a, axis=None, weights=None, returned=False):
     else:
         a = core.argument_conversion(a)
 
-    nlcpy_chk_axis(a, axis=axis)
+    axis = nlcpy_chk_axis(a, axis=axis)
 
     nlcpy_chk_type(a)
 
@@ -180,7 +179,9 @@ cpdef average(a, axis=None, weights=None, returned=False):
                 raise ValueError(
                     "Length of weights not compatible with specified axis.")
 
-            wgt = nlcpy.broadcast_to(wgt, (a.ndim - 1) * (1,) + wgt.shape)
+            # wgt = nlcpy.broadcast_to(wgt, (a.ndim - 1) * (1,) + wgt.shape)
+            wgt = wgt[*(axis * (nlcpy.newaxis,)), ...,
+                      *((a.ndim - axis - 1) * (nlcpy.newaxis,))]
 
         scl = nlcpy.add.reduce(wgt, axis=axis, dtype=result_dtype)
         if nlcpy.any(scl == 0.0):
@@ -289,8 +290,6 @@ cpdef mean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
 
     """
     if a is None:
-        if out is not None:
-            out = None
         return None
 
     keepdims = True if keepdims is True else False
@@ -347,33 +346,14 @@ cpdef mean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
     if out is not None:
         if isinstance(out, nlcpy.core.core.ndarray) is True:
             ans = nlcpy.squeeze(ans)
-            if out.ndim != ans.ndim:
-                raise TypeError(
-                    'out is wrong dim(input={} output={})'.format(out.ndim,
-                                                                  ans.ndim))
-            if out.shape != ans.shape:
-                raise TypeError(
-                    'out is wrong shape(input={} output={})'.format(out.shape,
-                                                                    ans.shape))
-
-            try:
-                out[...] = ans
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
-
-            out = out.astype(result_dtype)
+            if out.shape != ans.shape:  # raise above statement(add.reduce)
+                raise TypeError(  # pragma: no cover
+                    'out is wrong shape(input={} output={})'  # pragma: no cover
+                    .format(out.shape, ans.shape))  # pragma: no cover
+            out[...] = ans
             return out
-        else:
-            try:
-                out = ans
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{}'.format(e))
-
-            out = out.astype(result_dtype)
-            return out
-
+        else:  # raise above statement
+            raise TypeError('output must be an array')  # pragma: no cover
     return ans
 
 
@@ -481,10 +461,7 @@ cpdef median(a, axis=None, out=None, overwrite_input=False, keepdims=False):
     else:
         sort_a = nlcpy.sort(cp_a, axis=axis)
 
-    if sort_a.shape == ():
-        return sort_a.item()
-
-    if sort_a.ndim == 0:
+    if sort_a.ndim == 0 or sort_a.size == 1:
         ret = sort_a.copy()
     else:
 
@@ -511,34 +488,15 @@ cpdef median(a, axis=None, out=None, overwrite_input=False, keepdims=False):
     if out is not None:
         if isinstance(out, nlcpy.core.core.ndarray) is True:
             ret = nlcpy.squeeze(ret)
-            if out.ndim != ret.ndim:
-                raise TypeError(
-                    'median out is wrong dim(input={} output={})'.format(out.ndim,
-                                                                         ret.ndim))
-
             if out.shape != ret.shape:
-                raise TypeError(
+                raise ValueError(
                     'median out is wrong shape(input={} output={})'.format(out.shape,
                                                                            ret.shape))
 
-            try:
-                out[...] = ret
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{}'.format(e))
-
-            out = out.astype(ret.dtype)
-
+            out[...] = ret
             return out
         else:
-            try:
-                out = ret
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
-
-            out = out.astype(ret.dtype)
-            return out
+            raise TypeError('output must be an array')
 
     return ret
 
@@ -644,12 +602,8 @@ cpdef nanmean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
 
     cnt = nlcpy.where(nlcpy.isnan(a_in), 1, 0)
     if nlcpy.sum(cnt) == 0:
-        if axis is None:
-            ret = nlcpy.mean(a_in, axis=None, out=out, keepdims=keepdims)
-            ans = ret
-        else:
-            ret = nlcpy.mean(a_in, axis=axis, out=out, keepdims=keepdims)
-            ans = ret
+        ret = nlcpy.mean(a_in, axis=axis, out=out, keepdims=keepdims)
+        ans = ret
 
         if keepdims is True:
             ans = ans.reshape(keep_shape)
@@ -659,30 +613,15 @@ cpdef nanmean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
         if out is not None:
             if isinstance(out, nlcpy.core.core.ndarray) is True:
                 ans = nlcpy.squeeze(ans)
-                if out.ndim != ans.ndim or out.shape != ans.shape:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
+                if out.shape != ans.shape:
+                    raise TypeError(  # pragma: no cover
+                        'out is wrong shape(input={} output={})'  # pragma: no cover
+                        .format(out.shape, ans.shape))  # pragma: no cover
 
-                try:
-                    out[...] = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-
+                out[...] = ans
                 return out
             else:
-                try:
-                    out = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-
-                return out
-
+                raise TypeError('output must be an array')  # pragma: no cover
     else:
         arr, mask = nlcpy_replace_nan(a, 0)
 
@@ -703,35 +642,6 @@ cpdef nanmean(a, axis=None, dtype=None, out=None, keepdims=nlcpy._NoValue):
             ans = ans.reshape(keep_shape)
         else:
             ans = nlcpy.squeeze(ans)
-
-        if out is not None:
-            if isinstance(out, nlcpy.core.core.ndarray) is True:
-                ans = nlcpy.squeeze(ans)
-                if out.ndim != ans.ndim:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
-
-                if out.shape != ans.shape:
-                    raise TypeError('out is wrong shape(input={} output={})'.format(
-                        out.shape, ans.shape))
-
-                try:
-                    out[...] = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
-            else:
-                try:
-                    out = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
 
     ans = ans.astype(result_dtype)
 
@@ -953,35 +863,18 @@ cpdef nanstd(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue
         if out is not None:
             if isinstance(out, nlcpy.core.core.ndarray) is True:
                 ans = nlcpy.squeeze(ans)
-                if out.ndim != ans.ndim or out.shape != ans.shape:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
-                try:
-                    out[...] = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
+                if out.shape != ans.shape:
+                    raise TypeError(  # pragma: no cover
+                        'out is wrong shape(input={} output={})'  # pragma: no cover
+                        .format(out.shape, ans.shape))  # pragma: no cover
+                out[...] = ans
                 return out
             else:
-                try:
-                    out = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
+                raise TypeError('output must be an array')  # pragma: no cover
     else:
         var_data = nlcpy.nanvar(a, axis=axis, dtype=dtype, out=out,
                                 ddof=ddof, keepdims=keepdims)
-        if isinstance(var_data, nlcpy.core.core.ndarray):
-            std = nlcpy.sqrt(var_data, out=var_data)
-        else:
-            tmp = nlcpy.sqrt(var_data)
-            std = nlcpy.dtype.type(tmp)
-
+        std = nlcpy.sqrt(var_data, out=var_data)
         ans = std
 
         if axis is not None:
@@ -998,31 +891,14 @@ cpdef nanstd(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue
         if out is not None:
             if isinstance(out, nlcpy.core.core.ndarray) is True:
                 ans = nlcpy.squeeze(ans)
-                if out.ndim != ans.ndim:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
-
                 if out.shape != ans.shape:
-                    raise TypeError('out is wrong shape(input={} output={})'.format(
-                        out.shape, ans.shape))
-
-                try:
-                    out[...] = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
+                    raise TypeError(  # pragma: no cover
+                        'out is wrong shape(input={} output={})'  # pragma: no cover
+                        .format(out.shape, ans.shape))  # pragma: no cover
+                out[...] = ans
                 return out
             else:
-                try:
-                    out = ans
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
+                raise TypeError('output must be an array')  # pragma: no cover
 
     ans = ans.astype(result_dtype)
 
@@ -1156,36 +1032,22 @@ cpdef nanvar(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue
             var_data = ret
 
         if keepdims is True:
-            var_data = var.reshape(keep_shape)
+            var_data = var_data.reshape(keep_shape)
         else:
             var_data = nlcpy.squeeze(var_data)
 
         if out is not None:
             if isinstance(out, nlcpy.core.core.ndarray) is True:
                 var_data = nlcpy.squeeze(var_data)
-                if out.ndim != var_data.ndim or out.shape != var_data.shape:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, var_data.ndim))
-                try:
-                    out[...] = var_data
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
+                if out.shape != var_data.shape:
+                    raise TypeError(  # pragma: no cover
+                        'out is wrong shape(input={} output={})'  # pragma: no cover
+                        .format(out.shape, var_data.shape))  # pragma: no cover
+                out[...] = var_data
                 return out
             else:
-                try:
-                    out = var_data
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
-
+                raise TypeError('output must be an array')  # pragma: no cover
     else:
-
         arr, mask = nlcpy_replace_nan(a, 0)
         if mask is None:
             return nlcpy.var(arr, axis=axis, dtype=result_dtype, out=out,
@@ -1236,31 +1098,14 @@ cpdef nanvar(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue
         if out is not None:
             if isinstance(out, nlcpy.core.core.ndarray) is True:
                 var_data = nlcpy.squeeze(var_data)
-                if out.ndim != var_data.ndim:
-                    raise TypeError('out is wrong dim(input={} output={})'.format(
-                        out.ndim, var_data.ndim))
-
                 if out.shape != var_data.shape:
-                    raise TypeError('out is wrong shape(input={} output={})'.format(
-                        out.shape, var_data.shape))
-
-                try:
-                    out[...] = var_data
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
+                    raise TypeError(  # pragma: no cover
+                        'out is wrong shape(input={} output={})'  # pragma: no cover
+                        .format(out.shape, var_data.shape))  # pragma: no cover
+                out[...] = var_data
                 return out
             else:
-                try:
-                    out = var_data
-                except Exception as e:
-                    out = 0
-                    raise TypeError('out shapes is wrong:{} '.format(e))
-
-                out = out.astype(result_dtype)
-                return out
+                raise TypeError('output must be an array')  # pragma: no cover
 
     var_data = var_data.astype(result_dtype)
 
@@ -1361,7 +1206,8 @@ cpdef std(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     if a is None:
         return None
 
-    a = core.argument_conversion(a)
+    if not isinstance(a, ndarray):
+        a = core.argument_conversion(a)
 
     nlcpy_chk_axis(a, axis=axis)
 
@@ -1403,35 +1249,16 @@ cpdef std(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     if out is not None:
         if isinstance(out, nlcpy.core.core.ndarray) is True:
             ans = nlcpy.squeeze(ans)
-            if out.ndim != ans.ndim:
-                raise TypeError(
-                    'out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
-
             if out.shape != ans.shape:
-                raise TypeError(
-                    'out is wrong shape(input={} output={})'.format(
-                        out.shape, ans.shape))
+                raise ValueError(  # pragma: no cover
+                    'out is wrong shape(input={} output={})'
+                    .format(out.shape, ans.shape))  # pragma: no cover
 
-            try:
-                ans1 = ans.astype(result_dtype)
-                out[...] = ans1
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
-
-            out = out.astype(result_dtype)
+            ans1 = ans.astype(result_dtype)
+            out[...] = ans1
             return out
         else:
-            try:
-                ans1 = ans.astype(result_dtype)
-                out = ans1
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
-
-            out = out.astype(result_dtype)
-            return out
+            raise TypeError('output must be an array')  # pragma: no cover
 
     ans = ans.astype(result_dtype)
 
@@ -1532,8 +1359,7 @@ cpdef var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
 
     """
     if a is None:
-        if out is not None:
-            return None
+        return None
 
     if not isinstance(a, nlcpy.core.core.ndarray):
         a = nlcpy.array(a)
@@ -1571,9 +1397,6 @@ cpdef var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
         data_mean = nlcpy.mean(a, axis=axis, dtype=result_dtype)
         total = a.shape[axis]
 
-    if not isinstance(data_mean, nlcpy.core.core.ndarray):
-        data_mean = nlcpy.array(data_mean)
-
     ans = nlcpy.mean(a * a, axis=axis, dtype=result_dtype,
                      keepdims=False) - (data_mean * data_mean)
 
@@ -1593,32 +1416,16 @@ cpdef var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=nlcpy._NoValue):
     if out is not None:
         if isinstance(out, nlcpy.core.core.ndarray) is True:
             ans = nlcpy.squeeze(ans)
-            if out.ndim != ans.ndim:
-                raise TypeError(
-                    'out is wrong dim(input={} output={})'.format(
-                        out.ndim, ans.ndim))
-
             if out.shape != ans.shape:
-                raise TypeError(
-                    'out is wrong shape(input={} output={})'.format(
-                        out.shape, ans.shape))
+                raise ValueError(
+                    'out is wrong shape(input={} output={})'
+                    .format(out.shape, ans.shape))
 
-            try:
-                ans1 = ans.astype(result_dtype)
-                out[...] = ans1
-                return out
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
-
+            ans1 = ans.astype(result_dtype)
+            out[...] = ans1
+            return out
         else:
-            try:
-                ans1 = ans.astype(result_dtype)
-                out = ans1
-                return out
-            except Exception as e:
-                out = 0
-                raise TypeError('out shapes is wrong:{} '.format(e))
+            raise TypeError('output must be an array')
 
     ans = ans.astype(result_dtype)
     return ans

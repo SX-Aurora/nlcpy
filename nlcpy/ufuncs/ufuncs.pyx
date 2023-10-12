@@ -150,15 +150,6 @@ cdef _make_copy_if_needed(in_args, out_args):
     return in_args_new, [out_args]
 
 
-cpdef tuple _get_args_info(list args):
-    ret = []
-    for a in args:
-        t = type(a)
-        dtype = a.dtype.type
-        ret.append((t, dtype, a.ndim))
-    return tuple(ret)
-
-
 cdef _guess_dtypes_from_in_types(list types, tuple in_types):
     cdef Py_ssize_t n = len(in_types)
     cdef Py_ssize_t i
@@ -300,7 +291,6 @@ cdef class ufunc:
         readonly object _err_func
         readonly object __doc__
         readonly object __name__
-        readonly object __module__
 
     def __init__(self, name, nin, nout, types,
                  err_func, default_casting=None, doc=''):

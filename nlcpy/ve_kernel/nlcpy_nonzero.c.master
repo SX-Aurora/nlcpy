@@ -70,10 +70,15 @@ uint64_t nlcpy_nonzero(ve_arguments *args, int32_t *psw)
     }
     uint64_t cnt;
 
+////////////
+// error  //
+////////////
+    if(a->ndim > NLCPY_MAXNDIM) {
+        return (uint64_t)NLCPY_ERROR_NDIM;
 /////////
 // 0-d //
 /////////
-    if (a->ndim == 0) {
+    } else if (a->ndim == 0) {
         *pret = 0;
 
 /////////
@@ -181,7 +186,7 @@ uint64_t nlcpy_nonzero(ve_arguments *args, int32_t *psw)
 /////////
 // N-d //
 /////////
-    } else if (a->ndim > 4 && a->ndim <= NLCPY_MAXNDIM) {
+    } else {
         int64_t k;
         uint64_t ia = 0;
         uint64_t n_inner = a->ndim - 1;
@@ -216,8 +221,6 @@ uint64_t nlcpy_nonzero(ve_arguments *args, int32_t *psw)
                 ia -= (a->strides[k] / a->itemsize) * (a->shape[k] - 1);
             }
         } while (k >= 0);
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
 #end_switch

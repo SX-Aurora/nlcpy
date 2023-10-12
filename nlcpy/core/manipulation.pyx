@@ -262,7 +262,7 @@ cpdef _resize(ndarray self,
                                  'Use the np.resize function.')
 
             refcnt = sys.getrefcount(self)
-            if refcnt > 2:
+            if refcnt > 3:
                 raise ValueError('cannot resize an array that '
                                  'references or is referenced\n'
                                  'by another array in this way.\n'
@@ -273,7 +273,7 @@ cpdef _resize(ndarray self,
         is_pool, veo_hmem, ve_adr = _realloc_kernel(
             self, newnbytes if newnbytes!=0 else itemsize)
         if veo_hmem == 0:
-            raise MemoryError('cannot allocate memory for array')
+            raise MemoryError('cannot allocate memory for array')  # pragma: no cover
         self._is_pool = is_pool
         self.veo_hmem = veo_hmem
         self.ve_adr = ve_adr
@@ -458,8 +458,6 @@ cpdef ndarray _ndarray_concatenate(op, axis, ret):
         raise TypeError("The first input argument needs to be a sequence")
 
     n = len(op)
-    if n < 0:
-        return None
     if n == 0:
         raise ValueError("need at least one array to concatenate")
 
@@ -565,11 +563,7 @@ cdef ndarray _concatenate_flattened_arrays(n, arrays, order, ret):
             raise ValueError('Output array is the wrong size')
     else:
         dtype = numpy.result_type(*arrays)
-        if dtype is None:
-            return None
         ret = ndarray((shape,), dtype=dtype)
-        if ret is None:
-            return None
 
     view = ret.view()
     dsts = [None] * n
@@ -741,8 +735,6 @@ cpdef ndarray _ndarray_repeat(ndarray self, repeats, axis):
         axis += a.ndim
 
     rep = nlcpy.asanyarray(repeats, dtype='l')
-    if rep.dtype.char in 'FD':
-        raise TypeError("can't convert complex to int")
     if rep.ndim == 0 and rep < 0:
         raise ValueError('negative dimensions are not allowed')
     if rep.ndim > 1:

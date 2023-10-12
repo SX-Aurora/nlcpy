@@ -135,7 +135,7 @@ uint64_t nlcpy_take_bool(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -319,7 +319,7 @@ uint64_t nlcpy_take_i32(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -503,7 +503,7 @@ uint64_t nlcpy_take_i64(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -687,7 +687,7 @@ uint64_t nlcpy_take_u32(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -871,7 +871,7 @@ uint64_t nlcpy_take_u64(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -1055,7 +1055,7 @@ uint64_t nlcpy_take_f32(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -1239,7 +1239,7 @@ uint64_t nlcpy_take_f64(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -1423,7 +1423,7 @@ uint64_t nlcpy_take_c64(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;
@@ -1607,7 +1607,7 @@ uint64_t nlcpy_take_c128(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;

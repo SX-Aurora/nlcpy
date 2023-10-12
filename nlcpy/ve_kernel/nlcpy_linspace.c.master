@@ -84,7 +84,7 @@ uint64_t nlcpy_linspace(ve_arguments *args, int32_t *psw) {
             pout[out->size - 1] = pstop[0];
         }
 }
-    } else {
+    } else if (out->ndim > 1 && out->ndim <= NLCPY_MAXNDIM){
 @#ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -189,6 +189,8 @@ uint64_t nlcpy_linspace(ve_arguments *args, int32_t *psw) {
                 }
             } while(j > 0);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
 #end_switch
     retrieve_fpe_flags(psw);

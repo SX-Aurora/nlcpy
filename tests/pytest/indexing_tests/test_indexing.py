@@ -257,6 +257,18 @@ class TestIndexing(unittest.TestCase):
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
+    def test_take_0d_array(self, xp, dtype):
+        a = xp.array(3, dtype=dtype)
+        return xp.take(a, 0)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
+    def test_take_by_scalar_ind_not_int(self, xp, dtype):
+        a = testing.shaped_arange((3, 4, 5), xp, dtype)
+        return xp.take(a, 2.2)
+
+    @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
     def test_diagonal(self, xp, dtype):
         a = testing.shaped_arange((3, 4, 5), xp, dtype)
         return a.diagonal(1, 2, 0)

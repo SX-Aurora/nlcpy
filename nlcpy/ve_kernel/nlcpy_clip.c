@@ -312,14 +312,16 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -423,7 +425,7 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -637,8 +639,6 @@ uint64_t clip_bool(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -654,14 +654,16 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -765,7 +767,7 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -979,8 +981,6 @@ uint64_t clip_i32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -996,14 +996,16 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -1107,7 +1109,7 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -1321,8 +1323,6 @@ uint64_t clip_i64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -1338,14 +1338,16 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -1449,7 +1451,7 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -1663,8 +1665,6 @@ uint64_t clip_u32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -1680,14 +1680,16 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -1791,7 +1793,7 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -2005,8 +2007,6 @@ uint64_t clip_u64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -2022,14 +2022,16 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -2133,7 +2135,7 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -2347,8 +2349,6 @@ uint64_t clip_f32(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -2364,14 +2364,16 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -2475,7 +2477,7 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -2689,8 +2691,6 @@ uint64_t clip_f64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -2706,14 +2706,16 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -2817,7 +2819,7 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -3031,8 +3033,6 @@ uint64_t clip_c64(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, ve
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -3048,14 +3048,16 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
     Bint *pw = (Bint *)nlcpy__get_ptr(where);
     if (!pa || !pout || !pmin || !pmax || !pw) return NLCPY_ERROR_MEMORY;
 
-    if ((a->is_c_contiguous && out->is_c_contiguous &&
-         (amin->size == 0 || amin->is_c_contiguous) &&
-         (amax->size == 0 || amax->is_c_contiguous) &&
-         (where->size == 0 || where->is_c_contiguous)) ||
-        (a->is_f_contiguous && out->is_f_contiguous &&
-         (amin->size == 0 || amin->is_f_contiguous) &&
-         (amax->size == 0 || amax->is_f_contiguous) &&
-         (where->size == 0 || where->is_f_contiguous))
+    if(a->ndim > NLCPY_MAXNDIM){
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if ((a->is_c_contiguous && out->is_c_contiguous &&
+                (amin->size == 0 || amin->is_c_contiguous) &&
+                (amax->size == 0 || amax->is_c_contiguous) &&
+                (where->size == 0 || where->is_c_contiguous)) ||
+               (a->is_f_contiguous && out->is_f_contiguous &&
+                (amin->size == 0 || amin->is_f_contiguous) &&
+                (amax->size == 0 || amax->is_f_contiguous) &&
+                (where->size == 0 || where->is_f_contiguous))
     ) {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
@@ -3159,7 +3161,7 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
             }
         }
 }
-    } else if (a->ndim <= NLCPY_MAXNDIM) {
+    } else {
 #ifdef _OPENMP
         const int nt = omp_get_num_threads();
         const int it = omp_get_thread_num();
@@ -3373,8 +3375,6 @@ uint64_t clip_c128(ve_array *a, ve_array *out, ve_array *amin, ve_array *amax, v
                 }
             }
         }
-    } else {
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;
@@ -3420,6 +3420,10 @@ uint64_t nlcpy_clip(ve_arguments *args, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
 
         int32_t pswc;
         switch (out->dtype) {

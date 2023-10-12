@@ -100,14 +100,6 @@ cdef dict _typenames_base = {
 }
 
 
-cpdef str get_typename(dtype):
-    if dtype is None:
-        raise ValueError('dtype is None')
-    if dtype not in _typenames:
-        dtype = _dtype.get_dtype(dtype).type
-    return _typenames[dtype]
-
-
 cdef dict _typenames = {}
 cdef dict _dtype_kind_size_dict = {}
 

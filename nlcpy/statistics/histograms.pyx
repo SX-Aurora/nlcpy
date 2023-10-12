@@ -69,7 +69,6 @@ from nlcpy.core cimport broadcast
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core cimport dtype as _dtype
 from nlcpy import veo
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.statistics.function_base import *
 from nlcpy.wrapper.numpy_wrap import numpy_wrap

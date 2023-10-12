@@ -516,3 +516,22 @@ class TestDisconnect(unittest.TestCase):
         for veid in range(venode.get_num_available_venodes()):
             with pytest.raises(NotImplementedError):
                 venode.VE(veid).disconnect()
+
+
+@testing.multi_ve(2)
+class TestArgsDiffVE(unittest.TestCase):
+
+    def test_args_diff_ve(self):
+        with venode.VE(0):
+            x = nlcpy.empty(10)
+        with venode.VE(1):
+            y = nlcpy.empty(10)
+        with pytest.raises(ValueError):
+            nlcpy.add(x, y)
+
+
+class TestFindVENode(unittest.TestCase):
+
+    def test_find_venode_not_found(self):
+        ve = venode._venode._find_venode_from_proc_handle(0)
+        assert ve is None

@@ -63,14 +63,14 @@ binary_op get_binary_func(int64_t func_num) {
         return nlcpy_mod;
     case VE_FUNC_FMOD         :
         return nlcpy_fmod;
-    case VE_FUNC_DIVMOD       :
-        //return nlcpy_divmod;
+    //case VE_FUNC_DIVMOD       :
+    //    return nlcpy_divmod;
     case VE_FUNC_HEAVISIDE    :
         return nlcpy_heaviside;
-    case VE_FUNC_GCD          :
-        //return nlcpy_gcd;
-    case VE_FUNC_LCM          :
-        //return nlcpy_lcm;
+    //case VE_FUNC_GCD          :
+    //    return nlcpy_gcd;
+    //case VE_FUNC_LCM          :
+    //    return nlcpy_lcm;
     case VE_FUNC_BITWISE_AND  :
         return nlcpy_bitwise_and;
     case VE_FUNC_BITWISE_OR   :
@@ -115,12 +115,12 @@ binary_op get_binary_func(int64_t func_num) {
         return nlcpy_copysign;
     case VE_FUNC_NEXTAFTER    :
         return nlcpy_nextafter;
-    case VE_FUNC_MODF         :
-        //return nlcpy_modf;
+    //case VE_FUNC_MODF         :
+    //    return nlcpy_modf;
     case VE_FUNC_LDEXP        :
         return nlcpy_ldexp;
-    case VE_FUNC_FEXP         :
-        //return nlcpy_fexp;
+    //case VE_FUNC_FEXP         :
+    //    return nlcpy_fexp;
 #endif /* ADD_ONLY */
 #endif /* NO_OPERATOR */
     default                   :

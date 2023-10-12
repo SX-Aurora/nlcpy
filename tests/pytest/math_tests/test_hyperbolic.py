@@ -62,7 +62,7 @@ from nlcpy import testing
 class TestHyperbolic(unittest.TestCase):
 
     @testing.for_all_dtypes()
-    @testing.numpy_nlcpy_allclose(atol=1e-5)
+    @testing.numpy_nlcpy_allclose(rtol=1e-5)
     def check_unary(self, name, xp, dtype):
         a = testing.shaped_arange(self.shape, xp, dtype)
         return getattr(xp, name)(a)

@@ -45,7 +45,6 @@ from nlcpy.core cimport manipulation
 from nlcpy.core cimport core
 from nlcpy.core cimport broadcast
 from nlcpy.core.core cimport *
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core cimport internal
 from nlcpy.request cimport request
 from nlcpy.core.dtype cimport get_dtype_number, get_dtype
@@ -148,7 +147,6 @@ def get_calc_dtype(ufunc_name, A, arg_A, is_scalar_A, B, arg_B, is_scalar_B):
                             "input types,".format(ufunc_name),
                             "and the inputs could not be safely coerced to any "
                             "supported types according to the casting rule ''safe''")
-        return treat_A
 
 
 def check_calc_type(ufunc_name, calc_dtype):
@@ -296,12 +294,6 @@ cpdef outer_core(name, A, B, out=None, where=True,
         calc_dtype = get_dtype(dtype) if dtype is not None else \
             get_calc_dtype(ufunc_name, A, arg_A, is_scalar_A, B, arg_B, is_scalar_B)
     check_calc_type(ufunc_name, calc_dtype)
-    # extra check for 2nd argument of ldexp
-    if ufunc_name == "ldexp":
-        if dtype is not None:
-            if B.dtype.kind == 'f' or B.dtype.kind == 'c':  # uint64 is allowed
-                raise TypeError("No loop matching the specified signature and "
-                                "casting was found for ufunc ldexp")
 
     # decide work_dtype(dtype of workspace)
     promoted_dtype = False
@@ -439,7 +431,7 @@ cpdef outer_core(name, A, B, out=None, where=True,
                                 order='C').transpose(trans_out)
 
     if out is None:
-        out_shape = A.shape+B.shape
+        out_shape = A.shape + B.shape
         bcast_dim = nlcpy.empty(0, dtype="bool")
         if order == 'C' or order == 'c':
             out = nlcpy.empty(out_shape, order='C', dtype=out_dtype)

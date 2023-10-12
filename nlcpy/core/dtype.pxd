@@ -87,6 +87,6 @@ cdef _nlcpy_not_supported_type_set
 
 cpdef _check_dtype_is_valid(dtype)
 
-cpdef int get_dtype_number(numpy.dtype dtype)
+cpdef int get_dtype_number(numpy.dtype dtype) except *
 
 cpdef numpy.dtype promote_dtype_to_supported(numpy.dtype dtype)

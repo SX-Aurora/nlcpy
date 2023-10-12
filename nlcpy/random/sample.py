@@ -132,7 +132,7 @@ def ranf(*size):
     return rs.ranf(None if len(size) == 0 else size)
 
 
-def sample(*size):
+def sample(size=None):
     """This function has the same `nlcpy.random.RandomState.sample`
 
     See Also
@@ -141,7 +141,7 @@ def sample(*size):
 
     """
     rs = generator._get_rand()
-    return rs.sample(None if len(size) == 0 else size)
+    return rs.sample(size)
 
 
 def random(size=None):
@@ -166,10 +166,12 @@ def random_integers(low, high=None, size=None):
         (exclusive).
 
     """
-    if high is None:
-        high = low
-        low = 1
-    return randint(low, high + 1, size)
+    # if high is None:
+    #     high = low
+    #     low = 1
+    # return randint(low, high + 1, size)
+    rs = generator._get_rand()
+    return rs.random_integers(low, high, size)
 
 
 def random_sample(size=None):

@@ -111,7 +111,7 @@ _integers_types = {
     'uint16',
     'uint32',
     'uint64'}
-_unsigned_integers_types = {'bool', 'uint8', 'uint16', 'uint32', 'uint64'}
+_unsigned_integers_types = {'uint8', 'uint16', 'uint32', 'uint64'}
 
 
 def _get_rand():
@@ -179,7 +179,6 @@ def set_state(state):
     """
     rs = _get_rand()
     rs.set_state(state)
-    return
 
 
 def seed(seed=None):
@@ -298,9 +297,6 @@ class RandomState():
             if not type(state[1]) is int:
                 raise TypeError('an integer is required')
             nlcpy.random._numpy_state = (state[1], float(state[2]))
-
-    def _get_seed(self):
-        return self._ve_seed[int(VE())].get().tolist()
 
     def tomaxint(self, size):
         """Random integers between 0 and ``nlcpy.iinfo(nlcpy.int_).max``, inclusive.
@@ -621,8 +617,9 @@ class RandomState():
                            "instead".format(low=low, high=high)).
                           DeprecationWarning)
             """
+            pass
 
-        return self.randint(low, int(high) + 1, size=size, dtype='l')
+        return self.randint(low, high + 1, size=size, dtype='l')
 
     def random_sample(self, size=None):
         """Returns random floats in the half-open interval ``[0.0, 1.0)``.
@@ -726,10 +723,11 @@ class RandomState():
             self._generate_random_shuffle(x)
         else:
             # Untyped path.
-            random_interval = self.randint(0, high=n, size=n)
-            for i in reversed(range(0, n)):
-                j = random_interval.get().flat[i]
-                x[i], x[j] = x[j], x[i]
+            if n > 0:
+                random_interval = self.randint(0, high=n, size=n)
+                for i in reversed(range(0, n)):
+                    j = random_interval.get().flat[i]
+                    x[i], x[j] = x[j], x[i]
         return
 
     def permutation(self, x):
@@ -1122,8 +1120,8 @@ class RandomState():
             >>> plt.show()
         """
         self._is_number(loc, scale)
-        _size = size if size is not None else broadcast(
-            asarray(loc), asarray(scale)).shape
+        _size = size if size is not None else \
+            broadcast(asarray(loc), asarray(scale)).shape
         return self._generate_random_logistic(
             loc, scale, size=_size, dtype=float)
 
@@ -1613,9 +1611,9 @@ class RandomState():
 
         # isscalar is not nlcpy. use numpy.
         if not numpy.isscalar(low):
-            low = ndarray(low, float)
+            low = asarray(low, dtype=float)
         if not numpy.isscalar(high):
-            high = ndarray(high, float)
+            high = asarray(high, dtype=float)
         rand = (high - low) * rand + low
         return rand
 
@@ -1906,7 +1904,7 @@ class RandomState():
 
     def _generate_random_poisson(self, lam, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -1931,7 +1929,7 @@ class RandomState():
 
     def _generate_random_logistic(self, loc, scale, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -1956,7 +1954,7 @@ class RandomState():
 
     def _generate_random_weibull(self, a, b, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -1984,7 +1982,7 @@ class RandomState():
 
     def _generate_random_exponential(self, scale=1.0, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -2011,7 +2009,7 @@ class RandomState():
 
     def _generate_random_cauchy(self, a=0.0, b=1.0, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -2094,7 +2092,7 @@ class RandomState():
 
     def _generate_random_geometric(self, p, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -2113,7 +2111,7 @@ class RandomState():
 
     def _generate_random_binomial(self, n, p, size=None, dtype=float):
         if size is None:
-            size = ()
+            size = ()  # pragma: no cover
         if not numpy.isscalar(size) and len(size) == 0:
             size = ()
 
@@ -2208,11 +2206,8 @@ class RandomState():
         return
 
     def _generate_random_shuffle(self, x, axis=0):
-        if x.ndim == 0 or x.size == 1:
+        if x.ndim == 0 or x.size <= 1:
             return
-        for i in range(x.ndim):
-            if x._shape[i] == 0:
-                return
 
         fpe = request._get_fpe_flag()
         if axis < 0:
@@ -2262,3 +2257,15 @@ class RandomState():
 
 
 _rand = None
+
+
+# for testing
+_asl_error = {
+    'ASL_ERROR_OK': ASL_ERROR_OK,
+    'ASL_ERROR_ARGUMENT': ASL_ERROR_ARGUMENT,
+    'ASL_ERROR_LIBRARY_UNINITIALIZED': ASL_ERROR_LIBRARY_UNINITIALIZED,
+    'ASL_ERROR_RANDOM_INVALID': ASL_ERROR_RANDOM_INVALID,
+    'ASL_ERROR_MEMORY': ASL_ERROR_MEMORY,
+    'ASL_ERROR_MPI': ASL_ERROR_MPI,
+    'ASL_ERROR_RANDOM_INCOMPATIBLE_CALL': ASL_ERROR_RANDOM_INCOMPATIBLE_CALL,
+}

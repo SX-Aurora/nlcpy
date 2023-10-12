@@ -133,6 +133,4 @@ cpdef ndarray array(obj, dtype=*, bint copy=*, order=*, bint subok=*,
                     Py_ssize_t ndmin=*)
 cpdef int _update_order_char(ndarray a, int order_char)
 cpdef ndarray argument_conversion(x)
-cpdef tuple argument_conversion2(x, y)
 cpdef check_fpe_flags(fpe_flags, reqnames)
-cpdef determine_contiguous_property(self, order)

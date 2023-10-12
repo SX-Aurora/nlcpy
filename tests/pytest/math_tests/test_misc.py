@@ -182,10 +182,16 @@ class TestClip(unittest.TestCase):
         return xp.clip(a, 3, None, out=out)
 
     @testing.numpy_nlcpy_array_equal()
-    def test_clip_with_where(self, xp):
+    def test_clip_with_where_amax_none(self, xp):
         a = testing.shaped_arange(self.shape, xp)
         where = testing.shaped_random(self.shape, xp, bool)
         return xp.clip(a, 3, None, where=where)[where]
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_clip_with_where_amin_none(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        where = testing.shaped_random(self.shape, xp, bool)
+        return xp.clip(a, None, 3, where=where)[where]
 
     @testing.numpy_nlcpy_array_equal()
     def test_clip_with_where_with_out(self, xp):
@@ -224,6 +230,16 @@ class TestClip(unittest.TestCase):
         a = testing.shaped_arange(self.shape, xp)
         return xp.clip(a, 5, 4)
 
+    @testing.numpy_nlcpy_array_equal()
+    def test_clip_amin_list(self, xp):
+        a = testing.shaped_arange(self.shape, xp).ravel()
+        return xp.clip(a, [i for i in range(a.shape[0])], 7)
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_clip_amax_list(self, xp):
+        a = testing.shaped_arange(self.shape, xp).ravel()
+        return xp.clip(a, 1, [i for i in range(a.shape[0])])
+
 
 class TestClipOrder(unittest.TestCase):
 
@@ -256,6 +272,16 @@ class TestClipFailure(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_clip_shape_mismatch(self, xp):
         xp.clip(xp.empty([2, 3, 4]), xp.empty([3]), 2, out=xp.empty([3, 4]))
+
+    @testing.numpy_nlcpy_raises()
+    def test_clip_out_type_mismatch(self, xp):
+        xp.clip(xp.empty(3), 0, 2, out=[0, 1, 2])
+
+    @testing.numpy_nlcpy_raises()
+    def test_clip_with_where_not_bool(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        where = testing.shaped_random(self.shape, xp, int)
+        return xp.clip(a, 3, None, where=where)
 
 
 @testing.parameterize(*(

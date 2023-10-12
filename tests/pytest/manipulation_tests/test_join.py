@@ -148,6 +148,14 @@ class TestJoin(unittest.TestCase):
         with self.assertRaises(ValueError):
             nlcpy.concatenate((a, b, c))
 
+    @testing.for_all_dtypes(name='dtype')
+    @testing.numpy_nlcpy_array_equal()
+    def test_concatenate_axis_none(self, xp, dtype):
+        a = testing.shaped_arange((2, 3, 4), xp, dtype)
+        b = testing.shaped_reverse_arange((2, 3, 2), xp, dtype)
+        c = testing.shaped_arange((2, 3, 3), xp, dtype)
+        return xp.concatenate((a, b, c), axis=None)
+
     # Test for stack
 
     @testing.for_all_dtypes(name='dtype')

@@ -971,3 +971,32 @@ class TestNotSupportedRandom(unittest.TestCase):
     def test_notsupported(self):
         with self.assertRaises(AttributeError):
             getattr(nlcpy.random, self.attr)
+
+
+class TestNdarrayMethod(unittest.TestCase):
+    @testing.numpy_nlcpy_array_equal()
+    def test_argsort0(self, xp):
+        if _is_skip():
+            pytest.skip('Python3.6 is not testable')
+        x = xp.arange(5)
+        x[0] = 2
+        x[3] = 3
+        ret = x.argsort(kind='quick')
+        assert isinstance(ret, xp.ndarray)
+        return ret
+
+    def test_argsort1(self):
+        if _is_skip():
+            pytest.skip('Python3.6 is not testable')
+        x = nlcpy.arange(5)
+        with self.assertRaises(ValueError):
+            x.argsort(order='a')
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_argsort2(self, xp):
+        if _is_skip():
+            pytest.skip('Python3.6 is not testable')
+        x = xp.arange(5, dtype='c8')
+        ret = x.argsort()
+        assert isinstance(ret, xp.ndarray)
+        return ret

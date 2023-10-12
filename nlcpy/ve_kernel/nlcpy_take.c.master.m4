@@ -135,7 +135,7 @@ uint64_t nlcpy_take_$1(ve_array *a_src, ve_array *a_idx, ve_array *a_out,
 /////////
 // N-d //
 /////////
-    } else if (a_idx->ndim > 1 && a_idx->ndim < NLCPY_MAXNDIM) {
+    } else if (a_idx->ndim > 1 && a_idx->ndim <= NLCPY_MAXNDIM) {
         int64_t i, k;
         int64_t n_inner = a_idx->ndim - 1;
         int64_t n_outer = 0;

@@ -31,7 +31,7 @@
 
 import nlcpy
 import numpy
-from nlcpy.ufuncs import operations as ufunc_op
+# from nlcpy.ufuncs import operations as ufunc_op
 from nlcpy.linalg import cblas_wrapper
 from nlcpy.request import request
 from nlcpy.wrapper.numpy_wrap import numpy_wrap
@@ -108,7 +108,7 @@ def dot(a, b, out=None):
             raise ValueError('output array is incorrect dtype')
     # if either a or b is 0-D array, it is equivalent to nlcpy.multiply
     if a.ndim == 0 or b.ndim == 0:
-        return nlcpy.asanyarray(ufunc_op.multiply(a, b, out=out), order='C')
+        return nlcpy.asanyarray(nlcpy.multiply(a, b, out=out), order='C')
     # if both a and b are 1-D arrays, it is inner product of vectors
     if a.ndim == 1 and b.ndim == 1:
         return cblas_wrapper.cblas_dot(a, b, out=out)
@@ -206,7 +206,7 @@ def inner(a, b):
     a = nlcpy.asanyarray(a)
     b = nlcpy.asanyarray(b)
     if a.ndim == 0 or b.ndim == 0:
-        return ufunc_op.multiply(a, b)
+        return nlcpy.multiply(a, b)
     elif a.ndim == 1 and b.ndim == 1:
         return cblas_wrapper.cblas_dot(a, b)
     else:

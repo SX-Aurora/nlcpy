@@ -105,7 +105,10 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
@@ -198,9 +201,6 @@ uint64_t nlcpy_fft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, co
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -222,7 +222,10 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
@@ -315,9 +318,6 @@ uint64_t nlcpy_ifft_1d_c128_c128(ve_array *x, ve_array *y, const int64_t axis, c
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -339,7 +339,10 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
@@ -432,9 +435,6 @@ uint64_t nlcpy_fft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, cons
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -456,7 +456,10 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t m = x->size / x->shape[axis];
             asl_int64_t xs, ys;
@@ -549,9 +552,6 @@ uint64_t nlcpy_ifft_1d_c64_c64(ve_array *x, ve_array *y, const int64_t axis, con
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -575,7 +575,10 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
@@ -670,9 +673,6 @@ uint64_t nlcpy_rfft_1d_f64_c128(ve_array *x, ve_array *y, const int64_t axis, co
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -694,7 +694,10 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
@@ -789,9 +792,6 @@ uint64_t nlcpy_irfft_1d_c128_f64(ve_array *x, ve_array *y, const int64_t axis, c
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -813,7 +813,10 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
@@ -908,9 +911,6 @@ uint64_t nlcpy_rfft_1d_f32_c64(ve_array *x, ve_array *y, const int64_t axis, con
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -932,7 +932,10 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         if ((nlcpy__is_c_contiguous(x) && axis==x->ndim-1) || (nlcpy__is_f_contiguous(x) && axis==0)) {
             asl_int_t n = n_in;
             asl_int_t m = x->size / x->shape[axis];
@@ -1027,9 +1030,6 @@ uint64_t nlcpy_irfft_1d_c64_f32(ve_array *x, ve_array *y, const int64_t axis, co
 
             }
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1086,7 +1086,10 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1157,9 +1160,6 @@ uint64_t nlcpy_fft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1189,7 +1189,10 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1260,9 +1263,6 @@ uint64_t nlcpy_ifft_2d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1292,7 +1292,10 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1363,9 +1366,6 @@ uint64_t nlcpy_fft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1395,7 +1395,10 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1466,9 +1469,6 @@ uint64_t nlcpy_ifft_2d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1499,7 +1499,10 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1579,9 +1582,6 @@ uint64_t nlcpy_rfft_2d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1611,7 +1611,10 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1691,9 +1694,6 @@ uint64_t nlcpy_irfft_2d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1723,7 +1723,10 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1803,9 +1806,6 @@ uint64_t nlcpy_rfft_2d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1835,7 +1835,10 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if((nlcpy__is_c_contiguous(x) && ((axis_1 == x->ndim - 2 && axis_2 == x->ndim - 1) || (axis_1 == x->ndim - 1 && axis_2 == x->ndim - 2)))
         || (nlcpy__is_f_contiguous(x) && ((axis_1 == 0 && axis_2 == 1) || (axis_1 == 1 && axis_2 == 0))) ){
@@ -1915,9 +1918,6 @@ uint64_t nlcpy_irfft_2d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -1951,7 +1951,10 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2020,9 +2023,6 @@ uint64_t nlcpy_fft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2054,7 +2054,10 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2123,9 +2126,6 @@ uint64_t nlcpy_ifft_3d_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2157,7 +2157,10 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2226,9 +2229,6 @@ uint64_t nlcpy_fft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2260,7 +2260,10 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2329,9 +2332,6 @@ uint64_t nlcpy_ifft_3d_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2364,7 +2364,10 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2441,9 +2444,6 @@ uint64_t nlcpy_rfft_3d_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2475,7 +2475,10 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2552,9 +2555,6 @@ uint64_t nlcpy_irfft_3d_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2586,7 +2586,10 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2663,9 +2666,6 @@ uint64_t nlcpy_rfft_3d_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2697,7 +2697,10 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - 3, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, 2))) {
             m = (asl_int_t)(x->size / (x->shape[axis_1] * x->shape[axis_2] * x->shape[axis_3]));
@@ -2774,9 +2777,6 @@ uint64_t nlcpy_irfft_3d_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         }else{
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2806,7 +2806,10 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -2890,9 +2893,6 @@ uint64_t nlcpy_fft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -2920,7 +2920,10 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3004,9 +3007,6 @@ uint64_t nlcpy_ifft_nd_c128_c128(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3034,7 +3034,10 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3118,9 +3121,6 @@ uint64_t nlcpy_fft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_array
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3148,7 +3148,10 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3232,9 +3235,6 @@ uint64_t nlcpy_ifft_nd_c64_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3263,7 +3263,10 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3352,9 +3355,6 @@ uint64_t nlcpy_rfft_nd_f64_c128(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3382,7 +3382,10 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3471,9 +3474,6 @@ uint64_t nlcpy_irfft_nd_c128_f64(ve_array *x, ve_array *y, ve_array *axes, ve_ar
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3501,7 +3501,10 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3590,9 +3593,6 @@ uint64_t nlcpy_rfft_nd_f32_c64(ve_array *x, ve_array *y, ve_array *axes, ve_arra
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);
@@ -3620,7 +3620,10 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         if (err != ASL_ERROR_OK ) return nlcpy_generate_asl_error(err);
     }
 
-    if (y->ndim > 0 && y->ndim <= NLCPY_MAXNDIM){
+    if (y->ndim > NLCPY_MAXNDIM){
+        // above NLCPY_MAXNDIM
+        return (uint64_t)NLCPY_ERROR_NDIM;
+    } else if (y->ndim > 0){
         asl_int_t m;
         if ((nlcpy__is_c_contiguous(x) && check_multiplicity_convertible_axes(_axes, x->ndim - dim_val, x->ndim - 1)) || (nlcpy__is_f_contiguous(x) && check_multiplicity_convertible_axes(_axes, 0, dim_val - 1))) {
             m = (asl_int_t)x->size;
@@ -3709,9 +3712,6 @@ uint64_t nlcpy_irfft_nd_c64_f32(ve_array *x, ve_array *y, ve_array *axes, ve_arr
         } else {
             return (uint64_t)NLCPY_ERROR_INTERNAL;
         }
-    } else {
-        // above NLCPY_MAXNDIM
-        return (uint64_t)NLCPY_ERROR_NDIM;
     }
 
     retrieve_fpe_flags(psw);

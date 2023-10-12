@@ -42,7 +42,6 @@ import nlcpy
 from nlcpy import veo
 from nlcpy.core cimport core
 from nlcpy.core.core cimport *
-from nlcpy.manipulation.add_remove import resize
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core.internal cimport _compress_dims
 from nlcpy.request.ve_kernel cimport *
@@ -312,8 +311,6 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
         y = out
     else:
         y = ndarray(shape=shape, dtype=dt, order=order_out)
-    if y.ve_adr == 0:
-        raise MemoryError()
 
     if name == 'nlcpy_fmod_reduceat' and dt == 'bool':
         w = array(y, dtype='float64')

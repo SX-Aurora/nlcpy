@@ -136,6 +136,10 @@ inline Bint isnan_f32(float x) {
 float  nlcpy_g_nanf;
 double nlcpy_g_nan;
 
+#ifdef DEBUG_BARRIER
+void nlcpy__sleep_thread();
+#endif
+
 #ifdef __cplusplus
 }
 #endif

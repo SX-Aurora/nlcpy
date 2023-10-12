@@ -264,6 +264,11 @@ class TestDims(unittest.TestCase):
         a = testing.shaped_arange((2, 1, 3, 4), xp)
         xp.squeeze(a, axis=2)
 
+    def test_squeeze_0dim_axis_failure(self):
+        a = nlcpy.array(0)
+        with self.assertRaises(nlcpy.core.error._AxisError):
+            nlcpy.squeeze(a, axis=2)
+
     @testing.numpy_nlcpy_array_equal()
     def test_external_squeeze(self, xp):
         a = testing.shaped_arange((1, 2, 1, 3, 1, 1, 4, 1), xp)

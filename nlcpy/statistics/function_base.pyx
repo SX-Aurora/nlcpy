@@ -69,7 +69,6 @@ from nlcpy.core cimport broadcast
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.core cimport dtype as _dtype
 from nlcpy import veo
-from nlcpy.manipulation.shape import reshape
 from nlcpy.core.error import _AxisError as AxisError
 from nlcpy.wrapper.numpy_wrap import numpy_wrap
 cimport cython
@@ -262,30 +261,15 @@ cpdef nlcpy_median_nancheck(data, result, axis):
 
 
 cpdef nlcpy_chk_axis(a, axis=None):
-    ret = False
+    ret = axis
 
-    if isinstance(a, nlcpy.core.core.ndarray) is True:
-        if axis is None:
-            ret = True
-        else:
-            if type(axis) is tuple:
-                raise ValueError('tuple axis is not supported')
-            elif axis >= a.ndim:
-                raise ValueError("Nlcpy AxisError: axis {} is out of bounds"
-                                 " for array of dimension {}".format(axis, a.ndim))
-            else:
-                ret = True
-    else:
-        a = core.argument_conversion(a)
-        if axis is None:
-            ret = True
-        elif type(axis) is tuple:
+    if axis is not None:
+        if type(axis) is tuple:
             raise ValueError('tuple axis is not supported')
-        else:
-            if axis >= a.ndim:
-                raise ValueError("Nlcpy AxisError: axis {} is out of bounds"
-                                 " for array of dimension {}".format(axis, a.ndim))
-            else:
-                ret = True
+        if axis < 0:
+            ret = a.ndim + axis
+        if ret >= a.ndim or ret < 0:
+            raise ValueError("Nlcpy AxisError: axis {} is out of bounds"
+                             " for array of dimension {}".format(axis, a.ndim))
 
     return ret

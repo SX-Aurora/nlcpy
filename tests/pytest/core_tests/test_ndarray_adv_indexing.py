@@ -50,7 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
-
+import pytest
 import itertools
 import numpy
 
@@ -327,6 +327,7 @@ class TestArrayAdvancedIndexingOverflow(unittest.TestCase):
     {'shape': (0, 1), 'indexes': (0, Ellipsis)},
     {'shape': (2, 3), 'indexes': (slice(None), [1, 2], slice(None))},
     {'shape': (2, 3), 'indexes': numpy.array([], dtype=numpy.float_)},
+    {'shape': (2, 3), 'indexes': (numpy.array([0]), 2.2)},
 )
 class TestArrayInvalidIndexAdvGetitem(unittest.TestCase):
 
@@ -370,6 +371,15 @@ class TestArrayInvalidValueAdvGetitem(unittest.TestCase):
     def test_invalid_adv_getitem1(self, xp):
         a = testing.shaped_arange(self.shape, xp)
         a[self.indexes]
+
+
+class TestInvalidBooleanGetitem(unittest.TestCase):
+
+    def test_invalid_multiple_boolean(self):
+        a = testing.shaped_arange((2, 2), nlcpy)
+        ind = [[True, False], [False, True]]
+        with pytest.raises(ValueError):
+            a[ind]
 
 
 @testing.parameterize(

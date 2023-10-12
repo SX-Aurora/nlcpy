@@ -194,6 +194,8 @@ uint64_t nlcpy_delete(ve_arguments *args, int32_t *psw)
                 }
             } while (k >= 1);
         }
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
 #end_switch
     return 0;

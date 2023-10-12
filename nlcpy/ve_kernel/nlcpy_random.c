@@ -171,6 +171,7 @@ uint64_t nlcpy_random_generate_integers(void* out, void* work, int64_t low, uint
             }
             break;
         }
+    case ve_bool:
     case ve_i32:
         {
             int32_t *val= (int32_t *)((ve_array*)out)->ve_adr;
@@ -223,6 +224,7 @@ uint64_t nlcpy_random_generate_unsigned_integers(void* out, void* work, uint64_t
             }
             break;
         }
+    case ve_bool:
     case ve_u32:
         {
             uint32_t *val= (uint32_t *)((ve_array*)out)->ve_adr;

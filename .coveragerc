@@ -1,2 +1,14 @@
 [run]
 plugins = Cython.Coverage
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    return NotImplemented
+    @staticmethod
+omit =
+    */testing/*
+    */veo/vebuild.py
+    */prof/prof.py

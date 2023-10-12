@@ -53,7 +53,7 @@ import numpy
 
 try:
     _AxisError = numpy.AxisError
-except AttributeError:
+except AttributeError:  # pragma: no cover
     class IndexOrValueError(IndexError, ValueError):
 
         def __init__(self, *args, **kwargs):

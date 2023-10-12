@@ -802,6 +802,28 @@ class TestRandomDist(unittest.TestCase):
             assert_equal(actual2[ve].get(), actual2[ve + 1].get())
 
     @testing.multi_ve(multi_ve_node_max)
+    def test_random_default_rng(self):
+        actual1 = {}
+        actual2 = {}
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                random = vp.random.default_rng(self.seed)
+                actual1[ve] = random.random((3, 2))
+                desired = vp.array([[0.972810894716531, 0.152507473248988],
+                                    [0.744906395673752, 0.788559705018997],
+                                    [0.612674489850178, 0.044743933016434]]).get()
+                assert_array_almost_equal(actual1[ve].get(), desired, decimal=15)
+
+                random = Generator(MT19937(self.seed))
+                actual2[ve] = random.random()
+                assert_array_almost_equal(actual2[ve].get(), desired[0, 0], decimal=15)
+        for ve in range(0, multi_ve_node_max):
+            if ve >= (multi_ve_node_max - 1):
+                break
+            assert_equal(actual1[ve].get(), actual1[ve + 1].get())
+            assert_equal(actual2[ve].get(), actual2[ve + 1].get())
+
+    @testing.multi_ve(multi_ve_node_max)
     def test_random_float(self):
         actual = {}
         for ve in range(0, multi_ve_node_max):
@@ -877,6 +899,17 @@ class TestRandomDist(unittest.TestCase):
                               out=out)
                 assert_raises(ValueError, random.random, size=(10, 1),
                               out=out)
+
+    @testing.multi_ve(multi_ve_node_max)
+    def test_random_out_type_mismatch(self):
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                out = numpy.zeros(10)
+                assert_raises(ValueError, random.random, size=10,
+                              out=out)
+                out = vp.zeros(10, dtype=int)
+                assert_raises(TypeError, random.random, size=10,
+                              out=out, dtype=float)
 
     def __exclude_test_random_float_scalar(self):
         random = Generator(MT19937(self.seed))
@@ -1913,6 +1946,13 @@ class TestRandomDist(unittest.TestCase):
                               out=out)
                 assert_raises(ValueError, random.standard_gamma, 10.0, size=(10, 1),
                               out=out)
+
+    @testing.multi_ve(multi_ve_node_max)
+    def test_standard_gamma_shape_negative(self):
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                random = Generator(MT19937(self.seed))
+                assert_raises(ValueError, random.standard_gamma, -2)
 
     @testing.multi_ve(multi_ve_node_max)
     def test_standard_gamma_0(self):

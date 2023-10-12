@@ -68,7 +68,7 @@ def _set_ve_ld_preload(arch):
         if os.path.exists(os.path.join(libdir, libncc_name)):
             libncc = libncc_name
             break
-    if libncc is None:
+    if libncc is None:  # pragma: no cover
         warnings.warn('Not exists libncc.so in {}'.format(libdir),
                       RuntimeWarning)
         return
@@ -101,7 +101,7 @@ def _get_pool_size():
             order = 1024 ** 2
         elif g[1] in 'gG':
             order = 1024 ** 3
-        else:
+        else:  # pragma: no cover
             raise ValueError('VE_NLCPY_MEMPOOL_SIZE invalid.')
         _pool_size = int(g[0]) * order
     return _pool_size
@@ -181,5 +181,5 @@ def _get_nlc_home(arch):
         raise ValueError('Unknown Arch:', arch)
     if os.path.exists(nlc_home):
         return nlc_home
-    else:
+    else:  # pragma: no cover
         return None

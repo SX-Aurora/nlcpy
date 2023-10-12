@@ -14,6 +14,11 @@ else
 FTRACE=no
 endif
 
+ifeq ($(DEBUG),yes)
+else
+DEBUG=no
+endif
+
 all: make.dep nlcpy_ve_common nlcpy_ve_no_fast_math nlcpy_ve_fast_math embed_build_info
 
 arg_check:
@@ -30,15 +35,15 @@ make.dep: arg_check $(OBJDIR_COMMON) $(OBJDIR_NO_FAST_MATH) $(OBJDIR_FAST_MATH)
 
 nlcpy_ve_common: arg_check
 	cd $(OBJDIR_COMMON) && make -f Makefile perl
-	cd $(OBJDIR_COMMON) && make -j$(JOBS) -f Makefile COMMON=yes FTRACE=$(FTRACE) ARCH=$(ARCH)
+	cd $(OBJDIR_COMMON) && make -j$(JOBS) -f Makefile COMMON=yes FTRACE=$(FTRACE) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
 nlcpy_ve_no_fast_math: arg_check nlcpy_ve_common
 	cd $(OBJDIR_NO_FAST_MATH) && make -f Makefile perl
-	cd $(OBJDIR_NO_FAST_MATH) && make -j$(JOBS) -f Makefile FTRACE=$(FTRACE) ARCH=$(ARCH)
+	cd $(OBJDIR_NO_FAST_MATH) && make -j$(JOBS) -f Makefile FTRACE=$(FTRACE) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
 nlcpy_ve_fast_math: arg_check nlcpy_ve_common
 	cd $(OBJDIR_FAST_MATH) && make -f Makefile FAST_MATH=yes perl
-	cd $(OBJDIR_FAST_MATH) && make -j$(JOBS) -f Makefile FAST_MATH=yes FTRACE=$(FTRACE) ARCH=$(ARCH)
+	cd $(OBJDIR_FAST_MATH) && make -j$(JOBS) -f Makefile FAST_MATH=yes FTRACE=$(FTRACE) ARCH=$(ARCH) DEBUG=$(DEBUG)
 
 embed_build_info: arg_check nlcpy_ve_common
 	cd $(OBJDIR_COMMON) && make -f Makefile embed_build_info
@@ -71,3 +76,6 @@ clean:
 
 clean_cython:
 	sh scripts/clean.sh $(BASEDIR)
+
+clean_coverage:
+	rm -rf .coverage .coverage.* htmlcov

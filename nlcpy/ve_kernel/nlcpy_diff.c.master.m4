@@ -57,7 +57,7 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
             }
         }
         for (i = 0; i < b->size; i++) pb[i] = wk[i*iw0];
-    } else {
+    } else if (a->ndim > 1 && a->ndim <= NLCPY_MAXNDIM){
         int64_t n_inner = a->ndim - 1;
         int64_t *idx = (int64_t*)alloca(sizeof(int64_t) * a->ndim);
         nlcpy__rearrange_axis(a, idx);
@@ -72,13 +72,13 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
         }
         for (i = 0; i < n; i++) {
             nlcpy__reset_coords(cnt, a->ndim);
-            shape_wk[axis] = a->shape[axis] - i;
+            shape_wk[axis] = a->shape[axis] - i - 1;
             int64_t ia1 = 0;
             int64_t ia2 = astep[axis];
             do {
                 if (n_inner2 == axis) {
 #pragma _NEC ivdep
-                    for (j = 0; j < shape_wk[n_inner2] - 1; j++) {
+                    for (j = 0; j < shape_wk[n_inner2]; j++) {
                         ifelse($1,bool,wk[j*astep[n_inner2]+ia1] = !wk[(j+1)*astep[n_inner2]+ia1] && wk[j * astep[n_inner2] + ia1] || wk[(j+1)*astep[n_inner2]+ia1] && !wk[j*astep[n_inner2]+ia1];,wk[j*astep[n_inner2]+ia1] = wk[(j+1)*astep[n_inner2]+ia1] - wk[j*astep[n_inner2]+ia1];)
                     }
                 } else {
@@ -124,6 +124,8 @@ uint64_t FILENAME_$1(ve_array *a, ve_array *b, ve_array *w, int64_t n, int64_t a
                 cnt[kk] = 0;
             }
         } while(k >= 0);
+    } else {
+        return NLCPY_ERROR_NDIM;
     }
     retrieve_fpe_flags(psw);
     return (uint64_t)NLCPY_ERROR_OK;

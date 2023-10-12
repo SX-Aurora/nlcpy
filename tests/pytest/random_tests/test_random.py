@@ -196,6 +196,20 @@ class TestSeed(object):
                 assert_raises(TypeError, vp.random.RandomState.set_state, ["dummy"])
                 assert_raises(TypeError, vp.random.set_state, None)
                 assert_raises(TypeError, vp.random.set_state, ["dummy"])
+                assert_raises(TypeError, vp.random.set_state,
+                              (vp.array(1, dtype='i4'), 0, 0))
+                assert_raises(TypeError, vp.random.set_state,
+                              (vp.array(1, dtype='u4'), 1.2, 0))
+
+    @testing.multi_ve(multi_ve_node_max)
+    def test_get_state(self):
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                s1 = vp.random.RandomState(123).get_state()
+                vp.random.seed(123)
+                s2 = vp.random.get_state()
+                assert_equal(s1[0].get(), s2[0].get())
+                assert_equal(s1[1:], s2[1:])
 
 
 class TestBinomial(object):
@@ -333,58 +347,60 @@ class TestRandint(object):
     rfunc = vp.random.randint
 
     # valid integer/boolean types
-    itype = [vp.bool_, vp.int8, vp.uint8, vp.int16, vp.uint16,
-             vp.int32, vp.uint32, vp.int64, vp.uint64]
+    # itype = [vp.bool_, vp.int8, vp.uint8, vp.int16, vp.uint16,
+    #          vp.int32, vp.uint32, vp.int64, vp.uint64]
+    itype = [vp.bool_, vp.int32, vp.uint32, vp.int64, vp.uint64]
 
-    def __exclude_test_unsupported_type(self):
-        assert_raises(TypeError, self.rfunc, 1, dtype=float)
+    def test_unsupported_type(self):
+        assert_raises(TypeError, vp.random.randint, 1, dtype=float)
 
-    def __exclude_test_bounds_checking(self):
+    def test_bounds_checking(self):
         for dt in self.itype:
             lbnd = 0 if dt is vp.bool_ else vp.iinfo(dt).min
             ubnd = 2 if dt is vp.bool_ else vp.iinfo(dt).max + 1
-            assert_raises(ValueError, self.rfunc, lbnd - 1, ubnd, dtype=dt)
-            assert_raises(ValueError, self.rfunc, lbnd, ubnd + 1, dtype=dt)
-            assert_raises(ValueError, self.rfunc, ubnd, lbnd, dtype=dt)
-            assert_raises(ValueError, self.rfunc, 1, 0, dtype=dt)
+            assert_raises(ValueError, vp.random.randint, lbnd - 1, ubnd, dtype=dt)
+            assert_raises(ValueError, vp.random.randint, lbnd, ubnd + 1, dtype=dt)
+            assert_raises(ValueError, vp.random.randint, ubnd, lbnd, dtype=dt)
+            assert_raises(ValueError, vp.random.randint, 1, 0, dtype=dt)
 
-    def __exclude_test_rng_zero_and_extremes(self):
+    def test_rng_zero_and_extremes(self):
         for dt in self.itype:
             lbnd = 0 if dt is vp.bool_ else vp.iinfo(dt).min
             ubnd = 2 if dt is vp.bool_ else vp.iinfo(dt).max + 1
 
             tgt = ubnd - 1
-            assert_equal(self.rfunc(tgt, tgt + 1, size=1000, dtype=dt), tgt)
+            assert vp.all(vp.random.randint(tgt, tgt + 1, size=1000, dtype=dt) == tgt)
 
             tgt = lbnd
-            assert_equal(self.rfunc(tgt, tgt + 1, size=1000, dtype=dt), tgt)
+            assert vp.all(vp.random.randint(tgt, tgt + 1, size=1000, dtype=dt) == tgt)
 
             tgt = (lbnd + ubnd) // 2
-            assert_equal(self.rfunc(tgt, tgt + 1, size=1000, dtype=dt), tgt)
+            # assert_equal(vp.random.randint(tgt, tgt + 1, size=1000, dtype=dt), tgt)
+            assert vp.all(vp.random.randint(tgt, tgt + 1, size=1000, dtype=dt) == tgt)
 
-    def __exclude_test_full_range(self):
+    def test_full_range(self):
         for dt in self.itype:
             lbnd = 0 if dt is vp.bool_ else vp.iinfo(dt).min
-            ubnd = 2 if dt is vp.bool_ else vp.iinfo(dt).max + 1
+            ubnd = 2 if dt is vp.bool_ else vp.iinfo(dt).max
 
             try:
-                self.rfunc(lbnd, ubnd, dtype=dt)
+                vp.random.randint(lbnd, ubnd, dtype=dt)
             except Exception as e:
                 raise AssertionError("No error should have been raised, "
                                      "but one was with the following "
                                      "message:\n\n%s" % str(e))
 
-    def __exclude_test_in_bounds_fuzz(self):
+    def test_in_bounds_fuzz(self):
         # Don't use fixed seed
         vp.random.seed()
 
         for dt in self.itype[1:]:
             for ubnd in [4, 8, 16]:
-                vals = self.rfunc(2, ubnd, size=2**16, dtype=dt)
+                vals = vp.random.randint(2, ubnd, size=2**16, dtype=dt)
                 assert_(vals.max() < ubnd)
                 assert_(vals.min() >= 2)
 
-        vals = self.rfunc(0, 2, size=2**16, dtype=vp.bool_)
+        vals = vp.random.randint(0, 2, size=2**16, dtype=vp.bool_)
 
         assert_(vals.max() < 2)
         assert_(vals.min() >= 0)
@@ -422,7 +438,7 @@ class TestRandint(object):
         res = hashlib.md5(val).hexdigest()
         assert_(tgt[vp.dtype(bool).name] == res)
 
-    def __exclude_test_int64_uint64_corner_case(self):
+    def test_int64_uint64_corner_case(self):
         # When stored in Numpy arrays, `lbnd` is casted
         # as vp.int64, and `ubnd` is casted as vp.uint64.
         # Checking whether `lbnd` >= `ubnd` used to be
@@ -437,13 +453,13 @@ class TestRandint(object):
 
         dt = vp.int64
         tgt = vp.iinfo(vp.int64).max
-        lbnd = vp.int64(vp.iinfo(vp.int64).max)
-        ubnd = vp.uint64(vp.iinfo(vp.int64).max + 1)
+        lbnd = vp.iinfo(vp.int64).max
+        ubnd = vp.iinfo(vp.int64).max + 1
 
         # None of these function calls should
         # generate a ValueError now.
         actual = vp.random.randint(lbnd, ubnd, dtype=dt)
-        assert_equal(actual.get().tolist(), tgt.get().tolist())
+        assert_equal(actual.get(), tgt)
 
     def __exclude_test_respect_dtype_singleton(self):
         for dt in self.itype:
@@ -569,7 +585,23 @@ class TestRandomDist(unittest.TestCase):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
 
-    def __exclude_test_random_integers_max_int(self):
+    def test_random_integers_only_high(self):
+        actual = {}
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                vp.random.seed(1234567890)
+                with suppress_warnings():
+                    actual[ve] = vp.random.random_integers(99, size=(3, 2))
+                desired = vp.array([[29, 73],
+                                    [41, 66],
+                                    [37, 36]])
+                assert_array_equal(actual[ve].get().tolist(), desired.get().tolist())
+        for ve in range(0, multi_ve_node_max):
+            if ve >= (multi_ve_node_max - 1):
+                break
+            assert_equal(actual[ve].get(), actual[ve + 1].get())
+
+    def __exluce_test_random_integers_max_int(self):
         # Tests whether random_integers can generate the
         # maximum allowed Python int that can be converted
         # into a C long. Previous implementations of this
@@ -647,22 +679,24 @@ class TestRandomDist(unittest.TestCase):
 
     @testing.multi_ve(multi_ve_node_max)
     def test_random_sample(self):
-        actual = {}
-        for ve in range(0, multi_ve_node_max):
-            with vp.venode.VE(ve):
-                vp.random.seed(1234567890)
-                actual[ve] = vp.random.random_sample(size=(3, 2))
-                desired = vp.array([[0.972810894716531, 0.152507473248988],
-                                    [0.744906395673752, 0.788559705018997],
-                                    [0.612674489850178, 0.044743933016434]])
-                assert_array_almost_equal(
-                    actual[ve].get().tolist(),
-                    desired.get().tolist(),
-                    decimal=15)
-        for ve in range(0, multi_ve_node_max):
-            if ve >= (multi_ve_node_max - 1):
-                break
-            assert_equal(actual[ve].get(), actual[ve + 1].get())
+        for rf in (vp.random.random_sample, vp.random.sample):
+            actual = {}
+            for ve in range(0, multi_ve_node_max):
+                with vp.venode.VE(ve):
+                    vp.random.seed(1234567890)
+                    # actual[ve] = vp.random.random_sample(size=(3, 2))
+                    actual[ve] = rf(size=(3, 2))
+                    desired = vp.array([[0.972810894716531, 0.152507473248988],
+                                        [0.744906395673752, 0.788559705018997],
+                                        [0.612674489850178, 0.044743933016434]])
+                    assert_array_almost_equal(
+                        actual[ve].get().tolist(),
+                        desired.get().tolist(),
+                        decimal=15)
+            for ve in range(0, multi_ve_node_max):
+                if ve >= (multi_ve_node_max - 1):
+                    break
+                assert_equal(actual[ve].get(), actual[ve + 1].get())
 
     @testing.multi_ve(multi_ve_node_max)
     def test_ranf(self):
@@ -803,6 +837,7 @@ class TestRandomDist(unittest.TestCase):
         # of both, c-contiguous or not:
         for conv in [
             lambda x: vp.array([]),
+            lambda x: vp.zeros((2, 0, 3)),
             #             lambda x: x,
             #             lambda x: vp.asarray(x).astype(vp.int8),
             lambda x: vp.asarray(x).astype(vp.float32),
@@ -829,6 +864,16 @@ class TestRandomDist(unittest.TestCase):
                 if ve >= (multi_ve_node_max - 1):
                     break
                 assert_equal(alist[ve].get(), alist[ve + 1].get())
+
+        for conv in [
+            lambda x: numpy.array([]),
+            lambda x: numpy.asarray(x).astype(numpy.float32),
+        ]:
+            vp.random.seed(1234567890)
+            arr = conv([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
+            vp.random.shuffle(arr)
+            desired = conv([0., 2., 5., 9., 3., 6., 4., 8., 1., 7.])
+            assert_array_equal(arr, desired)
 
     @testing.multi_ve(multi_ve_node_max)
     def test_shuffle_1d(self):
@@ -973,6 +1018,12 @@ class TestRandomDist(unittest.TestCase):
             if ve >= (multi_ve_node_max - 1):
                 break
             assert_equal(flist[ve].get(), flist[ve + 1].get())
+
+    def test_shuffle_axis_out_of_bounds(self):
+        a = vp.array([2, 3, 4])
+        rs = vp.random.RandomState()
+        assert_raises(vp.AxisError, rs._generate_random_shuffle, a, 1)
+        assert_raises(vp.AxisError, rs._generate_random_shuffle, a, -3)
 
     def __exclude_test_shuffle_masked(self):
         a = vp.ma.masked_values(vp.reshape(range(20), (5, 4)) % 3 - 1, -1)
@@ -1323,6 +1374,7 @@ class TestRandomDist(unittest.TestCase):
                 actual[ve] = vp.random.gamma(shape=0, scale=0)
                 assert_equal(actual[ve].get().tolist(), 0)
                 assert_raises(ValueError, vp.random.gamma, shape=-0.1, scale=-0.1)
+                assert_raises(ValueError, vp.random.gamma, shape=0.1, scale=-0.1)
         for ve in range(0, multi_ve_node_max):
             if ve >= (multi_ve_node_max - 1):
                 break
@@ -1339,10 +1391,19 @@ class TestRandomDist(unittest.TestCase):
                                     [11, 12],
                                     [8, 1]])
                 assert_array_equal(actual[ve].get().tolist(), desired.get().tolist())
+                assert_raises(ValueError, vp.random.geometric, p=0)
+                assert_raises(ValueError, vp.random.geometric, p=-1)
+                assert_raises(ValueError, vp.random.geometric, p=1.1)
         for ve in range(0, multi_ve_node_max):
             if ve >= (multi_ve_node_max - 1):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
+
+    def test_geometric_0(self):
+        vp.random.seed(1234567890)
+        actual = vp.random.geometric(.123456789, size=())
+        desired = vp.array(28)
+        assert_equal(actual.get().tolist(), desired.get().tolist())
 
     @testing.multi_ve(multi_ve_node_max)
     def test_gumbel(self):
@@ -1427,6 +1488,23 @@ class TestRandomDist(unittest.TestCase):
                 desired = vp.array([[7.278203505945411, -3.306680053929311],
                                     [2.266712816006061, 2.755987704763023],
                                     [1.040593453487900, -5.998590365057210]])
+                assert_array_almost_equal(
+                    actual[ve].get().tolist(),
+                    desired.get().tolist(),
+                    decimal=15)
+        for ve in range(0, multi_ve_node_max):
+            if ve >= (multi_ve_node_max - 1):
+                break
+            assert_equal(actual[ve].get(), actual[ve + 1].get())
+
+    @testing.multi_ve(multi_ve_node_max)
+    def test_logistic_size_none(self):
+        actual = {}
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                vp.random.seed(1234567890)
+                actual[ve] = vp.random.logistic(loc=.123456789, scale=2.0, size=None)
+                desired = vp.array(7.278203505945411)
                 assert_array_almost_equal(
                     actual[ve].get().tolist(),
                     desired.get().tolist(),
@@ -1632,9 +1710,6 @@ class TestRandomDist(unittest.TestCase):
             with vp.venode.VE(ve):
                 vp.random.seed(1234567890)
                 actual[ve] = vp.random.poisson(lam=.123456789, size=(3, 2))
-#               desired = vp.array([[0, 0],
-#                                   [1, 0],
-#                                   [0, 0]])
                 desired = vp.array([[1, 0],
                                     [0, 0],
                                     [0, 0]])
@@ -1643,6 +1718,18 @@ class TestRandomDist(unittest.TestCase):
             if ve >= (multi_ve_node_max - 1):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
+
+    def test_poisson_size_none(self):
+        vp.random.seed(1234567890)
+        actual = vp.random.poisson(lam=.123456789, size=None)
+        desired = vp.array(1)
+        assert_array_equal(actual.get().tolist(), desired.tolist())
+
+    def test_poisson_lam_0(self):
+        vp.random.seed(1234567890)
+        actual = vp.random.poisson(lam=0, size=(3, 2))
+        desired = vp.zeros((3, 2), dtype=int)
+        assert_array_equal(actual.get().tolist(), desired.tolist())
 
     @testing.multi_ve(multi_ve_node_max)
     def test_poisson_exceptions(self):
@@ -1701,6 +1788,12 @@ class TestRandomDist(unittest.TestCase):
             if ve >= (multi_ve_node_max - 1):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
+
+    def test_standard_cauchy_0(self):
+        vp.random.seed(1234567890)
+        actual = vp.random.standard_cauchy(size=())
+        desired = vp.array(-0.08562543812184135)
+        assert_equal(actual.get().tolist(), desired.get().tolist())
 
     @testing.multi_ve(multi_ve_node_max)
     def test_standard_exponential(self):
@@ -1814,6 +1907,27 @@ class TestRandomDist(unittest.TestCase):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
 
+    @testing.multi_ve(multi_ve_node_max)
+    def test_uniform_not_scalar(self):
+        actual = {}
+        low = numpy.array(1.23)
+        high = numpy.array(10.54)
+        for ve in range(0, multi_ve_node_max):
+            with vp.venode.VE(ve):
+                vp.random.seed(1234567890)
+                actual[ve] = vp.random.uniform(low=low, high=high, size=(3, 2))
+                desired = vp.array([[10.286869429810903, 2.649844575948082],
+                                    [8.165078543722629, 8.571490853726862],
+                                    [6.933999500505159, 1.646566016383003]])
+                assert_array_almost_equal(
+                    actual[ve].get().tolist(),
+                    desired.get().tolist(),
+                    decimal=15)
+        for ve in range(0, multi_ve_node_max):
+            if ve >= (multi_ve_node_max - 1):
+                break
+            assert_equal(actual[ve].get(), actual[ve + 1].get())
+
     def __exclude_test_uniform_range_bounds(self):
         fmin = numpy.finfo('float').min
         fmax = numpy.finfo('float').max
@@ -1908,6 +2022,12 @@ class TestRandomDist(unittest.TestCase):
                 break
             assert_equal(actual[ve].get(), actual[ve + 1].get())
 
+    def test_weibull_1(self):
+        vp.random.seed(1234567890)
+        actual = vp.random.weibull(a=1.23, size=())
+        desired = vp.array(2.836367691007171)
+        assert_equal(actual.get().tolist(), desired.get().tolist())
+
     def __exclude_test_zipf(self):
         vp.random.seed(1234567890)
         actual = vp.random.zipf(a=1.23, size=(3, 2))
@@ -1915,6 +2035,26 @@ class TestRandomDist(unittest.TestCase):
                             [1, 1],
                             [3, 13]])
         assert_array_equal(actual.get().tolist(), desired.get().tolist())
+
+    def test_asl_error_check(self):
+        rs = vp.random.RandomState()
+        asl_err = vp.random.generator._asl_error
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_ARGUMENT'])
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_LIBRARY_UNINITIALIZED'])
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_RANDOM_INVALID'])
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_MEMORY'])
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_MPI'])
+        assert_raises(RuntimeError, rs._asl_error_check,
+                      asl_err['ASL_ERROR_RANDOM_INCOMPATIBLE_CALL'])
+        e = 0
+        for v in asl_err.values():
+            e ^= v
+        assert_raises(RuntimeError, rs._asl_error_check, e)
 
 
 class TestBroadcast(object):

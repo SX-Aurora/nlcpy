@@ -150,6 +150,10 @@ class TestArrayIndexingParameterized(unittest.TestCase):
      'indexes': (slice(None, (0, 0), None), )},
     {'shape': (2, 3, 4), 'transpose': None,
      'indexes': (slice(None, None, (0, 0)), )},
+    {'shape': (2, 3, 4), 'transpose': None,
+     'indexes': (1.1, )},
+    {'shape': (2, 3, 4), 'transpose': None,
+     'indexes': (1, 1, 1, 1)},
 )
 @testing.with_requires('numpy>=1.12.0')
 class TestArrayInvalidIndex(unittest.TestCase):
@@ -158,7 +162,6 @@ class TestArrayInvalidIndex(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_invalid_getitem(self, xp, dtype):
         a = testing.shaped_arange(self.shape, xp, dtype)
-        print(self.transpose)
         if self.transpose:
             a = a.transpose(self.transpose)
         a[self.indexes]

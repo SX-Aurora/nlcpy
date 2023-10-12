@@ -159,6 +159,7 @@ cdef class RequestManager:
         self.venode = venode
         self.veo_reqs = veo_reqs
         self.reqs_ve_ptr = self.venode.proc.alloc_mem(self.reqs.nbytes)
+        self.max_req = MAX_LAZY_REQUEST
 
     def __repr__(self):
         return repr(self.reqs)
@@ -166,13 +167,14 @@ cdef class RequestManager:
     def __str__(self):
         return str(self.reqs)
 
-    def _update_reqs(self):
+    def _update_reqs(self, max_req):
         self._flush(sync=True)
-        self.reqs = numpy.zeros(N_REQUEST_PACKAGE * MAX_LAZY_REQUEST, dtype='uint64')
+        self.max_req = max_req
+        self.reqs = numpy.zeros(N_REQUEST_PACKAGE * max_req, dtype='uint64')
         proc = self.venode.proc
         proc.free_mem(self.reqs_ve_ptr)
         self.reqs_ve_ptr = proc.alloc_mem(self.reqs.nbytes)
-        self.reqnames = _ReqNames(MAX_LAZY_REQUEST)
+        self.reqnames = _ReqNames(max_req)
 
     def _flush(self, sync=False):
         if self.nreq > 0:
@@ -219,13 +221,10 @@ cdef class RequestManager:
         self.refs_queing.clear()
         self.head = 0
         self.tail = 0
-        self.reqnames = _ReqNames(MAX_LAZY_REQUEST)
+        self.reqnames = _ReqNames(self.max_req)
 
     def set_timing(self, timing=LAZY):
         self.timing = timing
-
-    cdef increment_head(self, int num):
-        self.head = self.head + num
 
     cdef increment_tail(self, int num):
         self.tail = self.tail + num
@@ -236,7 +235,7 @@ cdef class RequestManager:
     cdef flush_if_needed(self):
         if self.timing == ON_THE_FLY:
             self._flush(sync=True)
-        elif self.nreq >= MAX_LAZY_REQUEST:
+        elif self.nreq >= self.max_req:
             self._flush(sync=False)
 
     def keep_refs(self, refs):
@@ -418,15 +417,13 @@ cpdef flush(VENode venode=None, bint sync=True):
     _rm._flush(sync=sync)
 
 cpdef set_max_request(int num, VENode venode=None):
-    global MAX_LAZY_REQUEST
-    MAX_LAZY_REQUEST = num
     if venode is None:
         venode = VE()
     if not venode.connected:
         venode.connect()
     _rm = venode.request_manager
-    _rm.flush(sync=True)
-    _rm._update_reqs()
+    _rm._flush(sync=True)
+    _rm._update_reqs(num)
 
 cpdef set_offload_timing_onthefly(VENode venode=None):
     """Sets kernel offload timing on-the-fly.
@@ -525,9 +522,8 @@ cdef int _set_ve_array_with_scalar(
     dst[offset + NDIM_OFFSET] = 0L
     dst[offset + SIZE_OFFSET] = 1
     cdef int i
-    for i in range(a.ndim):
-        dst[offset + SHAPE_OFFSET + i] = 0L
-        dst[offset + STRIDES_OFFSET + i] = 0L
+    dst[offset + SHAPE_OFFSET] = 0L
+    dst[offset + STRIDES_OFFSET] = 0L
     dst[offset + DTYPE_OFFSET] = a.dtype.num
     dst[offset + ITEMSIZE_OFFSET] = a.itemsize
     dst[offset + C_CONTIGUOUS_OFFSET] = 1L
@@ -542,7 +538,8 @@ cdef int _set_scalar(
     if val.dtype == _dtype.DT_BOOL:
         val = val.astype('i4')
 
-    cdef uint64_t *s_tmp = <uint64_t *>val.data
+    # cdef uint64_t *s_tmp = <uint64_t *>val.data
+    cdef uint64_t *s_tmp = <uint64_t *>PyArray_DATA(val)
 
     if val.dtype in (_dtype.DT_U64, _dtype.DT_I64,
                      _dtype.DT_F64, _dtype.DT_C64):

@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import pytest
 
 import numpy
 
@@ -90,6 +91,16 @@ class TestArrayCopyAndView(unittest.TestCase):
         a = xp.array(1.5, dtype=numpy.float32)
         return a.view(dtype=numpy.int32)
 
+    def test_view_0d_size_change(self):
+        a = nlcpy.array(1, dtype='f8')
+        with pytest.raises(ValueError):
+            a.view(dtype='f4')
+
+    def test_view_size_change_on_not_contiguous(self):
+        a = nlcpy.ones(10, dtype='f8')[::2]
+        with pytest.raises(ValueError):
+            a.view(dtype='f4')
+
     @testing.numpy_nlcpy_array_equal()
     def test_view_dtype_is_ma(self, xp):
         a = xp.arange(3)
@@ -110,15 +121,6 @@ class TestArrayCopyAndView(unittest.TestCase):
         a = xp.arange(3)
         return a.view(dtype=xp.ndarray, type=xp.ma.MaskedArray)
 
-    """failure
-    @testing.for_dtypes([numpy.int32, numpy.int64])
-    @testing.numpy_nlcpy_raises()
-    def test_view_non_contiguous_raise(self, xp, dtype):
-        a = testing.shaped_arange((2, 2, 2), xp, dtype=numpy.int32).transpose(
-            0, 2, 1)
-        a.view(dtype=dtype)
-    """
-
     @testing.numpy_nlcpy_array_equal()
     def test_flatten(self, xp):
         a = testing.shaped_arange((2, 3, 4), xp)
@@ -135,6 +137,16 @@ class TestArrayCopyAndView(unittest.TestCase):
     def test_transposed_flatten(self, xp):
         a = testing.shaped_arange((2, 3, 4), xp).transpose(2, 0, 1)
         return a.flatten()
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_flatten_order_A(self, xp):
+        a = testing.shaped_arange((2, 3, 4), xp, order='C')
+        return a.flatten(order='A')
+
+    @testing.numpy_nlcpy_array_equal()
+    def test_flatten_order_K(self, xp):
+        a = testing.shaped_arange((2, 3, 4), xp, order='C')
+        return a.flatten(order='K')
 
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
@@ -279,6 +291,10 @@ class TestArrayCopyAndView(unittest.TestCase):
         a = testing.shaped_arange((3, 4, 5), xp, dtype)
         return a.diagonal(-1, 2, 0)
 
+    def test_diagonal_below_ndim_2d(self):
+        with pytest.raises(ValueError):
+            nlcpy.zeros(2).diagonal()
+
     @testing.for_orders('CF')
     @testing.for_dtypes([numpy.int32, numpy.int64,
                          numpy.float32, numpy.float64])
@@ -341,3 +357,27 @@ class TestNumPyArrayCopyView(unittest.TestCase):
         b = xp.empty(a.shape, dtype=dtype, order=order)
         b[:] = a
         return b
+
+
+class TestArrayCopyVeoHmem(unittest.TestCase):
+    @testing.for_orders('CF')
+    @testing.for_all_dtypes()
+    def test_create_from_veo_hmem(self, dtype, order):
+        a = nlcpy.arange(100).reshape(10, 10, order=order).astype(
+            dtype=dtype)
+        b = nlcpy.ndarray(a.shape, dtype=a.dtype, strides=a.strides,
+                          veo_hmem=a.veo_hmem)
+        testing.assert_array_equal(a, b)
+        assert b._owndata is False
+
+    def test_create_from_invalid_hmem(self):
+        with pytest.raises(MemoryError):
+            _ = nlcpy.ndarray((2, 2), veo_hmem=0)
+
+    @testing.multi_ve(2)
+    def test_create_from_hmem_diff_node(self):
+        with nlcpy.venode.VE(1):
+            a = nlcpy.ones(10)
+        b = nlcpy.ndarray(a.shape, veo_hmem=a.veo_hmem)
+        testing.assert_array_equal(a, b)
+        assert a.venode == b.venode

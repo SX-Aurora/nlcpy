@@ -132,6 +132,11 @@ uint64_t nlcpy_argsort_bool(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -171,6 +176,11 @@ uint64_t nlcpy_argsort_bool(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -279,6 +289,11 @@ uint64_t nlcpy_argsort_i32(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -318,6 +333,11 @@ uint64_t nlcpy_argsort_i32(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -426,6 +446,11 @@ uint64_t nlcpy_argsort_i64(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -465,6 +490,11 @@ uint64_t nlcpy_argsort_i64(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -573,6 +603,11 @@ uint64_t nlcpy_argsort_u32(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -612,6 +647,11 @@ uint64_t nlcpy_argsort_u32(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -720,6 +760,11 @@ uint64_t nlcpy_argsort_u64(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -759,6 +804,11 @@ uint64_t nlcpy_argsort_u64(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -867,6 +917,11 @@ uint64_t nlcpy_argsort_f32(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -906,6 +961,11 @@ uint64_t nlcpy_argsort_f32(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
@@ -1014,6 +1074,11 @@ uint64_t nlcpy_argsort_f64(ve_array *val, ve_array *idx, int32_t *psw)
         asl_err = asl_library_set_thread_count(1);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;
 } /* omp single */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
 #ifdef _OPENMP
 #pragma omp critical
 #endif /* _OPENMP */
@@ -1053,6 +1118,11 @@ uint64_t nlcpy_argsort_f64(ve_array *val, ve_array *idx, int32_t *psw)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif /* _OPENMP */
+
+#ifdef DEBUG_BARRIER
+        nlcpy__sleep_thread();
+#endif /* DEBUG_BARRIER */
+
         /* destroy sorter */
         asl_err = asl_sort_destroy(sort);
         if (asl_err != ASL_ERROR_OK) return NLCPY_ERROR_ASL;

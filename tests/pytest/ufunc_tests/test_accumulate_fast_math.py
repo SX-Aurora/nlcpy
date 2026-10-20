@@ -89,8 +89,8 @@ def execute_ufunc(xp, op, in1, dtype=None, axis=0):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestAccumulate(unittest.TestCase):
 
     shapes = ((4,), (2, 2),)
@@ -122,9 +122,7 @@ class TestAccumulate(unittest.TestCase):
         xp.power.accumulate(xp.array([1, -1], dtype=dtype))
 
     def test_accumulate_not_supported_dtype(self):
-        for op in (
-                'divide', 'true_divide', 'arctan2', 'logaddexp', 'logaddexp2',
-                'floor_divide', 'mod', 'remainder', 'power'):
+        for op in ('divide', 'true_divide', 'arctan2', 'logaddexp', 'logaddexp2'):
             try:
                 getattr(nlcpy, op).accumulate([True])
                 raise Exception

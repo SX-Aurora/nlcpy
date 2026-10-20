@@ -5,13 +5,13 @@ all:nlcpy
 BASEDIR = ..
 
 # Parameters passed into the spec file
-PLAT           = el8
+PLAT           = el10
 ARCH           = x86_64
-VERSION_PYTHON = python3.6
-VERSION_NLCPY  = 3.0.1
+VERSION_PYTHON = python3.12
+VERSION_NLCPY  = 3.1.0
 VERSION_RPM    = 1
 RELEASE        = 1
-VERSION_NUMPY  = 1.19.5
+VERSION_NUMPY  = 1.26.0
 
 DISTDIR  = $(BASEDIR)/dist
 DOCDIR   = $(BASEDIR)/doc/build/html

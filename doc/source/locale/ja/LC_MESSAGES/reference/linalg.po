@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-05 14:32+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/linalg.rst:4
 msgid "Linear Algebra"
@@ -30,7 +29,7 @@ msgid "Matrix and Vector Products"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
-msgid ":obj:`nlcpy.dot <nlcpy.dot>`"
+msgid ":py:obj:`nlcpy.dot <nlcpy.dot>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
@@ -38,7 +37,7 @@ msgid "Computes a dot product of two arrays."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
-msgid ":obj:`nlcpy.inner <nlcpy.inner>`"
+msgid ":py:obj:`nlcpy.inner <nlcpy.inner>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
@@ -46,7 +45,7 @@ msgid "Computes an inner product of two arrays."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
-msgid ":obj:`nlcpy.outer <nlcpy.outer>`"
+msgid ":py:obj:`nlcpy.outer <nlcpy.outer>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
@@ -54,7 +53,7 @@ msgid "Computes an outer product of two vectors."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
-msgid ":obj:`nlcpy.matmul <nlcpy.matmul>`"
+msgid ":py:obj:`nlcpy.matmul <nlcpy.matmul>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:20:<autosummary>:1
@@ -66,7 +65,7 @@ msgid "Decompositions"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.svd <nlcpy.linalg.svd>`"
+msgid ":py:obj:`nlcpy.linalg.svd <nlcpy.linalg.svd>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
@@ -74,7 +73,7 @@ msgid "Singular Value Decomposition."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.cholesky <nlcpy.linalg.cholesky>`"
+msgid ":py:obj:`nlcpy.linalg.cholesky <nlcpy.linalg.cholesky>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
@@ -82,7 +81,7 @@ msgid "Cholesky decomposition."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.qr <nlcpy.linalg.qr>`"
+msgid ":py:obj:`nlcpy.linalg.qr <nlcpy.linalg.qr>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:32:<autosummary>:1
@@ -94,7 +93,7 @@ msgid "Matrix Eigenvalues"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.eig <nlcpy.linalg.eig>`"
+msgid ":py:obj:`nlcpy.linalg.eig <nlcpy.linalg.eig>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
@@ -102,7 +101,7 @@ msgid "Computes the eigenvalues and right eigenvectors of a square array."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.eigh <nlcpy.linalg.eigh>`"
+msgid ":py:obj:`nlcpy.linalg.eigh <nlcpy.linalg.eigh>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
@@ -112,7 +111,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.eigvals <nlcpy.linalg.eigvals>`"
+msgid ":py:obj:`nlcpy.linalg.eigvals <nlcpy.linalg.eigvals>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
@@ -120,7 +119,7 @@ msgid "Computes the eigenvalues of a general matrix."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.eigvalsh <nlcpy.linalg.eigvalsh>`"
+msgid ":py:obj:`nlcpy.linalg.eigvalsh <nlcpy.linalg.eigvalsh>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:45:<autosummary>:1
@@ -132,7 +131,7 @@ msgid "Norms and Other Numbers"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:55:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.norm <nlcpy.linalg.norm>`"
+msgid ":py:obj:`nlcpy.linalg.norm <nlcpy.linalg.norm>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:55:<autosummary>:1
@@ -144,7 +143,7 @@ msgid "Solving Equations and Inverting Matrices"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.solve <nlcpy.linalg.solve>`"
+msgid ":py:obj:`nlcpy.linalg.solve <nlcpy.linalg.solve>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
@@ -152,7 +151,7 @@ msgid "Solves a linear matrix equation, or system of linear scalar equations."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.lstsq <nlcpy.linalg.lstsq>`"
+msgid ":py:obj:`nlcpy.linalg.lstsq <nlcpy.linalg.lstsq>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
@@ -160,7 +159,7 @@ msgid "Returns the least-squares solution to a linear matrix equation."
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.inv <nlcpy.linalg.inv>`"
+msgid ":py:obj:`nlcpy.linalg.inv <nlcpy.linalg.inv>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:67:<autosummary>:1
@@ -172,7 +171,7 @@ msgid "Exceptions"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:77:<autosummary>:1
-msgid ":obj:`nlcpy.linalg.LinAlgError <nlcpy.linalg.LinAlgError>`"
+msgid ":py:obj:`nlcpy.linalg.LinAlgError <nlcpy.linalg.LinAlgError>`"
 msgstr ""
 
 #: ../../source/reference/linalg.rst:77:<autosummary>:1
@@ -198,4 +197,52 @@ msgid ""
 "multidimensional array are interpreted as vectors or matrices, as "
 "appropriate for each operation."
 msgstr ""
+
+#~ msgid ":obj:`nlcpy.dot <nlcpy.dot>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.inner <nlcpy.inner>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.outer <nlcpy.outer>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.matmul <nlcpy.matmul>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.svd <nlcpy.linalg.svd>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.cholesky <nlcpy.linalg.cholesky>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.qr <nlcpy.linalg.qr>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.eig <nlcpy.linalg.eig>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.eigh <nlcpy.linalg.eigh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.eigvals <nlcpy.linalg.eigvals>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.eigvalsh <nlcpy.linalg.eigvalsh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.norm <nlcpy.linalg.norm>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.solve <nlcpy.linalg.solve>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.lstsq <nlcpy.linalg.lstsq>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.inv <nlcpy.linalg.inv>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linalg.LinAlgError <nlcpy.linalg.LinAlgError>`"
+#~ msgstr ""
 

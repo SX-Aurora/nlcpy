@@ -391,6 +391,8 @@ class TestLogspace2(unittest.TestCase):
     @testing.for_dtypes('fF', name='dtype_s')
     @testing.for_dtypes('fF', name='dtype_e')
     @testing.numpy_nlcpy_allclose(atol=1e-5, rtol=1e-5)
+    @testing.with_requires('numpy>=2.0.0')
+    @testing.with_requires('numpy<=1.19.5')
     def test_logspace_array4(self, xp, dtype_s, dtype_e):
         start = testing.shaped_random([4, 5], xp, dtype=dtype_s)
         stop = testing.shaped_random([3, 4, 5], xp, dtype=dtype_e)

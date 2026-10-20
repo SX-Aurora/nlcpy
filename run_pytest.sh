@@ -11,14 +11,25 @@ PYTEST_CMD=pytest
 #
 function run_fast_math_tests () {
     local COV=$1
+    local SUB=$2
     local LPYTEST_DIR=${PYTEST_DIR}
     local retcode=0
+    if [[ $SUB == "" ]]; then
+        SUB="all"
+    fi
+    if [[ $SUB != "all" ]]; then
+        LPYTEST_DIR=${PYTEST_DIR}/${SUB}
+    fi
     if [[ $COV = true ]]; then
         _COV_OPT="--cov=$COV_PATH $COV_OPT"
     else
         _COV_OPT=$NOCOV_OPT
         cd ${PYTEST_DIR}
-        LPYTEST_DIR=.
+        if [[ $SUB != "all" ]]; then
+            LPYTEST_DIR=${SUB}
+        else
+            LPYTEST_DIR=.
+        fi
     fi
     echo ""
     echo "---------- Start fast_math tests ----------"
@@ -182,23 +193,34 @@ function run_full_tests () {
 #
 function run_small_tests () {
     local COV=$1
+    local SUB=$2
     local LPYTEST_DIR=${PYTEST_DIR}
     local retcode=0
+    if [[ $SUB == "" ]]; then
+        SUB="all"
+    fi
+    if [[ $SUB != "all" ]]; then
+        LPYTEST_DIR=${PYTEST_DIR}/${SUB}
+    fi
     if [[ $COV = true ]]; then
         _COV_OPT="--cov=$COV_PATH $COV_OPT"
     else
         _COV_OPT=$NOCOV_OPT
         cd ${PYTEST_DIR}
-        LPYTEST_DIR=.
+        if [[ $SUB != "all" ]]; then
+            LPYTEST_DIR=${SUB}
+        else
+            LPYTEST_DIR=.
+        fi
     fi
     echo ""
-    echo "---------- Start small tests ----------"
+    echo "---------- Start small tests (${SUB})----------"
     echo ""
     set -x
     VE_NLCPY_FAST_MATH=no $PYTEST_CMD $LPYTEST_DIR $_COV_OPT -x || retcode=$(($? | retcode))
     set +x
     echo ""
-    echo "---------- End small tests ------------"
+    echo "---------- End small tests (${SUB})------------"
     echo ""
     return $retcode
 }
@@ -222,6 +244,9 @@ function usage () {
     echo "  ARGUMENT:"
     echo "  --test MODE1,MODE2,... or --test=MODE1,MODE2,...: specify the test MODE"
     echo "         available MODEs are [full|small|fast_math|venode]"
+    echo "  --sub-test DIR1,DIR2,... or --sub-test=DIR1,DIR2,...: specify the sub directory"
+    echo "         this options is valid for --test=small and --test=fast_math"
+    echo "         if --sub-test is not specified, assumes all directories under tests/pytest/"
     echo "  --cov,-c: specify whether report coverage or not"
     echo "         (default: no coverage)"
     echo "  --cov-path PATH or --cov-path=PATH: specify coverage path"
@@ -262,6 +287,19 @@ do
                     exit 1
                 fi
             done
+        ;;
+        --sub-test | --sub-test=*)
+            if [[ "$1" =~ ^--sub-test= ]]; then
+                SUB_TEST=$(echo $1 | sed -e 's/^--sub-test=//')
+            elif [[ -z "$2" ]] || [[ "$2" =~ ^-+ ]]; then
+                usage
+                exit 1
+            else
+                SUB_TEST="$2"
+                shift
+            fi
+            SUB_TESTS=(${SUB_TEST//,/ })
+            # check is omitted
         ;;
         --cov | -c)
             COV=true
@@ -313,6 +351,9 @@ if [[ ${#TESTS[@]} -eq 0 ]]; then
 fi
 
 echo "test: ${TESTS[@]}"
+if [[ ${#SUB_TESTS[@]} != 0 ]]; then
+    echo "sub-test: ${SUB_TESTS[@]}"
+fi
 echo "cov: ${COV}"
 echo "cov-path: ${COV_PATH}"
 echo "scheduler: ${SCH}"
@@ -328,14 +369,30 @@ do
         (run_full_ufunc_tests $COV)
         err_state=$(($? | err_state))
     elif [[ $t = "fast_math" ]]; then
-        (run_fast_math_tests $COV)
-        err_state=$(($? | err_state))
+        if [[ ${#SUB_TESTS[@]} = 0 ]]; then
+            (run_fast_math_tests $COV "all")
+            err_state=$(($? | err_state))
+        else
+            for st in ${SUB_TESTS[@]}
+            do
+                (run_fast_math_tests $COV $st)
+                err_state=$(($? | err_state))
+            done
+        fi
     elif [[ $t = "venode" ]]; then
         (run_venode_tests $COV $SCH)
         err_state=$(($? | err_state))
     else
-        (run_small_tests $COV)
-        err_state=$(($? | err_state))
+        if [[ ${#SUB_TESTS[@]} = 0 ]]; then
+            (run_small_tests $COV "all")
+            err_state=$(($? | err_state))
+        else
+            for st in ${SUB_TESTS[@]}
+            do
+                (run_small_tests $COV $st)
+                err_state=$(($? | err_state))
+            done
+        fi
     fi
 done
 

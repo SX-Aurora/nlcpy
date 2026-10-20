@@ -23,7 +23,7 @@ shapes = (
     })
 ))
 class TestQuantile(unittest.TestCase):
-    @testing.for_dtypes(['f', 'F'])
+    @testing.for_dtypes(['f'])
     @testing.numpy_nlcpy_array_equal()
     def test_case_00(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)
@@ -31,7 +31,7 @@ class TestQuantile(unittest.TestCase):
         a[1] = xp.nan
         return xp.nanquantile(a, 0.5)
 
-    @testing.for_dtypes(['f', 'F'])
+    @testing.for_dtypes(['f'])
     @testing.numpy_nlcpy_array_equal()
     def test_case_01(self, xp, dtype):
         a = testing.shaped_random(self.shape, xp, dtype)

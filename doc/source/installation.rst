@@ -21,7 +21,7 @@ This page describes installation of NLCPy.
     - The libraries of NLCPy are located in the following directory after NEC SDK
       is installed or updated::
 
-          /opt/nec/ve/nlcpy/X.X.X/lib/python36/nlcpy
+          /opt/nec/ve/nlcpy/X.X.X/lib/python3.12/nlcpy
 
       Here, X.X.X denotes the version of NLCPy.
       If you install or update NEC SDK, the directory of the latest version of
@@ -29,7 +29,7 @@ This page describes installation of NLCPy.
       version of NLCPy, the evironmental variable **PYTHONPATH** must be set as
       follows::
 
-          $ export PYTHONPATH=/opt/nec/ve/nlcpy/X.X.X/lib/python36/
+          $ export PYTHONPATH=/opt/nec/ve/nlcpy/X.X.X/lib/python3.12/
 
 Requirements
 ------------
@@ -39,12 +39,12 @@ installed on your x86 Node of SX-Aurora TSUBASA.
 
 * | `NEC SDK <https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_
 
-    - required NEC C/C++ compiler version: >= 5.0.0
+    - required NEC C/C++ compiler version: >= 5.4.1
     - required NLC version: >= 3.0.0
 
 * | `Alternative VE Offloading (AVEO) <https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_
 
-    - required version: >= 3.0.2
+    - required version: >= 3.6.0
 
     - If you install NLCPy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
 
@@ -66,11 +66,11 @@ installed on your x86 Node of SX-Aurora TSUBASA.
 
 * | `Python <https://www.python.org/>`_
 
-    - required version: 3.6, 3.7, or 3.8
+    - required version: 3.12
 
 * | `NumPy <https://www.numpy.org/>`_
 
-    - required version: >= v1.17
+    - required version: v1.26.0
 
 
 Install from wheel
@@ -95,7 +95,7 @@ You can install NLCPy by executing either of following commands.
 
            $ pip install <path_to_wheel>
 
-The shared objects for Vector Engine, which are included in the wheel package, are tested by using NEC C/C++ Compiler Version 5.0.0 and NumPy v1.19.5.
+The shared objects for Vector Engine, which are included in the wheel package, are tested by using NEC C/C++ Compiler Version 5.4.1 and NumPy v1.26.0.
 
 
 Install from source (with building)

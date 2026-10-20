@@ -98,13 +98,13 @@ cpdef _check_dtype_is_valid(dtype):
 cdef _init_dtype_dict():
     for i in (int, float, bool, complex, None):
         dtype = numpy.dtype(i)
-        if dtype is numpy.dtype('bool'):
+        if dtype == numpy.dtype('bool'):
             _dtype_dict[i] = (dtype, numpy.dtype('i4').itemsize)
         else:
             _dtype_dict[i] = (dtype, dtype.itemsize)
     for i in all_type_chars:
         dtype = numpy.dtype(i)
-        if dtype is numpy.dtype('bool'):
+        if dtype == numpy.dtype('bool'):
             item = (dtype, numpy.dtype('i4').itemsize)
         else:
             item = (dtype, dtype.itemsize)
@@ -112,7 +112,7 @@ cdef _init_dtype_dict():
         _dtype_dict[dtype.type] = item
     for i in {str(numpy.dtype(i)) for i in all_type_chars}:
         dtype = numpy.dtype(i)
-        if dtype is numpy.dtype('bool'):
+        if dtype == numpy.dtype('bool'):
             _dtype_dict[i] = (dtype, numpy.dtype('i4').itemsize)
         else:
             _dtype_dict[i] = (dtype, dtype.itemsize)
@@ -141,7 +141,7 @@ cpdef get_dtype(t):
     return ret[0]
 
 cdef tuple _convert_dtype(numpy.dtype t):
-    if t is numpy.dtype('bool'):
+    if t == numpy.dtype('bool'):
         return t, numpy.dtype('i4').itemsize
     elif t.char == 'q':
         return numpy.dtype('l'), numpy.dtype('l').itemsize
@@ -162,33 +162,33 @@ cpdef tuple get_dtype_with_itemsize(t):
 
 
 cpdef int get_dtype_number(numpy.dtype dtype) except *:
-    if dtype is numpy.dtype('bool'):
+    if dtype == numpy.dtype('bool'):
         return ve_dtype.ve_bool
-    if dtype is numpy.dtype('int8'):
+    if dtype == numpy.dtype('int8'):
         return ve_dtype.ve_i8
-    if dtype is numpy.dtype('int16'):
+    if dtype == numpy.dtype('int16'):
         return ve_dtype.ve_i16
-    if dtype is numpy.dtype('int32'):
+    if dtype == numpy.dtype('int32'):
         return ve_dtype.ve_i32
-    if dtype is numpy.dtype('int64'):
+    if dtype == numpy.dtype('int64'):
         return ve_dtype.ve_i64
-    if dtype is numpy.dtype('uint8'):
+    if dtype == numpy.dtype('uint8'):
         return ve_dtype.ve_u8
-    if dtype is numpy.dtype('uint16'):
+    if dtype == numpy.dtype('uint16'):
         return ve_dtype.ve_u16
-    if dtype is numpy.dtype('uint32'):
+    if dtype == numpy.dtype('uint32'):
         return ve_dtype.ve_u32
-    if dtype is numpy.dtype('uint64'):
+    if dtype == numpy.dtype('uint64'):
         return ve_dtype.ve_u64
-    if dtype is numpy.dtype('float16'):
+    if dtype == numpy.dtype('float16'):
         return ve_dtype.ve_f16
-    if dtype is numpy.dtype('float32'):
+    if dtype == numpy.dtype('float32'):
         return ve_dtype.ve_f32
-    if dtype is numpy.dtype('float64'):
+    if dtype == numpy.dtype('float64'):
         return ve_dtype.ve_f64
-    if dtype is numpy.dtype('complex64'):
+    if dtype == numpy.dtype('complex64'):
         return ve_dtype.ve_c64
-    if dtype is numpy.dtype('complex128'):
+    if dtype == numpy.dtype('complex128'):
         return ve_dtype.ve_c128
 
     raise ValueError('detected unknown dtype %s' % dtype)
@@ -203,3 +203,4 @@ cpdef numpy.dtype promote_dtype_to_supported(numpy.dtype dtype):
         return numpy.dtype('f4')
     else:
         return dtype
+

@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-15 11:02+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/random.rst:4
 msgid "Random Sampling"
@@ -60,7 +59,7 @@ msgid "Construct Generator"
 msgstr ""
 
 #: ../../source/reference/random.rst:45:<autosummary>:1
-msgid ":obj:`nlcpy.random.default_rng <nlcpy.random.default_rng>`"
+msgid ":py:obj:`nlcpy.random.default_rng <nlcpy.random.default_rng>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:45:<autosummary>:1
@@ -74,7 +73,7 @@ msgid "Simple Random Data"
 msgstr ""
 
 #: ../../source/reference/random.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.bytes <nlcpy.random.Generator.bytes>`"
+msgid ":py:obj:`nlcpy.random.Generator.bytes <nlcpy.random.Generator.bytes>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -83,7 +82,9 @@ msgid "Returns random bytes."
 msgstr ""
 
 #: ../../source/reference/random.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.integers <nlcpy.random.Generator.integers>`"
+msgid ""
+":py:obj:`nlcpy.random.Generator.integers "
+"<nlcpy.random.Generator.integers>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:56:<autosummary>:1
@@ -93,7 +94,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/reference/random.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.random <nlcpy.random.Generator.random>`"
+msgid ":py:obj:`nlcpy.random.Generator.random <nlcpy.random.Generator.random>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -107,7 +108,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:66:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.permutation "
+":py:obj:`nlcpy.random.Generator.permutation "
 "<nlcpy.random.Generator.permutation>`"
 msgstr ""
 
@@ -117,7 +118,7 @@ msgid "Randomly permutes a sequence, or returns a permuted range."
 msgstr ""
 
 #: ../../source/reference/random.rst:66:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.shuffle <nlcpy.random.Generator.shuffle>`"
+msgid ":py:obj:`nlcpy.random.Generator.shuffle <nlcpy.random.Generator.shuffle>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:147:<autosummary>:1
@@ -130,7 +131,9 @@ msgid "Distributions"
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.binomial <nlcpy.random.Generator.binomial>`"
+msgid ""
+":py:obj:`nlcpy.random.Generator.binomial "
+"<nlcpy.random.Generator.binomial>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -140,7 +143,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.exponential "
+":py:obj:`nlcpy.random.Generator.exponential "
 "<nlcpy.random.Generator.exponential>`"
 msgstr ""
 
@@ -150,7 +153,7 @@ msgid "Draws samples from an exponential distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.gamma <nlcpy.random.Generator.gamma>`"
+msgid ":py:obj:`nlcpy.random.Generator.gamma <nlcpy.random.Generator.gamma>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -159,7 +162,9 @@ msgid "Draws samples from a Gamma distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.geometric <nlcpy.random.Generator.geometric>`"
+msgid ""
+":py:obj:`nlcpy.random.Generator.geometric "
+"<nlcpy.random.Generator.geometric>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -168,7 +173,7 @@ msgid "Draws samples from a geometric distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.gumbel <nlcpy.random.Generator.gumbel>`"
+msgid ":py:obj:`nlcpy.random.Generator.gumbel <nlcpy.random.Generator.gumbel>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -177,7 +182,9 @@ msgid "Draws samples from a Gumbel distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.logistic <nlcpy.random.Generator.logistic>`"
+msgid ""
+":py:obj:`nlcpy.random.Generator.logistic "
+"<nlcpy.random.Generator.logistic>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -186,7 +193,9 @@ msgid "Draws samples from a logistic distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.lognormal <nlcpy.random.Generator.lognormal>`"
+msgid ""
+":py:obj:`nlcpy.random.Generator.lognormal "
+"<nlcpy.random.Generator.lognormal>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -195,7 +204,7 @@ msgid "Draws samples from a log-normal distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.normal <nlcpy.random.Generator.normal>`"
+msgid ":py:obj:`nlcpy.random.Generator.normal <nlcpy.random.Generator.normal>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -204,7 +213,7 @@ msgid "Draws random samples from a normal (Gaussian) distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.poisson <nlcpy.random.Generator.poisson>`"
+msgid ":py:obj:`nlcpy.random.Generator.poisson <nlcpy.random.Generator.poisson>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -214,7 +223,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.standard_cauchy "
+":py:obj:`nlcpy.random.Generator.standard_cauchy "
 "<nlcpy.random.Generator.standard_cauchy>`"
 msgstr ""
 
@@ -225,7 +234,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.standard_exponential "
+":py:obj:`nlcpy.random.Generator.standard_exponential "
 "<nlcpy.random.Generator.standard_exponential>`"
 msgstr ""
 
@@ -236,7 +245,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.standard_gamma "
+":py:obj:`nlcpy.random.Generator.standard_gamma "
 "<nlcpy.random.Generator.standard_gamma>`"
 msgstr ""
 
@@ -247,7 +256,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.Generator.standard_normal "
+":py:obj:`nlcpy.random.Generator.standard_normal "
 "<nlcpy.random.Generator.standard_normal>`"
 msgstr ""
 
@@ -257,7 +266,7 @@ msgid "Draws samples from a standard Normal distribution (mean=0, stdev=1)."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.uniform <nlcpy.random.Generator.uniform>`"
+msgid ":py:obj:`nlcpy.random.Generator.uniform <nlcpy.random.Generator.uniform>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -266,7 +275,7 @@ msgid "Draws samples from a uniform distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:90:<autosummary>:1
-msgid ":obj:`nlcpy.random.Generator.weibull <nlcpy.random.Generator.weibull>`"
+msgid ":py:obj:`nlcpy.random.Generator.weibull <nlcpy.random.Generator.weibull>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
@@ -290,7 +299,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:119:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.get_state "
+":py:obj:`nlcpy.random.RandomState.get_state "
 "<nlcpy.random.RandomState.get_state>`"
 msgstr ""
 
@@ -299,7 +308,7 @@ msgid "Returns an ndarray representing the internal state of the generator."
 msgstr ""
 
 #: ../../source/reference/random.rst:119:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.seed <nlcpy.random.RandomState.seed>`"
+msgid ":py:obj:`nlcpy.random.RandomState.seed <nlcpy.random.RandomState.seed>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:119:<autosummary>:1
@@ -310,7 +319,7 @@ msgstr ""
 
 #: ../../source/reference/random.rst:119:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.set_state "
+":py:obj:`nlcpy.random.RandomState.set_state "
 "<nlcpy.random.RandomState.set_state>`"
 msgstr ""
 
@@ -319,11 +328,11 @@ msgid "Sets the internal state of the generator from an ndarray."
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.bytes <nlcpy.random.RandomState.bytes>`"
+msgid ":py:obj:`nlcpy.random.RandomState.bytes <nlcpy.random.RandomState.bytes>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.rand <nlcpy.random.RandomState.rand>`"
+msgid ":py:obj:`nlcpy.random.RandomState.rand <nlcpy.random.RandomState.rand>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -331,7 +340,9 @@ msgid "Random values in a given shape."
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.randint <nlcpy.random.RandomState.randint>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.randint "
+"<nlcpy.random.RandomState.randint>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -339,7 +350,7 @@ msgid "Returns random integers from *low* (inclusive) to *high* (exclusive)."
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.randn <nlcpy.random.RandomState.randn>`"
+msgid ":py:obj:`nlcpy.random.RandomState.randn <nlcpy.random.RandomState.randn>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -347,12 +358,14 @@ msgid "Returns a sample (or samples) from the \"standard normal\" distribution."
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.random <nlcpy.random.RandomState.random>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.random "
+"<nlcpy.random.RandomState.random>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.random_integers "
+":py:obj:`nlcpy.random.RandomState.random_integers "
 "<nlcpy.random.RandomState.random_integers>`"
 msgstr ""
 
@@ -364,12 +377,12 @@ msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.random_sample "
+":py:obj:`nlcpy.random.RandomState.random_sample "
 "<nlcpy.random.RandomState.random_sample>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.ranf <nlcpy.random.RandomState.ranf>`"
+msgid ":py:obj:`nlcpy.random.RandomState.ranf <nlcpy.random.RandomState.ranf>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
@@ -377,12 +390,14 @@ msgid "This is an alias of random_sample."
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.sample <nlcpy.random.RandomState.sample>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.sample "
+"<nlcpy.random.RandomState.sample>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:137:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.tomaxint "
+":py:obj:`nlcpy.random.RandomState.tomaxint "
 "<nlcpy.random.RandomState.tomaxint>`"
 msgstr ""
 
@@ -392,90 +407,102 @@ msgstr ""
 
 #: ../../source/reference/random.rst:147:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.permutation "
+":py:obj:`nlcpy.random.RandomState.permutation "
 "<nlcpy.random.RandomState.permutation>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:147:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.shuffle <nlcpy.random.RandomState.shuffle>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.shuffle "
+"<nlcpy.random.RandomState.shuffle>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.binomial "
+":py:obj:`nlcpy.random.RandomState.binomial "
 "<nlcpy.random.RandomState.binomial>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.exponential "
+":py:obj:`nlcpy.random.RandomState.exponential "
 "<nlcpy.random.RandomState.exponential>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.gamma <nlcpy.random.RandomState.gamma>`"
+msgid ":py:obj:`nlcpy.random.RandomState.gamma <nlcpy.random.RandomState.gamma>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.geometric "
+":py:obj:`nlcpy.random.RandomState.geometric "
 "<nlcpy.random.RandomState.geometric>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.gumbel <nlcpy.random.RandomState.gumbel>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.gumbel "
+"<nlcpy.random.RandomState.gumbel>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.logistic "
+":py:obj:`nlcpy.random.RandomState.logistic "
 "<nlcpy.random.RandomState.logistic>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.lognormal "
+":py:obj:`nlcpy.random.RandomState.lognormal "
 "<nlcpy.random.RandomState.lognormal>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.normal <nlcpy.random.RandomState.normal>`"
-msgstr ""
-
-#: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.poisson <nlcpy.random.RandomState.poisson>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.normal "
+"<nlcpy.random.RandomState.normal>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.standard_cauchy "
+":py:obj:`nlcpy.random.RandomState.poisson "
+"<nlcpy.random.RandomState.poisson>`"
+msgstr ""
+
+#: ../../source/reference/random.rst:169:<autosummary>:1
+msgid ""
+":py:obj:`nlcpy.random.RandomState.standard_cauchy "
 "<nlcpy.random.RandomState.standard_cauchy>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.standard_exponential "
+":py:obj:`nlcpy.random.RandomState.standard_exponential "
 "<nlcpy.random.RandomState.standard_exponential>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.standard_gamma "
+":py:obj:`nlcpy.random.RandomState.standard_gamma "
 "<nlcpy.random.RandomState.standard_gamma>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
 msgid ""
-":obj:`nlcpy.random.RandomState.standard_normal "
+":py:obj:`nlcpy.random.RandomState.standard_normal "
 "<nlcpy.random.RandomState.standard_normal>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.uniform <nlcpy.random.RandomState.uniform>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.uniform "
+"<nlcpy.random.RandomState.uniform>`"
 msgstr ""
 
 #: ../../source/reference/random.rst:169:<autosummary>:1
-msgid ":obj:`nlcpy.random.RandomState.weibull <nlcpy.random.RandomState.weibull>`"
+msgid ""
+":py:obj:`nlcpy.random.RandomState.weibull "
+"<nlcpy.random.RandomState.weibull>`"
 msgstr ""
 
 #~ msgid "Returns a ndarray representing the internal state of the generator."
@@ -487,5 +514,228 @@ msgstr ""
 #~ msgid ""
 #~ "Random integers between 0 and "
 #~ "``nlcpy.iinfo(nlcpy.int).max``, inclusive."
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.default_rng <nlcpy.random.default_rng>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.bytes <nlcpy.random.Generator.bytes>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.integers "
+#~ "<nlcpy.random.Generator.integers>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.random <nlcpy.random.Generator.random>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.permutation "
+#~ "<nlcpy.random.Generator.permutation>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.shuffle <nlcpy.random.Generator.shuffle>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.binomial "
+#~ "<nlcpy.random.Generator.binomial>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.exponential "
+#~ "<nlcpy.random.Generator.exponential>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.gamma <nlcpy.random.Generator.gamma>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.geometric "
+#~ "<nlcpy.random.Generator.geometric>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.gumbel <nlcpy.random.Generator.gumbel>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.logistic "
+#~ "<nlcpy.random.Generator.logistic>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.lognormal "
+#~ "<nlcpy.random.Generator.lognormal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.normal <nlcpy.random.Generator.normal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.poisson <nlcpy.random.Generator.poisson>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.standard_cauchy "
+#~ "<nlcpy.random.Generator.standard_cauchy>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.standard_exponential "
+#~ "<nlcpy.random.Generator.standard_exponential>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.standard_gamma "
+#~ "<nlcpy.random.Generator.standard_gamma>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.Generator.standard_normal "
+#~ "<nlcpy.random.Generator.standard_normal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.uniform <nlcpy.random.Generator.uniform>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.Generator.weibull <nlcpy.random.Generator.weibull>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.get_state "
+#~ "<nlcpy.random.RandomState.get_state>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.seed <nlcpy.random.RandomState.seed>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.set_state "
+#~ "<nlcpy.random.RandomState.set_state>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.bytes <nlcpy.random.RandomState.bytes>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.rand <nlcpy.random.RandomState.rand>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.randint "
+#~ "<nlcpy.random.RandomState.randint>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.randn <nlcpy.random.RandomState.randn>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.random "
+#~ "<nlcpy.random.RandomState.random>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.random_integers "
+#~ "<nlcpy.random.RandomState.random_integers>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.random_sample "
+#~ "<nlcpy.random.RandomState.random_sample>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.ranf <nlcpy.random.RandomState.ranf>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.sample "
+#~ "<nlcpy.random.RandomState.sample>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.tomaxint "
+#~ "<nlcpy.random.RandomState.tomaxint>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.permutation "
+#~ "<nlcpy.random.RandomState.permutation>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.shuffle "
+#~ "<nlcpy.random.RandomState.shuffle>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.binomial "
+#~ "<nlcpy.random.RandomState.binomial>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.exponential "
+#~ "<nlcpy.random.RandomState.exponential>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.random.RandomState.gamma <nlcpy.random.RandomState.gamma>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.geometric "
+#~ "<nlcpy.random.RandomState.geometric>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.gumbel "
+#~ "<nlcpy.random.RandomState.gumbel>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.logistic "
+#~ "<nlcpy.random.RandomState.logistic>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.lognormal "
+#~ "<nlcpy.random.RandomState.lognormal>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.normal "
+#~ "<nlcpy.random.RandomState.normal>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.poisson "
+#~ "<nlcpy.random.RandomState.poisson>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.standard_cauchy "
+#~ "<nlcpy.random.RandomState.standard_cauchy>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.standard_exponential "
+#~ "<nlcpy.random.RandomState.standard_exponential>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.standard_gamma "
+#~ "<nlcpy.random.RandomState.standard_gamma>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.standard_normal "
+#~ "<nlcpy.random.RandomState.standard_normal>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.uniform "
+#~ "<nlcpy.random.RandomState.uniform>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.random.RandomState.weibull "
+#~ "<nlcpy.random.RandomState.weibull>`"
 #~ msgstr ""
 

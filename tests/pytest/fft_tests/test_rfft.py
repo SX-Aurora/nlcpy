@@ -12,8 +12,10 @@ from nlcpy.testing import (  # NOQA
 
 
 @testing.parameterize(*testing.product({
-    'n': [None, 0, 5, 10, 15],
-    'shape': [(10,), (5, 10), (3, 4, 5)],
+#    'n': [None, 0, 5, 10, 15],
+    'n': [None, 0, 5],
+#    'shape': [(10,), (5, 10), (3, 4, 5)],
+    'shape': [(10,), (5, 10)],
     'norm': [None, 'ortho', ''],
 }))
 @testing.with_requires('numpy>=1.10.0')

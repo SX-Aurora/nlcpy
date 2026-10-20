@@ -24,7 +24,7 @@ LIB=$(LIBDIR)/libnlcpy_ve_kernel_no_fast_math.so
 endif
 LIB_PROF=$(LIBDIR)/libnlcpy_profiling.so
 
-CC=ncc
+CC=$(if $(NCC_VER),ncc-$(NCC_VER),ncc)
 CFLAGS=-fpic -O2 -report-all -fopenmp
 BUILDID=-Wl,--build-id=sha1
 LDFLAGS=-shared -L$(LIBDIR) -l$(patsubst lib%.so,%,$(notdir $(LIB_COMMON))) $(LIBPATH) $(LIB_NLC) -fopenmp $(BUILDID)

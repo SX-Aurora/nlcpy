@@ -78,6 +78,23 @@ ops = [
 ]
 
 
+def adjust_dtype(xp, op, dtype_in, dtype, dtype_out):
+    if xp is numpy:
+        if dtype is None and dtype_out is not None and \
+           (dtype_in == numpy.bool_ and dtype_out != numpy.bool_):
+            if op in ('divide', 'true_divide',):
+                dtype = numpy.float32
+            elif dtype_out.kind != 'c' and \
+                op in ('logaddexp', 'logaddexp2', 'arctan2', 'hypot', 'heaviside',
+                       'copysign', 'nextafter'):
+                dtype = numpy.float32
+            elif op in ('power',):
+                dtype = numpy.int32
+            elif op in ('right_shift', 'left_shift') and dtype_out.kind not in 'cf':
+                dtype = numpy.int32
+    return dtype
+
+
 def convert_initial(initial, op, dtype_in, dtype=None, dtype_out=None):
     if initial in (None, numpy._NoValue):
         return initial
@@ -97,9 +114,31 @@ def convert_initial(initial, op, dtype_in, dtype=None, dtype_out=None):
 
 
 def is_executable(op, initial=0, where=True, dtype_in=None, dtype=None, dtype_out=None):
-    if op == 'logaddexp' and \
+    if op in ('logaddexp', 'logaddexp2') and \
        dtype_out is not None and numpy.dtype(dtype_out).char == 'L':
         return False
+    if op == 'subtract' and dtype is None and dtype_out is not None and \
+           (dtype_in == numpy.bool_ and dtype_out != numpy.bool_):
+        return False
+    if op == 'arctan2':
+        return False
+    if op == 'power':
+        if dtype is not None:
+            _dtype = dtype
+        elif dtype_out is not None:
+            _dtype = numpy.result_type(dtype_in, dtype_out)
+        else:
+            _dtype = dtype_in
+        if _dtype in ('float32', 'float64'):
+            return False
+    if dtype_out is None:
+        if op in (
+            'divide', 'true_divide', 'arctan2', 'hypot', 'copysign',
+            'logaddexp', 'logaddexp2', 'nextafter', 'heaviside',
+            'power', 'floor_divide', 'mod', 'remainder', 'fmod',
+            'right_shift', 'left_shift', 'subtract'
+        ):
+            return not (dtype is None and dtype_in == numpy.bool_)
     return True
 
 
@@ -108,6 +147,8 @@ def execute_ufunc(op, xp, in1, out=None, dtype=None,
     dtype_out = None if out is None else out.dtype
     if not is_executable(op, initial, where, in1.dtype, dtype, dtype_out):
         return 0
+    if initial == numpy._NoValue:
+        dtype = adjust_dtype(xp, op, in1.dtype, dtype, dtype_out)
     initial = convert_initial(initial, op, in1.dtype, dtype, dtype_out)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', numpy.ComplexWarning)
@@ -117,6 +158,13 @@ def execute_ufunc(op, xp, in1, out=None, dtype=None,
                     in1, out=out, dtype=dtype, axis=axis,
                     initial=initial, where=where, keepdims=keepdims)
                 nlcpy.request.flush()
+        else:
+            if initial != None:
+                initial = numpy.array(initial).astype(dtype)
+            ret = getattr(xp, op).reduce(
+                in1, out=out, dtype=dtype, axis=axis,
+                initial=initial, where=where, keepdims=keepdims)
+            nlcpy.request.flush()
     return ret
 
 
@@ -124,8 +172,8 @@ def execute_ufunc(op, xp, in1, out=None, dtype=None,
     'initial': (numpy._NoValue, None, 0, 2, -2.63, -3.2 + 0.3j),
 }))
 @pytest.mark.no_fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceDtype(unittest.TestCase):
 
     shape = ((3, 2), )
@@ -182,8 +230,8 @@ class TestReduceDtype(unittest.TestCase):
     'initial': (numpy._NoValue, None, 1.1),
 }))
 @pytest.mark.no_fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceShape(unittest.TestCase):
 
     axes = (0, 1, -2, (0, 2), None)
@@ -215,8 +263,8 @@ class TestReduceShape(unittest.TestCase):
 
 
 @pytest.mark.no_fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduce(unittest.TestCase):
 
     def tearDown(self):
@@ -230,23 +278,23 @@ class TestReduce(unittest.TestCase):
     def test_reduce_scalar(self, xp, op, in1, out, axis):
         return execute_ufunc(op, xp, in1, axis=axis, out=out)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_incorrect_axis(self, xp):
         return xp.add.reduce(xp.empty([2, 3, 4]), axis=3)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_incorrect_axis2(self, xp):
         return xp.add.reduce(xp.empty([2, 3, 4]), axis=-4)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_incorrect_axis3(self, xp):
         return xp.add.reduce(xp.empty([2, 3, 4]), axis=(1, 2, 3))
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_incorrect_out_shape(self, xp):
         return xp.add.reduce(xp.empty([2, 3, 4]), axis=(1, 2), out=xp.empty([4]))
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_power_with_negative_integer(self, xp):
         xp.power.reduce([1, -1])
 
@@ -270,8 +318,8 @@ class TestReduce(unittest.TestCase):
 
 
 @pytest.mark.no_fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceKeepdims(unittest.TestCase):
 
     shape = ((3, 4), )
@@ -311,3 +359,45 @@ class TestReduceKeepdims(unittest.TestCase):
         return execute_ufunc(
             op, xp, in1, axis=axis, out=out, dtype=dtype,
             where=where, keepdims=True)
+
+
+@pytest.mark.no_fast_math
+class TestReduceIncompatible(unittest.TestCase):
+
+    def tearDown(self):
+        nlcpy.venode.synchronize_all_ve()
+        gc.collect()
+
+    def test_reduce_power(self):
+        for dtype in 'fd':
+            a = nlcpy.array([2, 2, 2], dtype=dtype)
+            result = nlcpy.power.reduce(a)
+            assert result == 16
+
+            # this case is not work now because reduce that uses initial=2 falls back to NumPy.
+            #a = nlcpy.array([2, 2, 2])
+            #result = nlcpy.power.reduce(a, dtype=dtype, initial=2)
+            #assert result == 256
+
+            #a = nlcpy.array([2, 2, 2], dtype=dtype)
+            #result = nlcpy.power.reduce(a, initial=2, where=[False, True, True])
+            #assert result == 16
+
+    def test_reduce_arctan2(self):
+        for dtype in 'fd':
+            a = nlcpy.array([2, 2, 2], dtype=dtype)
+            result = nlcpy.arctan2.reduce(a)
+            ans = nlcpy.arctan2(nlcpy.arctan2(a[0], a[1]), a[2])
+            numpy.testing.assert_allclose(result, ans)
+
+            # this case is not work now because reduce that uses initial=2 falls back to NumPy.
+            #a = nlcpy.array([2, 2, 2])
+            #result = nlcpy.arctan2.reduce(a, dtype=dtype, initial=2)
+            #ans = nlcpy.arctan2(nlcpy.arctan2(nlcpy.arctan2(2.0, a[0]), a[1]), a[2])
+            #numpy.testing.assert_allclose(result, ans)
+
+            #a = nlcpy.array([2, 2, 2], dtype=dtype)
+            #result = nlcpy.arctan2.reduce(a, initial=2, where=[False, True, True])
+            #ans = nlcpy.arctan2(nlcpy.arctan2(2.0, a[1]), a[2])
+            #numpy.testing.assert_allclose(result, ans)
+

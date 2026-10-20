@@ -110,15 +110,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
 
     op_name = (name.replace('nlcpy_', '')).replace('_reduce', '')
 
-    if dtype is not None and out is not None and \
-            (axis is None or len(axis) > 1) and \
-            (a.dtype != dtype or a.dtype != out.dtype):
-        ret = getattr(numpy, op_name).reduce(
-            a, axis=axis, dtype=dtype, out=out.get(), keepdims=keepdims,
-            initial=initial, where=where)
-        nlcpy.copyto(out, ret)
-        return out
-
     nlcpy_identity = {'add': 0, 'multiply': 1,
                       'logical_and': True, 'logical_or': False, 'logical_xor': False,
                       'bitwise_and': -1, 'bitwise_or': 0, 'bitwise_xor': 0,
@@ -130,17 +121,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         if len(nlcpy.dtype(dtype)) > 0:
             raise TypeError('cannot perform reduce with flexible type')
         dtype = get_dtype(dtype)
-
-    if op_name == 'subtract':
-        _msg = "numpy boolean subtract, the `-` operator, is deprecated," \
-               " use the bitwise_xor, the `^` operator," \
-               " or the logical_xor function instead."
-        if dtype is not None and dtype.char == '?':
-            raise TypeError(_msg)
-        elif dtype is None and out is not None and out.dtype.char == '?':
-            raise TypeError(_msg)
-        elif dtype is None and out is None and a.dtype.char == '?':
-            raise TypeError(_msg)
 
     op_has_identity = False
     op_is_reordable = False
@@ -238,9 +218,6 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
                     _dtype = 'uint64'
 
         if axis != [] and initial is not nlcpy._NoValue:
-            if type(initial) == complex and \
-                    _dtype not in ('bool', 'complex64', 'complex128'):
-                initial = initial.real
             if initial == nlcpy.inf:
                 initial = get_plus_infinity(_dtype, op_name, is_identity)
             elif initial == -nlcpy.inf:
@@ -302,37 +279,56 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         raise NotImplementedError(
             "broadcast of 'where' is not implemented yet.")
 
-    if out is not None:
-        odt = out.dtype
-    elif dtype is not None:
+    if dtype is not None:
+        odt = dtype
         if op_name in ('divide', 'logaddexp', 'logaddexp2', 'true_divide',
                        'heaviside', 'arctan2', 'hypot', 'copysign', 'nextafter'):
             if dtype in ('int32', 'int64', 'uint32', 'uint64'):
                 odt = 'float64'
-            else:
-                odt = dtype
         elif op_is_boolean:
             odt = 'bool'
-        else:
-            odt = dtype
     else:
-        if op_name in ('add', 'multiply'):
-            if a.dtype in ('bool', 'int32'):
+        _dtype = numpy.result_type(a.dtype, out.dtype) if out is not None else a.dtype
+        odt = _dtype
+        if op_name == 'subtract':
+            if _dtype == 'bool':
+                odt = 'int32'
+        elif op_name in ('add', 'multiply'):
+            if _dtype in ('bool', 'int32'):
                 odt = 'int64'
-            elif a.dtype in ('uint32',):
+            elif _dtype in ('uint32',):
                 odt = 'uint64'
+        elif op_name in ('power', 'right_shift', 'left_shift') and a.dtype == '?':
+            odt = 'int32'
+        elif op_name in ('mod', 'remainder', 'fmod', 'floor_divide'):
+            if _dtype == 'bool':
+                odt = 'int32'
             else:
-                odt = a.dtype
+                odt = _dtype
+        elif op_name in ('divide', 'logaddexp', 'logaddexp2', 'true_divide',
+                         'heaviside', 'arctan2', 'hypot', 'copysign', 'nextafter'):
+            if _dtype in ('bool', 'int32', 'int64', 'uint32', 'uint64'):
+                odt = 'float64'
+            elif a.dtype == 'bool':
+                odt = 'float32'
+            else:
+                odt = _dtype
         elif op_is_boolean:
             odt = 'bool'
-        else:
-            odt = a.dtype
+
+    if op_name == 'bitwise_and' and out is not None and initial in (-1, nlcpy._NoValue):
+        if dtype == 'uint32' and out.dtype in ('float32', 'complex64') or \
+           dtype == 'uint64' and out.dtype.kind in 'fc':
+            out.fill(0)
+            return out
 
     initial_save = initial
     if initial is nlcpy._NoValue and op_name in nlcpy_identity:
-        if op_name not in ('maximum', 'minimum', 'fmax', 'fmin') and \
-           not op_is_boolean or len(axis) == 0 or dtype is None:
+        if op_name == 'logaddexp2':
             _dtype = odt
+        elif op_name not in ('maximum', 'minimum', 'fmax', 'fmin') and \
+           not op_is_boolean or len(axis) == 0 or dtype is None:
+            _dtype = odt if out is None else out.dtype
         else:
             _dtype = dtype
         initial = nlcpy_identity[op_name]
@@ -352,14 +348,33 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         elif initial == -nlcpy.inf:
             initial = get_minus_infinity(odt, op_name)
         else:
-            if type(initial) == complex and \
-                    odt not in ('bool', 'complex64', 'complex128'):
-                initial = numpy.array(initial.real, dtype=odt)
+            if dtype is not None:
+                numpy.array(initial, dtype=dtype)  # check type error
+                if out is None:
+                    initial = numpy.array(initial).astype(odt)
+                else:
+                    numpy.array(initial, dtype=odt)  # check type error
+                    initial = numpy.array(initial).astype(out.dtype)
+            elif op_name in ('add', 'multiply') and out is not None and \
+                 a.dtype == 'bool' and out.dtype == 'bool':
+                numpy.array(initial).astype(odt)  # check type error
+                initial = numpy.array(initial).astype(out.dtype)
             else:
-                initial = numpy.array(initial, dtype=odt)
+                if out is None:
+                    initial = numpy.array(initial, dtype=odt)
+                else:
+                    if op_name == 'divide' and a.dtype == 'bool':
+                        numpy.array(initial, dtype='float64')  # check type error
+                    numpy.array(initial, dtype=odt)  # check type error
+                    initial = numpy.array(initial).astype(out.dtype)
         flag_init = 1
     else:
         raise ValueError("Input object 'initial={}' is not a scalar".format(initial))
+
+    if op_name in ('logaddexp', 'logaddexp2'):
+        if out is not None and out.dtype == 'bool':
+            out.fill(True)
+            return out
 
     if a._f_contiguous and not a._c_contiguous:
         order_out = 'F'
@@ -367,27 +382,22 @@ cpdef reduce_core(name, a, axis=None, dtype=None, out=None, keepdims=False,
         order_out = 'C'
 
     x = a
-    dtype = dtype if dtype is not None else odt
-    if not op_is_boolean and not (len(axis) > 0 or flag_init):
-        x = nlcpy.asarray(x, dtype=odt)
-    else:
-        if dtype != odt and (initial_save is None or
-                             initial_save is nlcpy._NoValue and
-                             not op_has_identity):
-            x = nlcpy.array(x)
-            for i in range(len(axis)):
-                if x.ndim > axis[i] and x.shape[axis[i]] > 1:
-                    sl = [slice(0, None) if j != axis[i] else
-                          slice(0, 1) for j in range(x.ndim)]
-                    x[sl] = x[sl].astype(odt)
+    if out is not None and out.dtype != odt and (initial_save is None or
+                         initial_save is nlcpy._NoValue and
+                         not op_has_identity):
+        x = nlcpy.array(x)
+        for i in range(len(axis)):
+            if x.ndim > axis[i] and x.shape[axis[i]] > 1:
+                sl = [slice(0, None) if j != axis[i] else
+                      slice(0, 1) for j in range(x.ndim)]
+                x[sl] = x[sl].astype(out.dtype)
 
-        if op_is_boolean:
-            dtype = bool
-            x = nlcpy.asarray(x, dtype=dtype)
-            initial = numpy.asarray(initial, dtype=dtype)
-        elif (len(axis) > 0 or flag_init):
-            x = nlcpy.asarray(x, dtype=dtype)
-            initial = numpy.asarray(initial, dtype=dtype)
+    dtype = dtype if dtype is not None else odt
+    if op_is_boolean:
+        dtype = bool
+        x = nlcpy.asarray(x, dtype=dtype)
+    elif (len(axis) > 0 or flag_init):
+        x = nlcpy.asarray(x, dtype=dtype)
 
     if where_is_false:
         op_name = 'add'

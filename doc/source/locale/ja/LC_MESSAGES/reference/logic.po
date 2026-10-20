@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-18 17:24+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/logic.rst:2
 msgid "Logic Functions"
@@ -30,7 +29,7 @@ msgid "Truth Value Testing"
 msgstr ""
 
 #: ../../source/reference/logic.rst:15:<autosummary>:1
-msgid ":obj:`nlcpy.all <nlcpy.all>`"
+msgid ":py:obj:`nlcpy.all <nlcpy.all>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:15:<autosummary>:1
@@ -38,7 +37,7 @@ msgid "Tests whether all array elements along a given axis evaluate to True."
 msgstr ""
 
 #: ../../source/reference/logic.rst:15:<autosummary>:1
-msgid ":obj:`nlcpy.any <nlcpy.any>`"
+msgid ":py:obj:`nlcpy.any <nlcpy.any>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:15:<autosummary>:1
@@ -50,7 +49,7 @@ msgid "Array Contents"
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
-msgid ":obj:`nlcpy.isfinite <nlcpy.isfinite>`"
+msgid ":py:obj:`nlcpy.isfinite <nlcpy.isfinite>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
@@ -58,7 +57,7 @@ msgid "Tests whether input elements are neither inf nor nan, or not."
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
-msgid ":obj:`nlcpy.isinf <nlcpy.isinf>`"
+msgid ":py:obj:`nlcpy.isinf <nlcpy.isinf>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
@@ -66,7 +65,7 @@ msgid "Tests whether input elements are inf, or not."
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
-msgid ":obj:`nlcpy.isnan <nlcpy.isnan>`"
+msgid ":py:obj:`nlcpy.isnan <nlcpy.isnan>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:26:<autosummary>:1
@@ -78,7 +77,7 @@ msgid "Logical Operations"
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.logical_and <nlcpy.logical_and>`"
+msgid ":py:obj:`nlcpy.logical_and <nlcpy.logical_and>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
@@ -86,7 +85,7 @@ msgid "Computes the logical AND of two arrays element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.logical_or <nlcpy.logical_or>`"
+msgid ":py:obj:`nlcpy.logical_or <nlcpy.logical_or>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
@@ -94,7 +93,7 @@ msgid "Computes the logical OR of two arrays element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.logical_not <nlcpy.logical_not>`"
+msgid ":py:obj:`nlcpy.logical_not <nlcpy.logical_not>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
@@ -102,7 +101,7 @@ msgid "Computes the logical NOT of the input array element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.logical_xor <nlcpy.logical_xor>`"
+msgid ":py:obj:`nlcpy.logical_xor <nlcpy.logical_xor>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:38:<autosummary>:1
@@ -114,7 +113,7 @@ msgid "Comparison"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.greater <nlcpy.greater>`"
+msgid ":py:obj:`nlcpy.greater <nlcpy.greater>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
@@ -122,7 +121,7 @@ msgid "Returns (*x1* > *x2*), element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.greater_equal <nlcpy.greater_equal>`"
+msgid ":py:obj:`nlcpy.greater_equal <nlcpy.greater_equal>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
@@ -130,7 +129,7 @@ msgid "Returns (*x1* >= *x2*), element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.less <nlcpy.less>`"
+msgid ":py:obj:`nlcpy.less <nlcpy.less>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
@@ -138,7 +137,7 @@ msgid "Returns (*x1* < *x2*), element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.less_equal <nlcpy.less_equal>`"
+msgid ":py:obj:`nlcpy.less_equal <nlcpy.less_equal>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
@@ -146,7 +145,7 @@ msgid "Returns (*x1* <= *x2*), element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.equal <nlcpy.equal>`"
+msgid ":py:obj:`nlcpy.equal <nlcpy.equal>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
@@ -154,10 +153,55 @@ msgid "Returns (*x1* == *x2*), element-wise."
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
-msgid ":obj:`nlcpy.not_equal <nlcpy.not_equal>`"
+msgid ":py:obj:`nlcpy.not_equal <nlcpy.not_equal>`"
 msgstr ""
 
 #: ../../source/reference/logic.rst:51:<autosummary>:1
 msgid "Returns (*x1* != *x2*), element-wise."
 msgstr ""
+
+#~ msgid ":obj:`nlcpy.all <nlcpy.all>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.any <nlcpy.any>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.isfinite <nlcpy.isfinite>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.isinf <nlcpy.isinf>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.isnan <nlcpy.isnan>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logical_and <nlcpy.logical_and>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logical_or <nlcpy.logical_or>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logical_not <nlcpy.logical_not>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logical_xor <nlcpy.logical_xor>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.greater <nlcpy.greater>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.greater_equal <nlcpy.greater_equal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.less <nlcpy.less>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.less_equal <nlcpy.less_equal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.equal <nlcpy.equal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.not_equal <nlcpy.not_equal>`"
+#~ msgstr ""
 

@@ -59,6 +59,7 @@ class TestReduceCoverage(unittest.TestCase):
         with self.assertRaises(TypeError):
             nlcpy.subtract.reduce(a, dtype='bool')
 
+    @testing.with_requires('numpy<1.20')
     def test_reduce_subtract_failure_1(self):
         a = nlcpy.array([[1, 2], [3, 4]], dtype='i8')
         o = nlcpy.empty(2, dtype='bool')

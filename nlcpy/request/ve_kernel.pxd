@@ -337,7 +337,7 @@ cdef extern from "../include/ve_array.h":
     cdef int ITEMSIZE_OFFSET
     cdef int C_CONTIGUOUS_OFFSET
     cdef int F_CONTIGUOUS_OFFSET
-    cdef int SCALAR_OFFSET = F_CONTIGUOUS_OFFSET
+    cdef int SCALAR_OFFSET
 
 cdef extern from "../include/ve_request.h":
     cdef uint64_t SIZEOF_REQUEST_PACKAGE

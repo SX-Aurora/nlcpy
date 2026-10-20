@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-15 11:02+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/request.rst:4
 msgid "Request Management Routines"
@@ -26,7 +25,7 @@ msgid "Flush"
 msgstr ""
 
 #: ../../source/reference/request.rst:14:<autosummary>:1
-msgid ":obj:`nlcpy.request.flush <nlcpy.request.flush>`"
+msgid ":py:obj:`nlcpy.request.flush <nlcpy.request.flush>`"
 msgstr ""
 
 #: ../../source/reference/request.rst:14:<autosummary>:1
@@ -38,7 +37,9 @@ msgid "Manage Offload Timing"
 msgstr ""
 
 #: ../../source/reference/request.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.request.get_offload_timing <nlcpy.request.get_offload_timing>`"
+msgid ""
+":py:obj:`nlcpy.request.get_offload_timing "
+"<nlcpy.request.get_offload_timing>`"
 msgstr ""
 
 #: ../../source/reference/request.rst:24:<autosummary>:1
@@ -47,7 +48,7 @@ msgstr ""
 
 #: ../../source/reference/request.rst:24:<autosummary>:1
 msgid ""
-":obj:`nlcpy.request.set_offload_timing_lazy "
+":py:obj:`nlcpy.request.set_offload_timing_lazy "
 "<nlcpy.request.set_offload_timing_lazy>`"
 msgstr ""
 
@@ -57,7 +58,7 @@ msgstr ""
 
 #: ../../source/reference/request.rst:24:<autosummary>:1
 msgid ""
-":obj:`nlcpy.request.set_offload_timing_onthefly "
+":py:obj:`nlcpy.request.set_offload_timing_onthefly "
 "<nlcpy.request.set_offload_timing_onthefly>`"
 msgstr ""
 
@@ -72,5 +73,23 @@ msgstr ""
 #~ "Flushes stacked requests on VH to "
 #~ "VE, and waits until VE exectuion "
 #~ "is completed."
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.request.flush <nlcpy.request.flush>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.request.get_offload_timing "
+#~ "<nlcpy.request.get_offload_timing>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.request.set_offload_timing_lazy "
+#~ "<nlcpy.request.set_offload_timing_lazy>`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":obj:`nlcpy.request.set_offload_timing_onthefly "
+#~ "<nlcpy.request.set_offload_timing_onthefly>`"
 #~ msgstr ""
 

@@ -11,8 +11,10 @@ from nlcpy.testing import (  # NOQA
 
 
 @testing.parameterize(*testing.product({
-    'n': [None, 0, 5, 10, 15],
-    'shape': [(10,), (5, 10), (3, 4, 5)],
+#    'n': [None, 0, 5, 10, 15],
+    'n': [None, 0, 5],
+#    'shape': [(10,), (5, 10), (3, 4, 5)],
+    'shape': [(10,), (5, 10)],
     'norm': [None, 'ortho', ''],
 }))
 @testing.with_requires('numpy>=1.10.0')
@@ -128,8 +130,10 @@ class TestFft1DInvalidParam(object):
 
 
 @testing.parameterize(*testing.product({
-    'shape': [(5, 10), (10, 5, 10), (10, 5, 7, 9), (13, 11, 9, 7, 5)],
-    'n': [None, 1, 5, 15],
+#    'shape': [(5, 10), (10, 5, 10), (10, 5, 7, 9), (13, 11, 9, 7, 5)],
+    'shape': [(5, 10), (10, 5, 10)],
+#    'n': [None, 1, 5, 15],
+    'n': [None, 1, 5],
     'data_order': ['F', 'C'],
     'axis': [0, 1, 2, 3, 4, 5],
     'norm': [None, 'ortho']

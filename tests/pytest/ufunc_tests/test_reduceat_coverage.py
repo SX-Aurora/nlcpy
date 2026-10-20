@@ -111,8 +111,8 @@ class TestReduceatCoverage(unittest.TestCase):
         a = xp.ones((3, 3), order='f')
         return xp.add.reduceat(a, [0, 1, 2]).tolist()
 
-    @testing.with_requires('numpy<1.20')
-    @testing.numpy_nlcpy_allclose()
+#    @testing.with_requires('numpy<1.20')
+    @testing.numpy_nlcpy_raises()
     def test_reduceat_fmod_bool(self, xp):
         a = xp.array([1, 2])
         o = xp.empty(2, dtype='i4')

@@ -390,13 +390,25 @@ class TestNumpyWrap(unittest.TestCase):
         assert (ret is out)
         return ret
 
+    @testing.with_requires("numpy<2.0")
+    @testing.numpy_nlcpy_array_equal()
+    def test_round__with_out(self, xp):
+        if _is_skip():
+            pytest.skip('Python3.6 is not testable')
+        a = xp.arange(3)
+        out = xp.zeros(3)
+        ret = xp.round_(a, 0, out)
+        assert (isinstance(ret, xp.ndarray))
+        assert (ret is out)
+        return ret
+
     @testing.numpy_nlcpy_array_equal()
     def test_round_with_out(self, xp):
         if _is_skip():
             pytest.skip('Python3.6 is not testable')
         a = xp.arange(3)
         out = xp.zeros(3)
-        ret = xp.round_(a, 0, out)
+        ret = xp.round(a, 0, out)
         assert (isinstance(ret, xp.ndarray))
         assert (ret is out)
         return ret
@@ -1000,3 +1012,4 @@ class TestNdarrayMethod(unittest.TestCase):
         ret = x.argsort()
         assert isinstance(ret, xp.ndarray)
         return ret
+

@@ -65,35 +65,35 @@ class TestSort(unittest.TestCase):
     def test_sort_zero_dim(self):
         a = testing.shaped_random((), nlcpy)
         with self.assertRaises(TypeError):
-            a.sort()
+            a.sort(kind='stable')
 
     @testing.numpy_nlcpy_raises()
     def test_external_sort_zero_dim(self):
         a = testing.shaped_random((), nlcpy)
         with self.assertRaises(TypeError):
-            return nlcpy.sort(a)
+            return nlcpy.sort(a, kind='stable')
 
     @testing.numpy_nlcpy_array_equal()
     def test_sort_two_dim(self, xp):
         a = testing.shaped_random((2, 3), xp)
-        a.sort()
+        a.sort(kind='stable')
         return a
 
     @testing.numpy_nlcpy_array_equal()
     def test_external_sort_two_dim(self, xp):
         a = testing.shaped_random((2, 3), xp)
-        return xp.sort(a)
+        return xp.sort(a, kind='stable')
 
     @testing.numpy_nlcpy_array_equal()
     def test_sort_three_dim(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        a.sort()
+        a.sort(kind='stable')
         return a
 
     @testing.numpy_nlcpy_array_equal()
     def test_external_three_dim(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        return xp.sort(a)
+        return xp.sort(a, kind='stable')
 
     # Test dtypes
 
@@ -101,14 +101,14 @@ class TestSort(unittest.TestCase):
     @testing.numpy_nlcpy_allclose()
     def test_sort_dtype(self, xp, dtype):
         a = testing.shaped_random((10,), xp, dtype)
-        a.sort()
+        a.sort(kind='stable')
         return a
 
     @testing.for_all_dtypes(no_float16=True, no_bool=False, no_complex=False)
     @testing.numpy_nlcpy_allclose()
     def test_external_sort_dtype(self, xp, dtype):
         a = testing.shaped_random((10,), xp, dtype)
-        return xp.sort(a)
+        return xp.sort(a, kind='stable')
 
     @testing.for_dtypes([numpy.float16])
     def test_external_sort_unsupported_dtype(self, dtype):
@@ -121,53 +121,53 @@ class TestSort(unittest.TestCase):
     @testing.numpy_nlcpy_allclose()
     def test_sort_contiguous(self, xp):
         a = testing.shaped_random((10,), xp)  # C contiguous view
-        a.sort()
+        a.sort(kind='stable')
         return a
 
     @testing.numpy_nlcpy_allclose()
     def test_external_sort_contiguous(self, xp):
         a = testing.shaped_random((10,), xp)  # C contiguous view
-        return xp.sort(a)
+        return xp.sort(a, kind='stable')
 
     @testing.numpy_nlcpy_allclose()
     def test_external_sort_non_contiguous(self, xp):
         a = testing.shaped_random((10,), xp)[::2]  # Non contiguous view
-        return xp.sort(a)
+        return xp.sort(a, kind='stable')
 
     # Test axis
 
     @testing.numpy_nlcpy_array_equal()
     def test_sort_axis(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        a.sort(axis=0)
+        a.sort(axis=0, kind='stable')
         return a
 
     @testing.numpy_nlcpy_array_equal()
     def test_external_sort_axis(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        return xp.sort(a, axis=0)
+        return xp.sort(a, axis=0, kind='stable')
 
     @testing.numpy_nlcpy_array_equal()
     def test_sort_negative_axis(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        a.sort(axis=-2)
+        a.sort(axis=-2, kind='stable')
         return a
 
     @testing.numpy_nlcpy_array_equal()
     def test_external_sort_negative_axis(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        return xp.sort(a, axis=-2)
+        return xp.sort(a, axis=-2, kind='stable')
 
     @testing.numpy_nlcpy_array_equal()
     def test_external_sort_none_axis(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        return xp.sort(a, axis=None)
+        return xp.sort(a, axis=None, kind='stable')
 
     @testing.with_requires('numpy>=1.13')
     @testing.numpy_nlcpy_raises()
     def test_sort_invalid_axis1(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        a.sort(axis=3)
+        a.sort(axis=3, kind='stable')
 
     def test_sort_invalid_axis2(self):
         a = testing.shaped_random((2, 3, 3), nlcpy)
@@ -178,7 +178,7 @@ class TestSort(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_external_sort_invalid_axis1(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        xp.sort(a, axis=3)
+        xp.sort(a, axis=3, kind='stable')
 
     def test_external_sort_invalid_axis2(self):
         a = testing.shaped_random((2, 3, 3), nlcpy)
@@ -189,7 +189,7 @@ class TestSort(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_sort_invalid_negative_axis1(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        a.sort(axis=-4)
+        a.sort(axis=-4, kind='stable')
 
     def test_sort_invalid_negative_axis2(self):
         a = testing.shaped_random((2, 3, 3), nlcpy)
@@ -200,7 +200,7 @@ class TestSort(unittest.TestCase):
     @testing.numpy_nlcpy_raises()
     def test_external_sort_invalid_negative_axis1(self, xp):
         a = testing.shaped_random((2, 3, 3), xp)
-        xp.sort(a, axis=-4)
+        xp.sort(a, axis=-4, kind='stable')
 
     def test_external_sort_invalid_negative_axis2(self):
         a = testing.shaped_random((2, 3, 3), nlcpy)
@@ -215,9 +215,9 @@ class TestArgsort(unittest.TestCase):
 
     def argsort(self, a, axis=-1, xp=numpy):
         if self.external:
-            return xp.argsort(a, axis=axis)
+            return xp.argsort(a, axis=axis, kind='stable')
         else:
-            return a.argsort(axis=axis)
+            return a.argsort(axis=axis, kind='stable')
 
     # Test base cases
 

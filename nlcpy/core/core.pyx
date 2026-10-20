@@ -336,7 +336,7 @@ cdef class ndarray:
         """
         Total number of bytes for all elements.
         """
-        if self.dtype is numpy.dtype('bool'):
+        if self.dtype == numpy.dtype('bool'):
             return self.size * numpy.dtype('i4').itemsize
         return self.size * self.itemsize
 
@@ -1398,7 +1398,7 @@ cdef class ndarray:
         return ret
 
     def sum(self, axis=None, dtype=None, out=None, keepdims=False,
-            initial=0, where=True):
+            initial=nlcpy._NoValue, where=True):
         """Returns the sum of the array elements over the given axis.
 
         See Also
@@ -1483,7 +1483,7 @@ cdef class ndarray:
 
         venode.request_manager._flush(sync=True)
 
-        if self.dtype is numpy.dtype('bool'):
+        if self.dtype == numpy.dtype('bool'):
             a_cpu_tmp = numpy.empty_like(a_cpu, dtype='i4')
             venode.proc.read_mem(a_cpu_tmp.data, a_ve.ve_adr, a_ve.nbytes)
             a_cpu[...] = a_cpu_tmp.astype('bool')
@@ -1517,7 +1517,7 @@ cdef class ndarray:
         else:
             raise RuntimeError('Cannot set to non-contiguous array')
 
-        if a_cpu.dtype is numpy.dtype('bool'):
+        if a_cpu.dtype == numpy.dtype('bool'):
             a_cpu = a_cpu.astype('i4')
 
         venode = self._venode
@@ -1879,7 +1879,7 @@ cdef ndarray _send_object_to_ve(obj, dtype, order, Py_ssize_t ndmin):
     if a_dtype.char not in '?bhilqBHILQefdFD':
         raise NotImplementedError('Unsupported dtype \'%s\'' % a_dtype)
 
-    if a_cpu.dtype is numpy.dtype('bool'):
+    if a_cpu.dtype == numpy.dtype('bool'):
         a_cpu = a_cpu.astype(dtype='i4')
 
     cdef ndarray a_ve = ndarray(
@@ -2038,3 +2038,4 @@ cdef _exit_mode = False
 def _finalize():
     global _exit_mode
     _exit_mode = True
+

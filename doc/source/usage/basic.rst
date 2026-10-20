@@ -65,13 +65,13 @@ Here, **X.X.X** denotes the version number of NEC Numeric Library Collection.
 Supported Python Versions
 -------------------------
 
-NLCPy is available from Python version 3.6, 3.7, or 3.8.
+NLCPy is available from Python version 3.12.
 
 .. note::
 
-    - NLCPy is not supported for Python version 3.5 or earlier.
+    - NLCPy is not supported for Python version 3.11 or earlier.
 
-    - This manual is intended for users who will use Python version 3.6, 3.7, or 3.8.
+    - This manual is intended for users who will use Python version 3.12.
 
 
 Import Package

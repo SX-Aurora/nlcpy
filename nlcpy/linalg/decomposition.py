@@ -526,6 +526,7 @@ def qr(a, mode='reduced'):
 
     a = nlcpy.asarray(a)
     util._assertRank2(a)
+    a_order = 'C' if a.flags.c_contiguous else 'F'
     if a.dtype == 'F':
         dtype = 'D'
         a_dtype = 'F'
@@ -548,7 +549,7 @@ def qr(a, mode='reduced'):
         elif mode == 'r':
             return nlcpy.empty((0, n), a_dtype)
         elif mode == 'raw':
-            return nlcpy.empty((n, m), dtype), nlcpy.empty((0,), dtype)
+            return nlcpy.empty((n, m), a_dtype), nlcpy.empty((0,), a_dtype)
         else:
             return nlcpy.empty((m, n), a_dtype), nlcpy.empty((0,), a_dtype)
 
@@ -584,13 +585,15 @@ def qr(a, mode='reduced'):
     )
 
     if mode == 'raw':
+        a = nlcpy.asarray(a, dtype=a_dtype, order=a_order)
+        tau = nlcpy.asarray(tau, dtype=a_dtype)
         return a.T, tau
 
     if mode == 'r':
         return nlcpy.asarray(r, dtype=a_dtype)
 
     if mode == 'economic':
-        return nlcpy.asarray(a, dtype=a_dtype)
+        return nlcpy.asarray(a, dtype=a_dtype, order=a_order)
 
     mc = m if mode == 'complete' else k
     q = nlcpy.asarray(a[:, :mc], dtype=a_dtype, order='C')

@@ -14,12 +14,12 @@
 Before the installation, the following components are required to be installed on your x86 Node of SX-Aurora TSUBASA.
 
 - [NEC SDK](https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf)
-	- required NEC C/C++ compiler version: >= 5.0.0
+	- required NEC C/C++ compiler version: >= 5.4.0
 	- required NLC version: >= 3.0.0
 
 - [Alternative VE Offloading (AVEO)](https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html)
 
-    - required version: >= 3.0.2
+    - required version: >= 3.6.0
 	- If you install NLCPy from wheel, the runtime packages of Alternative VE Offloading(AVEO) are required.
 
         ```
@@ -39,10 +39,10 @@ Before the installation, the following components are required to be installed o
     ```
 
 - [Python](https://www.python.org/)
-        - required version: 3.6, 3.7, or 3.8
+        - required version: 3.12
 
 - [NumPy](https://www.numpy.org/)
-        - required version: >= v1.17
+        - required version: >= v1.26.0
 
 ## Install from wheel
 

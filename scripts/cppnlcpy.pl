@@ -1521,10 +1521,10 @@ my $d2r = "1.7453292519943295769e\-2"; #pi/180
 },
 'true_divide' => '@op3@ = (@ari_dtype@)(@op1@) / (@ari_dtype@)(@op2@);',
 'floor_divide'=> {
-     'float'           => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = nlcpy_g_nanf;',
-     'double'          => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = nlcpy_g_nan;',
-     'float _Complex'  => '@op3@ = floorf(crealf((float _Complex)(@op1@)/(float _Complex)(@op2@))); if (cabsf((float _Complex)@op2@)==0) @op3@ = nlcpy_g_nanf;',
-     'double _Complex' => '@op3@ = floor (creal((double _Complex)(@op1@)/(double _Complex)(@op2@))); if (cabsf((double _Complex)@op2@)==0) @op3@ = nlcpy_g_nan;',
+     'float'           => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = INFINITY;',
+     'double'          => '@op3@ = floor ((double)(@op1@)/(double)(@op2@)); if ((double)@op2@==0) @op3@ = INFINITY;',
+     'float _Complex'  => '@op3@ = floorf(crealf((float _Complex)(@op1@)/(float _Complex)(@op2@))); if (cabsf((float _Complex)@op2@)==0) @op3@ = INFINITY;',
+     'double _Complex' => '@op3@ = floor (creal((double _Complex)(@op1@)/(double _Complex)(@op2@))); if (cabsf((double _Complex)@op2@)==0) @op3@ = INFINITY;',
      'others'          => << 'EOS'
                           const @ari_dtype@ l = (@op2@!=0) ? ((@ari_dtype@)@op1@ / (@ari_dtype@)@op2@) * (@ari_dtype@)@op2@ : @op1@;
                           @op3@ = (( ((double)((@ari_dtype@)@op1@) * (double)@op2@)>=0 || l == @op1@) ? l : l - (@ari_dtype@)@op2@)/(@ari_dtype@)(@op2@);
@@ -1534,8 +1534,8 @@ EOS
 'power'       => {
      'float'           => '@op3@ = powf ((@ari_dtype@)(@op1@), (@ari_dtype@)(@op2@));',
      'double'          => '@op3@ = pow  ((@ari_dtype@)(@op1@), (@ari_dtype@)(@op2@));',
-     'float _Complex'  => '@op3@ = (crealf((float _Complex)@op1@)==0&&cimagf((float _Complex)@op1@)==0&&(crealf((float _Complex)@op2@)==0||cimagf((float _Complex)@op2@)!=0)) ? nlcpy_g_nanf+nlcpy_g_nanf*I : cpowf((float _Complex)@op1@, (float _Complex)@op2@);',
-     'double _Complex' => '@op3@ = (creal((double _Complex)@op1@)==0&&cimag((double _Complex)@op1@)==0&&(creal((double _Complex)@op2@)==0||cimag((double _Complex)@op2@)!=0)) ? nlcpy_g_nan+nlcpy_g_nan*I : cpow((double _Complex)@op1@, (double _Complex)@op2@);',
+     'float _Complex'  => '@op3@ = (crealf((float _Complex)@op1@)!=0||cimagf((float _Complex)@op1@)!=0) ? cpowf((float _Complex)@op1@, (float _Complex)@op2@) : (crealf((float _Complex)@op2@)==0&&cimagf((float _Complex)@op2@)==0) ? 1.0+0.0j : (crealf((float _Complex)@op2@)>0) ? 0.0+0.0*I : (crealf((float _Complex)@op2@)<0||crealf((float _Complex)@op2@)==0&&cimagf((float _Complex)@op2@)!=0) ? nlcpy_g_nanf+nlcpy_g_nanf*I : cpowf((float _Complex)@op1@, (float _Complex)@op2@);',
+     'double _Complex'  => '@op3@ = (creal((double _Complex)@op1@)!=0||cimag((double _Complex)@op1@)!=0) ? cpow((double _Complex)@op1@, (double _Complex)@op2@) : (creal((double _Complex)@op2@)==0&&cimag((double _Complex)@op2@)==0) ? 1.0+0.0j : (creal((double _Complex)@op2@)>0) ? 0.0+0.0*I : (creal((double _Complex)@op2@)<0||crealf((double _Complex)@op2@)==0&&cimag((double _Complex)@op2@)!=0) ? nlcpy_g_nan+nlcpy_g_nan*I : cpow((double _Complex)@op1@, (double _Complex)@op2@);',
      'others'          => << 'EOS'
                   double t = pow((double)(@op1@), (double)(@op2@));
                   @op3@ = (t>=0) ? (@ari_dtype@) (t+0.5) : (@ari_dtype@) (t-0.5);

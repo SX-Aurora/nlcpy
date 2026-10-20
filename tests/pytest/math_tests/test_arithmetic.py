@@ -314,8 +314,7 @@ class TestArithmeticBinaryNanCheck(unittest.TestCase):
         in1 = nlcpy.zeros(10, dtype=dtype)
         in2 = nlcpy.full(10, 0 + 0j, dtype=dtype)
         actual = nlcpy.power(in1, in2)
-        desired = numpy.full(10, numpy.nan, dtype=dtype)
-        desired.imag = numpy.nan
+        desired = numpy.ones(10, dtype=dtype)
         assert numpy.array_equal(actual, desired, equal_nan=True)
 
     @testing.for_complex_dtypes()
@@ -324,8 +323,7 @@ class TestArithmeticBinaryNanCheck(unittest.TestCase):
         in1 = nlcpy.zeros(10, dtype=dtype)
         in2 = nlcpy.full(10, 1 + 1j, dtype=dtype)
         actual = nlcpy.power(in1, in2)
-        desired = numpy.full(10, numpy.nan, dtype=dtype)
-        desired.imag = numpy.nan
+        desired = numpy.zeros(10, dtype=dtype)
         assert numpy.array_equal(actual, desired, equal_nan=True)
 
     @testing.for_complex_dtypes()
@@ -343,5 +341,5 @@ class TestArithmeticBinaryNanCheck(unittest.TestCase):
         in2 = nlcpy.zeros(10, dtype=dtype)
         with nlcpy.errstate(divide='ignore', invalid='ignore'):
             actual = nlcpy.floor_divide(in1, in2)
-            desired = numpy.full(10, numpy.nan, dtype=dtype)
+            desired = numpy.full(10, numpy.inf, dtype=dtype)
             assert numpy.array_equal(actual, desired, equal_nan=True)

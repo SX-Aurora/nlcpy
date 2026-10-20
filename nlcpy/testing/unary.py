@@ -122,7 +122,7 @@ def _recreate_array_or_scalar(op, in1, minval, maxval, ufunc_name=""):
             if op == 'power':
                 _maxval = 2
             elif op == 'multiply':
-                _maxval = 10
+                _maxval = 2.4
             else:
                 _maxval = 16
             if isinstance(in1, numpy.ndarray):

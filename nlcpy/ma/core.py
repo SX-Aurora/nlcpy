@@ -480,9 +480,8 @@ class MaskedArray(ndarray):
                 _mask[indx] = mval
         elif not self._hardmask:
             # Set the data, then the mask
-            if isinstance(indx, MaskedArray):
+            if isinstance(indx, MaskedArray) and not isinstance(value, masked_array):
                 _data[indx.data] = dval
-                _mask[indx.data] = mval
             else:
                 _data[indx] = dval
                 _mask[indx] = mval
@@ -790,17 +789,17 @@ class MaskedArray(ndarray):
         else:
             if m is not nomask:
                 self._mask += m
+
         if numpy.isscalar(other):
             if self._mask is not nomask and self._mask.any():
                 other = numpy.array(
                     other, dtype=numpy.result_type(self.dtype, type(other)))
-            else:
-                other = numpy.result_type(self.dtype, type(other)).type(other)
             where = nlcpy.logical_not(self._mask)
             nlcpy.add(self._data, other, where=where, out=self._data)
         else:
-            self._data.__iadd__(
-                nlcpy.where(self._mask, self.dtype.type(0), getdata(other)))
+            other = getdata(other)
+            other = nlcpy.where(self._mask, other.dtype.type(0), other)
+            self._data.__iadd__(other)
         return self
 
     def __sub__(self, other):
@@ -821,13 +820,12 @@ class MaskedArray(ndarray):
             if self._mask is not nomask and self._mask.any():
                 other = numpy.array(
                     other, dtype=numpy.result_type(self.dtype, type(other)))
-            else:
-                other = numpy.result_type(self.dtype, type(other)).type(other)
             where = nlcpy.logical_not(self._mask)
             nlcpy.subtract(self._data, other, where=where, out=self._data)
         else:
-            self._data.__isub__(
-                nlcpy.where(self._mask, self.dtype.type(0), getdata(other)))
+            other = getdata(other)
+            other = nlcpy.where(self._mask, other.dtype.type(0), other)
+            self._data.__isub__(other)
         return self
 
     def __mul__(self, other):
@@ -848,13 +846,12 @@ class MaskedArray(ndarray):
             if self._mask is not nomask and self._mask.any():
                 other = numpy.array(
                     other, dtype=numpy.result_type(self.dtype, type(other)))
-            else:
-                other = numpy.result_type(self.dtype, type(other)).type(other)
             where = nlcpy.logical_not(self._mask)
             nlcpy.multiply(self._data, other, where=where, out=self._data)
         else:
-            self._data.__imul__(
-                nlcpy.where(self._mask, self.dtype.type(1), getdata(other)))
+            other = getdata(other)
+            other = nlcpy.where(self._mask, other.dtype.type(1), other)
+            self._data.__imul__(other)
         return self
 
     def __div__(self, other):

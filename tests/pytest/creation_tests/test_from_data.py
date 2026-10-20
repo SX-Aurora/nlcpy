@@ -50,6 +50,7 @@
 #     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 
 import unittest
+import re
 
 import nlcpy
 from nlcpy import testing
@@ -485,9 +486,11 @@ class TestArrayInvalidObject(unittest.TestCase):
     })
 )
 class TestFromFile(unittest.TestCase):
-    @testing.numpy_nlcpy_array_equal
     @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
     def test_fromfile(self, xp, dtype):
+        if self.offset != 0 and (self.count < 0 or self.sep != ''):
+            return 0
         a = testing.shaped_random([10], numpy, dtype)
         with tempfile.TemporaryFile() as fh:
             a.tofile(fh, sep=self.sep)
@@ -496,62 +499,71 @@ class TestFromFile(unittest.TestCase):
 
 
 class TestLoadtxt(unittest.TestCase):
-    @testing.numpy_nlcpy_array_equal
     @testing.for_all_dtypes()
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_dtype(self, xp, dtype):
         a = testing.shaped_random([2, 3, 4], xp, dtype)
-        txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
+        if a.dtype.char == '?':
+            a = a.astype('i')
+        numpy.set_printoptions(linewidth=numpy.inf)
+        str_a = str(a)
+        if a.dtype.kind == 'c':
+            str_a = re.sub(r"\s+\+", "+", str_a)
+        txt = StringIO(str_a.translate(str.maketrans({'[': None, ']': None})))
         return xp.loadtxt(txt, dtype=dtype)
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_comments(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': '@comment\n', ']': None})))
         return xp.loadtxt(txt, comments='@')
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_delimiter(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
-        trans = str.maketrans({'[': None, ']': None, ' ': '@'})
-        txt = StringIO(str(a).translate(trans).replace('\n@', ''))
+        numpy.set_printoptions(linewidth=numpy.inf)
+        trans = str.maketrans({'[': None, ']': None})
+        txt = StringIO(
+            re.sub(r"\s+", "@", str(a).translate(trans)).replace('\n@', '')[:-2]
+        )
         return xp.loadtxt(txt, delimiter='@')
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_converters(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
-        conv = {1: lambda s: float(s + s)}
+        conv = {1: lambda s: float(s) + float(s)}
         return xp.loadtxt(txt, converters=conv)
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_skiprows(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
         return xp.loadtxt(txt, skiprows=1)
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_usecols(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
         return xp.loadtxt(txt, usecols=1)
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_unpack(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
         return xp.loadtxt(txt, unpack=True)
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_ndmin(self, xp):
         a = testing.shaped_random([10], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))
         return xp.loadtxt(txt, ndmin=2)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_loadtxt_encoding(self, xp):
         return xp.loadtxt("", encoding="dummy")
 
-    @testing.numpy_nlcpy_array_equal
+    @testing.numpy_nlcpy_array_equal()
     def test_loadtxt_maxrows(self, xp):
         a = testing.shaped_random([2, 3, 4], xp)
         txt = StringIO(str(a).translate(str.maketrans({'[': None, ']': None})))

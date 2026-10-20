@@ -293,21 +293,21 @@ cpdef ndarray convert_optimized_array(a, dtype=None):
         out_shape[0] = nx
         out_slice.append(slice(None))
     elif ndim == 2:
-        out_shape[1] = int(mx)
+        out_shape[1] = int(mx.item())
         out_shape[0] = ny
         out_slice.append(slice(None))
         out_slice.append(slice(0, nx))
     elif ndim == 3:
-        out_shape[2] = int(mx)
-        out_shape[1] = int(my)
+        out_shape[2] = int(mx.item())
+        out_shape[1] = int(my.item())
         out_shape[0] = nz
         out_slice.append(slice(None))
         out_slice.append(slice(0, ny))
         out_slice.append(slice(0, nx))
     elif ndim == 4:
-        out_shape[3] = int(mx)
-        out_shape[2] = int(my)
-        out_shape[1] = int(mz)
+        out_shape[3] = int(mx.item())
+        out_shape[2] = int(my.item())
+        out_shape[1] = int(mz.item())
         out_shape[0] = nw
         out_slice.append(slice(None))
         out_slice.append(slice(0, nz))
@@ -415,21 +415,21 @@ cpdef ndarray create_optimized_array(shape, dtype='float64'):
         out_shape[0] = nx
         out_slice.append(slice(None))
     elif ndim == 2:
-        out_shape[1] = int(mx)
+        out_shape[1] = int(mx.item())
         out_shape[0] = ny
         out_slice.append(slice(None))
         out_slice.append(slice(0, nx))
     elif ndim == 3:
-        out_shape[2] = int(mx)
-        out_shape[1] = int(my)
+        out_shape[2] = int(mx.item())
+        out_shape[1] = int(my.item())
         out_shape[0] = nz
         out_slice.append(slice(None))
         out_slice.append(slice(0, ny))
         out_slice.append(slice(0, nx))
     elif ndim == 4:
-        out_shape[3] = int(mx)
-        out_shape[2] = int(my)
-        out_shape[1] = int(mz)
+        out_shape[3] = int(mx.item())
+        out_shape[2] = int(my.item())
+        out_shape[1] = int(mz.item())
         out_shape[0] = nw
         out_slice.append(slice(None))
         out_slice.append(slice(0, nz))

@@ -49,6 +49,12 @@ from nlcpy.request cimport request
 
 cimport numpy as cnp
 
+cpdef create_work_array(out, input_shape, dtype):
+    if input_shape != out.shape:
+        return nlcpy.array(out, dtype=dtype)
+    else:
+        return nlcpy.empty(out.shape, dtype=dtype)
+
 cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
 
     if dtype is not None:
@@ -114,7 +120,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                                          +str(input_arr.shape).replace(" ", "")+"->"
                                          +str(input_arr.shape).replace(" ", "")+" ")
                     else:
-                        y = out
                         output_flg = True
 
                 else:
@@ -122,7 +127,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                         raise ValueError(
                             "provided out is the wrong size for the reduction")
                     else:
-                        y = out
                         output_flg = True
 
             else:
@@ -138,7 +142,6 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                                              +str(input_arr.shape).replace(" ", "")
                                              +"->"+str(input_arr.shape).replace(" ", "")
                                              +" ")
-                    y = out
                     output_flg = True
                 else:
                     raise ValueError("Iterator input op_axes[0]["
@@ -150,6 +153,7 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
         if output_flg and dtype is None:
             if name in ('nlcpy_logaddexp_accumulate',
                         'nlcpy_logaddexp2_accumulate',
+                        'nlcpy_floor_divide_accumulate',
                         'nlcpy_remainder_accumulate',
                         'nlcpy_mod_accumulate',
                         'nlcpy_fmod_accumulate',
@@ -159,12 +163,10 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                         'nlcpy_copysign_accumulate',
                         'nlcpy_nextafter_accumulate',
                         ):
-                if out.dtype == 'complex64':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'F'")
-                elif out.dtype == 'complex128':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'D'")
+                if out.dtype in ('complex64', 'complex128'):
+                    raise TypeError(f"ufunc {name} not supported for the input types, and "
+                        "the inputs could not be safely coerced to any supported types"
+                        "according to the casting rule ''safe''")
 
             elif name in ('nlcpy_bitwise_and_accumulate',
                           'nlcpy_bitwise_or_accumulate',
@@ -172,24 +174,18 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                           'nlcpy_right_shift_accumulate',
                           'nlcpy_left_shift_accumulate',
                           ):
-                if out.dtype == 'float32':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'f'")
-                elif out.dtype == 'complex64':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'F'")
-                elif out.dtype == 'float64':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'd'")
-                elif out.dtype == 'complex128':
-                    raise ValueError("could not find a matching type for "+name
-                                     +", requested type has type code 'D'")
+                if out.dtype in ('float32', 'float64', 'complex64', 'complex128'):
+                    raise TypeError(f"ufunc {name} not supported for the input types, and "
+                        "the inputs could not be safely coerced to any supported types"
+                        "according to the casting rule ''safe''")
+
 
     ########################################################################
     # dtype check
     if dtype is None and out is None:
         if name in ('nlcpy_logaddexp_accumulate',
                     'nlcpy_logaddexp2_accumulate',
+                    'nlcpy_floor_divide_accumulate',
                     'nlcpy_remainder_accumulate',
                     'nlcpy_mod_accumulate',
                     'nlcpy_fmod_accumulate',
@@ -199,12 +195,10 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                     'nlcpy_copysign_accumulate',
                     'nlcpy_nextafter_accumulate',
                     ):
-            if input_arr.dtype.name in ('complex64'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'F'")
-            elif input_arr.dtype.name in ('complex128'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'D'")
+            if input_arr.dtype.name in ('complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
 
         elif name in ('nlcpy_bitwise_and_accumulate',
                       'nlcpy_bitwise_or_accumulate',
@@ -212,25 +206,17 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_right_shift_accumulate',
                       'nlcpy_left_shift_accumulate',
                       ):
-            if input_arr.dtype.name in ('float32'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'f'")
-            elif input_arr.dtype.name in ('complex64'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'F'")
-            elif input_arr.dtype.name in ('float64'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'd'")
-            elif input_arr.dtype.name in ('complex128'):
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'D'")
+            if input_arr.dtype.name in ('float32', 'float64', 'complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
 
     if dtype is None:
-        dt = input_arr.dtype if out is None else out.dtype
+        dt = input_arr.dtype.name
         if name in ('nlcpy_add_accumulate', 'nlcpy_multiply_accumulate'):
-            if input_arr.dtype.name in ('bool', 'int32'):
+            if dt in ('bool', 'int32'):
                 dt = 'int64'
-            elif input_arr.dtype.name in ('uint32'):
+            elif dt in ('uint32'):
                 dt = 'uint64'
 
         elif name in ('nlcpy_greater_accumulate',
@@ -239,7 +225,12 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_less_equal_accumulate',
                       'nlcpy_not_equal_accumulate',
                       'nlcpy_equal_accumulate',
-                      'nlcpy_logical_and_accumulate',
+                      ):
+            if dt != 'bool':
+                raise TypeError("No loop matching the specified signature and "
+                    f"casting was found for ufunc {name}")
+
+        elif name in ('nlcpy_logical_and_accumulate',
                       'nlcpy_logical_or_accumulate',
                       'nlcpy_logical_xor_accumulate',
                       ):
@@ -252,17 +243,22 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_true_divide_accumulate',
                       'nlcpy_heaviside_accumulate',
                       'nlcpy_arctan2_accumulate',
-                      'nlcpy_hypot_accumulate',
                       'nlcpy_copysign_accumulate',
                       'nlcpy_nextafter_accumulate',
+                      'nlcpy_hypot_accumulate',
                       ):
-            if dt.name == 'bool':
+            if dt == 'bool':
                 if out is None:
                     raise TypeError("not support for float16.")
                 else:
                     dt = 'float32'
 
-            elif dt.name not in ('float32', 'float64', 'complex64', 'complex128'):
+            elif dt in ('complex64', 'complex128') and \
+                name not in ('nlcpy_divide_accumulate', 'nlcpy_true_divide_accumulate',):
+                raise TypeError(f"ufunc '{name}' not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types "
+                    "according to the casting rule ''safe''")
+            elif dt not in ('float32', 'float64', 'complex64', 'complex128'):
                 dt = 'float64'
 
         elif name in ('nlcpy_floor_divide_accumulate',
@@ -270,16 +266,47 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_remainder_accumulate',
                       'nlcpy_mod_accumulate',
                       'nlcpy_fmod_accumulate',
-                      'nlcpy_left_shift_accumulate',
-                      'nlcpy_right_shift_accumulate',
                       'nlcpy_subtract_accumulate',
                       ):
-            if dt.name == 'bool':
-                # dt = 'int8' nlcpy can't use
+            if dt == 'bool':
+                if out is not None and out.dtype == 'bool':
+                    if name == 'nlcpy_subtract_accumulate':
+                        raise TypeError("nlcpy boolean subtract, the `-` operator, "
+                            "is not supported, use the bitwise_xor, the `^` operator, "
+                            "or the logical_xor function instead.")
                 if out is None:
-                    raise TypeError("not support for int8.")
+                    # dt = 'int8' nlcpy can't use
+                        raise TypeError("not support for int8.")
                 else:
                     dt = 'int32'
+
+            elif dt in ('complex64', 'complex128') and \
+              name not in ('nlcpy_power_accumulate', 'nlcpy_subtract_accumulate'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
+
+            elif out is not None:
+                dt = numpy.result_type(input_arr.dtype, out.dtype)
+
+        elif name in ('nlcpy_bitwise_and_accumulate',
+                      'nlcpy_bitwise_or_accumulate',
+                      'nlcpy_bitwise_xor_accumulate',
+                      'nlcpy_right_shift_accumulate',
+                      'nlcpy_left_shift_accumulate',
+                      ):
+            if dt in ('float32', 'float64', 'complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
+            if out is not None:
+                if out.dtype == 'uint64' and dt in ('int32', 'int64') or \
+                    (out.dtype in ('int32', 'int64') and dt == 'uint64'):
+                    raise TypeError(f"ufunc {name} not supported for the input types, and "
+                        "the inputs could not be safely coerced to any supported types"
+                        "according to the casting rule ''safe''")
+                dt = numpy.result_type(input_arr.dtype, out.dtype)
+
 
     else:
         # argument dtype = int8/int16/float16 -> not supported error
@@ -288,6 +315,7 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
 
         if name in ('nlcpy_logaddexp_accumulate',
                     'nlcpy_logaddexp2_accumulate',
+                    'nlcpy_floor_divide_accumulate',
                     'nlcpy_remainder_accumulate',
                     'nlcpy_mod_accumulate',
                     'nlcpy_fmod_accumulate',
@@ -297,31 +325,29 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                     'nlcpy_copysign_accumulate',
                     'nlcpy_nextafter_accumulate',
                     ):
-            if dtype == 'complex64':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'F'")
-            elif dtype == 'complex128':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'D'")
+            if dtype in ('bool', 'complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
+            if input_arr.dtype.name in ('complex64', 'complex128'):
+                input_arr = nlcpy.asarray(input_arr, dtype=dtype)
 
         elif name in ('nlcpy_bitwise_and_accumulate',
                       'nlcpy_bitwise_or_accumulate',
                       'nlcpy_bitwise_xor_accumulate',
-                      'nlcpy_right_shift_accumulate',
+                      ):
+            if dtype in ('float32', 'float64', 'complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
+
+        elif name in ('nlcpy_right_shift_accumulate',
                       'nlcpy_left_shift_accumulate',
                       ):
-            if dtype == 'float32':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'f'")
-            elif dtype == 'complex64':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'F'")
-            elif dtype == 'float64':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'd'")
-            elif dtype == 'complex128':
-                raise ValueError("could not find a matching type for "+name
-                                 +", requested type has type code 'D'")
+            if dtype in ('bool', 'float32', 'float64', 'complex64', 'complex128'):
+                raise TypeError(f"ufunc {name} not supported for the input types, and "
+                    "the inputs could not be safely coerced to any supported types"
+                    "according to the casting rule ''safe''")
 
         if type(dtype) == str and dtype.find(',') > 0:
             raise TypeError('cannot perform accumulate with flexible type')
@@ -336,6 +362,9 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                     'nlcpy_logical_or_accumulate',
                     'nlcpy_logical_xor_accumulate',
                     ):
+            if dtype != 'bool':
+                raise TypeError("No loop matching the specified signature and "
+                    f"casting was found for ufunc {name}")
             dt = 'bool'
             input_arr = nlcpy.array(input_arr, dtype='bool')
 
@@ -350,16 +379,14 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_nextafter_accumulate',
                       ):
             if dtype == 'bool':
-                # dt = 'float16' nlcpy can't use
-                if out is None:
-                    raise TypeError("not support for float16.")
-                else:
-                    dt = 'float32'
+                raise TypeError("No loop matching the specified signature and casting "
+                    f"was found for ufunc {name}")
 
-            elif dtype in ('float32', 'float64', 'complex', 'complex64', 'complex128'):
+            elif dtype in ('float32', 'float64', 'complex64', 'complex128'):
                 dt = dtype
             else:
-                dt = 'float64'
+                raise TypeError("No loop matching the specified signature and "
+                    f"casting was found for ufunc {name}")
 
         elif name in ('nlcpy_floor_divide_accumulate',
                       'nlcpy_power_accumulate',
@@ -370,13 +397,17 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                       'nlcpy_right_shift_accumulate',
                       'nlcpy_subtract_accumulate',
                       ):
-            if dtype == 'bool' and out is None:
-                # dt = 'int8' nlcpy can't use
-                raise TypeError("not support for int8.")
             if dtype == 'bool':
-                dt = 'int32'
-            elif input_arr.dtype == 'bool' and name == 'nlcpy_subtract_accumulate':
-                dt = 'int32'
+                if out is None:
+                    # dt = 'int8' nlcpy can't use
+                    raise TypeError("not support for int8.")
+                if name == 'nlcpy_subtract_accumulate':
+                    raise TypeError("nlcpy boolean subtract, the `-` operator, "
+                        "is not supported, use the bitwise_xor, the `^` operator, "
+                        "or the logical_xor function instead.")
+                else:
+                    raise TypeError("No loop matching the specified signature "
+                        f"and casting was found for ufunc {name}")
             else:
                 dt = dtype
         else:
@@ -388,7 +419,8 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
         y = core.ndarray(shape=input_arr.shape, dtype=dt, order=order_out)
         w = y
     else:
-        if out.dtype.name == dt:
+        y = out
+        if out.dtype == dt:
             if name in ('nlcpy_divide_accumulate',
                         'nlcpy_true_divide_accumulate',
                         'nlcpy_heaviside_accumulate',
@@ -400,11 +432,11 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                         'nlcpy_nextafter_accumulate',
                         ):
                 if out.dtype.name in ('bool'):
-                    w = nlcpy.array(y, dtype='float32')
+                    w = create_work_array(y, input_arr.shape, 'float32')
                 elif out.dtype.name in ('int32', 'int64', 'uint32', 'uint64'):
-                    w = nlcpy.array(y, dtype='float64')
+                    w = create_work_array(y, input_arr.shape, 'float64')
                 else:
-                    w = y
+                    w = create_work_array(y, input_arr.shape, dt)
 
             elif name in ('nlcpy_greater_accumulate',
                           'nlcpy_less_accumulate',
@@ -416,28 +448,28 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                           'nlcpy_logical_or_accumulate',
                           'nlcpy_logical_xor_accumulate',
                           ):
-                w = nlcpy.array(y, dtype='bool')
+                w = create_work_array(y, input_arr.shape, 'bool')
             elif name in ('nlcpy_floor_divide_accumulate',
                           'nlcpy_power_accumulate',
                           'nlcpy_left_shift_accumulate',
                           'nlcpy_right_shift_accumulate',
                           ):
                 if out.dtype.name in ('bool'):
-                    w = nlcpy.array(y, dtype='int32')
+                    w = create_work_array(y, input_arr.shape, 'int32')
                 else:
-                    w = y
+                    w = create_work_array(y, input_arr.shape, dt)
             elif name in ('nlcpy_remainder_accumulate',
                           'nlcpy_mod_accumulate',
                           'nlcpy_fmod_accumulate',
                           ):
                 if out.dtype.name in ('bool', 'complex64', 'complex128'):
-                    w = nlcpy.array(y, dtype='int32')
+                    w = create_work_array(y, input_arr.shape, 'int32')
                 else:
-                    w = y
+                    w = create_work_array(y, input_arr.shape, dt)
             else:
-                w = y
+                w = create_work_array(y, input_arr.shape, dt)
         else:
-            w = nlcpy.array(y, dtype=dt)
+            w = create_work_array(y, input_arr.shape, dt)
 
     if name in ('nlcpy_maximum_accumulate', 'nlcpy_minimum_accumulate',
                 'nlcpy_fmax_accumulate', 'nlcpy_fmin_accumulate',
@@ -450,7 +482,8 @@ cpdef accumulate_core(name, a, axis=0, dtype=None, out=None):
                 'nlcpy_logaddexp2_accumulate', 'nlcpy_heaviside_accumulate',
                 'nlcpy_copysign_accumulate', 'nlcpy_nextafter_accumulate'
                 ):
-        input_arr = nlcpy.asarray(input_arr, dtype=w.dtype)
+        if dtype is not None:
+            input_arr = nlcpy.asarray(input_arr, dtype=w.dtype)
 
     elif name in ('nlcpy_add_accumulate', 'nlcpy_subtract_accumulate',
                   'nlcpy_multiply_accumulate',

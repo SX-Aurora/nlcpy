@@ -1,3 +1,5 @@
 numpy
 cython
 wheel
+setuptools >= 70.1
+patchelf

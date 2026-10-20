@@ -66,16 +66,13 @@ double _Complex nlcpy__global_c128;
 
 define(<--@macro_reduce_operator@-->,<--@
 uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t init_flag,
-                     ve_array *initial, int32_t where_flag, ve_array *where, int32_t *psw)
+                     $2 init_val, int32_t where_flag, ve_array *where, int32_t *psw)
 {
     @TYPE1@ *px = (@TYPE1@ *)nlcpy__get_ptr(x);
     if (px == NULL) return NLCPY_ERROR_MEMORY;
     $2 *py = ($2 *)nlcpy__get_ptr(y);
     if (py == NULL) return NLCPY_ERROR_MEMORY;
-    $2 *pi = ($2 *)nlcpy__get_ptr(initial);
-    if (pi == NULL) return NLCPY_ERROR_MEMORY;
     ve_array *w = where;
-    $2 init_val = ($2)(*pi);
 
     // initialize
     if (init_flag) {
@@ -101,7 +98,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
 {
         if (!where_flag) {
             if (!init_flag) {
-                *py = *px;
+                *py = ($2)*px;
             }
             else{
                 @UNARY_OPERATOR@(*px,*py,$1)
@@ -110,7 +107,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
             Bint *pw = (Bint *)w->ve_adr;
             if (*pw) {
                 if (!init_flag) {
-                    *py = *px;
+                    *py = ($2)*px;
                 }
                 else{
                     @UNARY_OPERATOR@(*px,*py,$1)
@@ -124,7 +121,6 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
 /////////
     } else if (x->ndim == 1){
         uint64_t i;
-        uint64_t iw0 = 0;
         const uint64_t ix = x->strides[0]/x->itemsize;
         if (!where_flag) {
 #if defined(add_reduce) || defined(multiply_reduce)
@@ -142,7 +138,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
 #endif
             uint64_t ii;
             if (!init_flag) {
-                *py = *px;
+                *py = ($2)*px;
                 ii = 1;
             } else {
                 ii = 0;
@@ -168,7 +164,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
             // Note that rational operations for complex and unsigned numbers occurs an error or warnning.
             uint64_t ii;
             if (!init_flag) {
-                *py = *px;
+                *py = ($2)*px;
                 ii = 1;
             } else {
                 ii = 0;
@@ -180,12 +176,14 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
             const uint64_t ist = (x->shape[0]-ii)*it/nt;
             const uint64_t ien = (x->shape[0]-ii)*(it+1)/nt;
             $2 tmp = ($2)(*py);
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
 #if "$1" eq "f32" || "$1" eq "f64"
             double is_there_nan = (isnan_$1(tmp)) ? 1.0 : 0.0;
 #elif "$1" eq "i32" || "$1" eq "i64" || "$1" eq "bool"
             double is_there_nan = 0.0;
 #else
 #error Not Impletended
+#endif
 #endif
 @#pragma _NEC ivdep
             for (i=ii+ist; i < ii+ien; i++) {
@@ -229,7 +227,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
 @#endif /* _OPENMP */
             {
                 if (!init_flag) {
-                    *py = *px;
+                    *py = ($2)*px;
                     i = 1;
                 } else {
                     i = 0;
@@ -250,7 +248,7 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                 if (!init_flag) {
                     for (i = 0; i < x->shape[0]; i++) {
                         if (pw[i*iw]) {
-                            *py = *px;
+                            *py = ($2)*px;
                             i++;
                             break;
                         }
@@ -318,8 +316,6 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
         const int it = 0;
 @#endif
         int64_t i;
-        uint64_t adr_x = (uint64_t)x->ve_adr;
-        uint64_t adr_y = (uint64_t)y->ve_adr;
 
         uint64_t ix = 0;
         uint64_t iy = 0;
@@ -344,19 +340,21 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *y, int32_t axis, int32_t ini
                         // Note that a rational operation for complex and unsigned numbers occurs an error or warnning.
                         uint64_t ii;
                         if (!init_flag) {
-                           py[iy] = px[ix];
+                           py[iy] = ($2)px[ix];
                            ii = 1;
                         } else {
                            ii = 0;
                         }
 #if ( defined(maximum_reduce) || defined(minimum_reduce) ) && ( defined(DTAG1_i32) || defined(DTAG1_i64) || defined(DTAG1_f32) || defined(DTAG1_f64) || defined(DTAG1_bool)) && ( "$1" eq "i32" || "$1" eq "i64" || "$1" eq "f32" || "$1" eq "f64" || "$1" eq "bool")
                         $2 tmp = py[iy];
+#if defined(DTAG1_f32) || defined(DTAG1_f64)
 #if "$1" eq "f32" || "$1" eq "f64"
                         float is_there_nan = (isnan_$1(py[iy])) ? 1.0 : 0.0;
 #elif "$1" eq "i32" || "$1" eq "i64" || "$1" eq "bool"
                         float is_there_nan = 0.0;
 #else
 #error Not Impletended
+#endif
 #endif
 @#pragma _NEC ivdep
                         for (i = ii; i < x->shape[n_inner2]; i++) {

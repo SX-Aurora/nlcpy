@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-17 17:08+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/mathematical.rst:2
 msgid "Mathematical Functions"
@@ -30,7 +29,7 @@ msgid "Trigonometric Functions"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.sin <nlcpy.sin>`"
+msgid ":py:obj:`nlcpy.sin <nlcpy.sin>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -38,7 +37,7 @@ msgid "Computes the element-wise sine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.cos <nlcpy.cos>`"
+msgid ":py:obj:`nlcpy.cos <nlcpy.cos>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -46,7 +45,7 @@ msgid "Computes the element-wise cosine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.tan <nlcpy.tan>`"
+msgid ":py:obj:`nlcpy.tan <nlcpy.tan>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -54,7 +53,7 @@ msgid "Computes the element-wise tangent."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.arcsin <nlcpy.arcsin>`"
+msgid ":py:obj:`nlcpy.arcsin <nlcpy.arcsin>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -62,7 +61,7 @@ msgid "Computes the element-wise inverse sine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.arccos <nlcpy.arccos>`"
+msgid ":py:obj:`nlcpy.arccos <nlcpy.arccos>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -70,7 +69,7 @@ msgid "Computes the element-wise inverse cosine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.arctan <nlcpy.arctan>`"
+msgid ":py:obj:`nlcpy.arctan <nlcpy.arctan>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -78,7 +77,7 @@ msgid "Computes the element-wise inverse tangent."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.arctan2 <nlcpy.arctan2>`"
+msgid ":py:obj:`nlcpy.arctan2 <nlcpy.arctan2>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -88,7 +87,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.hypot <nlcpy.hypot>`"
+msgid ":py:obj:`nlcpy.hypot <nlcpy.hypot>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -96,7 +95,7 @@ msgid "Computes the \"legs\" of a right triangle."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.degrees <nlcpy.degrees>`"
+msgid ":py:obj:`nlcpy.degrees <nlcpy.degrees>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -104,7 +103,7 @@ msgid "Converts angles from radians to degrees."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.radians <nlcpy.radians>`"
+msgid ":py:obj:`nlcpy.radians <nlcpy.radians>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
@@ -112,11 +111,11 @@ msgid "Converts angles from degrees to radians."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.deg2rad <nlcpy.deg2rad>`"
+msgid ":py:obj:`nlcpy.deg2rad <nlcpy.deg2rad>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:25:<autosummary>:1
-msgid ":obj:`nlcpy.rad2deg <nlcpy.rad2deg>`"
+msgid ":py:obj:`nlcpy.rad2deg <nlcpy.rad2deg>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:27
@@ -124,7 +123,7 @@ msgid "Hyperbolic Functions"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.sinh <nlcpy.sinh>`"
+msgid ":py:obj:`nlcpy.sinh <nlcpy.sinh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -132,7 +131,7 @@ msgid "Computes the element-wise hyperbolic sine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.cosh <nlcpy.cosh>`"
+msgid ":py:obj:`nlcpy.cosh <nlcpy.cosh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -140,7 +139,7 @@ msgid "Computes the element-wise hyperbolic cosine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.tanh <nlcpy.tanh>`"
+msgid ":py:obj:`nlcpy.tanh <nlcpy.tanh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -148,7 +147,7 @@ msgid "Computes the element-wise hyperbolic tangent."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.arcsinh <nlcpy.arcsinh>`"
+msgid ":py:obj:`nlcpy.arcsinh <nlcpy.arcsinh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -156,7 +155,7 @@ msgid "Computes the element-wise inverse hyperbolic sine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.arccosh <nlcpy.arccosh>`"
+msgid ":py:obj:`nlcpy.arccosh <nlcpy.arccosh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -164,7 +163,7 @@ msgid "Computes the element-wise inverse hyperbolic cosine."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
-msgid ":obj:`nlcpy.arctanh <nlcpy.arctanh>`"
+msgid ":py:obj:`nlcpy.arctanh <nlcpy.arctanh>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:38:<autosummary>:1
@@ -176,7 +175,7 @@ msgid "Rounding"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
-msgid ":obj:`nlcpy.floor <nlcpy.floor>`"
+msgid ":py:obj:`nlcpy.floor <nlcpy.floor>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
@@ -184,7 +183,7 @@ msgid "Returns the floor of the input, element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
-msgid ":obj:`nlcpy.ceil <nlcpy.ceil>`"
+msgid ":py:obj:`nlcpy.ceil <nlcpy.ceil>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
@@ -192,7 +191,7 @@ msgid "Returns the ceiling of the input, element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
-msgid ":obj:`nlcpy.trunc <nlcpy.trunc>`"
+msgid ":py:obj:`nlcpy.trunc <nlcpy.trunc>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:48:<autosummary>:1
@@ -204,7 +203,7 @@ msgid "Sums, Products, Differences"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
-msgid ":obj:`nlcpy.prod <nlcpy.prod>`"
+msgid ":py:obj:`nlcpy.prod <nlcpy.prod>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
@@ -212,7 +211,7 @@ msgid "Returns the product of array elements over a given axis."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
-msgid ":obj:`nlcpy.sum <nlcpy.sum>`"
+msgid ":py:obj:`nlcpy.sum <nlcpy.sum>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
@@ -220,7 +219,7 @@ msgid "Sum of array elements over a given axis."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
-msgid ":obj:`nlcpy.cumsum <nlcpy.cumsum>`"
+msgid ":py:obj:`nlcpy.cumsum <nlcpy.cumsum>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
@@ -228,7 +227,7 @@ msgid "Returns the cumulative sum of the elements along a given axis."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
-msgid ":obj:`nlcpy.diff <nlcpy.diff>`"
+msgid ":py:obj:`nlcpy.diff <nlcpy.diff>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:59:<autosummary>:1
@@ -240,7 +239,7 @@ msgid "Exponents and Logarithms"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.exp <nlcpy.exp>`"
+msgid ":py:obj:`nlcpy.exp <nlcpy.exp>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -248,7 +247,7 @@ msgid "Computes the exponential of all elements in the input array."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.exp2 <nlcpy.exp2>`"
+msgid ":py:obj:`nlcpy.exp2 <nlcpy.exp2>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -256,7 +255,7 @@ msgid "Computes `2**x` for all elements in the array."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.log <nlcpy.log>`"
+msgid ":py:obj:`nlcpy.log <nlcpy.log>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -264,7 +263,7 @@ msgid "Computes the element-wise natural logarithm of *x*."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.log10 <nlcpy.log10>`"
+msgid ":py:obj:`nlcpy.log10 <nlcpy.log10>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -272,7 +271,7 @@ msgid "Computes the element-wise base-10 logarithm of *x*."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.expm1 <nlcpy.expm1>`"
+msgid ":py:obj:`nlcpy.expm1 <nlcpy.expm1>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -280,7 +279,7 @@ msgid "Computes `exp(x) - 1` for all elements in the array."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.log1p <nlcpy.log1p>`"
+msgid ":py:obj:`nlcpy.log1p <nlcpy.log1p>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -288,7 +287,7 @@ msgid "Computes the element-wise natural logarithm of *1 + x*."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.logaddexp <nlcpy.logaddexp>`"
+msgid ":py:obj:`nlcpy.logaddexp <nlcpy.logaddexp>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -296,15 +295,16 @@ msgid "Computes the element-wise natural logarithm of :math:`exp(x1) + exp(x2)`.
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.logaddexp2 <nlcpy.logaddexp2>`"
+msgid ":py:obj:`nlcpy.logaddexp2 <nlcpy.logaddexp2>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
+#, python-brace-format
 msgid "Computes the element-wise base-2 logarithm of :math:`2^{x1} + 2^{x2}`."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.signbit <nlcpy.signbit>`"
+msgid ":py:obj:`nlcpy.signbit <nlcpy.signbit>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -312,7 +312,7 @@ msgid "Returns True where signbit is set (less than zero), element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.copysign <nlcpy.copysign>`"
+msgid ":py:obj:`nlcpy.copysign <nlcpy.copysign>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -320,7 +320,7 @@ msgid "Changes the sign of x1 to that of x2, element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.spacing <nlcpy.spacing>`"
+msgid ":py:obj:`nlcpy.spacing <nlcpy.spacing>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
@@ -330,10 +330,11 @@ msgid ""
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
-msgid ":obj:`nlcpy.ldexp <nlcpy.ldexp>`"
+msgid ":py:obj:`nlcpy.ldexp <nlcpy.ldexp>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:78:<autosummary>:1
+#, python-brace-format
 msgid "Returns :math:`x1 * 2^{x2}`, element-wise."
 msgstr ""
 
@@ -342,7 +343,7 @@ msgid "Arithmetic Operations"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.add <nlcpy.add>`"
+msgid ":py:obj:`nlcpy.add <nlcpy.add>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -350,7 +351,7 @@ msgid "Computes the element-wise addition of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.subtract <nlcpy.subtract>`"
+msgid ":py:obj:`nlcpy.subtract <nlcpy.subtract>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -358,7 +359,7 @@ msgid "Computes the element-wise subtraction of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.multiply <nlcpy.multiply>`"
+msgid ":py:obj:`nlcpy.multiply <nlcpy.multiply>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -366,7 +367,7 @@ msgid "Computes the element-wise multiplication of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.divide <nlcpy.divide>`"
+msgid ":py:obj:`nlcpy.divide <nlcpy.divide>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -374,11 +375,11 @@ msgid "Computes the element-wise division of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.true_divide <nlcpy.true_divide>`"
+msgid ":py:obj:`nlcpy.true_divide <nlcpy.true_divide>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.floor_divide <nlcpy.floor_divide>`"
+msgid ":py:obj:`nlcpy.floor_divide <nlcpy.floor_divide>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -386,7 +387,7 @@ msgid "Computes the element-wise floor division of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.negative <nlcpy.negative>`"
+msgid ":py:obj:`nlcpy.negative <nlcpy.negative>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -394,7 +395,7 @@ msgid "Computes numerical negative, element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.positive <nlcpy.positive>`"
+msgid ":py:obj:`nlcpy.positive <nlcpy.positive>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -402,7 +403,7 @@ msgid "Computes numerical positive, element-wise."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.power <nlcpy.power>`"
+msgid ":py:obj:`nlcpy.power <nlcpy.power>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -410,7 +411,7 @@ msgid "Computes the element-wise exponentiation of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.remainder <nlcpy.remainder>`"
+msgid ":py:obj:`nlcpy.remainder <nlcpy.remainder>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -418,16 +419,16 @@ msgid "Computes the element-wise remainder of division."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.mod <nlcpy.mod>`"
+msgid ":py:obj:`nlcpy.mod <nlcpy.mod>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.fmod <nlcpy.fmod>`"
+msgid ":py:obj:`nlcpy.fmod <nlcpy.fmod>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.absolute <nlcpy.absolute>`"
+msgid ":py:obj:`nlcpy.absolute <nlcpy.absolute>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -436,7 +437,7 @@ msgid "Computes the element-wise absolute value."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
-msgid ":obj:`nlcpy.reciprocal <nlcpy.reciprocal>`"
+msgid ":py:obj:`nlcpy.reciprocal <nlcpy.reciprocal>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:99:<autosummary>:1
@@ -448,7 +449,7 @@ msgid "Handling Complex Numbers"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
-msgid ":obj:`nlcpy.angle <nlcpy.angle>`"
+msgid ":py:obj:`nlcpy.angle <nlcpy.angle>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
@@ -456,7 +457,7 @@ msgid "Returns the angle of the complex argument."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
-msgid ":obj:`nlcpy.real <nlcpy.real>`"
+msgid ":py:obj:`nlcpy.real <nlcpy.real>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
@@ -464,7 +465,7 @@ msgid "Returns the real part of the complex argument."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
-msgid ":obj:`nlcpy.imag <nlcpy.imag>`"
+msgid ":py:obj:`nlcpy.imag <nlcpy.imag>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
@@ -472,7 +473,7 @@ msgid "Returns the imaginary part of the complex argument."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
-msgid ":obj:`nlcpy.conj <nlcpy.conj>`"
+msgid ":py:obj:`nlcpy.conj <nlcpy.conj>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
@@ -480,7 +481,7 @@ msgid "Returns the element-wise complex conjugate."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:111:<autosummary>:1
-msgid ":obj:`nlcpy.conjugate <nlcpy.conjugate>`"
+msgid ":py:obj:`nlcpy.conjugate <nlcpy.conjugate>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:113
@@ -488,7 +489,7 @@ msgid "Miscellaneous"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.clip <nlcpy.clip>`"
+msgid ":py:obj:`nlcpy.clip <nlcpy.clip>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -496,7 +497,7 @@ msgid "Clips (limits) the values in an array."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.sqrt <nlcpy.sqrt>`"
+msgid ":py:obj:`nlcpy.sqrt <nlcpy.sqrt>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -504,7 +505,7 @@ msgid "Computes the element-wise square-root of the input."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.cbrt <nlcpy.cbrt>`"
+msgid ":py:obj:`nlcpy.cbrt <nlcpy.cbrt>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -512,7 +513,7 @@ msgid "Computes the element-wise cubic-root of the input."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.square <nlcpy.square>`"
+msgid ":py:obj:`nlcpy.square <nlcpy.square>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -520,11 +521,11 @@ msgid "Computes the element-wise square of the input."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.fabs <nlcpy.fabs>`"
+msgid ":py:obj:`nlcpy.fabs <nlcpy.fabs>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.sign <nlcpy.sign>`"
+msgid ":py:obj:`nlcpy.sign <nlcpy.sign>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -532,7 +533,7 @@ msgid "Returns the element-wise indication of the sign of a number."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.heaviside <nlcpy.heaviside>`"
+msgid ":py:obj:`nlcpy.heaviside <nlcpy.heaviside>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -540,7 +541,7 @@ msgid "Computes Heaviside step function."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.maximum <nlcpy.maximum>`"
+msgid ":py:obj:`nlcpy.maximum <nlcpy.maximum>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -548,7 +549,7 @@ msgid "Computes the element-wise maximum of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.minimum <nlcpy.minimum>`"
+msgid ":py:obj:`nlcpy.minimum <nlcpy.minimum>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
@@ -556,13 +557,214 @@ msgid "Computes the element-wise minimum of the inputs."
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.fmax <nlcpy.fmax>`"
+msgid ":py:obj:`nlcpy.fmax <nlcpy.fmax>`"
 msgstr ""
 
 #: ../../source/reference/mathematical.rst:130:<autosummary>:1
-msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
+msgid ":py:obj:`nlcpy.fmin <nlcpy.fmin>`"
 msgstr ""
 
 #~ msgid "Return the product of array elements over a given axis."
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.sin <nlcpy.sin>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.cos <nlcpy.cos>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.tan <nlcpy.tan>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arcsin <nlcpy.arcsin>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arccos <nlcpy.arccos>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arctan <nlcpy.arctan>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arctan2 <nlcpy.arctan2>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.hypot <nlcpy.hypot>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.degrees <nlcpy.degrees>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.radians <nlcpy.radians>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.deg2rad <nlcpy.deg2rad>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.rad2deg <nlcpy.rad2deg>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.sinh <nlcpy.sinh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.cosh <nlcpy.cosh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.tanh <nlcpy.tanh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arcsinh <nlcpy.arcsinh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arccosh <nlcpy.arccosh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arctanh <nlcpy.arctanh>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.floor <nlcpy.floor>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.ceil <nlcpy.ceil>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.trunc <nlcpy.trunc>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.prod <nlcpy.prod>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.sum <nlcpy.sum>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.cumsum <nlcpy.cumsum>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.diff <nlcpy.diff>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.exp <nlcpy.exp>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.exp2 <nlcpy.exp2>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.log <nlcpy.log>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.log10 <nlcpy.log10>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.expm1 <nlcpy.expm1>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.log1p <nlcpy.log1p>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logaddexp <nlcpy.logaddexp>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logaddexp2 <nlcpy.logaddexp2>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.signbit <nlcpy.signbit>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.copysign <nlcpy.copysign>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.spacing <nlcpy.spacing>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.ldexp <nlcpy.ldexp>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.add <nlcpy.add>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.subtract <nlcpy.subtract>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.multiply <nlcpy.multiply>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.divide <nlcpy.divide>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.true_divide <nlcpy.true_divide>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.floor_divide <nlcpy.floor_divide>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.negative <nlcpy.negative>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.positive <nlcpy.positive>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.power <nlcpy.power>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.remainder <nlcpy.remainder>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.mod <nlcpy.mod>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fmod <nlcpy.fmod>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.absolute <nlcpy.absolute>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.reciprocal <nlcpy.reciprocal>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.angle <nlcpy.angle>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.real <nlcpy.real>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.imag <nlcpy.imag>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.conj <nlcpy.conj>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.conjugate <nlcpy.conjugate>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.clip <nlcpy.clip>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.sqrt <nlcpy.sqrt>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.cbrt <nlcpy.cbrt>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.square <nlcpy.square>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fabs <nlcpy.fabs>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.sign <nlcpy.sign>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.heaviside <nlcpy.heaviside>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.maximum <nlcpy.maximum>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.minimum <nlcpy.minimum>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fmax <nlcpy.fmax>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fmin <nlcpy.fmin>`"
 #~ msgstr ""
 

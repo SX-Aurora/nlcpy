@@ -126,6 +126,7 @@ class TestOuterCoverage(unittest.TestCase):
         a = xp.array([1, 2, 3], dtype='i4')
         return xp.floor_divide.outer(a, a)
 
+    @testing.with_requires('numpy<1.20')
     def test_outer_floor_divide_1(self):
         a = nlcpy.array([1, 2, 3], dtype='i4')
         b = nlcpy.array([1, 2, 3], dtype='u8')

@@ -63,24 +63,22 @@ def _casting_check_without_msg(dtype_out, in_args, casting):
 
 
 def _casting_check_binary_except(dtype_out, in_args, casting):
-    if in_args[0].dtype.kind == 'u' or in_args[1].dtype.kind == 'u':
-        for x in in_args:
+    for x in in_args:
+        if numpy.isscalar(x):
             if not numpy.can_cast(x, dtype_out, casting=casting):
                 return False
-    else:
-        for x in in_args:
+        else:
             if not numpy.can_cast(x.dtype, dtype_out, casting=casting):
                 return False
     return True
 
 
 def _casting_check_unary_except(dtype_out, in_args, casting):
-    if in_args[0].dtype.kind == 'u':
-        for x in in_args:
+    for x in in_args:
+        if numpy.isscalar(in_args[0]):
             if not numpy.can_cast(x, dtype_out, casting=casting):
                 return False
-    else:
-        for x in in_args:
+        else:
             if not numpy.can_cast(x.dtype, dtype_out, casting=casting):
                 return False
     return True
@@ -226,7 +224,7 @@ def _binary_check_case5(*args):
     if check_out:
         if check_cast and not numpy.can_cast(dt, out.dtype, casting=casting):
             _raise_no_loop_matching(name)
-        elif not (dt == numpy.int8 and out.dtype.kind in ('u')):
+        else:
             _casting_check_out(dt, out.dtype, name, casting)
     if valid is False or numpy.dtype(dt).kind in ('b'):
         _raise_no_loop_matching(name)
@@ -270,7 +268,7 @@ def _binary_check_case7(*args):
     if check_out:
         if check_cast and not numpy.can_cast(dt, out.dtype, casting=casting):
             _raise_no_loop_matching(name)
-        elif not (dt == numpy.int8 and out.dtype.kind in ('u')):
+        else:
             _casting_check_out(dt, out.dtype, name, casting)
     if valid is False or numpy.dtype(dt).kind in ('b', 'f', 'c'):
         _raise_no_loop_matching(name)
@@ -318,13 +316,13 @@ def _binary_check_case9(*args):
 
 def _binary_check_case10(*args):
     dt = args[0]
-    in_args = args[1]
+    # in_args = args[1]
     name = args[2]
-    casting = args[3]
+    # casting = args[3]
     # valid = args[4]
-    check_cast = args[5]
-    if check_cast:
-        _casting_check_binary(numpy.dtype(dt), in_args, name, casting)
+    # check_cast = args[5]
+    if dt != numpy.dtype('bool'):
+        _raise_no_loop_matching(name)
 
 
 def _unary_check_case1(*args):
@@ -365,7 +363,11 @@ def _unary_check_case2(*args):
     if check_out:
         if check_cast and not numpy.can_cast(dt, out.dtype, casting=casting):
             _raise_no_loop_matching(name)
-        elif not (dt == numpy.int8 and out.dtype.kind in ('u')):
+        elif dt in (numpy.bool_, numpy.int8) and out.dtype.kind == 'u':
+            raise TypeError("Cannot cast ufunc \'{}\' output from dtype(\'{}\') "
+                            "to dtype(\'{}\') with casting rule \'{}\'".format(
+                                name, dt, out.dtype, casting))
+        else:
             _casting_check_out(dt, out.dtype, name, casting)
     if valid is False or numpy.dtype(dt).kind in ('b'):
         _raise_no_loop_matching(name)
@@ -562,9 +564,9 @@ def _absolute_error_check(*args):
     check_out = args[6]
     out = args[7]
 
-    if in_args[0].dtype.kind == 'c':
-        if valid is False or dt.kind not in ('f'):
-            _raise_no_loop_matching(name)
+    if in_args[0].dtype.char == 'F' and dt.char not in 'fd' or \
+       in_args[0].dtype.char == 'D' and dt.char != 'd':
+        _raise_no_loop_matching(name)
     if check_cast:
         if in_args[0].dtype.kind != 'c':
             _casting_check_unary(dt, in_args, name, casting)

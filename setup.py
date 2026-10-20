@@ -25,7 +25,7 @@ except ImportError:
     from distutils.command import build
     from distutils import dir_util
 from setuptools.command.sdist import sdist
-from wheel.bdist_wheel import bdist_wheel
+from setuptools.command.bdist_wheel import bdist_wheel
 import numpy
 from os import path
 from io import open
@@ -75,12 +75,18 @@ parser.add_argument(
     nargs=1, type=parse_targs,
     help='select comma separated build targets')
 parser.add_argument(
+    '--ncc-ver', metavar='NCC_VERSION', default='',
+    nargs=1, type=str,
+    help='specify ncc version')
+parser.add_argument(
     '--profile', action='store_true', default=False,
     help='enable profiling for Cython code')
 parser.add_argument(
     '--debug', action='store_true', default=False,
-    help='enable debugging for Cython code')
+    help='enable debugging for Cython code and VE kernel')
 args, sys.argv = parser.parse_known_args(sys.argv)
+ncc_ver = args.ncc_ver[0]
+ve_debug = 'yes' if args.debug else 'no'
 
 #####################################################
 # set macros and compiler directives
@@ -297,18 +303,21 @@ for key in ext_modules:
 
 def show_build_stats():
     # get ncc version
-    ret = subprocess.run(
-        'ncc --version |& grep -o "[0-9]\.[0-9]\.[0-9]"',
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True)
-    if ret.returncode != 0:
-        raise RuntimeError('Cannot find \'ncc\' command.')
-    ncc_version = ret.stdout.decode().split('\n')[0]
+    if ncc_ver == '':
+        ret = subprocess.run(
+            'ncc --version |& grep -o "[0-9]\\.[0-9]\\.[0-9]"',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True)
+        if ret.returncode != 0:
+            raise RuntimeError('Cannot find \'ncc\' command.')
+        ncc_version = ret.stdout.decode().split('\n')[0]
+    else:
+        ncc_version = ncc_ver
     # get gcc version
     import platform
     ret = subprocess.run(
-        'gcc --version |& grep -o "[0-9]\.[0-9]\.[0-9]"',
+        'gcc --version |& grep -o "[0-9]\\.[0-9]\\.[0-9]"',
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True)
@@ -341,6 +350,25 @@ show_build_stats()
 
 CFG_DIR = 'config'
 
+class PostBuildCommand():
+
+    @staticmethod
+    def run():
+        # remove local path from RPATH using patchelf.
+        ret = os.system("patchelf --help > /dev/null 2>&1")
+        if ret != 0:
+            raise RuntimeError("patchelf command failed.\n" +
+                               "Please install patchelf with \"pip install patchelf.\"")
+        for pathname, dirs, files in os.walk("."):
+            for file in files:
+                if file.endswith(".so"):
+                    so_file = os.path.join(pathname,file)
+                    patch_cmd = "patchelf --remove-rpath " + so_file
+                    ret = os.system(patch_cmd)
+                    if ret != 0:
+                        raise RuntimeError("'patchelf --remove-rpath' failed. exitting.")
+
+
 # customize bdist_wheel
 
 
@@ -353,7 +381,7 @@ class vh_custom_bdist_wheel(bdist_wheel):
 class ve1_custom_bdist_wheel(bdist_wheel):
     def run(self):
         shutil.copyfile(os.path.join(CFG_DIR, 'MANIFEST.in.wheel.ve1'), 'MANIFEST.in')
-        ret = subprocess.call(['make', 'ARCH=ve1', '-f',
+        ret = subprocess.call(['make', 'ARCH=ve1', f'NCC_VER={ncc_ver}', f'DEBUG={ve_debug}', '-f',
                                os.path.join(os.getcwd(), 'Makefile')])
         if ret != 0:
             raise RuntimeError('Failed to build VE1 kernel.')
@@ -363,7 +391,7 @@ class ve1_custom_bdist_wheel(bdist_wheel):
 class ve3_custom_bdist_wheel(bdist_wheel):
     def run(self):
         shutil.copyfile(os.path.join(CFG_DIR, 'MANIFEST.in.wheel.ve3'), 'MANIFEST.in')
-        ret = subprocess.call(['make', 'ARCH=ve3', '-f',
+        ret = subprocess.call(['make', 'ARCH=ve3', f'NCC_VER={ncc_ver}', f'DEBUG={ve_debug}', '-f',
                                os.path.join(os.getcwd(), 'Makefile')])
         if ret != 0:
             raise RuntimeError('Failed to build VE3 kernel.')
@@ -398,6 +426,7 @@ class vh_custom_build_ext(build_ext.build_ext):
     def run(self):
         # as-is
         super().run()
+        PostBuildCommand.run()
 
     def build_extensions(self):
         try:
@@ -409,7 +438,7 @@ class vh_custom_build_ext(build_ext.build_ext):
 
 class ve1_custom_build_ext(build_ext.build_ext):
     def run(self):
-        ret = subprocess.call(['make', 'ARCH=ve1', '-f',
+        ret = subprocess.call(['make', 'ARCH=ve1', f'NCC_VER={ncc_ver}', f'DEBUG={ve_debug}', '-f',
                                os.path.join(os.getcwd(), 'Makefile')])
         if ret != 0:
             raise RuntimeError('Failed to build VE1 kernel.')
@@ -418,7 +447,7 @@ class ve1_custom_build_ext(build_ext.build_ext):
 
 class ve3_custom_build_ext(build_ext.build_ext):
     def run(self):
-        ret = subprocess.call(['make', 'ARCH=ve3', '-f',
+        ret = subprocess.call(['make', 'ARCH=ve3', f'NCC_VER={ncc_ver}', f'DEBUG={ve_debug}', '-f',
                                os.path.join(os.getcwd(), 'Makefile')])
         if ret != 0:
             raise RuntimeError('Failed to build VE3 kernel.')
@@ -438,6 +467,7 @@ cmdclass = {}
 
 flat_targs = sum(args.targ, [])
 print("Build Targets:", flat_targs)
+print(f'NCC Version: {'default' if args.ncc_ver == '' else args.ncc_ver}')
 for bt in flat_targs:
     print("\n===Begin Building for %s ===" % bt)
     shutil.copyfile(os.path.join(CFG_DIR, f'setup_{bt}.cfg'), 'setup.cfg')
@@ -449,7 +479,7 @@ for bt in flat_targs:
     kwargs = {'version': __version__,  # NOQA
               'cmdclass': cmdclass}
     if bt == 'vh':
-        kwargs['install_requires'] = ['numpy>=1.17',
+        kwargs['install_requires'] = ['numpy>=1.26',
                                       'nlcpy_ve1_kernel==' + __version__, # NOQA
                                       'nlcpy_ve3_kernel==' + __version__] # NOQA
         kwargs['ext_modules'] = cythonize(
@@ -458,5 +488,8 @@ for bt in flat_targs:
             language_level=3)
 
     setup(**kwargs)
-    dir_util._path_created.clear()
+    try:
+        dir_util.SkipRepeatAbsolutePaths.clear()
+    except AttributeError:
+        dir_util._path_created.clear()
     print("===End Building for %s ===" % bt)

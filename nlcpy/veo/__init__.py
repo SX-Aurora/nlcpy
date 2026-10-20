@@ -31,3 +31,18 @@
 
 from nlcpy.veo._veo import *  # NOQA
 from nlcpy.veo.vebuild import *  # NOQA
+
+INTENT_IN = _veo._veo_args_intent.INTENT_IN
+INTENT_INOUT = _veo._veo_args_intent.INTENT_INOUT
+INTENT_OUT = _veo._veo_args_intent.INTENT_OUT
+
+STATE_UNKNOWN = _veo._veo_context_state.STATE_UNKNOWN
+STATE_RUNNING = _veo._veo_context_state.STATE_RUNNING
+STATE_SYSCALL = _veo._veo_context_state.STATE_SYSCALL
+STATE_BLOCKED = _veo._veo_context_state.STATE_BLOCKED
+STATE_EXIT = _veo._veo_context_state.STATE_EXIT
+
+COMMAND_OK = _veo._veo_command_state.COMMAND_OK
+COMMAND_EXCEPTION = _veo._veo_command_state.COMMAND_EXCEPTION
+COMMAND_ERROR = _veo._veo_command_state.COMMAND_ERROR
+COMMAND_UNFINISHED = _veo._veo_command_state.COMMAND_UNFINISHED

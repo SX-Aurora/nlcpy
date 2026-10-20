@@ -33,8 +33,8 @@ from __future__ import division, absolute_import, print_function
 
 import warnings
 import random
-import os
-import atexit
+import tempfile
+
 from numpy.testing import assert_array_equal
 from nlcpy import testing
 
@@ -66,22 +66,17 @@ typedata = {
 fil = "tmp.npy"
 
 
-@atexit.register
-def cleanup():
-    if os.path.isfile(fil):
-        os.remove(fil)
-
-
 def ca1(arg):
     d = arg[0]
 
-    na = np.array(d)
-    src = np.nanmean(na)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(d)
+        src = np.nanmean(na)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dd = ny.array(d)
-    dst = ny.nanmean(dd)
+        ok = np.load(f.name)
+        dd = ny.array(d)
+        dst = ny.nanmean(dd)
 
     return ok, dst
 
@@ -95,11 +90,12 @@ def ca2(arg):
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', RuntimeWarning)
         src = np.nanmean(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dd = ny.array(d, dtype=t)
-    dst = ny.nanmean(dd, axis=a)
+        ok = np.load(f.name)
+        dd = ny.array(d, dtype=t)
+        dst = ny.nanmean(dd, axis=a)
 
     return ok, dst
 
@@ -120,12 +116,13 @@ def ca3(arg):
     else:
         pass
 
-    na = np.array(seed)
-    src = np.nanmean(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(seed)
+        src = np.nanmean(na, axis=a)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.nanmean(na, axis=a)
+        ok = np.load(f.name)
+        dst = ny.nanmean(na, axis=a)
 
     return ok, dst
 
@@ -171,12 +168,13 @@ def ca5(arg):
     else:
         pass
 
-    na = np.array(seed)
-    ans = np.nanmean(na, axis=a, keepdims=k)
-    np.save(fil, ans)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(seed)
+        ans = np.nanmean(na, axis=a, keepdims=k)
+        np.save(f.name, ans)
 
-    ok = np.load(fil)
-    dst = ny.nanmean(na, axis=a, keepdims=k)
+        ok = np.load(f.name)
+        dst = ny.nanmean(na, axis=a, keepdims=k)
 
     return ok, dst
 

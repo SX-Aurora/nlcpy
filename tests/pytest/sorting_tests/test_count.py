@@ -74,10 +74,10 @@ class TestCount(unittest.TestCase):
 
 class TestCountFailure(unittest.TestCase):
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_count_nonzero_axis_error1(self, xp):
         xp.count_nonzero(xp.empty([2, 3]), axis=2)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_count_nonzero_axis_error2(self, xp):
         xp.count_nonzero(xp.empty([2, 3]), axis=-5)

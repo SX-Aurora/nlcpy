@@ -31,8 +31,7 @@
 
 from __future__ import division, absolute_import, print_function
 import random
-import os
-import atexit
+import tempfile
 
 from numpy.testing import assert_array_almost_equal
 
@@ -67,21 +66,16 @@ typedata = {
 fil = "tmp.npy"
 
 
-@atexit.register
-def cleanup():
-    if os.path.isfile(fil):
-        os.remove(fil)
-
-
 def ca1(arg):
     d = arg[0]
 
-    na = np.array(d)
-    src = np.nanvar(na)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(d)
+        src = np.nanvar(na)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.nanvar(na)
+        ok = np.load(f.name)
+        dst = ny.nanvar(na)
 
     return ok, dst
 
@@ -90,12 +84,13 @@ def ca2(arg):
     d = arg[0]
     a = arg[2]
 
-    na = np.array(d)
-    src = np.nanvar(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(d)
+        src = np.nanvar(na, axis=a)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.nanvar(na, axis=a)
+        ok = np.load(f.name)
+        dst = ny.nanvar(na, axis=a)
 
     return ok, dst
 
@@ -119,12 +114,13 @@ def ca3(arg):
     seed[0] = float('NaN')
     na = np.array(seed)
 
-    src = np.nanvar(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        src = np.nanvar(na, axis=a)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    na = ny.array(seed)
-    dst = ny.nanvar(na, axis=a)
+        ok = np.load(f.name)
+        na = ny.array(seed)
+        dst = ny.nanvar(na, axis=a)
 
     return ok, dst
 
@@ -171,15 +167,16 @@ def ca5(arg):
     else:
         pass
 
-    seed[0] = float('NaN')
-    na = np.array(seed)
-    ans = np.nanvar(na, axis=a, keepdims=k)
-    np.save(fil, ans)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        seed[0] = float('NaN')
+        na = np.array(seed)
+        ans = np.nanvar(na, axis=a, keepdims=k)
+        np.save(f.name, ans)
 
-    ok = np.load(fil)
+        ok = np.load(f.name)
 
-    na = ny.array(seed)
-    dst = ny.nanvar(na, axis=a, keepdims=k)
+        na = ny.array(seed)
+        dst = ny.nanvar(na, axis=a, keepdims=k)
 
     return ok, dst
 

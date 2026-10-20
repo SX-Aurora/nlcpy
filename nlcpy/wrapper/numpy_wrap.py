@@ -128,6 +128,7 @@ def _make_wrap_func(f):
             'nancumsum': (3,),
             'nanprod': (3,),
             'nansum': (3,),
+            'round': (2,),
             'round_': (2,),
             'take': (3,),
             'trace': (5,),
@@ -367,3 +368,4 @@ def _make_wrap_method(f, arr):
         else:
             return ret
     return wrap_method
+

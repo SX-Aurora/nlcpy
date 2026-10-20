@@ -33,6 +33,7 @@ import numpy
 import unittest
 import pytest
 import gc
+import warnings
 import nlcpy
 from nlcpy import testing
 from nlcpy.testing.types import all_types
@@ -99,8 +100,7 @@ ops = [
 cnt = 0
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+
 class TestBinaryCast(unittest.TestCase):
 
     def tearDown(self):
@@ -506,8 +506,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where)
@@ -543,8 +543,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where)
@@ -579,8 +579,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where)
@@ -618,8 +618,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where)
@@ -657,8 +657,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where, dtype=dtype)
@@ -690,8 +690,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where, dtype=dtype)
@@ -722,8 +722,8 @@ class TestBinaryCast(unittest.TestCase):
 
         with testing.numpy_nlcpy_errstate(
                 divide='ignore', over='ignore', invalid='ignore'):
-            with numpy.warnings.catch_warnings():
-                numpy.warnings.simplefilter(
+            with warnings.catch_warnings():
+                warnings.simplefilter(
                     'ignore', numpy.ComplexWarning)
                 func = getattr(xp, op)
                 y = func(in1, in2, out=out, where=where, dtype=dtype)
@@ -744,8 +744,6 @@ shapes_base = [(4, ),
 b_shapes = testing.shaped_rearrange_for_broadcast(shapes_base)
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
 class TestBinaryBroadcast(unittest.TestCase):
 
     def tearDown(self):

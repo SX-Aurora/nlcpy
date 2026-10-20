@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-10 17:18+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/functions.rst:2
 msgid "Functions Provided by NLCPy"
@@ -301,10 +301,6 @@ msgid ":obj:`numpy.asmatrix`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
-msgid ":obj:`numpy.asscalar`"
-msgstr ""
-
-#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.atleast_1d`"
 msgstr ""
 
@@ -402,6 +398,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`nlcpy.broadcast_arrays`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.broadcast_shapes`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -894,6 +894,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.frexp`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.from_dlpack`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -2041,6 +2045,10 @@ msgid ":obj:`nlcpy.show_config`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":obj:`numpy.show_runtime`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":obj:`numpy.sign`"
 msgstr ""
 
@@ -2728,7 +2736,7 @@ msgstr ""
 msgid ":meth:`nlcpy.ndarray.view`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:458
+#: ../../source/comparison_table.rst.inc:459
 msgid "Linear Algebra"
 msgstr "線形代数"
 
@@ -2856,7 +2864,7 @@ msgstr ""
 msgid ":obj:`numpy.linalg.tensorsolve`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:490
+#: ../../source/comparison_table.rst.inc:491
 msgid "Discrete Fourier Transform"
 msgstr "離散フーリエ変換"
 
@@ -3004,7 +3012,7 @@ msgstr ""
 msgid ":obj:`nlcpy.fft.rfftn`"
 msgstr ""
 
-#: ../../source/comparison_table.rst.inc:520
+#: ../../source/comparison_table.rst.inc:521
 msgid "Random Sampling"
 msgstr "乱数生成"
 
@@ -3157,6 +3165,10 @@ msgid ":meth:`nlcpy.random.Generator.permutation`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.permuted`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`numpy.random.Generator.poisson`"
 msgstr ""
 
@@ -3186,6 +3198,10 @@ msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
 msgid ":meth:`nlcpy.random.Generator.shuffle`"
+msgstr ""
+
+#: ../../source/comparison_table.rst.inc:1
+msgid ":meth:`numpy.random.Generator.spawn`"
 msgstr ""
 
 #: ../../source/comparison_table.rst.inc:1
@@ -3434,5 +3450,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ":meth:`numpy.random.Generator.permuted`"
+#~ msgstr ""
+
+#~ msgid ":obj:`numpy.asscalar`"
 #~ msgstr ""
 

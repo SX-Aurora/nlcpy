@@ -693,7 +693,9 @@ static uint64_t reduce_copyto_bool(const ve_array *x, ve_array *y) {
  *
  * **************************/
 
-uint64_t FILENAME(ve_arguments *args, int32_t *psw)
+
+
+uint64_t FILENAME_i32(ve_arguments *args, int32_t *psw)
 {
     uint64_t err = NLCPY_ERROR_OK;
     ve_array *x = &(args->reduce.x);
@@ -707,36 +709,39 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
     ve_array *out = &(args->reduce.out);
     int32_t do_copyto = args->reduce.do_copyto;
 
+    int32_t *pi = (int32_t *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
     if (axis >= 0) {
 #begin_switch
         if (y->dtype==w->dtype) {
             switch (y->dtype) {
 #if defined(DTAG_i32)
-            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_i64)
-            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_u32)
-            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_u64)
-            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_f32)
-            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_f64)
-            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_c64)
-            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_c128)
-            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_bool)
-            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
 #endif
             default: err = NLCPY_ERROR_DTYPE;
             }
@@ -744,31 +749,31 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
         } else {
             switch (w->dtype) {
 #if defined(DTAG_i32)
-            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_i64)
-            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_u32)
-            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_u64)
-            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_f32)
-            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_f64)
-            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_c64)
-            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_c128)
-            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
 #endif
 #if defined(DTAG_bool)
-            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, initial, where_flag, where, psw); break;
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
 #endif
             default: err = NLCPY_ERROR_DTYPE;
             }
@@ -777,7 +782,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 @#pragma omp barrier
 @#endif /* _OPENMP */
 
-            int32_t pswc;
+            int32_t pswc = 0;
             where_flag = 0;
             switch (y->dtype) {
 /* #if defined(DTAG_OUT_i32) */
@@ -818,7 +823,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 @#pragma omp barrier
 @#endif /* _OPENMP */
     if (do_copyto) {
-        int32_t pswc;
+        int32_t pswc = 0;
         if (y->size != out->size) {
             switch(out->dtype) {
                 case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
@@ -849,5 +854,1327 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
         *psw |= pswc;
     }
 
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_i64(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    int64_t *pi = (int64_t *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_u32(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    uint32_t *pi = (uint32_t *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_u64(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    uint64_t *pi = (uint64_t *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_f32(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    float *pi = (float *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_f64(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    double *pi = (double *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_c64(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    float _Complex *pi = (float _Complex *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_c128(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    double _Complex *pi = (double _Complex *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+uint64_t FILENAME_bool(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *x = &(args->reduce.x);
+    ve_array *y = &(args->reduce.y);
+    ve_array *w = &(args->reduce.w);
+    int32_t axis = args->reduce.axis;
+    int32_t init_flag = args->reduce.init_flag;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t where_flag = args->reduce.where_flag;
+    ve_array *where = &(args->reduce.where);
+    ve_array *out = &(args->reduce.out);
+    int32_t do_copyto = args->reduce.do_copyto;
+
+    int32_t *pi = (int32_t *)nlcpy__get_ptr(initial);
+    if (pi == NULL) return NLCPY_ERROR_MEMORY;
+
+    if (axis >= 0) {
+#begin_switch
+        if (y->dtype==w->dtype) {
+            switch (y->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, y, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, y, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, y, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, y, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, y, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, y, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, y, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, y, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, y, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+        } else {
+            switch (w->dtype) {
+#if defined(DTAG_i32)
+            case ve_i32:  err = FILENAME_@DTAG1@_i32 (x, w, axis, init_flag, (int32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_i64)
+            case ve_i64:  err = FILENAME_@DTAG1@_i64 (x, w, axis, init_flag, (int64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u32)
+            case ve_u32:  err = FILENAME_@DTAG1@_u32 (x, w, axis, init_flag, (uint32_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_u64)
+            case ve_u64:  err = FILENAME_@DTAG1@_u64 (x, w, axis, init_flag, (uint64_t)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f32)
+            case ve_f32:  err = FILENAME_@DTAG1@_f32 (x, w, axis, init_flag, (float)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_f64)
+            case ve_f64:  err = FILENAME_@DTAG1@_f64 (x, w, axis, init_flag, (double)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c64)
+            case ve_c64:  err = FILENAME_@DTAG1@_c64 (x, w, axis, init_flag, (float _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_c128)
+            case ve_c128: err = FILENAME_@DTAG1@_c128(x, w, axis, init_flag, (double _Complex)*pi, where_flag, where, psw); break;
+#endif
+#if defined(DTAG_bool)
+            case ve_bool: err = FILENAME_@DTAG1@_bool(x, w, axis, init_flag, (bool)*pi, where_flag, where, psw); break;
+#endif
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+
+            int32_t pswc = 0;
+            where_flag = 0;
+            switch (y->dtype) {
+/* #if defined(DTAG_OUT_i32) */
+            case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_i64) */
+            case ve_i64:  err |= nlcpy_cast_i64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u32) */
+            case ve_u32:  err |= nlcpy_cast_u32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_u64) */
+            case ve_u64:  err |= nlcpy_cast_u64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f32) */
+            case ve_f32:  err |= nlcpy_cast_f32 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_f64) */
+            case ve_f64:  err |= nlcpy_cast_f64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c64) */
+            case ve_c64:  err |= nlcpy_cast_c64 (w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_c128) */
+            case ve_c128: err |= nlcpy_cast_c128(w, y, where_flag, where, &pswc); break;
+/* #endif */
+/* #if defined(DTAG_OUT_bool) */
+            case ve_bool: err |= nlcpy_cast_bool(w, y, where_flag, where, &pswc); break;
+/* #endif */
+            default: err = NLCPY_ERROR_DTYPE;
+            }
+            *psw |= pswc;
+        }
+#end_switch
+    }
+
+@#ifdef _OPENMP
+@#pragma omp barrier
+@#endif /* _OPENMP */
+    if (do_copyto) {
+        int32_t pswc = 0;
+        if (y->size != out->size) {
+            switch(out->dtype) {
+                case ve_i32:  err |= reduce_copyto_i32 (y, out); break;
+                case ve_i64:  err |= reduce_copyto_i64 (y, out); break;
+                case ve_u32:  err |= reduce_copyto_u32 (y, out); break;
+                case ve_u64:  err |= reduce_copyto_u64 (y, out); break;
+                case ve_f32:  err |= reduce_copyto_f32 (y, out); break;
+                case ve_f64:  err |= reduce_copyto_f64 (y, out); break;
+                case ve_c64:  err |= reduce_copyto_c64 (y, out); break;
+                case ve_c128:  err |= reduce_copyto_c128 (y, out); break;
+                case ve_bool:  err |= reduce_copyto_bool (y, out); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        } else {
+            switch(out->dtype) {
+                case ve_i32:  err |= nlcpy_cast_i32 (y, out, 0, where, &pswc); break;
+                case ve_i64:  err |= nlcpy_cast_i64 (y, out, 0, where, &pswc); break;
+                case ve_u32:  err |= nlcpy_cast_u32 (y, out, 0, where, &pswc); break;
+                case ve_u64:  err |= nlcpy_cast_u64 (y, out, 0, where, &pswc); break;
+                case ve_f32:  err |= nlcpy_cast_f32 (y, out, 0, where, &pswc); break;
+                case ve_f64:  err |= nlcpy_cast_f64 (y, out, 0, where, &pswc); break;
+                case ve_c64:  err |= nlcpy_cast_c64 (y, out, 0, where, &pswc); break;
+                case ve_c128:  err |= nlcpy_cast_c128 (y, out, 0, where, &pswc); break;
+                case ve_bool:  err |= nlcpy_cast_bool (y, out, 0, where, &pswc); break;
+                default: err = NLCPY_ERROR_DTYPE;
+            }
+        }
+        *psw |= pswc;
+    }
+
+    return (uint64_t)err;
+}
+
+
+uint64_t FILENAME(ve_arguments *args, int32_t *psw)
+{
+    uint64_t err = NLCPY_ERROR_OK;
+    ve_array *initial = &(args->reduce.initial);
+    int32_t init_flag = args->reduce.init_flag;
+    if (init_flag){
+        switch (initial->dtype) {
+            case ve_i32:  err = FILENAME_i32 (args, psw); break;
+            case ve_i64:  err = FILENAME_i64 (args, psw); break;
+            case ve_u32:  err = FILENAME_u32 (args, psw); break;
+            case ve_u64:  err = FILENAME_u64 (args, psw); break;
+            case ve_f32:  err = FILENAME_f32 (args, psw); break;
+            case ve_f64:  err = FILENAME_f64 (args, psw); break;
+            case ve_c64:  err = FILENAME_c64 (args, psw); break;
+            case ve_c128: err = FILENAME_c128(args, psw); break;
+            case ve_bool: err = FILENAME_bool(args, psw); break;
+            default:
+                 err = NLCPY_ERROR_DTYPE;
+        }
+    } else {
+        err = FILENAME_i32 (args, psw);
+    }
     return (uint64_t)err;
 }

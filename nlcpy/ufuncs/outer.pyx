@@ -50,7 +50,20 @@ from nlcpy.request cimport request
 from nlcpy.core.dtype cimport get_dtype_number, get_dtype
 
 cimport numpy as np
+from numpy.core._exceptions import _UFuncInputCastingError
+from numpy.core._exceptions import _UFuncOutputCastingError
 
+cdef _ufunc_boolean_name_set = (
+    'greater',
+    'greater_equal',
+    'less',
+    'less_equal',
+    'not_equal',
+    'equal',
+    'logical_and',
+    'logical_or',
+    'logical_xor',
+)
 
 def get_contiguity(x):
     if x._c_contiguous or x._f_contiguous:
@@ -90,17 +103,19 @@ def get_calc_dtype_bool_bool(ufunc_name):
 def equiv_scalar(x):
     if np.isscalar(x):
         return True
-    elif isinstance(x, np.ndarray):
+    elif isinstance(x, np.ndarray) or isinstance(x, nlcpy.ndarray):
         if x.ndim == 0:
             return True
         else:
             return False
-    else:  # nlcpy.ndarray, list, tuple
+    else:  # list, tuple
         # regard nlcpy.ndarray with ndim=0 as NOT scalar
         return False
 
 
 def get_how_treat_dtype(ufunc_name, x, arg_x, is_scalar_x):
+    if isinstance(arg_x, nlcpy.ndarray) and arg_x.ndim == 0:
+        arg_x = arg_x.get()
     if ufunc_name in ("add", "subtract", "multiply", "maximum", "minimum",
                       "logical_and", "logical_or", "logical_xor",
                       "bitwise_and", "bitwise_or", "bitwise_xor",
@@ -181,7 +196,7 @@ def check_calc_type(ufunc_name, calc_dtype):
                             "rule ''safe''".format(ufunc_name))
 
     elif 'complex' in calc_dtype_name:
-        if ufunc_name in ("mod", "remainder",
+        if ufunc_name in ("mod", "remainder", "floor_divide",
                           "bitwise_and", "bitwise_or", "bitwise_xor",
                           "right_shift", "left_shift", "fmod",
                           "arctan2", "hypot", "logaddexp", "logaddexp2",
@@ -221,22 +236,11 @@ def raise_binary_broadcast_err(a_shape, b_shape, out_shape):
                          + str_shape(work_shape).rstrip())
 
 
-def check_can_cast(from_dtype, to_dtype, casting, ufunc_name, str_where):
-    if np.can_cast(from_dtype, to_dtype, casting=casting):
-        return None
-    else:
-        return "Cannot cast ufunc '{}' {} from dtype('{}') to dtype('{}') with "\
-            "casting rule '{}'".format(ufunc_name, str_where,
-                                       from_dtype.name, to_dtype.name, casting)
+def check_can_cast(from_dtype, to_dtype, casting):
+    return np.can_cast(from_dtype, to_dtype, casting=casting)
 
-
-def check_can_cast2(from_obj, from_dtype, to_dtype, casting, ufunc_name, str_where):
-    if np.can_cast(from_obj, to_dtype, casting=casting):
-        return None
-    else:
-        return "Cannot cast ufunc '{}' {} from dtype('{}') to dtype('{}') with "\
-            "casting rule '{}'".format(ufunc_name, str_where,
-                                       str(from_dtype), str(to_dtype), casting)
+def check_can_cast2(from_obj, from_dtype, to_dtype, casting):
+    return np.can_cast(from_obj, to_dtype, casting=casting)
 
 
 ##################################
@@ -255,6 +259,9 @@ cpdef outer_core(name, A, B, out=None, where=True,
 
     if casting == 'unsafe':
         raise NotImplementedError("not supported for casting == 'unsafe'.")
+
+    if dtype is not None:
+        dtype = get_dtype(dtype)
 
     # keep the arguments A and B as they are not to use get() when decide calc_dtype
     arg_A = A
@@ -283,17 +290,67 @@ cpdef outer_core(name, A, B, out=None, where=True,
         raise TypeError("return arrays must be of ArrayType")
 
     # decide calc_dtype
-    ###
-    if casting in ('no', 'equiv'):
-        if A.dtype != B.dtype:
-            raise TypeError(
-                "Cannot cast ufunc '{}' input 0 from dtype('{}') to dtype('{}') with "
-                "casting rule '{}'".format(ufunc_name, A.dtype, B.dtype, casting))
-        calc_dtype = A.dtype
-    else:
-        calc_dtype = get_dtype(dtype) if dtype is not None else \
-            get_calc_dtype(ufunc_name, A, arg_A, is_scalar_A, B, arg_B, is_scalar_B)
+    if ufunc_name in _ufunc_boolean_name_set:
+        if dtype is not None and dtype != '?':
+            raise TypeError("No loop matching the specified signature and casting"
+                            + "was found for ufunc " + ufunc_name)
+
+    calc_dtype = dtype if dtype is not None else \
+        get_calc_dtype(ufunc_name, A, arg_A, is_scalar_A, B, arg_B, is_scalar_B)
     check_calc_type(ufunc_name, calc_dtype)
+
+    if is_scalar_A:
+        if isinstance(arg_A, nlcpy.ndarray):
+            _A = arg_A.get()
+        else:
+            _A = arg_A
+    else:
+        _A = A.dtype
+    if is_scalar_B:
+        if isinstance(arg_B, nlcpy.ndarray):
+            _B = arg_B.get()
+        else:
+            _B = arg_B
+    else:
+        _B = B.dtype
+    op = numpy.__getattribute__(ufunc_name)
+    if dtype is None and ufunc_name in _ufunc_boolean_name_set:
+        calc_dtype = 'bool'
+    if ufunc_name in ('logical_and', 'logical_or', 'logical_xor') and \
+       ((casting not in ('no', 'equiv') or is_scalar_A or not is_scalar_B or \
+       A.dtype == 'bool' or A.dtype == B.dtype or \
+       A.dtype.char in 'ilIL' and B.dtype.char not in '?ilIL' or \
+       A.dtype.char == 'F' and B.dtype.char == 'D') and dtype in (None, 'bool')):
+        pass
+    elif ufunc_name in ('less', 'less_equal', 'equal', 'not_equal', 'greater', 'greater_equal') \
+         and (casting not in ('no', 'equiv') or (A.dtype == B.dtype or \
+         not is_scalar_A and numpy.can_cast(_B, A.dtype, casting=casting)) or \
+         (A.dtype.char in 'lL' and B.dtype.char in 'lL' and \
+         not (not is_scalar_A and is_scalar_B and A.dtype == 'L' and B.dtype == 'l'))) and \
+         dtype in (None, 'bool'):
+        pass
+    else:
+        if dtype is None and out is None:
+            if not numpy.can_cast(_A, calc_dtype, casting=casting):
+                raise numpy.core._exceptions._UFuncInputCastingError(op, casting, A.dtype, calc_dtype, 0)
+            if not numpy.can_cast(_B, calc_dtype, casting=casting):
+                raise numpy.core._exceptions._UFuncInputCastingError(op, casting, B.dtype, calc_dtype, 1)
+        elif dtype is None:
+            if casting in ('no', 'equiv'):
+                if not np.can_cast(_A, calc_dtype, casting=casting):
+                    raise numpy.core._exceptions._UFuncInputCastingError(op, casting, A.dtype, calc_dtype, 0)
+                if not np.can_cast(_B, calc_dtype, casting=casting):
+                    raise numpy.core._exceptions._UFuncInputCastingError(op, casting, B.dtype, calc_dtype, 1)
+        elif out is None:
+            if not np.can_cast(_A, dtype, casting=casting):
+                  raise numpy.core._exceptions._UFuncInputCastingError(op, casting, A.dtype, calc_dtype, 0)
+            if not np.can_cast(_B, dtype, casting=casting):
+                  raise numpy.core._exceptions._UFuncInputCastingError(op, casting, B.dtype, calc_dtype, 1)
+        else:
+            if not np.can_cast(_A, dtype, casting=casting):
+                raise numpy.core._exceptions._UFuncInputCastingError(op, casting, A.dtype, calc_dtype, 0)
+            if not np.can_cast(_B, dtype, casting=casting):
+                raise numpy.core._exceptions._UFuncInputCastingError(op, casting, B.dtype, calc_dtype, 1)
 
     # decide work_dtype(dtype of workspace)
     promoted_dtype = False
@@ -305,12 +362,8 @@ cpdef outer_core(name, A, B, out=None, where=True,
         if calc_dtype in ("int8", "int16", "float16"):
             if out is None:  # out_dtype is clac_dtype
                 raise TypeError("not support for int8, int16, and float16.")
-            elif out.dtype == "bool":
-                # rasie TypeError before promoted_dtype
-                err_msg = check_can_cast(calc_dtype, out.dtype, casting,
-                                         ufunc_name, "output")
-                if err_msg is not None:
-                    raise TypeError(err_msg)
+            if not check_can_cast(calc_dtype, out.dtype, casting):
+                raise _UFuncOutputCastingError(op, casting, calc_dtype, out.dtype, 0)
             calc_dtype = promote_dtype(calc_dtype)
             promoted_dtype = True
 
@@ -319,44 +372,9 @@ cpdef outer_core(name, A, B, out=None, where=True,
     # decide out_dtype
     out_dtype = out.dtype if out is not None else work_dtype
 
-    if dtype is not None:
-        temp_A = arg_A if is_scalar_A else A
-        err_msg = check_can_cast2(temp_A, A.dtype, calc_dtype, casting,
-                                  ufunc_name, "input 0")
-        if err_msg is not None:
-            raise TypeError(err_msg)
-        if ufunc_name != "ldexp":
-            temp_B = arg_B if is_scalar_B else B
-            err_msg = check_can_cast2(temp_B, B.dtype, calc_dtype, casting,
-                                      ufunc_name, "input 1")
-            if err_msg is not None:
-                raise TypeError(err_msg)
-
-    should_check_cast = True
-    # where following two cases, numpy doesn't raise TypeError although
-    # check_can_cast will return err then not check can cast exceptionally
-    if promoted_dtype and work_dtype == "int32" and out_dtype.kind == 'u':
-        should_check_cast = False
-
-    elif ufunc_name == "floor_divide":
-        # when all of the following three conditions are satisfied,
-        # can unsafe cast from int to uint on output
-        # and calc_dtype and work_dtype are "int64"
-        #   1. (A.dtype, B.dtype) is pair of ("int32" or "int64") and "uint64"
-        #      (thier result_type = "float64")
-        #   2. dtype is None
-        #   3. out_dtype.kind is 'i' or 'u'
-        int_kinds = ('i', 'u')
-        if dtype is None and out_dtype.kind == 'i':
-            if A.dtype.kind in int_kinds and B.dtype.kind in int_kinds and \
-               calc_dtype == "float64":
-                calc_dtype = work_dtype = np.dtype("int64")
-                should_check_cast = False
-
-    if should_check_cast:
-        err_msg = check_can_cast(work_dtype, out_dtype, casting, ufunc_name, "output")
-        if err_msg is not None:
-            raise TypeError(err_msg)
+    if not promoted_dtype:
+        if not check_can_cast(work_dtype, out_dtype, casting):
+            raise _UFuncOutputCastingError(op, casting, work_dtype, out_dtype, 0)
 
     # check out.shape for broadcast
     work_shape = A.shape + B.shape
@@ -489,7 +507,7 @@ cpdef outer_core(name, A, B, out=None, where=True,
 
     if ufunc_name == "power":
         if np.dtype(calc_dtype).kind in (ord('i'), ord('u')):
-            if nlcpy.any(nlcpy.less(B, 0)):
+            if nlcpy.any(nlcpy.less(B.astype(calc_dtype), 0)):
                 raise ValueError("Integers to negative integer powers are not allowed.")
 
     # make copy to increase vector efficiency if need

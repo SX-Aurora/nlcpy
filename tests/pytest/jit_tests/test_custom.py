@@ -35,7 +35,6 @@ import string
 import tempfile
 import subprocess
 import os
-import shutil
 import io
 import nlcpy
 from nlcpy import testing
@@ -283,14 +282,16 @@ def _helper2(cls, raw, compiler, name, dtype, args_type, ret_type,
         suffix = '.f03'
     code = string.Template(raw).substitute(dtype=dtype)
     with tempfile.TemporaryDirectory() as tmpdir:
+        olddir = os.getcwd()
+        os.chdir(tmpdir)
         with open(os.path.join(tmpdir, base_name + suffix), "w") as f:
             f.write(code)
         cmd += (os.path.join(tmpdir, base_name + suffix),
                 '-o', os.path.join(tmpdir, base_name + '.so'))
-        subprocess.check_output(cmd,
-                                env=env,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+        subprocess.run(cmd,
+                       env=env,
+                       stderr=subprocess.STDOUT,
+                       universal_newlines=True)
         if encode:
             cls.lib = nlcpy.jit.CustomVELibrary(
                 path=os.path.join(tmpdir, base_name + '.so').encode('utf-8')
@@ -299,11 +300,12 @@ def _helper2(cls, raw, compiler, name, dtype, args_type, ret_type,
             cls.lib = nlcpy.jit.CustomVELibrary(
                 path=os.path.join(tmpdir, base_name + '.so')
             )
-    cls.kern = cls.lib.get_function(
-        name,
-        args_type=args_type,
-        ret_type=ret_type
-    )
+        cls.kern = cls.lib.get_function(
+            name,
+            args_type=args_type,
+            ret_type=ret_type
+        )
+        os.chdir(olddir)
 
 
 @testing.parameterize(*testing.product({
@@ -822,40 +824,35 @@ class TestCustomLibraryDistDir(unittest.TestCase):
         )
 
     def test_dist_dir(self):
-        dist_dir = './jit_tmp_dir/'
-        if os.path.exists(dist_dir):
-            shutil.rmtree(dist_dir)
-        code = r'''
-            void hello(void) {
-                printf("hello\n");
-            }
+        with tempfile.TemporaryDirectory(prefix="jit_tmp_dir.",
+                                         dir=".") as dist_dir:
+            code = r'''
+                void hello(void) {
+                    printf("hello\n");
+                }
 '''
-        self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', dist_dir=dist_dir)
-        self.kern()
-        assert os.path.exists(dist_dir)
-        assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.c')
-        assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.o')
-        assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.so')
-        nlcpy.jit.unload_library(self.lib)
-        self.lib = None
-        shutil.rmtree(dist_dir)
+            self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', dist_dir=dist_dir)
+            self.kern()
+            assert os.path.exists(dist_dir)
+            assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.c')
+            assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.o')
+            assert os.path.exists(os.path.join(dist_dir, self.lib.id) + '.so')
+            nlcpy.jit.unload_library(self.lib)
+            self.lib = None
 
     def test_dist_dir_permission_denied(self):
         if os.getuid() == 0 and os.geteuid() == 0:
             self.skipTest("Root user")
-        dist_dir = './jit_tmp_dir/'
-        if os.path.exists(dist_dir):
-            shutil.rmtree(dist_dir)
-        os.mkdir(dist_dir)
-        os.chmod(dist_dir, 0o444)
-        code = r'''
-            void hello(void) {
-                printf("hello\n");
-            }
+        with tempfile.TemporaryDirectory(prefix="jit_tmp_dir.",
+                                         dir=".") as dist_dir:
+            os.chmod(dist_dir, 0o444)
+            code = r'''
+                void hello(void) {
+                    printf("hello\n");
+                }
 '''
-        with pytest.raises(PermissionError):
-            self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', dist_dir=dist_dir)
-        shutil.rmtree(dist_dir)
+            with pytest.raises(PermissionError):
+                self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', dist_dir=dist_dir)
 
 
 class TestCustomLibraryLogStream(unittest.TestCase):
@@ -879,25 +876,21 @@ class TestCustomLibraryLogStream(unittest.TestCase):
         )
 
     def test_log_stream(self):
-        file_name = './tmp.log'
-        if os.path.exists(file_name):
-            os.remove(file_name)
         code = r'''
             void hello(void) {
                 printf("hello\n");
             }
 '''
-        with open(file_name, 'w') as fs:
+        with tempfile.NamedTemporaryFile(mode="w", suffix="tmp.log",
+                                         dir=".", delete=False) as fs:
             self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', log_stream=fs)
-        assert os.path.isfile(file_name)
-        assert os.path.getsize(file_name) > 0
-        os.remove(file_name)
+        assert os.path.isfile(fs.name)
+        assert os.path.getsize(fs.name) > 0
+        os.remove(fs.name)
 
     def test_log_stream_not_writable(self):
-        file_name = './tmp.log'
-        if os.path.exists(file_name):
-            os.remove(file_name)
-        with open(file_name, 'w'):
+        with tempfile.NamedTemporaryFile(mode="w", suffix="tmp.log",
+                                         dir=".", delete=False) as fs:
             pass
         code = r'''
             void hello(void) {
@@ -905,14 +898,11 @@ class TestCustomLibraryLogStream(unittest.TestCase):
             }
 '''
         with pytest.raises(io.UnsupportedOperation):
-            with open(file_name, 'r') as fs:
-                self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', log_stream=fs)
-        os.remove(file_name)
+            with open(fs.name, 'r') as fs2:
+                self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', log_stream=fs2)
+        os.remove(fs.name)
 
     def test_log_stream_with_compile_failure(self):
-        file_name = './tmp.log'
-        if os.path.exists(file_name):
-            os.remove(file_name)
         code = r'''
             void test(void) {
                 // missing semicolon
@@ -920,11 +910,12 @@ class TestCustomLibraryLogStream(unittest.TestCase):
             }
 '''
         with pytest.raises(nlcpy.jit.nccException):
-            with open(file_name, 'w') as fs:
+            with tempfile.NamedTemporaryFile(mode="w", suffix="tmp.log",
+                                             dir=".", delete=False) as fs:
                 self._helper(code, '/opt/nec/ve/bin/ncc', 'hello', log_stream=fs)
-        assert os.path.isfile(file_name)
-        assert os.path.getsize(file_name) > 0
-        os.remove(file_name)
+        assert os.path.isfile(fs.name)
+        assert os.path.getsize(fs.name) > 0
+        os.remove(fs.name)
 
 
 # TODO: check after modified ftrace
@@ -944,60 +935,63 @@ class TestCustomLibraryFtrace(unittest.TestCase):
 
     def test_ftrace_c(self):
         file_name = './ftrace.out'
-        if os.path.exists(file_name):
-            os.remove(file_name)
-        _helper1(self, _test_ve_adr_c, '/opt/nec/ve/bin/ncc', 'test_sum',
-                 _ctypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
-                 ftrace=True)
-        x1, x2, y = _prep(self.dtype)
-        err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
-                        sync=self.sync, callback=self.callback)
-        testing.assert_allclose(y, x1 + x2,
-                                err_msg='File-ID: {}'.format(self.lib.id))
-        if self.sync:
-            assert err == 0
-        nlcpy.jit.unload_library(self.lib)
-        assert os.path.exists(file_name)
-        assert os.path.getsize(file_name) > 0
-        os.remove(file_name)
+        with tempfile.TemporaryDirectory(dir=".") as tmpdir:
+            olddir = os.getcwd()
+            os.chdir(tmpdir)
+            _helper1(self, _test_ve_adr_c, '/opt/nec/ve/bin/ncc', 'test_sum',
+                     _ctypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
+                     ftrace=True)
+            x1, x2, y = _prep(self.dtype)
+            err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
+                            sync=self.sync, callback=self.callback)
+            testing.assert_allclose(y, x1 + x2,
+                                    err_msg='File-ID: {}'.format(self.lib.id))
+            if self.sync:
+                assert err == 0
+            nlcpy.jit.unload_library(self.lib)
+            assert os.path.exists(file_name)
+            assert os.path.getsize(file_name) > 0
+            os.chdir(olddir)
 
     def test_ftrace_cpp(self):
         file_name = './ftrace.out'
-        if os.path.exists(file_name):
-            os.remove(file_name)
-        _helper1(self, _test_ve_adr_cpp, '/opt/nec/ve/bin/nc++', 'test_sum',
-                 _cpptypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
-                 ftrace=True)
-        x1, x2, y = _prep(self.dtype)
-        err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
-                        sync=self.sync, callback=self.callback)
-        testing.assert_allclose(y, x1 + x2,
-                                err_msg='File-ID: {}'.format(self.lib.id))
-        if self.sync:
-            assert err == 0
-        nlcpy.jit.unload_library(self.lib)
-        assert os.path.exists(file_name)
-        assert os.path.getsize(file_name) > 0
-        os.remove(file_name)
+        with tempfile.TemporaryDirectory(dir=".") as tmpdir:
+            olddir = os.getcwd()
+            os.chdir(tmpdir)
+            _helper1(self, _test_ve_adr_cpp, '/opt/nec/ve/bin/nc++', 'test_sum',
+                     _cpptypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
+                     ftrace=True)
+            x1, x2, y = _prep(self.dtype)
+            err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
+                            sync=self.sync, callback=self.callback)
+            testing.assert_allclose(y, x1 + x2,
+                                    err_msg='File-ID: {}'.format(self.lib.id))
+            if self.sync:
+                assert err == 0
+            nlcpy.jit.unload_library(self.lib)
+            assert os.path.exists(file_name)
+            assert os.path.getsize(file_name) > 0
+            os.chdir(olddir)
 
     def test_ftrace_f(self):
         file_name = './ftrace.out'
-        if os.path.exists(file_name):
-            os.remove(file_name)
-        _helper1(self, _test_ve_adr_f, '/opt/nec/ve/bin/nfort', 'test_sum_',
-                 _ftypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
-                 ext_cflags=('-fpp',), ftrace=True)
-        x1, x2, y = _prep(self.dtype)
-        err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
-                        sync=self.sync, callback=self.callback)
-        testing.assert_allclose(y, x1 + x2,
-                                err_msg='File-ID: {}'.format(self.lib.id))
-        if self.sync:
-            assert err == 0
-        nlcpy.jit.unload_library(self.lib)
-        assert os.path.exists(file_name)
-        assert os.path.getsize(file_name) > 0
-        os.remove(file_name)
+        with tempfile.TemporaryDirectory(dir=".") as tmpdir:
+            olddir = os.getcwd()
+            os.chdir(tmpdir)
+            _helper1(self, _test_ve_adr_f, '/opt/nec/ve/bin/nfort', 'test_sum_',
+                     _ftypes[self.dtype], (uint64, uint64, uint64, uint64), uint64,
+                     ext_cflags=('-fpp',), ftrace=True)
+            x1, x2, y = _prep(self.dtype)
+            err = self.kern(x1.ve_adr, x2.ve_adr, y.ve_adr, y.size,
+                            sync=self.sync, callback=self.callback)
+            testing.assert_allclose(y, x1 + x2,
+                                    err_msg='File-ID: {}'.format(self.lib.id))
+            if self.sync:
+                assert err == 0
+            nlcpy.jit.unload_library(self.lib)
+            assert os.path.exists(file_name)
+            assert os.path.getsize(file_name) > 0
+            os.chdir(olddir)
 
 
 class TestCustomKernelFailure(unittest.TestCase):

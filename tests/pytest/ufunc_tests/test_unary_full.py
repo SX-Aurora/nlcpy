@@ -30,6 +30,7 @@
 #
 
 import numpy
+import warnings
 import unittest
 import pytest
 import gc
@@ -112,8 +113,8 @@ ops = [
 ]
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestUnaryCast(unittest.TestCase):
 
     def tearDown(self):
@@ -371,8 +372,8 @@ class TestUnaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         out = xp.array(out)
         where = xp.array(where)
-        with numpy.warnings.catch_warnings():
-            numpy.warnings.simplefilter('ignore', numpy.ComplexWarning)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
             func = getattr(xp, op)
             y = func(in1, out=out, where=where)
             if xp is numpy and op in float16_op_set:
@@ -402,8 +403,8 @@ class TestUnaryCast(unittest.TestCase):
     def test_unary_cast_scalar_with_out_with_where(self, xp, op, in1, out, where):
         out = xp.array(out)
         where = xp.array(where)
-        with numpy.warnings.catch_warnings():
-            numpy.warnings.simplefilter('ignore', numpy.ComplexWarning)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
             func = getattr(xp, op)
             y = func(in1, out=out, where=where)
             if xp is numpy and op in float16_op_set:
@@ -435,8 +436,8 @@ class TestUnaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         out = xp.array(out)
         where = xp.array(where)
-        with numpy.warnings.catch_warnings():
-            numpy.warnings.simplefilter('ignore', numpy.ComplexWarning)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
             func = getattr(xp, op)
             y = func(in1, out=out, where=where)
             if xp is numpy and op in float16_op_set:
@@ -468,8 +469,8 @@ class TestUnaryCast(unittest.TestCase):
         in1 = xp.array(in1)
         out = xp.array(out)
         where = xp.array(where)
-        with numpy.warnings.catch_warnings():
-            numpy.warnings.simplefilter('ignore', numpy.ComplexWarning)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
             func = getattr(xp, op)
             y = func(in1, out=out, where=where, dtype=dtype)
             if xp is nlcpy:
@@ -496,8 +497,8 @@ class TestUnaryCast(unittest.TestCase):
             self, xp, op, in1, out, where, dtype):
         out = xp.array(out)
         where = xp.array(where)
-        with numpy.warnings.catch_warnings():
-            numpy.warnings.simplefilter('ignore', numpy.ComplexWarning)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
             func = getattr(xp, op)
             y = func(in1, out=out, where=where, dtype=dtype)
             if xp is nlcpy:

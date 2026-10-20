@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-15 11:02+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/creation.rst:2
 msgid "Array Creation Routines"
@@ -29,7 +29,7 @@ msgid "Ones and Zeros"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.empty <nlcpy.empty>`"
+msgid ":py:obj:`nlcpy.empty <nlcpy.empty>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -37,7 +37,7 @@ msgid "Returns a new array of given shape and type, without initializing entries
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.empty_like <nlcpy.empty_like>`"
+msgid ":py:obj:`nlcpy.empty_like <nlcpy.empty_like>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -45,7 +45,7 @@ msgid "Returns a new array with the same shape and type as a given array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.eye <nlcpy.eye>`"
+msgid ":py:obj:`nlcpy.eye <nlcpy.eye>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -53,7 +53,7 @@ msgid "Returns a 2-D array with ones on the diagonal and zeros elsewhere."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.identity <nlcpy.identity>`"
+msgid ":py:obj:`nlcpy.identity <nlcpy.identity>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -61,7 +61,7 @@ msgid "Returns the identity array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.ones <nlcpy.ones>`"
+msgid ":py:obj:`nlcpy.ones <nlcpy.ones>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -69,7 +69,7 @@ msgid "Returns a new array of given shape and type, filled with ones."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.ones_like <nlcpy.ones_like>`"
+msgid ":py:obj:`nlcpy.ones_like <nlcpy.ones_like>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -77,7 +77,7 @@ msgid "Returns an array of ones with the same shape and type as a given array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.zeros <nlcpy.zeros>`"
+msgid ":py:obj:`nlcpy.zeros <nlcpy.zeros>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -85,7 +85,7 @@ msgid "Returns a new array of given shape and type, filled with zeros."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.zeros_like <nlcpy.zeros_like>`"
+msgid ":py:obj:`nlcpy.zeros_like <nlcpy.zeros_like>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -93,7 +93,7 @@ msgid "Returns an array of zeros with the same shape and type as a given array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.full <nlcpy.full>`"
+msgid ":py:obj:`nlcpy.full <nlcpy.full>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -101,7 +101,7 @@ msgid "Returns a new array of given shape and type, filled with *fill_value*."
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
-msgid ":obj:`nlcpy.full_like <nlcpy.full_like>`"
+msgid ":py:obj:`nlcpy.full_like <nlcpy.full_like>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:24:<autosummary>:1
@@ -113,7 +113,7 @@ msgid "From Existing Data"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.array <nlcpy.array>`"
+msgid ":py:obj:`nlcpy.array <nlcpy.array>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -121,7 +121,7 @@ msgid "Creates an array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.asarray <nlcpy.asarray>`"
+msgid ":py:obj:`nlcpy.asarray <nlcpy.asarray>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -129,7 +129,7 @@ msgid "Converts the input to an array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.asanyarray <nlcpy.asanyarray>`"
+msgid ":py:obj:`nlcpy.asanyarray <nlcpy.asanyarray>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -137,7 +137,7 @@ msgid "Converts the input to an array, but passes ndarray subclasses through."
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.copy <nlcpy.copy>`"
+msgid ":py:obj:`nlcpy.copy <nlcpy.copy>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -145,7 +145,7 @@ msgid "Returns an array copy of the given object."
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.fromfile <nlcpy.fromfile>`"
+msgid ":py:obj:`nlcpy.fromfile <nlcpy.fromfile>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -153,7 +153,7 @@ msgid "Constructs an array from data in a text or binary file."
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
-msgid ":obj:`nlcpy.loadtxt <nlcpy.loadtxt>`"
+msgid ":py:obj:`nlcpy.loadtxt <nlcpy.loadtxt>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:39:<autosummary>:1
@@ -165,7 +165,7 @@ msgid "Numerical Ranges"
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
-msgid ":obj:`nlcpy.arange <nlcpy.arange>`"
+msgid ":py:obj:`nlcpy.arange <nlcpy.arange>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
@@ -173,7 +173,7 @@ msgid "Returns evenly spaced values within a given interval."
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
-msgid ":obj:`nlcpy.linspace <nlcpy.linspace>`"
+msgid ":py:obj:`nlcpy.linspace <nlcpy.linspace>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
@@ -181,7 +181,7 @@ msgid "Returns evenly spaced numbers over a specified interval."
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
-msgid ":obj:`nlcpy.logspace <nlcpy.logspace>`"
+msgid ":py:obj:`nlcpy.logspace <nlcpy.logspace>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
@@ -189,7 +189,7 @@ msgid "Returns numbers spaced evenly on a log scale."
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
-msgid ":obj:`nlcpy.meshgrid <nlcpy.meshgrid>`"
+msgid ":py:obj:`nlcpy.meshgrid <nlcpy.meshgrid>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:52:<autosummary>:1
@@ -201,7 +201,7 @@ msgid "Building Matrices"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
-msgid ":obj:`nlcpy.diag <nlcpy.diag>`"
+msgid ":py:obj:`nlcpy.diag <nlcpy.diag>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
@@ -209,7 +209,7 @@ msgid "Extracts a diagonal or constructs a diagonal array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
-msgid ":obj:`nlcpy.diagflat <nlcpy.diagflat>`"
+msgid ":py:obj:`nlcpy.diagflat <nlcpy.diagflat>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
@@ -217,7 +217,7 @@ msgid "Creates a two-dimensional array with the flattened input as a diagonal."
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
-msgid ":obj:`nlcpy.tri <nlcpy.tri>`"
+msgid ":py:obj:`nlcpy.tri <nlcpy.tri>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
@@ -225,7 +225,7 @@ msgid "An array with ones at and below the given diagonal and zeros elsewhere."
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
-msgid ":obj:`nlcpy.tril <nlcpy.tril>`"
+msgid ":py:obj:`nlcpy.tril <nlcpy.tril>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
@@ -233,7 +233,7 @@ msgid "Lower triangle of an array."
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
-msgid ":obj:`nlcpy.triu <nlcpy.triu>`"
+msgid ":py:obj:`nlcpy.triu <nlcpy.triu>`"
 msgstr ""
 
 #: ../../source/reference/creation.rst:64:<autosummary>:1
@@ -250,5 +250,80 @@ msgstr ""
 #~ "Returns the identity array.The identity "
 #~ "array is a square array with ones"
 #~ " on the main diagonal."
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.empty <nlcpy.empty>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.empty_like <nlcpy.empty_like>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.eye <nlcpy.eye>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.identity <nlcpy.identity>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.ones <nlcpy.ones>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.ones_like <nlcpy.ones_like>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.zeros <nlcpy.zeros>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.zeros_like <nlcpy.zeros_like>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.full <nlcpy.full>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.full_like <nlcpy.full_like>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.array <nlcpy.array>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.asarray <nlcpy.asarray>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.asanyarray <nlcpy.asanyarray>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.copy <nlcpy.copy>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fromfile <nlcpy.fromfile>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.loadtxt <nlcpy.loadtxt>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.arange <nlcpy.arange>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.linspace <nlcpy.linspace>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.logspace <nlcpy.logspace>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.meshgrid <nlcpy.meshgrid>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.diag <nlcpy.diag>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.diagflat <nlcpy.diagflat>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.tri <nlcpy.tri>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.tril <nlcpy.tril>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.triu <nlcpy.triu>`"
 #~ msgstr ""
 

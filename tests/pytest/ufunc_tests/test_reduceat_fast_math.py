@@ -64,6 +64,15 @@ def adjust_dtype(xp, op, dtype_in, dtype):
 
 
 def is_executable(op, dtype_in=None, dtype=None):
+    if op == 'arctan2':
+        return False
+    if op == 'power':
+        if dtype is not None:
+            _dtype = dtype
+        else:
+            _dtype = dtype_in
+        if _dtype in ('float32', 'float64'):
+            return False
     if op in (
         'divide', 'true_divide', 'arctan2', 'logaddexp', 'logaddexp2',
         'power', 'floor_divide', 'mod', 'remainder', 'fmod',
@@ -83,8 +92,8 @@ def execute_ufunc(xp, op, in1, indices, dtype=None, axis=0):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceat(unittest.TestCase):
 
     shapes = ((4,), (4, 4),)

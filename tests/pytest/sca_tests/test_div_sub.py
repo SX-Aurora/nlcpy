@@ -169,9 +169,9 @@ class Test1dAxialFactorCoefDivSub(unittest.TestCase):
 
     def test_1d_axial_with_factor_and_coef_div_sub(self):
         if self.prefix and self.div:
-            return True
+            self.skipTest("unsupported combination: prefix=True and div=True")
         if self.change_coef and self.div:
-            return True
+            self.skipTest("unsupported combination: change_coef=True and div=True")
         xin = testing.shaped_arange(self.shape, nlcpy).astype(self.dtype) * 0.1
         n_elem = get_n_stencil_elem(self.stencil_scale)
         nlcpy.random.seed(0)

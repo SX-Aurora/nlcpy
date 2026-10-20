@@ -70,9 +70,9 @@ class TestBasic(unittest.TestCase):
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
-    @testing.with_requires("numpy<1.20")
+#    @testing.with_requires("numpy<1.20")
     def test_empty_scalar(self, xp, dtype, order):
-        a = xp.empty(None, dtype=dtype, order=order)
+        a = xp.empty((), dtype=dtype, order=order) 
         a.fill(0)
         return a
 
@@ -119,10 +119,31 @@ class TestBasic(unittest.TestCase):
         return b
 
     @testing.for_CF_orders()
-    @testing.with_requires("numpy<1.23")
+#    @testing.with_requires("numpy<1.23")
     def test_empty_zero_sized_array_strides(self, order):
         a = numpy.empty((1, 0, 2), dtype='d', order=order)
         b = nlcpy.empty((1, 0, 2), dtype='d', order=order)
+        self.assertEqual(b.strides, a.strides)
+
+    @testing.for_CF_orders()
+#    @testing.with_requires("numpy<1.23")
+    def test_zeros_zero_sized_array_strides(self, order):
+        a = numpy.zeros((1, 0, 2), dtype='d', order=order)
+        b = nlcpy.zeros((1, 0, 2), dtype='d', order=order)
+        self.assertEqual(b.strides, a.strides)
+
+    @testing.for_CF_orders()
+#    @testing.with_requires("numpy<1.23")
+    def test_ones_zero_sized_array_strides(self, order):
+        a = numpy.ones((1, 0, 2), dtype='d', order=order)
+        b = nlcpy.ones((1, 0, 2), dtype='d', order=order)
+        self.assertEqual(b.strides, a.strides)
+
+    @testing.for_CF_orders()
+#    @testing.with_requires("numpy<1.23")
+    def test_full_zero_sized_array_strides(self, order):
+        a = numpy.full((1, 0, 2), 1, dtype='d', order=order)
+        b = nlcpy.full((1, 0, 2), 1, dtype='d', order=order)
         self.assertEqual(b.strides, a.strides)
 
     @testing.for_all_dtypes()
@@ -144,9 +165,9 @@ class TestBasic(unittest.TestCase):
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
-    @testing.with_requires("numpy<1.20")
+#    @testing.with_requires("numpy<1.20")
     def test_zeros_scalar(self, xp, dtype, order):
-        return xp.zeros(None, dtype=dtype, order=order)
+        return xp.zeros((), dtype=dtype, order=order)
 
     @testing.for_CF_orders()
     @testing.for_all_dtypes()
@@ -302,3 +323,4 @@ class TestBasicReshape(unittest.TestCase):
         b = nlcpy.ones_like(a, shape=self.shape)
         c = nlcpy.ones(self.shape, dtype=dtype)
         testing.assert_array_equal(b, c)
+

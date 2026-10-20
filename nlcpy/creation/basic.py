@@ -85,7 +85,15 @@ def empty(shape, dtype=float, order='C'):
            [0, 0]])            # They are not always zero. (uninitialized)
 
     """
-    return nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    if isinstance(shape, int):
+        if shape == 0:
+            return nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,))
+        else:
+            return nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    elif shape is not None and 0 in shape:
+        return nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,)*len(shape))
+    else:
+        return nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
 
 
 # ----------------------------------------------------------------------------
@@ -306,7 +314,15 @@ def ones(shape, dtype=None, order='C'):
     """
     if numpy.dtype(dtype).kind == 'V':
         raise NotImplementedError('void dtype in ones is not implemented yet.')
-    out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    if isinstance(shape, int):
+        if shape == 0:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,))
+        else:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    elif shape is not None and 0 in shape:
+        out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,)*len(shape))
+    else:
+        out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
     out.fill(1)
     return out
 
@@ -434,7 +450,15 @@ def zeros(shape, dtype=float, order='C'):
     """
     if numpy.dtype(dtype).kind == 'V':
         raise NotImplementedError('void dtype in zeros is not implemented yet.')
-    out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    if isinstance(shape, int):
+        if shape == 0:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,))
+        else:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+    elif shape is not None and 0 in shape:
+        out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,)*len(shape))
+    else:
+        out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
     out.fill(0)
     return out
 
@@ -576,7 +600,17 @@ def full(shape, fill_value, dtype=None, order='C'):
                 warnings.warn(
                     'Casting complex values to real discards the imaginary part',
                     numpy.ComplexWarning, stacklevel=2)
-        out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+        # out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+        if isinstance(shape, int):
+            if shape == 0:
+                out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,))
+            else:
+                out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+        elif shape is not None and 0 in shape:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order, strides=(0,)*len(shape))
+        else:
+            out = nlcpy.ndarray(shape=shape, dtype=dtype, order=order)
+
         # out.fill(fill_value)
         out.fill(numpy.array(fill_value).astype(dtype))
 
@@ -587,6 +621,11 @@ def full(shape, fill_value, dtype=None, order='C'):
         fill_value = nlcpy.asarray(fill_value)
         out = nlcpy.array(
             nlcpy.broadcast_to(fill_value, shape=shape), dtype=dtype, order=order)
+        if isinstance(shape, int):
+            if shape == 0:
+                lib.stride_tricks.as_strided(out, strides=(0,))
+        elif shape is not None and 0 in shape:
+                lib.stride_tricks.as_strided(out, strides=(0,)*len(shape))
 
     return out
 

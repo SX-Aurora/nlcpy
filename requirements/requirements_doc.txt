@@ -1,6 +1,6 @@
 numpy
 scipy
 matplotlib
-sphinx == 4.2.0
+sphinx
 sphinx-intl
 sphinx_rtd_theme

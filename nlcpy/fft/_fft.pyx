@@ -212,6 +212,9 @@ def _is_int_cast_for_iterable(param):
 
 
 def _get_params_1d(a, n, axis, array_func=_get_complex_ndarray):
+    if n is not None and n <= 0:
+        raise ValueError(f"Invalid number of FFT data points {n} specified.")
+
     if isinstance(axis, tuple):
         _len = len(axis)
         if _len > 1:
@@ -230,7 +233,6 @@ def _get_params_1d(a, n, axis, array_func=_get_complex_ndarray):
     if not _is_axis_cast:
         raise TypeError('%d format: a number is required, not {}'.format(
                         type(axis).__name__))
-
     a = array_func(a)
 
     if a is None or axis < -a.ndim or axis >= a.ndim:

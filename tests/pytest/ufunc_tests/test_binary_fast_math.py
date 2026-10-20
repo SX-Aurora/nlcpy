@@ -84,8 +84,6 @@ def adjust_input(xp, op, a, is_left=True):
 ###########################################################
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
 class TestBinaryCast(unittest.TestCase):
 
     def tearDown(self):
@@ -249,8 +247,6 @@ shapes_base = [(4, ),
 b_shapes = testing.shaped_rearrange_for_broadcast(shapes_base)
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
 class TestBinaryBroadcast(unittest.TestCase):
 
     def tearDown(self):

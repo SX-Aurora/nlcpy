@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 16:37+0900\n"
+"POT-Creation-Date: 2026-03-25 15:03+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/installation.rst:4
 msgid "Installation Guide"
@@ -77,7 +77,7 @@ msgid ""
 "to be installed on your x86 Node of SX-Aurora TSUBASA."
 msgstr "NLCPyをインストールする前に、以下のコンポーネントをSX-Aurora TSUBASAのx86ノードにインストールする必要があります。"
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:40
 msgid ""
 "`NEC SDK "
 "<https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
@@ -86,22 +86,22 @@ msgstr ""
 "<https://sxauroratsubasa.sakura.ne.jp/documents/guide/pdfs/InstallationGuide_E.pdf>`_"
 
 #: ../../source/installation.rst:42
-msgid "required NEC C/C++ compiler version: >= 5.0.0"
-msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 5.0.0"
+msgid "required NEC C/C++ compiler version: >= 5.4.1"
+msgstr "必要なNEC C/C++ コンパイラのバージョン: >= 5.4.1"
 
 #: ../../source/installation.rst:43
 msgid "required NLC version: >= 3.0.0"
 msgstr "必要なNLCのバージョン: >= 3.0.0"
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:45
 msgid ""
 "`Alternative VE Offloading (AVEO) "
 "<https://sxauroratsubasa.sakura.ne.jp/documents/veos/en/aveo/index.html>`_"
 msgstr ""
 
 #: ../../source/installation.rst:47
-msgid "required version: >= 3.0.2"
-msgstr "必要なバージョン: >= 3.0.2"
+msgid "required version: >= 3.6.0"
+msgstr "必要なバージョン: >= 3.6.0"
 
 #: ../../source/installation.rst:49
 msgid ""
@@ -117,25 +117,25 @@ msgstr ""
 "NLCPyをソースコードからインストールする場合、Alternative VE "
 "Offloading(AVEO)のdevelopmentパッケージが必要です。"
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:61
 msgid "veosinfo3"
 msgstr ""
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:67
 msgid "`Python <https://www.python.org/>`_"
 msgstr ""
 
 #: ../../source/installation.rst:69
-msgid "required version: 3.6, 3.7, or 3.8"
-msgstr "必要なバージョン: 3.6, 3.7, 3.8 のいずれか"
+msgid "required version: 3.12"
+msgstr "必要なバージョン: 3.12"
 
-#: ../../source/installation.rst
+#: ../../source/installation.rst:71
 msgid "`NumPy <https://www.numpy.org/>`_"
 msgstr ""
 
 #: ../../source/installation.rst:73
-msgid "required version: >= v1.17"
-msgstr "必要なバージョン: >= v1.17"
+msgid "required version: v1.26.0"
+msgstr "必要なバージョン: v1.26.0"
 
 #: ../../source/installation.rst:77
 msgid "Install from wheel"
@@ -170,11 +170,11 @@ msgstr "pipコマンドを使用してローカルのwheelパッケージをイ�
 #: ../../source/installation.rst:98
 msgid ""
 "The shared objects for Vector Engine, which are included in the wheel "
-"package, are tested by using NEC C/C++ Compiler Version 5.0.0 and NumPy "
-"v1.19.5."
+"package, are tested by using NEC C/C++ Compiler Version 5.4.1 and NumPy "
+"v1.26.0."
 msgstr ""
-"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ コンパイラバージョン5.0.0とNumPy"
-" v1.19.5を使用してテストしています。"
+"wheelパッケージに含まれているVector Engine用の共有オブジェクトは、NEC C/C++ コンパイラバージョン5.4.1とNumPy"
+" v1.26.0を使用してテストしています。"
 
 #: ../../source/installation.rst:102
 msgid "Install from source (with building)"
@@ -195,4 +195,7 @@ msgstr "そして、`gcc` および `ncc` コマンドが使用可能な環境�
 
 #~ msgid "`veosinfo3`"
 #~ msgstr ""
+
+#~ msgid "required version: 3.6, 3.7, or 3.8"
+#~ msgstr "必要なバージョン: 3.6, 3.7, 3.8 のいずれか"
 

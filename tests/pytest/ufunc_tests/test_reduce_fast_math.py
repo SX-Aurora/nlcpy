@@ -69,6 +69,15 @@ def convert_initial(initial, op, dtype_in, dtype=None):
 
 
 def is_executable(op, initial=0, dtype_in=None, dtype=None):
+    if op == 'arctan2':
+        return False
+    if op == 'power':
+        if dtype is not None:
+            _dtype = dtype
+        else:
+            _dtype = dtype_in
+        if _dtype in ('float32', 'float64'):
+            return False
     if dtype is None:
         dtype = dtype_in
     if dtype is not None:
@@ -105,8 +114,8 @@ def execute_ufunc(op, xp, in1, dtype=None, axis=0, initial=numpy._NoValue):
     'initial': (numpy._NoValue, None, 0, 2, -2.63, -3.2 + 0.3j),
 }))
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceDtype(unittest.TestCase):
 
     shape = ((4,), (3, 2), )
@@ -136,8 +145,8 @@ class TestReduceDtype(unittest.TestCase):
     'initial': (numpy._NoValue, None, 1.1),
 }))
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduceAxis(unittest.TestCase):
 
     axes = (0, 1, -2, (0, 2), None)
@@ -157,8 +166,8 @@ class TestReduceAxis(unittest.TestCase):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestReduce(unittest.TestCase):
 
     def tearDown(self):
@@ -172,6 +181,6 @@ class TestReduce(unittest.TestCase):
     def test_reduce_scalar(self, xp, op, in1, axis):
         return execute_ufunc(op, xp, in1, axis=axis)
 
-    @testing.numpy_nlcpy_raises
+    @testing.numpy_nlcpy_raises()
     def test_reduce_power_with_negative_integer(self, xp):
         xp.power.reduce([1, -1])

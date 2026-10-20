@@ -67,14 +67,14 @@ uint64_t FILENAME_@DTAG1@_$1(ve_array *x, ve_array *indices, ve_array *y, int32_
     uint64_t *end = (uint64_t*)alloca(sizeof(uint64_t) * indices->size);
     for (uint64_t i = 0; i < indices->size - 1; i++) {
         if (*(pind + i) >= *(pind + i + 1)) {
-            start[i] = *(pind + i);
-            end[i] = *(pind + i) + 1;
+            start[i] = (uint64_t)*(pind + i);
+            end[i] = (uint64_t)(*(pind + i) + 1);
         } else {
-            start[i] = *(pind + i);
-            end[i] = *(pind + i + 1);
+            start[i] = (uint64_t)*(pind + i);
+            end[i] = (uint64_t)*(pind + i + 1);
         }
     }
-    start[indices->size - 1] = *(pind + indices->size - 1);
+    start[indices->size - 1] = (uint64_t)*(pind + indices->size - 1);
     end[indices->size - 1] = x->shape[axis];
 
     int64_t n_inner = x->ndim - 1;

@@ -123,6 +123,8 @@ fi
 %changelog
 ##
 ##############################################
+* Mon Feb 2 2026 NEC Corporation
+- RHEL10 support.
 * Thu Jan 19 2023 NEC Corporation
 - Added VE3.
 * Wed Mar 31 2021 NEC Corporation

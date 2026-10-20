@@ -31,8 +31,7 @@
 
 from __future__ import division, absolute_import, print_function
 import random
-import os
-import atexit
+import tempfile
 
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,)
 
@@ -66,21 +65,16 @@ typedata = {
 fil = "tmp.npy"
 
 
-@atexit.register
-def cleanup():
-    if os.path.isfile(fil):
-        os.remove(fil)
-
-
 def ca1(arg):
     d = arg[0]
 
-    na = np.array(d)
-    src = np.var(na)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(d)
+        src = np.var(na)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.var(na)
+        ok = np.load(f.name)
+        dst = ny.var(na)
 
     return ok, dst
 
@@ -89,12 +83,13 @@ def ca2(arg):
     d = arg[0]
     a = arg[2]
 
-    na = np.array(d)
-    src = np.var(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(d)
+        src = np.var(na, axis=a)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.var(na, axis=a)
+        ok = np.load(f.name)
+        dst = ny.var(na, axis=a)
 
     return ok, dst
 
@@ -115,12 +110,13 @@ def ca3(arg):
     else:
         pass
 
-    na = np.array(seed)
-    src = np.var(na, axis=a)
-    np.save(fil, src)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(seed)
+        src = np.var(na, axis=a)
+        np.save(f.name, src)
 
-    ok = np.load(fil)
-    dst = ny.var(na, axis=a)
+        ok = np.load(f.name)
+        dst = ny.var(na, axis=a)
 
     return ok, dst
 
@@ -166,12 +162,13 @@ def ca5(arg):
     else:
         pass
 
-    na = np.array(seed)
-    ans = np.var(na, axis=a, keepdims=k)
-    np.save(fil, ans)
+    with tempfile.NamedTemporaryFile(dir=".", suffix=fil) as f:
+        na = np.array(seed)
+        ans = np.var(na, axis=a, keepdims=k)
+        np.save(f.name, ans)
 
-    ok = np.load(fil)
-    dst = ny.var(na, axis=a, keepdims=k)
+        ok = np.load(f.name)
+        dst = ny.var(na, axis=a, keepdims=k)
 
     return ok, dst
 

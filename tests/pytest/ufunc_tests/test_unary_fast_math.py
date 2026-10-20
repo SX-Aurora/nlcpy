@@ -97,8 +97,8 @@ def adjust_input(xp, op, a):
     return a
 
 
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestUnaryCast(unittest.TestCase):
 
     def tearDown(self):

@@ -167,7 +167,8 @@ def arange(start, stop=None, step=1, dtype=None):
 
     if numpy.dtype(dtype).type == numpy.bool_:
         if size > 2:
-            raise ValueError('no fill-function for data-type.')
+            raise TypeError('arange() is only supported for booleans when '
+                            'the result has at most length 2.')
         if size == 2:
             return nlcpy.array([start, start - step], dtype=numpy.bool_)
         else:

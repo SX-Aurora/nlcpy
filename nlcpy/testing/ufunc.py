@@ -32,7 +32,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import pkg_resources
+from packaging import version
 import numpy
 import re
 
@@ -169,23 +169,23 @@ def _create_random_scalar(dtype, minval, maxval):
     dtype = numpy.dtype(dtype)
     if dtype == '?':
         a = numpy.random.randint(2, size=1)
-        return bool(a), minval, maxval
+        return bool(a.item()), minval, maxval
     elif dtype.kind == 'c':
         a = numpy.random.uniform(minval, maxval, size=1)
         b = numpy.random.uniform(minval, maxval, size=1)
-        return complex(a, b), minval, maxval
+        return complex(a.item(), b.item()), minval, maxval
     elif dtype.kind == 'i':
         a = numpy.random.randint(minval, maxval, size=1)
-        return int(a), minval, maxval
+        return int(a.item()), minval, maxval
     elif dtype.kind == 'u':
         if minval < 0:
             maxval += (-minval)
             minval = 0
         a = numpy.random.randint(minval, maxval, size=1)
-        return int(a), minval, maxval
+        return int(a.item()), minval, maxval
     else:
         a = numpy.random.uniform(minval, maxval, size=1)
-        return float(a), minval, maxval
+        return float(a.item()), minval, maxval
 
 
 def _precheck_func_for_ufunc(
@@ -211,6 +211,7 @@ def _precheck_func_for_ufunc(
         helper._check_nlcpy_numpy_error(self, nlcpy_error, nlcpy_msg,
                                         nlcpy_tb, numpy_error, numpy_msg,
                                         numpy_tb, accept_error=accept_error)
+        del nlcpy_error, nlcpy_tb
         return None, None
 
     if not isinstance(nlcpy_result, (tuple, list)):
@@ -353,15 +354,10 @@ def _check_for_binary_with_create_param(
     shape = (shape,)
     if type(casting) == str:
         casting = (casting, )
-
     # skip check
-    ws = pkg_resources.WorkingSet()
-    try:
-        ws.require('numpy<1.18')
-    except pkg_resources.ResolutionError:
-        if op == 'floor_divide':
+    if version.parse(numpy.__version__) >= version.parse("1.18"):
+        if op == 'floor_divide': 
             return
-
     # no out, no where, no dtype
     if not is_out and not is_where and not is_dtype:
         binary._check_binary_no_out_no_where_no_dtype(

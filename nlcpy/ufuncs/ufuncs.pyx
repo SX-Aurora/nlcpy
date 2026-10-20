@@ -76,7 +76,16 @@ from nlcpy.ufuncs cimport reduceat as _reduceat
 from nlcpy.ufuncs cimport accumulate as _accumulate
 from nlcpy.linalg cimport cblas_wrapper
 from nlcpy.core.error import _AxisError as AxisError
+from numpy.core._exceptions import _UFuncNoLoopError
 
+cdef _ufunc_comparison_name_set = (
+    'greater',
+    'greater_equal',
+    'less',
+    'less_equal',
+    'not_equal',
+    'equal',
+)
 
 cdef _ufunc_boolean_name_set = (
     'greater',
@@ -377,6 +386,9 @@ cdef class ufunc:
         if dtype is None:
             check_cast = False
             ari_dtype = dtype_out
+        elif name in _ufunc_comparison_name_set:
+            check_cast = False
+            ari_dtype = dtype
         else:
             check_cast = True
             ari_dtype = dtype
@@ -574,6 +586,7 @@ cdef class ufunc:
             raise ValueError('reduce only supported for binary functions')
 
         op_name = self.name.replace("nlcpy_", "")
+
         dtype = None if dtype is None else numpy.dtype(dtype)
 
         if out is not None:
@@ -614,8 +627,23 @@ cdef class ufunc:
         if axis_chk is not None:
             axis_chk = list(axis_chk)
 
+        array_chk = nlcpy.asanyarray(array)
+        if dtype is not None and out is not None and \
+                (axis_chk is None or len(axis_chk) > 1) and \
+                (array_chk.dtype != dtype or array_chk.dtype != out.dtype) or \
+                initial != nlcpy._NoValue:
+            out_np = None if out is None else out.get()
+            where = where.get() if isinstance(where, nlcpy.ndarray) else where
+            ret = getattr(numpy, op_name).reduce(
+                array, axis=axis, dtype=dtype, out=out_np, keepdims=keepdims,
+                initial=initial, where=where)
+            if out is not None:
+                nlcpy.copyto(out, ret)
+            else:
+                out = nlcpy.array(ret)
+            return out
+
         if axis_chk is not None and array is not None:
-            array_chk = nlcpy.asanyarray(array)
             for i in range(len(axis_chk)):
                 if axis_chk[i] < 0:
                     axis_chk[i] = array_chk.ndim + axis_chk[i]
@@ -645,8 +673,10 @@ cdef class ufunc:
         if op_name in ("arctan2", "hypot", "logaddexp", "logaddexp2",
                        "heaviside", "copysign", "nextafter"):
             _ngcharlist = "?ilILFD"
-        if op_name in ("floor_divide", "power"):
+        if op_name == 'power':
             _ngcharlist = "?"
+        if op_name == "floor_divide":
+            _ngcharlist = "?FD"
         if op_name in ("divide", "true_divide"):
             _ngcharlist = "?ilIL"
         if op_name.startswith("bitwise_"):
@@ -655,23 +685,49 @@ cdef class ufunc:
             _ngcharlist = "?FD"
         if op_name.endswith("_shift"):
             _ngcharlist = "?fdFD"
+        if op_name in _ufunc_comparison_name_set:
+             _ngcharlist = "ilILfdFD"
         if dtype is not None and dtype.char in _ngcharlist:
-            raise TypeError(_msg)
-        elif dtype is None and out is not None and out.dtype.char in _ngcharlist:
             raise TypeError(_msg)
         elif dtype is None and out is None and array is None:
             if op_name in ("logaddexp", "logaddexp2", "heaviside", "copysign",
                            "nextafter"):
                 raise TypeError(_msg)
-        elif dtype is None and out is None \
-                and nlcpy.asanyarray(array).dtype.char in _ngcharlist:
-            raise TypeError(_msg)
 
-        if self.name == "nlcpy_subtract" and (numpy.dtype(dtype) == bool or (
-                dtype is None and out is not None and out.dtype == bool)):
-            raise TypeError("nlcpy boolean subtract, the `-` operator,"
-                            " is deprecated, use the bitwise_xor, the `^` operator,"
-                            " or the logical_xor function instead.")
+        if op_name.startswith("logical_") and dtype is not None and dtype.char != '?':
+            raise TypeError(_msg)
+        if op_name.startswith("bitwise_") and dtype is None:
+            _dtype = array_chk.dtype if out is None else numpy.result_type(array_chk.dtype, out.dtype)
+            if _dtype.char in _ngcharlist:
+                raise TypeError(_msg)
+        if op_name.endswith("_shift") and dtype is None:
+            _dtype = array_chk.dtype if out is None else numpy.result_type(array_chk.dtype, out.dtype)
+            if _dtype.kind in 'fc':
+                raise TypeError(_msg)
+        if op_name in ('mod', 'remainder', 'fmod') and dtype is None:
+            _dtype = array_chk.dtype if out is None else numpy.result_type(array_chk.dtype, out.dtype)
+            if _dtype.kind == 'c':
+                raise TypeError(_msg)
+        if op_name == 'floor_divide' and dtype is None:
+            _dtype = array_chk.dtype if out is None else numpy.result_type(array_chk.dtype, out.dtype)
+            if _dtype.kind == 'c':
+                raise TypeError(_msg)
+        if op_name in ("arctan2", "hypot", "logaddexp", "logaddexp2", "heaviside", "copysign", "nextafter") and dtype is None:
+            if array_chk.dtype.kind == 'c' or out is not None and out.dtype.kind == 'c':
+                raise TypeError(_msg)
+        if op_name in _ufunc_comparison_name_set:
+            if dtype is None and array_chk.dtype.char != '?':
+                op = numpy.__getattribute__(op_name)
+                raise _UFuncNoLoopError(op, (numpy.dtypes.BoolDType, array_chk.dtype, None))
+
+        if self.name == "nlcpy_subtract":
+            if dtype is not None and dtype.char == '?' or \
+               (dtype is None and (out is None or out.dtype.char == '?') and \
+               array_chk.dtype.char == '?'):
+                raise TypeError("nlcpy boolean subtract, the `-` operator,"
+                                " is deprecated, use the bitwise_xor, the `^` operator,"
+                                " or the logical_xor function instead.")
+
         if array is None:
             dtype = bool if (
                 op_name in ("less", "greater", "less_equal", "greater_equal",
@@ -1073,3 +1129,4 @@ cpdef create_ufunc(name, types, err_func,
     ret = ufunc(name, len(_types[0][0]), len(_types[0][1]), _types,
                 err_func, default_casting=default_casting, doc=doc)
     return ret
+

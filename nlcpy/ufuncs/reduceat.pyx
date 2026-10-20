@@ -183,19 +183,25 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
                       ):
             raise TypeError("not support for int8.")
 
-    if name == 'nlcpy_subtract_reduceat' and a.dtype == 'bool':
-        dtype = 'int32'
-
     if name in ('nlcpy_logical_or_reduceat',
                 'nlcpy_logical_and_reduceat',
                 'nlcpy_logical_xor_reduceat',
-                'nlcpy_equal_reduceat',
-                'nlcpy_not_equal_reduceat',
-                'nlcpy_less_reduceat',
-                'nlcpy_greater_reduceat',
-                'nlcpy_less_equal_reduceat',
-                'nlcpy_greater_equal_reduceat',
                 ):
+        if dtype is not None and dtype != 'bool':
+            raise TypeError('No loop matching the specified signature and casting was '
+                             f'found for ufunc {name}')
+        dt = 'bool'
+        a = nlcpy.array(a, dtype='bool')
+    elif name in ('nlcpy_equal_reduceat',
+                  'nlcpy_not_equal_reduceat',
+                  'nlcpy_less_reduceat',
+                  'nlcpy_greater_reduceat',
+                  'nlcpy_less_equal_reduceat',
+                  'nlcpy_greater_equal_reduceat',
+                  ):
+        if dtype is None and a.dtype != 'bool' or dtype is not None and dtype != 'bool':
+            raise TypeError('No loop matching the specified signature and casting was '
+                             f'found for ufunc {name}')
         dt = 'bool'
         a = nlcpy.array(a, dtype='bool')
     elif dtype is not None:
@@ -212,8 +218,6 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
             dt = 'float32'
         else:
             dt = dtype
-    elif out is not None:
-        dt = out.dtype
     elif name in ('nlcpy_add_reduceat',
                   'nlcpy_multiply_reduceat'
                   ):
@@ -229,67 +233,98 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
     if name in ('nlcpy_bitwise_and_reduceat',
                 'nlcpy_bitwise_or_reduceat',
                 'nlcpy_bitwise_xor_reduceat',
-                'nlcpy_right_shift_reduceat',
-                'nlcpy_left_shift_reduceat',
                 ):
-        if dt in ('float32', ):
-            raise ValueError("could not find a matching type for "+name
-                             +", requested type has type code 'f'")
-        if dt in ('float64', ):
-            raise ValueError("could not find a matching type for "+name
-                             +", requested type has type code 'd'")
+        if dtype in ('float32', 'float64', 'complex64', 'complex128') or \
+           dtype is None and a.dtype in ('float32', 'float64', 'complex64', 'complex128') or \
+           dtype is None and out is not None and (
+               a.dtype in ('int32', 'int64') and out.dtype == 'uint64' or \
+               a.dtype == 'uint64' and out.dtype in ('int32', 'int64') or \
+               out.dtype in ('float32', 'float64', 'complex64', 'complex128')):
+            raise TypeError(f"ufunc {name} not supported for the input types, and "
+                "the inputs could not be safely coerced to any supported types"
+                "according to the casting rule ''safe''")
+        if a.dtype != dt:
+            a = nlcpy.array(a, dtype=dt)
 
-    if name in ('nlcpy_mod_reduceat',
-                'nlcpy_remainder_reduceat',
-                'nlcpy_bitwise_and_reduceat',
-                'nlcpy_bitwise_or_reduceat',
-                'nlcpy_bitwise_xor_reduceat',
-                'nlcpy_right_shift_reduceat',
-                'nlcpy_left_shift_reduceat',
-                'nlcpy_arctan2_reduceat',
-                'nlcpy_hypot_reduceat',
-                'nlcpy_logaddexp_reduceat',
-                'nlcpy_logaddexp2_reduceat',
-                'nlcpy_heaviside_reduceat',
-                'nlcpy_copysign_reduceat',
-                'nlcpy_nextafter_reduceat',
-                'nlcpy_fmod_reduceat',
-                ):
-        if dt == 'complex64':
-            raise ValueError("could not find a matching type for "+name
-                             +", requested type has type code 'F'")
-        if dt == 'complex128':
-            raise ValueError("could not find a matching type for "+name
-                             +", requested type has type code 'D'")
+    elif name in ('nlcpy_right_shift_reduceat',
+                  'nlcpy_left_shift_reduceat',
+                  ):
+        if dtype in ('bool', 'float32', 'float64', 'complex64', 'complex128') or \
+           dtype is None and a.dtype in ('float32', 'float64', 'complex64', 'complex128') or \
+           dtype is None and out is not None and (
+               a.dtype in ('int32', 'int64') and out.dtype == 'uint64' or \
+               a.dtype == 'uint64' and out.dtype in ('int32', 'int64') or \
+               out.dtype in ('float32', 'float64', 'complex64', 'complex128')):
+            raise TypeError(f"ufunc {name} not supported for the input types, and "
+                "the inputs could not be safely coerced to any supported types"
+                "according to the casting rule ''safe''")
 
-    if name in ('nlcpy_right_shift_reduceat',
-                'nlcpy_left_shift_reduceat',
-                'nlcpy_power_reduceat',
-                'nlcpy_mod_reduceat',
-                'nlcpy_fmod_reduceat',
-                'nlcpy_remainder_reduceat',
-                'nlcpy_subtract_reduceat',
-                ):
-        if dt == 'bool':
-            dt = 'int32'
+        if dtype is None and out is not None:
+            dt = numpy.result_type(a.dtype, out.dtype)
         if dt != a.dtype:
-            if dt in ('uint32', 'uint64'):
-                a = nlcpy.array(a, dtype=dt)
-            elif a.dtype in ('float32', 'float64', 'complex64', 'complex128'):
+            a = nlcpy.array(a, dtype=dt)
+
+    elif name in ('nlcpy_mod_reduceat',
+                  'nlcpy_remainder_reduceat',
+                  'nlcpy_fmod_reduceat',
+                  'nlcpy_floor_divide_reduceat',
+                ):
+        if dtype in ('bool', 'complex64', 'complex128') or dtype is None and \
+           (a.dtype in ('complex64', 'complex128') or \
+           out is not None and out.dtype in ('complex64', 'complex128')):
+            raise TypeError(f"ufunc {name} not supported for the input types, and "
+                "the inputs could not be safely coerced to any supported types"
+                "according to the casting rule ''safe''")
+        if dt == 'bool':
+            if name in ('nlcpy_mod_reduceat', 'nlcpy_remainder_reduceat'):
+                dt = 'int32'
+        if a.dtype != dt:
+            a = nlcpy.array(a, dtype=dt)
+
+    elif name in ('nlcpy_bitwise_and_reduceat',
+                  'nlcpy_bitwise_or_reduceat',
+                  'nlcpy_bitwise_xor_reduceat',
+                 ):
+        if dt in ('float32', 'float64', 'complex64', 'complex128'):
+            raise TypeError(f"ufunc {name} not supported for the input types, and "
+                "the inputs could not be safely coerced to any supported types"
+                "according to the casting rule ''safe''")
+
+    elif name in ('nlcpy_power_reduceat',
+                  'nlcpy_subtract_reduceat',
+                ):
+        if dtype == 'bool':
+            raise TypeError('No loop matching the specified signature and casting '
+                            f'was found for ufunc {name}')
+        if name == 'nlcpy_subtract_reduceat':
+            if dtype is None and \
+                a.dtype == 'bool' and (out is None or out.dtype == 'bool'):
+                    raise TypeError("nlcpy boolean subtract, the `-` operator, "
+                        "is not supported, use the bitwise_xor, the `^` operator, "
+                        "or the logical_xor function instead.")
+            if dtype is None and out is not None:
+                dt = numpy.result_type(dt, out.dtype)
+        else:
+            if dt == 'bool':
+                dt = 'int32'
+            if dt != a.dtype:
                 a = nlcpy.array(a, dtype=dt)
 
     elif name in ('nlcpy_bitwise_and_reduceat',
                   'nlcpy_bitwise_or_reduceat',
                   'nlcpy_bitwise_xor_reduceat',
                   ):
-        if dt != a.dtype:
-            if dt in ('uint32', 'uint64'):
-                a = nlcpy.array(a, dtype=dt)
-            elif a.dtype in ('float32', 'float64', 'complex64', 'complex128'):
-                a = nlcpy.array(a, dtype=dt)
+        if dt != a.dtype and \
+           dt in ('uint32', 'uint64', 'float32', 'float64', 'complex64', 'complex128'):
+            a = nlcpy.array(a, dtype=dt)
+
     elif name in ('nlcpy_divide_reduceat',
                   'nlcpy_true_divide_reduceat',
                   ):
+        if dtype is not None and \
+           dtype not in ('float32', 'float64', 'complex64', 'complex128'):
+            raise TypeError('No loop matching the specified signature and casting '
+                            f'was found for ufunc {name}')
         if dt not in ('float32', 'complex64', 'complex128'):
             dt = 'float64'
 
@@ -301,6 +336,13 @@ cpdef reduceat_core(name, a, indices, axis=0, dtype=None, out=None):
                   'nlcpy_copysign_reduceat',
                   'nlcpy_nextafter_reduceat',
                   ):
+        if dtype is None and (
+           a.dtype in ('complex64', 'complex128') or \
+           out is not None and out.dtype in ('complex64', 'complex128')) or \
+           dtype is not None and dtype not in ('float32', 'float64'):
+            raise TypeError(f"ufunc {name} not supported for the input types, and "
+                "the inputs could not be safely coerced to any supported types"
+                "according to the casting rule ''safe''")
         if dt != 'float32':
             dt = 'float64'
         if dt != a.dtype:

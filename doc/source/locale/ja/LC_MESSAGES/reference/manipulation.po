@@ -3,19 +3,18 @@
 # This file is distributed under the same license as the nlcpy package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: nlcpy 1.0.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-17 17:08+0900\n"
+"POT-Creation-Date: 2026-03-24 09:34+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../../source/reference/manipulation.rst:2
 msgid "Array Manipulation Routines"
@@ -30,7 +29,7 @@ msgid "Basic Operations"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:16:<autosummary>:1
-msgid ":obj:`nlcpy.shape <nlcpy.shape>`"
+msgid ":py:obj:`nlcpy.shape <nlcpy.shape>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:16:<autosummary>:1
@@ -38,7 +37,7 @@ msgid "Returns the shape of an array."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:16:<autosummary>:1
-msgid ":obj:`nlcpy.copyto <nlcpy.copyto>`"
+msgid ":py:obj:`nlcpy.copyto <nlcpy.copyto>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:16:<autosummary>:1
@@ -50,7 +49,7 @@ msgid "Changing Array Shape"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:27:<autosummary>:1
-msgid ":obj:`nlcpy.reshape <nlcpy.reshape>`"
+msgid ":py:obj:`nlcpy.reshape <nlcpy.reshape>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:27:<autosummary>:1
@@ -58,7 +57,7 @@ msgid "Gives a new shape to an array without changing its data."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:27:<autosummary>:1
-msgid ":obj:`nlcpy.ravel <nlcpy.ravel>`"
+msgid ":py:obj:`nlcpy.ravel <nlcpy.ravel>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:27:<autosummary>:1
@@ -70,7 +69,7 @@ msgid "Transpose-like Operations"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
-msgid ":obj:`nlcpy.moveaxis <nlcpy.moveaxis>`"
+msgid ":py:obj:`nlcpy.moveaxis <nlcpy.moveaxis>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
@@ -78,7 +77,7 @@ msgid "Moves axes of an array to new positions."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
-msgid ":obj:`nlcpy.rollaxis <nlcpy.rollaxis>`"
+msgid ":py:obj:`nlcpy.rollaxis <nlcpy.rollaxis>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
@@ -86,7 +85,7 @@ msgid "Rolls the specified axis backwards, until it lies in a given position."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
-msgid ":obj:`nlcpy.swapaxes <nlcpy.swapaxes>`"
+msgid ":py:obj:`nlcpy.swapaxes <nlcpy.swapaxes>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
@@ -94,7 +93,7 @@ msgid "Interchanges two axes of an array."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
-msgid ":obj:`nlcpy.transpose <nlcpy.transpose>`"
+msgid ":py:obj:`nlcpy.transpose <nlcpy.transpose>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:40:<autosummary>:1
@@ -106,7 +105,7 @@ msgid "Changing Number of Dimensions"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.atleast_1d <nlcpy.atleast_1d>`"
+msgid ":py:obj:`nlcpy.atleast_1d <nlcpy.atleast_1d>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -114,7 +113,7 @@ msgid "Converts inputs to arrays with at least one dimension."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.atleast_2d <nlcpy.atleast_2d>`"
+msgid ":py:obj:`nlcpy.atleast_2d <nlcpy.atleast_2d>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -122,7 +121,7 @@ msgid "Views inputs as arrays with at least two dimensions."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.atleast_3d <nlcpy.atleast_3d>`"
+msgid ":py:obj:`nlcpy.atleast_3d <nlcpy.atleast_3d>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -130,7 +129,7 @@ msgid "Views inputs as arrays with at least three dimensions."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.broadcast_arrays <nlcpy.broadcast_arrays>`"
+msgid ":py:obj:`nlcpy.broadcast_arrays <nlcpy.broadcast_arrays>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -138,7 +137,7 @@ msgid "Broadcasts any number of arrays against each other."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.broadcast_to <nlcpy.broadcast_to>`"
+msgid ":py:obj:`nlcpy.broadcast_to <nlcpy.broadcast_to>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -146,7 +145,7 @@ msgid "Broadcasts an array to a new shape."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.expand_dims <nlcpy.expand_dims>`"
+msgid ":py:obj:`nlcpy.expand_dims <nlcpy.expand_dims>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -154,7 +153,7 @@ msgid "Expands the shape of an array."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
-msgid ":obj:`nlcpy.squeeze <nlcpy.squeeze>`"
+msgid ":py:obj:`nlcpy.squeeze <nlcpy.squeeze>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:56:<autosummary>:1
@@ -166,7 +165,7 @@ msgid "Joining Arrays"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
-msgid ":obj:`nlcpy.concatenate <nlcpy.concatenate>`"
+msgid ":py:obj:`nlcpy.concatenate <nlcpy.concatenate>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
@@ -174,7 +173,7 @@ msgid "Joins a sequence of arrays along an existing axis."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
-msgid ":obj:`nlcpy.hstack <nlcpy.hstack>`"
+msgid ":py:obj:`nlcpy.hstack <nlcpy.hstack>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
@@ -182,7 +181,7 @@ msgid "Stacks arrays in sequence horizontally (column wise)."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
-msgid ":obj:`nlcpy.stack <nlcpy.stack>`"
+msgid ":py:obj:`nlcpy.stack <nlcpy.stack>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
@@ -190,7 +189,7 @@ msgid "Joins a sequence of arrays along a new axis."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
-msgid ":obj:`nlcpy.vstack <nlcpy.vstack>`"
+msgid ":py:obj:`nlcpy.vstack <nlcpy.vstack>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
@@ -198,7 +197,7 @@ msgid "Stacks arrays in sequence vertically (row wise)."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
-msgid ":obj:`nlcpy.block <nlcpy.block>`"
+msgid ":py:obj:`nlcpy.block <nlcpy.block>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:70:<autosummary>:1
@@ -210,7 +209,7 @@ msgid "Splitting arrays"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
-msgid ":obj:`nlcpy.split <nlcpy.split>`"
+msgid ":py:obj:`nlcpy.split <nlcpy.split>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
@@ -218,7 +217,7 @@ msgid "Splits an array into multiple sub-arrays."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
-msgid ":obj:`nlcpy.hsplit <nlcpy.hsplit>`"
+msgid ":py:obj:`nlcpy.hsplit <nlcpy.hsplit>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
@@ -226,7 +225,7 @@ msgid "Splits an array into multiple sub-arrays horizontally (column-wise)."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
-msgid ":obj:`nlcpy.vsplit <nlcpy.vsplit>`"
+msgid ":py:obj:`nlcpy.vsplit <nlcpy.vsplit>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:82:<autosummary>:1
@@ -238,7 +237,7 @@ msgid "Tiling Arrays"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:93:<autosummary>:1
-msgid ":obj:`nlcpy.tile <nlcpy.tile>`"
+msgid ":py:obj:`nlcpy.tile <nlcpy.tile>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:93:<autosummary>:1
@@ -246,7 +245,7 @@ msgid "Constructs an array by repeating A the number of times given by reps."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:93:<autosummary>:1
-msgid ":obj:`nlcpy.repeat <nlcpy.repeat>`"
+msgid ":py:obj:`nlcpy.repeat <nlcpy.repeat>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:93:<autosummary>:1
@@ -258,7 +257,7 @@ msgid "Adding and Removing Elements"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
-msgid ":obj:`nlcpy.append <nlcpy.append>`"
+msgid ":py:obj:`nlcpy.append <nlcpy.append>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
@@ -266,7 +265,7 @@ msgid "Appends values to the end of an array."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
-msgid ":obj:`nlcpy.delete <nlcpy.delete>`"
+msgid ":py:obj:`nlcpy.delete <nlcpy.delete>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
@@ -274,7 +273,7 @@ msgid "Returns a new array with sub-arrays along an axis deleted."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
-msgid ":obj:`nlcpy.insert <nlcpy.insert>`"
+msgid ":py:obj:`nlcpy.insert <nlcpy.insert>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
@@ -282,7 +281,7 @@ msgid "Inserts values along the given axis before the given indices."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
-msgid ":obj:`nlcpy.resize <nlcpy.resize>`"
+msgid ":py:obj:`nlcpy.resize <nlcpy.resize>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
@@ -290,7 +289,7 @@ msgid "Returns a new array with the specified shape."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
-msgid ":obj:`nlcpy.unique <nlcpy.unique>`"
+msgid ":py:obj:`nlcpy.unique <nlcpy.unique>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:107:<autosummary>:1
@@ -302,7 +301,7 @@ msgid "Rearranging Elements"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
-msgid ":obj:`nlcpy.flip <nlcpy.flip>`"
+msgid ":py:obj:`nlcpy.flip <nlcpy.flip>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
@@ -310,7 +309,7 @@ msgid "Reverses the order of elements in an array along the given axis."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
-msgid ":obj:`nlcpy.fliplr <nlcpy.fliplr>`"
+msgid ":py:obj:`nlcpy.fliplr <nlcpy.fliplr>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
@@ -318,7 +317,7 @@ msgid "Flips array in the left/right direction."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
-msgid ":obj:`nlcpy.flipud <nlcpy.flipud>`"
+msgid ":py:obj:`nlcpy.flipud <nlcpy.flipud>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
@@ -326,10 +325,112 @@ msgid "Flips array in the up/down direction."
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
-msgid ":obj:`nlcpy.roll <nlcpy.roll>`"
+msgid ":py:obj:`nlcpy.roll <nlcpy.roll>`"
 msgstr ""
 
 #: ../../source/reference/manipulation.rst:118:<autosummary>:1
 msgid "Rolls array elements along a given axis."
 msgstr ""
+
+#~ msgid ":obj:`nlcpy.shape <nlcpy.shape>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.copyto <nlcpy.copyto>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.reshape <nlcpy.reshape>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.ravel <nlcpy.ravel>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.moveaxis <nlcpy.moveaxis>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.rollaxis <nlcpy.rollaxis>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.swapaxes <nlcpy.swapaxes>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.transpose <nlcpy.transpose>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.atleast_1d <nlcpy.atleast_1d>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.atleast_2d <nlcpy.atleast_2d>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.atleast_3d <nlcpy.atleast_3d>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.broadcast_arrays <nlcpy.broadcast_arrays>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.broadcast_to <nlcpy.broadcast_to>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.expand_dims <nlcpy.expand_dims>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.squeeze <nlcpy.squeeze>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.concatenate <nlcpy.concatenate>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.hstack <nlcpy.hstack>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.stack <nlcpy.stack>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.vstack <nlcpy.vstack>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.block <nlcpy.block>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.split <nlcpy.split>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.hsplit <nlcpy.hsplit>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.vsplit <nlcpy.vsplit>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.tile <nlcpy.tile>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.repeat <nlcpy.repeat>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.append <nlcpy.append>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.delete <nlcpy.delete>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.insert <nlcpy.insert>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.resize <nlcpy.resize>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.unique <nlcpy.unique>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.flip <nlcpy.flip>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.fliplr <nlcpy.fliplr>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.flipud <nlcpy.flipud>`"
+#~ msgstr ""
+
+#~ msgid ":obj:`nlcpy.roll <nlcpy.roll>`"
+#~ msgstr ""
 

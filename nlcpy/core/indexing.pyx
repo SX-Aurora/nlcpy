@@ -108,7 +108,7 @@ cdef _ndarray_setitem(ndarray self, slices, value):
 
 cdef ndarray _ndarray_take(ndarray self, indices, axis, out):
     if axis is None:
-        return _take(self, indices, 0, self._shape.size() - 1, out)
+        return _take(self, indices, 0, (<int64_t>self._shape.size()) - 1, out)
     else:
         return _take(self, indices, axis, axis, out)
 

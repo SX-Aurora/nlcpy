@@ -80,14 +80,17 @@ ops = [
 
 def adjust_dtype(xp, op, dtype_in, dtype, dtype_out):
     if xp is numpy:
-        if dtype == numpy.bool_ or dtype is None and dtype_out == numpy.bool_:
-            if op in ('divide', 'true_divide', 'logaddexp', 'logaddexp2',
-                      'heaviside', 'arctan2', 'hypot', 'copysign', 'nextafter'):
+        if dtype is None and dtype_out is not None and \
+           (dtype_in == numpy.bool_ and dtype_out != numpy.bool_):
+            if op in ('divide', 'true_divide',):
                 dtype = numpy.float32
-            elif op in ('power', 'right_shift', 'left_shift', 'subtract'):
+            elif dtype_out.kind != 'c' and \
+                op in ('logaddexp', 'logaddexp2', 'arctan2', 'hypot', 'heaviside',
+                       'copysign', 'nextafter'):
+                dtype = numpy.float32
+            elif op in ('power', 'subtract'):
                 dtype = numpy.int32
-        elif dtype_in == numpy.bool_:
-            if op == 'subtract':
+            elif op in ('right_shift', 'left_shift') and dtype_out.kind not in 'cf':
                 dtype = numpy.int32
     return dtype
 
@@ -100,8 +103,7 @@ def is_executable(op, dtype_in=None, dtype=None, dtype_out=None):
             'power', 'floor_divide', 'mod', 'remainder', 'fmod',
             'right_shift', 'left_shift', 'subtract'
         ):
-            return dtype != numpy.bool_ and not \
-                (dtype is None and dtype_in == numpy.bool_)
+            return not (dtype is None and dtype_in == numpy.bool_)
 
     return True
 
@@ -116,8 +118,8 @@ def execute_ufunc(xp, op, in1, out=None, dtype=None, axis=0):
 
 
 @pytest.mark.no_fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestAccumulate(unittest.TestCase):
 
     shapes = ((2, 2),)
@@ -177,10 +179,21 @@ class TestAccumulate(unittest.TestCase):
             return execute_ufunc(xp, op, in1, dtype=dtype, out=out, axis=axis)
 
     @testing.numpy_nlcpy_check_for_unary_ufunc(
-        ops, shapes2, order_x='C', dtype_x=all_types, dtype_out=all_types,
+        ops[1:], shapes2, order_x='C', dtype_x=all_types, dtype_out=all_types,
         ufunc_name='accumulate', is_out=True, axes=axes2, seed=0
     )
     def test_accumulate_shape(self, xp, op, in1, out, axis):
+        out = xp.asarray(out)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', numpy.ComplexWarning)
+            return execute_ufunc(xp, op, in1, out=out, axis=axis)
+
+    @testing.numpy_nlcpy_check_for_unary_ufunc(
+        ['power',], shapes2, order_x='C', dtype_x=all_types, dtype_out=all_types,
+        ufunc_name='accumulate', is_out=True, axes=axes2, seed=0,
+        maxval=2
+    )
+    def test_accumulate_shape_power(self, xp, op, in1, out, axis):
         out = xp.asarray(out)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', numpy.ComplexWarning)

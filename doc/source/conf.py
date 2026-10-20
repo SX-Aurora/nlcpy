@@ -34,6 +34,8 @@ release = __version__  # NOQA
 
 # -- General configuration ---------------------------------------------------
 
+tls_verify = False
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

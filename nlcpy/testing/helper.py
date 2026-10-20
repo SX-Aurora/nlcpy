@@ -56,7 +56,6 @@ import contextlib
 import functools
 import inspect
 import os
-import pkg_resources
 import random
 import sys
 import traceback
@@ -66,7 +65,12 @@ import warnings
 import numpy
 import re
 import importlib
+from packaging.version import Version
+from packaging.specifiers import SpecifierSet
 from distutils.version import StrictVersion
+from importlib.metadata import version, PackageNotFoundError
+from packaging.version import InvalidVersion
+
 
 import nlcpy
 from nlcpy import ndarray
@@ -88,10 +92,9 @@ def _call_func(self, impl, args, kw):
         if tb.tb_next is None:
             # failed before impl is called, e.g. invalid kw
             raise e
-        result = None
-        error = e
-        msg = str(e)
+        del _, tb
         tb_str = traceback.format_exc()
+        return None, e, str(e), tb_str
 
     return result, error, msg, tb_str
 
@@ -1210,31 +1213,17 @@ def with_requires(*requirements):
             run a given test case.
 
     """
-    ws = pkg_resources.WorkingSet()
-    try:
-        ws.require(*requirements)
-        skip = False
-    except pkg_resources.DistributionNotFound:
-        for req in requirements:
-            m = re.findall(r'(\w+)\s*([=|>|<|!]+)\s*(.*)', req)
-
-            libname = m[0][0]
-            sign = m[0][1]
-            targver = m[0][2]
-
-            lib = importlib.import_module(libname)
-            statement = ('StrictVersion(lib.__version__) {} '
-                         'StrictVersion(targver)'.format(sign))
-
-            flag = eval(statement, {'lib': lib, 'targver': targver,
-                                    'StrictVersion': StrictVersion})
-            if flag is False:
+    skip = False
+    for req in requirements:
+        try:
+            pkg_name, spec = re.match(r'(\w+)\s*(.*)', req).groups()
+            installed_version = Version(version(pkg_name))
+            if not SpecifierSet(spec).contains(installed_version):
                 skip = True
                 break
-            else:
-                skip = False
-    except pkg_resources.ResolutionError:
-        skip = True
+        except (PackageNotFoundError, InvalidVersion, AttributeError):
+            skip = True
+            break
 
     msg = 'requires: {}'.format(','.join(requirements))
     return unittest.skipIf(skip, msg)
@@ -1246,25 +1235,22 @@ def numpy_satisfies(version_range):
     Args:
         version_range: A version specifier (e.g., `>=1.13.0`).
     """
-    spec = 'numpy{}'.format(version_range)
+    spec = 'numpy{}'.format(version_range) 
+    specifier = SpecifierSet(version_range)
     try:
-        pkg_resources.require(spec)
-    except pkg_resources.DistributionNotFound:
-        m = re.findall(r'(\w+)\s*([=|>|<|!]+)\s*(.*)', spec)
+        return Version(numpy.__version__)  in specifier 
+    except ImportError: 
+        m = re.findall(r'(\w+)\s*([=|>|<|!]+)\s*(.*)', spec) 
         libname = m[0][0]
-        sign = m[0][1]
-        targver = m[0][2]
+        sign = m[0][1] 
+        targver = m[0][2] 
 
-        lib = importlib.import_module(libname)
+        lib = importlib.import_module(libname) 
         statement = ('StrictVersion(lib.__version__) {} '
                      'StrictVersion(targver)'.format(sign))
-
         flag = eval(statement, {'lib': lib, 'targver': targver,
                                 'StrictVersion': StrictVersion})
         return flag
-    except pkg_resources.VersionConflict:
-        return False
-    return True
 
 
 def shaped_arange(shape, xp=nlcpy, dtype=numpy.float32, order='C'):

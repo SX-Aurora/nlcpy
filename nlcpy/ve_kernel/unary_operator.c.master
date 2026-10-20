@@ -183,7 +183,7 @@ uint64_t FILENAME(ve_arguments *args, int32_t *psw)
 @#pragma omp barrier
 @#endif /* _OPENMP */
 
-        int32_t pswc;
+        int32_t pswc = 0;
         switch (y->dtype) {
 #if defined(DTAG_OUT_i32)
         case ve_i32:  err |= nlcpy_cast_i32 (w, y, where_flag, where, &pswc); break;

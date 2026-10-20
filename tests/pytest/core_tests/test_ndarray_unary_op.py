@@ -112,9 +112,9 @@ class TestArrayUnaryOp(unittest.TestCase):
     def test_pos_array(self):
         self.check_array_op(operator.pos)
 
-    @testing.with_requires('numpy<1.16')
+    #@testing.with_requires('numpy<1.16')
     def test_pos_array_full(self):
-        self.check_array_op_full(operator.pos)
+        self.check_array_op(operator.pos)
 
     def test_abs_array(self):
         self.check_array_op_full(operator.abs)
@@ -143,7 +143,7 @@ class TestArrayUnaryOp(unittest.TestCase):
     def test_abs_zerodim(self):
         self.check_zerodim_op_full(operator.abs)
 
-    @testing.with_requires('numpy<1.16')
+    #@testing.with_requires('numpy<1.16')
     def test_abs_zerodim_full(self):
         self.check_zerodim_op_full(operator.abs)
 

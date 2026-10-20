@@ -194,6 +194,7 @@ class TestArrayCopyAndView(unittest.TestCase):
         a.fill(numpy.ones((), dtype=dtype))
         return a
 
+    @testing.with_requires("numpy<2.0")
     @testing.for_all_dtypes()
     @testing.numpy_nlcpy_array_equal()
     def test_fill_with_numpy_nonscalar_ndarray(self, xp, dtype):

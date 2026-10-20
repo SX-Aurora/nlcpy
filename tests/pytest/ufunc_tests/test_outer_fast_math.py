@@ -99,8 +99,8 @@ def execute_ufunc(xp, op, in1, in2, dtype=None, order='K'):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestOuter(unittest.TestCase):
 
     shapes = (((3, 4), (2, 3)),)
@@ -127,8 +127,8 @@ class TestOuter(unittest.TestCase):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestOuterArrayScalar(unittest.TestCase):
 
     shapes = ((3, 4),)
@@ -155,8 +155,8 @@ class TestOuterArrayScalar(unittest.TestCase):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestOuterScalar(unittest.TestCase):
 
     def tearDown(self):
@@ -181,8 +181,8 @@ class TestOuterScalar(unittest.TestCase):
 
 
 @pytest.mark.fast_math
-@testing.with_requires('numpy>=1.19')
-@testing.with_requires('numpy<1.20')
+#@testing.with_requires('numpy>=1.19')
+#@testing.with_requires('numpy<1.20')
 class TestOuter2(unittest.TestCase):
 
     def tearDown(self):
